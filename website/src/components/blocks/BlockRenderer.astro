@@ -1,0 +1,32 @@
+---
+import type { PageBlock } from '@/lib/payload-types'
+import ContentBlock from './ContentBlock.astro'
+import MediaContentBlock from './MediaContentBlock.astro'
+import CardsBlock from './CardsBlock.astro'
+import PricingBlock from './PricingBlock.astro'
+import CTABlock from './CTABlock.astro'
+import FAQBlock from './FAQBlock.astro'
+import GalleryBlock from './GalleryBlock.astro'
+import ArchiveBlock from './ArchiveBlock.astro'
+
+interface Props {
+  layout: PageBlock[]
+  locale?: string
+}
+
+const { layout, locale = 'es' } = Astro.props
+---
+
+{layout.map((block) => {
+  switch (block.blockType) {
+    case 'content': return <ContentBlock block={block} locale={locale} />
+    case 'media-content': return <MediaContentBlock block={block} locale={locale} />
+    case 'cards': return <CardsBlock block={block} locale={locale} />
+    case 'pricing': return <PricingBlock block={block} locale={locale} />
+    case 'cta': return <CTABlock block={block} locale={locale} />
+    case 'faq': return <FAQBlock block={block} locale={locale} />
+    case 'gallery': return <GalleryBlock block={block} locale={locale} />
+    case 'archive': return <ArchiveBlock block={block} locale={locale} />
+    default: return null
+  }
+})}

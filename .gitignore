@@ -1,0 +1,25 @@
+# dependencies
+node_modules/
+
+# env
+.env
+.env.local
+.env.*.local
+
+# builds
+dist/
+.next/
+.astro/
+*.tsbuildinfo
+
+# test artifacts
+coverage/
+playwright-report/
+test-results/
+
+# local media uploads
+backend/public/media/
+
+# os
+.DS_Store
+Thumbs.db

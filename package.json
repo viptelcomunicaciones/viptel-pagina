@@ -1,0 +1,12 @@
+{
+  "name": "viptelcomunicaciones",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --parallel -r run dev",
+    "dev:backend": "pnpm --filter ./backend dev",
+    "dev:website": "pnpm --filter ./website dev",
+    "build": "pnpm -r run build",
+    "build:backend": "pnpm --filter ./backend build",
+    "build:website": "pnpm --filter ./website build"
+  }
+}

@@ -1,0 +1,56 @@
+---
+import type { ArchiveBlock as ArchiveBlockType } from '@/lib/payload-types'
+import { getAllPosts } from '@/lib/payload'
+import RichText from './RichText.astro'
+
+interface Props {
+  block: ArchiveBlockType
+  locale?: string
+}
+
+const { block, locale = 'es' } = Astro.props
+
+let posts: any[] = []
+
+if (block.populateBy === 'selection' && block.selectedDocs?.length) {
+  const all = await getAllPosts(locale)
+  posts = all.filter((p) => block.selectedDocs!.includes(p.id))
+} else {
+  posts = await getAllPosts(locale)
+  if (block.categories?.length) {
+    posts = posts.filter((p) =>
+      p.categories?.some((c: any) => block.categories!.includes(typeof c === 'number' ? c : c.id))
+    )
+  }
+  if (block.limit) posts = posts.slice(0, block.limit)
+}
+---
+
+<section class="py-[var(--space-section-md)]">
+  <div class="mx-auto max-w-6xl px-6">
+    {block.introContent && (
+      <div class="text-center mb-12">
+        <RichText content={block.introContent} />
+      </div>
+    )}
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {posts.map((post) => (
+        <a
+          href={`/${locale === 'es' ? '' : locale + '/'}blog/${post.slug}`}
+          class="group bg-background rounded-xl border border-border overflow-hidden hover:border-brand-500/40 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
+        >
+          {post.coverImage?.url && (
+            <img src={post.coverImage.url} alt={post.coverImage.alt || post.title} class="w-full aspect-video object-cover" />
+          )}
+          <div class="p-5">
+            <h3 class="font-display font-bold text-foreground group-hover:text-brand-500 transition-colors">{post.title}</h3>
+            {post.excerpt && <p class="text-sm text-foreground-muted mt-2">{post.excerpt}</p>}
+            {post.publishedAt && (
+              <time class="text-xs text-foreground-muted mt-3 block">{new Date(post.publishedAt).toLocaleDateString(locale === 'en' ? 'en-US' : 'es-CO', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
+            )}
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>

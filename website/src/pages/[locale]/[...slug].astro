@@ -1,0 +1,25 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro'
+import BlockRenderer from '@/components/blocks/BlockRenderer.astro'
+import HeroBlock from '@/components/blocks/HeroBlock.astro'
+import { getPageBySlug } from '@/lib/payload'
+
+export const prerender = false
+
+const { locale, slug } = Astro.params
+
+if (!slug || !locale) {
+  return Astro.redirect('/404')
+}
+
+const page = await getPageBySlug(slug, locale)
+
+if (!page) {
+  return Astro.redirect('/404')
+}
+---
+
+<PageLayout title={page.meta?.title || page.title} description={page.meta?.description || page.description || page.title}>
+  {page.hero && <HeroBlock hero={page.hero} locale={locale} />}
+  <BlockRenderer layout={page.layout} locale={locale} />
+</PageLayout>

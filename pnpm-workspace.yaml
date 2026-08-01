@@ -1,0 +1,9 @@
+packages:
+  - 'backend'
+  - 'website'
+
+onlyBuiltDependencies:
+  - sharp
+  - esbuild
+  - unrs-resolver
+  - workerd

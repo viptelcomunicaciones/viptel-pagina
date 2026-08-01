@@ -1,0 +1,36 @@
+---
+import RichText from './RichText.astro'
+import type { MediaContentBlock as MediaContentBlockType } from '@/lib/payload-types'
+
+interface Props {
+  block: MediaContentBlockType
+  locale?: string
+}
+
+const { block } = Astro.props
+const isLeft = block.imagePosition === 'left'
+const mediaUrl = block.image?.url
+---
+
+<section class="relative z-10 py-[var(--space-section-md)] bg-background-secondary border-t border-border">
+  <div class="mx-auto max-w-6xl px-6">
+    <div class={`grid gap-10 md:grid-cols-2 md:gap-12 items-center`}>
+      {isLeft && mediaUrl && (
+        <div data-reveal>
+          <img src={mediaUrl} alt={block.image?.alt || ''} class="w-full h-auto rounded-xl shadow-lg" />
+        </div>
+      )}
+      <div data-reveal data-reveal-delay={isLeft ? '1' : '0'}>
+        {block.heading && (
+          <h2 class="font-display text-3xl md:text-4xl font-bold text-foreground mb-6">{block.heading}</h2>
+        )}
+        {block.body && <RichText content={block.body} class="text-lg text-foreground-muted leading-relaxed" />}
+      </div>
+      {!isLeft && mediaUrl && (
+        <div data-reveal data-reveal-delay="1">
+          <img src={mediaUrl} alt={block.image?.alt || ''} class="w-full h-auto rounded-xl shadow-lg" />
+        </div>
+      )}
+    </div>
+  </div>
+</section>

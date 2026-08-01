@@ -1,0 +1,37 @@
+---
+import { Hero } from '@/components/hero'
+import Button from '@/components/ui/form/Button/Button.astro'
+import type { PageHero } from '@/lib/payload-types'
+
+interface Props {
+  hero: PageHero
+  locale?: string
+}
+
+const { hero } = Astro.props
+---
+
+<section class="relative z-10 py-[var(--space-section-md)]">
+  <Hero layout="centered" size={hero.type === 'highImpact' ? 'xl' : hero.type === 'mediumImpact' ? 'lg' : 'md'} class="isolate" showHeroHalo>
+    <h1 slot="title">{hero.title}</h1>
+    {hero.description && <p slot="description">{hero.description}</p>}
+    {hero.image?.url && (
+      <img
+        src={hero.image.url}
+        alt={hero.image.alt || hero.title || ''}
+        width={hero.image.width || 1200}
+        height={hero.image.height || 800}
+        class="w-full max-h-[400px] object-cover rounded-xl shadow-lg mb-6"
+      />
+    )}
+    {hero.links && hero.links.length > 0 && (
+      <Fragment slot="actions">
+        {hero.links.map((link) => (
+          <Button size="lg" href={link.url}>
+            {link.label}
+          </Button>
+        ))}
+      </Fragment>
+    )}
+  </Hero>
+</section>

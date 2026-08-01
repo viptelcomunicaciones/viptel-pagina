@@ -1,0 +1,526 @@
+{
+  "nav": {
+    "skipToContent": "Saltar al contenido",
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú",
+    "selectLanguage": "Seleccionar idioma",
+    "currentLanguage": "Idioma actual",
+    "mainNav": "Navegación principal",
+    "mobileNav": "Navegación móvil",
+    "toggleMenu": "Abrir/cerrar menú",
+    "sectionNavigate": "Navegar",
+    "searchSite": "Buscar en el sitio",
+    "sectionTheme": "Tema",
+    "sectionLanguage": "Idioma",
+    "sectionConnect": "Conectar",
+    "items": {
+      "home": "Inicio",
+      "services": "Servicios",
+      "projects": "Portafolio",
+      "blog": "Blog",
+      "about": "Nosotros",
+      "contact": "Contacto"
+    }
+  },
+  "common": {
+    "readMore": "Leer más",
+    "loading": "Cargando…",
+    "backToTop": "Volver arriba",
+    "search": "Buscar",
+    "submit": "Enviar",
+    "cancel": "Cancelar",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "home": "Inicio"
+  },
+  "blog": {
+    "title": "Blog",
+    "description": "Últimos artículos y actualizaciones",
+    "readingTime": "{minutes} min de lectura",
+    "publishedOn": "Publicado el {date}",
+    "updatedOn": "Actualizado el {date}",
+    "writtenBy": "Escrito por {author}",
+    "tagsLabel": "Etiquetas",
+    "featured": "Destacado",
+    "draft": "Borrador",
+    "noPostsFound": "No se encontraron artículos.",
+    "tableOfContents": "Tabla de contenidos",
+    "shareThisPost": "Compartir este artículo",
+    "relatedPosts": "Artículos relacionados",
+    "share": "Compartir:",
+    "shareOn": "Compartir en {platform}",
+    "copyLink": "Copiar enlace",
+    "metaTitle": "Blog",
+    "metaDescription": "El blog de Viptel: guías prácticas, noticias y actualizaciones sobre telecomunicaciones y tecnología.",
+    "heroBadge": "Todos los artículos",
+    "heroDescription": "Todo lo que necesitas saber sobre telecomunicaciones, explicado en guías prácticas.",
+    "allPosts": "Todos los artículos",
+    "noPosts": "No se encontraron artículos",
+    "pageMetaTitle": "Blog — Página {page}",
+    "pageMetaDescription": "Página {page} de {total} — guías prácticas sobre telecomunicaciones y tecnología empresarial.",
+    "pageBadge": "Página {page} de {total}",
+    "newestPosts": "Artículos recientes",
+    "tagMetaTitle": "#{tag} — Blog",
+    "tagMetaDescription": "Artículos etiquetados como \"{tag}\".",
+    "tagBadge": "Etiqueta",
+    "tagCountOne": "{count} artículo etiquetado \"{tag}\".",
+    "tagCountOther": "{count} artículos etiquetados \"{tag}\".",
+    "tagEmpty": "No se encontraron artículos para esta etiqueta.",
+    "tagBackToAll": "Volver a todos los artículos",
+    "onThisPage": "En esta página",
+    "tocShow": "Mostrar",
+    "tocHide": "Ocultar",
+    "backToBlog": "Volver al Blog",
+    "updated": "Actualizado",
+    "followAlong": "Síguenos",
+    "followAlongLead": "Mantente al día — nuevos artículos, ideas y actualizaciones.",
+    "rssFeed": "Feed RSS",
+    "emailLabel": "Correo"
+  },
+  "comments": {
+    "title": "Comentarios",
+    "loadError": "Error al cargar comentarios. Recarga e intenta de nuevo.",
+    "requiresJs": "Los comentarios requieren JavaScript."
+  },
+  "projects": {
+    "title": "Portafolio",
+    "description": "Proyectos realizados",
+    "viewProject": "Ver proyecto",
+    "viewSource": "Ver código fuente",
+    "noProjectsFound": "No se encontraron proyectos.",
+    "metaTitle": "Portafolio",
+    "metaDescription": "Trabajos seleccionados — sitios web, herramientas y proyectos realizados por Viptel.",
+    "heroBadge": "Trabajos seleccionados",
+    "heroDescription": "Proyectos de los que estamos más orgullosos.",
+    "allProjects": "Todos los proyectos",
+    "pageMetaTitle": "Portafolio — Página {page}",
+    "pageMetaDescription": "Página {page} de {total} — trabajos seleccionados y proyectos realizados por Viptel.",
+    "pageBadge": "Página {page} de {total}",
+    "tagMetaTitle": "#{tag} — Portafolio",
+    "tagMetaDescription": "Proyectos etiquetados como \"{tag}\".",
+    "tagBadge": "Etiqueta",
+    "tagCountOne": "{count} proyecto etiquetado \"{tag}\".",
+    "tagCountOther": "{count} proyectos etiquetados \"{tag}\".",
+    "tagEmpty": "No se encontraron proyectos para esta etiqueta.",
+    "tagBackToAll": "Volver a todos los proyectos",
+    "backToProjects": "Volver al Portafolio",
+    "moreProjects": "Más proyectos",
+    "ctaBadge": "Hablemos",
+    "ctaHeading": "Hablemos de lo que necesitas",
+    "ctaLead": "Cada proyecto es un diseño único, hecho con el cuidado que ves aquí. Cuéntanos qué tienes en mente.",
+    "ctaPrimary": "Enviar mensaje",
+    "ctaSecondary": "Más sobre nosotros",
+    "closingHeading": "¿Tienes un proyecto en mente?",
+    "closingLead": "Ya sea un proyecto nuevo o algo que necesita una perspectiva fresca — nos encantaría saber de ti."
+  },
+  "pagination": {
+    "page": "Página {current} de {total}",
+    "label": "Paginación",
+    "previousPage": "Página anterior",
+    "nextPage": "Página siguiente"
+  },
+  "errors": {
+    "pageNotFound": "Página no encontrada",
+    "pageNotFoundMessage": "La página que buscas no existe o ha sido movida.",
+    "goHome": "Ir al inicio",
+    "metaTitle": "Página no encontrada",
+    "metaDescription": "Esta página ha sido movida, eliminada o nunca existió.",
+    "badge": "404 — página no encontrada",
+    "titleLead": "Página no",
+    "titleHighlight": "encontrada.",
+    "description": "Esta página ha sido movida, eliminada o nunca existió. Vamos a retomar el camino.",
+    "backHome": "Volver al inicio",
+    "browseBlog": "Visitar el blog",
+    "tryInstead": "Prueba con esto",
+    "projectsDesc": "Trabajos seleccionados y casos de estudio.",
+    "blogDesc": "Notas sobre tecnología y telecomunicaciones.",
+    "contactTitle": "Contacto",
+    "contactDesc": "Inicia una conversación sobre tu proyecto."
+  },
+  "newsletter": {
+    "heading": "Suscríbete al boletín",
+    "description": "Recibe los últimos artículos en tu correo.",
+    "emailPlaceholder": "Ingresa tu correo",
+    "subscribe": "Suscribirse",
+    "subscribing": "Suscribiendo…",
+    "success": "¡Gracias por suscribirte!",
+    "genericError": "Algo salió mal",
+    "error": "Error al suscribir. Intenta de nuevo."
+  },
+  "contact": {
+    "heading": "Contáctanos",
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "subject": "Asunto",
+    "message": "Mensaje",
+    "send": "Enviar mensaje",
+    "sending": "Enviando…",
+    "success": "¡Mensaje enviado con éxito!",
+    "genericError": "Algo salió mal",
+    "error": "Error al enviar el mensaje. Intenta de nuevo."
+  },
+  "theme": {
+    "selectColourTheme": "Seleccionar tema de color",
+    "colourTheme": "Tema de color",
+    "colourMode": "Modo de color",
+    "modeTrigger": "Tema: {mode}. Haz clic para cambiar.",
+    "system": "Sistema",
+    "light": "Claro",
+    "dark": "Oscuro",
+    "currentlyLight": "Modo claro",
+    "currentlyDark": "Modo oscuro",
+    "swatchLabel": "Tema {name}"
+  },
+  "search": {
+    "placeholder": "Buscar artículos, proyectos y páginas…",
+    "inputLabel": "Término de búsqueda",
+    "resultsLabel": "Resultados de búsqueda",
+    "hint": "Empieza a escribir para buscar en el sitio.",
+    "noResults": "Sin resultados para “{query}”",
+    "unavailable": "El índice de búsqueda se genera en tiempo de compilación y no está disponible en <code class=\"rounded bg-secondary px-1.5 py-0.5 text-xs\">astro dev</code>.<br />Ejecuta <code class=\"rounded bg-secondary px-1.5 py-0.5 text-xs\">pnpm build &amp;&amp; pnpm preview</code> para probarlo localmente."
+  },
+  "video": {
+    "playLabel": "Reproducir video: {title}",
+    "watchOn": "Ver en YouTube"
+  },
+  "footer": {
+    "copyright": "© {year} {siteName}",
+    "credit": "Tema por <a href=\"https://hansmartens.dev\" class=\"transition-colors hover:text-foreground\" target=\"_blank\" rel=\"noopener noreferrer\">Hans Martens Dev</a>",
+    "builtWith": "Construido con Astro Rocket",
+    "followOn": "Síguenos en {platform}"
+  },
+  "pages": {
+    "about": {
+      "meta": {
+        "title": "Nosotros — Viptel Comunicaciones",
+        "description": "Conoce a Viptel: soluciones empresariales de telecomunicaciones, desarrollo web y transformación digital."
+      },
+      "hero": {
+        "badge": "Nosotros",
+        "titleLead": "Viptel Comunicaciones —",
+        "typingWords": ["Telecomunicaciones", "Desarrollo Web", "Marketing Digital", "Transformación Digital"],
+        "typingWordsMobile": ["Telecomunicaciones", "Desarrollo Web", "Marketing Digital"],
+        "description": "Soluciones integrales de telecomunicaciones para empresas."
+      },
+      "whatYouGet": {
+        "badge": "Qué ofrecemos",
+        "heading": "Soluciones empresariales completas",
+        "lead": "Todo lo que tu empresa necesita en telecomunicaciones y tecnología.",
+        "items": [
+          {
+            "icon": "phone",
+            "title": "PBX y VoIP",
+            "description": "Centrales telefónicas IP y comunicación unificada para tu empresa."
+          },
+          {
+            "icon": "layout",
+            "title": "Desarrollo Web",
+            "description": "Sitios web corporativos, aplicaciones web y plataformas digitales."
+          },
+          {
+            "icon": "trending-up",
+            "title": "Marketing Digital",
+            "description": "Estrategias de marketing online, SEO y publicidad digital."
+          },
+          {
+            "icon": "server",
+            "title": "Redes y Conectividad",
+            "description": "Infraestructura de red, cableado estructurado y conectividad empresarial."
+          }
+        ]
+      },
+      "principles": {
+        "badge": "Nuestros principios",
+        "heading": "Construimos con propósito",
+        "lead": "Cada decisión en Viptel está guiada por los mismos principios.",
+        "items": [
+          { "icon": "zap", "title": "Calidad Primero", "description": "Soluciones robustas y confiables que cumplen con los más altos estándares." },
+          { "icon": "award", "title": "Experiencia", "description": "Años de experiencia en telecomunicaciones y tecnología empresarial." },
+          { "icon": "rocket", "title": "Innovación Constante", "description": "Siempre a la vanguardia en tecnología y tendencias del sector." }
+        ]
+      },
+      "stack": {
+        "badge": "Tecnología",
+        "title": "Nuestra tecnología",
+        "description": "Las tecnologías que impulsan Viptel, elegidas por su rendimiento y confiabilidad."
+      },
+      "faq": {
+        "badge": "Información",
+        "heading": "Preguntas frecuentes",
+        "lead": "Todo lo que necesitas saber antes de empezar.",
+        "cards": [
+          {
+            "icon": "phone",
+            "title": "Servicios",
+            "items": [
+              { "question": "¿Qué servicios ofrece Viptel?", "answer": "Ofrecemos soluciones de telecomunicaciones (PBX, VoIP), desarrollo web, marketing digital, software empresarial y consultoría tecnológica." },
+              { "question": "¿Trabajan con empresas de todos los tamaños?", "answer": "Sí, desde pequeñas empresas hasta grandes corporaciones. Cada solución se adapta a las necesidades específicas de tu negocio." },
+              { "question": "¿Ofrecen soporte técnico?", "answer": "Sí, contamos con soporte técnico especializado para garantizar el funcionamiento continuo de tus servicios." }
+            ]
+          },
+          {
+            "icon": "code-2",
+            "title": "Proyectos",
+            "items": [
+              { "question": "¿Cuánto tiempo toma un proyecto?", "answer": "Depende del alcance. Te daremos un cronograma claro antes de empezar." },
+              { "question": "¿Qué incluye el desarrollo web?", "answer": "Diseño, desarrollo, hospedaje, dominio y soporte. Todo lo necesario para tener tu sitio web funcionando." }
+            ]
+          }
+        ]
+      },
+      "openSource": {
+        "badge": "Open Source",
+        "heading": "Construido en código abierto",
+        "description": "Este sitio está construido con tecnologías open source. Nos apasiona la transparencia y la innovación.",
+        "button": "Ver en GitHub",
+        "cards": [
+          { "title": "Hecho por Viptel", "text": "Diseñado y construido por el equipo de Viptel Comunicaciones." },
+          { "title": "Tecnología moderna", "text": "Construido con Astro, Payload CMS y PostgreSQL." },
+          { "title": "En evolución", "text": "Mejoramos constantemente para ofrecer el mejor servicio." }
+        ]
+      },
+      "cta": {
+        "badge": "Contáctanos",
+        "heading": "¿Listo para empezar?",
+        "description": "Contáctanos y descubre cómo podemos ayudarte a transformar tu negocio.",
+        "button": "Contáctanos"
+      }
+    },
+    "services": {
+      "meta": {
+        "title": "Servicios — Telecomunicaciones, Desarrollo Web y más",
+        "description": "Soluciones empresariales de telecomunicaciones: PBX, VoIP, desarrollo web, marketing digital y software empresarial."
+      },
+      "includedLabel": "Incluye",
+      "hero": {
+        "badge": "Servicios",
+        "titleLead": "Soluciones integrales de",
+        "titleHighlight": "telecomunicaciones",
+        "description": "Todo lo que tu empresa necesita para comunicarse, crecer y transformarse digitalmente.",
+        "jumpLabels": ["Telecomunicaciones", "Desarrollo web", "Marketing digital"]
+      },
+      "design": {
+        "badge": "Telecomunicaciones",
+        "heading": "Telecomunicaciones",
+        "paragraphs": [
+          "Soluciones de comunicación empresarial: centrales telefónicas IP (PBX), VoIP, redes y conectividad.",
+          "Implementamos sistemas de comunicación modernos y confiables que mantienen tu empresa conectada."
+        ],
+        "included": [
+          {
+            "lead": "Centrales telefónicas IP",
+            "text": "PBX virtual y física para empresas de todos los tamaños."
+          },
+          {
+            "lead": "VoIP empresarial",
+            "text": "Comunicación de voz sobre IP con calidad y confiabilidad."
+          },
+          {
+            "lead": "Redes y conectividad",
+            "text": "Cableado estructurado, redes WiFi y solución de conectividad."
+          },
+          {
+            "lead": "Soporte técnico",
+            "text": "Mantenimiento y soporte para garantizar la operación continua."
+          }
+        ],
+        "ctaLabel": "Solicitar cotización"
+      },
+      "development": {
+        "badge": "Desarrollo Web",
+        "heading": "Desarrollo Web",
+        "paragraphs": [
+          "Creamos sitios web corporativos, aplicaciones web y plataformas digitales a medida.",
+          "Utilizamos tecnologías modernas para garantizar rendimiento, seguridad y escalabilidad."
+        ],
+        "included": [
+          {
+            "lead": "Sitios web corporativos",
+            "text": "Presencia digital profesional para tu empresa."
+          },
+          {
+            "lead": "Aplicaciones web",
+            "text": "Plataformas a medida para tus procesos de negocio."
+          },
+          {
+            "lead": "E-commerce",
+            "text": "Tiendas online integradas con sistemas de pago."
+          },
+          {
+            "lead": "Mantenimiento y hosting",
+            "text": "Tu sitio siempre actualizado, seguro y en línea."
+          }
+        ],
+        "ctaLabel": "Ver proyectos recientes"
+      },
+      "performance": {
+        "badge": "Marketing Digital",
+        "heading": "Marketing Digital",
+        "paragraphs": [
+          "Estrategias de marketing online para impulsar tu presencia digital y alcanzar tus objetivos de negocio.",
+          "Desde SEO hasta publicidad digital, te ayudamos a llegar a tu audiencia ideal."
+        ],
+        "included": [
+          {
+            "lead": "SEO y posicionamiento",
+            "text": "Tu negocio en los primeros resultados de búsqueda."
+          },
+          {
+            "lead": "Publicidad digital",
+            "text": "Campañas en Google Ads y redes sociales."
+          },
+          {
+            "lead": "Redes sociales",
+            "text": "Gestión de redes sociales y contenido estratégico."
+          },
+          {
+            "lead": "Analítica web",
+            "text": "Medición y optimización de resultados."
+          }
+        ],
+        "ctaLabel": "Solicitar consultoría"
+      },
+      "process": {
+        "badge": "Cómo trabajamos",
+        "heading": "Nuestro proceso",
+        "lead": "Desde tu primer mensaje hasta la entrega final.",
+        "steps": [
+          { "title": "Contacto inicial", "description": "Nos cuentas tu proyecto y te damos una asesoría sin compromiso." },
+          { "title": "Propuesta", "description": "Recibes una propuesta clara con alcance, tiempos y presupuesto." },
+          { "title": "Ejecución", "description": "Trabajamos en tu proyecto con entregables parciales y comunicación constante." },
+          { "title": "Entrega y soporte", "description": "Implementamos, capacitamos y damos soporte continuo." }
+        ]
+      },
+      "faq": {
+        "badge": "Preguntas",
+        "heading": "Preguntas y respuestas",
+        "lead": "Lo que los clientes preguntan antes de empezar.",
+        "cards": [
+          {
+            "icon": "tag",
+            "title": "Antes de empezar",
+            "items": [
+              { "question": "¿Cuánto cuesta un proyecto?", "answer": "Cada proyecto recibe un presupuesto personalizado. Te damos una cotización clara antes de empezar." },
+              { "question": "¿Cuánto tiempo toma?", "answer": "Depende del alcance del proyecto. Te daremos un cronograma claro en la propuesta." },
+              { "question": "¿Ofrecen garantía?", "answer": "Sí, todos nuestros servicios incluyen garantía y soporte técnico." }
+            ]
+          },
+          {
+            "icon": "user",
+            "title": "Trabajando con nosotros",
+            "items": [
+              { "question": "¿Dan soporte después de la entrega?", "answer": "Sí, ofrecemos planes de soporte y mantenimiento continuo." },
+              { "question": "¿Trabajan con empresas fuera de Colombia?", "answer": "Sí, trabajamos con clientes en toda Latinoamérica." }
+            ]
+          }
+        ]
+      },
+      "cta": {
+        "badge": "Hablemos",
+        "heading": "Hablemos de lo que necesitas",
+        "description": "La primera consulta es gratuita y sin compromiso. Obtén una propuesta clara con tiempos y presupuesto.",
+        "primary": "Enviar mensaje",
+        "secondary": "Más sobre nosotros"
+      }
+    },
+    "contact": {
+      "meta": {
+        "title": "Contacto",
+        "description": "Cuéntanos sobre tu proyecto y te responderemos en menos de 24 horas."
+      },
+      "hero": {
+        "badge": "Contáctanos",
+        "titleLead": "Cuéntanos sobre tu",
+        "titleHighlight": "proyecto",
+        "description": "Nos encantaría saber de ti. Envíanos un mensaje o contáctanos por cualquiera de nuestros canales."
+      },
+      "formTitle": "Detalles del proyecto",
+      "channelsTitle": "Otros canales",
+      "channelsSubtitle": "¿Prefieres otro canal? Elige el que mejor te funcione.",
+      "emailLabel": "Correo",
+      "emailNote": "Escríbenos",
+      "socialNote": "Síguenos",
+      "basedIn": "Basados en {country}"
+    },
+    "home": {
+      "meta": {
+        "title": "Viptel Comunicaciones — Soluciones empresariales de telecomunicaciones",
+        "description": "Soluciones de telecomunicaciones, desarrollo web, marketing digital y software empresarial para tu negocio."
+      },
+      "hero": {
+        "badge": "Disponibles para nuevos proyectos",
+        "titleLine1": "Viptel Comunicaciones —",
+        "titleLine2": "Telecomunicaciones",
+        "titleLine3": "y Tecnología",
+        "description": "Soluciones integrales de telecomunicaciones, desarrollo web y transformación digital para empresas.",
+        "descriptionMobile": "Soluciones de telecomunicaciones, desarrollo web y transformación digital.",
+        "github": "Ver en GitHub",
+        "getStarted": "Contáctanos"
+      },
+      "services": {
+        "badge": "Servicios",
+        "heading": "Soluciones empresariales",
+        "lead": "Todo lo que tu empresa necesita en un solo lugar.",
+        "learnMore": "Ver servicios",
+        "cards": [
+          { "icon": "phone", "title": "Telecomunicaciones", "description": "PBX, VoIP, redes y conectividad empresarial." },
+          { "icon": "code", "title": "Desarrollo Web", "description": "Sitios web, aplicaciones y plataformas digitales." },
+          { "icon": "trending-up", "title": "Marketing Digital", "description": "SEO, publicidad digital y redes sociales." }
+        ]
+      },
+      "workWithMe": {
+        "badge": "Trabaja con nosotros",
+        "heading": "Transforma tu negocio",
+        "lead": "Lo que obtienes cuando trabajamos juntos.",
+        "cards": [
+          { "icon": "phone", "title": "Comunicación unificada", "description": "Sistemas de comunicación modernos para tu empresa." },
+          { "icon": "zap", "title": "Tecnología de punta", "description": "Soluciones basadas en las mejores tecnologías del mercado." },
+          { "icon": "search", "title": "Presencia digital", "description": "Tu negocio visible donde tus clientes te buscan." },
+          { "icon": "shield-check", "title": "Soporte continuo", "description": "Acompañamiento y soporte técnico permanente." }
+        ],
+        "cta": "Ver nuestros servicios"
+      },
+      "portfolio": {
+        "badge": "Proyectos",
+        "heading": "Proyectos realizados",
+        "lead": "Una selección de nuestro trabajo.",
+        "viewAll": "Ver todos los proyectos"
+      },
+      "testimonials": {
+        "badge": "Testimonios",
+        "heading": "Lo que dicen nuestros clientes",
+        "lead": "Palabras reales de proyectos terminados.",
+        "items": [
+          { "quote": "Viptel transformó nuestras comunicaciones. La implementación de la central IP fue impecable y el soporte ha sido excepcional.", "name": "Carlos Mendoza", "role": "Gerente, TechSolutions" },
+          { "quote": "El desarrollo de nuestro sitio web superó todas las expectativas. profesionales, cumplidos y con resultados medibles.", "name": "María Fernández", "role": "Directora, Grupo Nova" }
+        ]
+      },
+      "aboutTeaser": {
+        "badge": "Nosotros",
+        "headingLine1": "Expertos en",
+        "headingLine2": "telecomunicaciones.",
+        "para1WithLocation": "Con años de experiencia en el sector, basados en {location} y disponibles para clientes en toda Latinoamérica. Ofrecemos soluciones integrales de telecomunicaciones y tecnología empresarial.",
+        "para1NoLocation": "Con años de experiencia en el sector, disponibles para clientes en toda Latinoamérica. Ofrecemos soluciones integrales de telecomunicaciones y tecnología empresarial.",
+        "para2": "En nuestro blog compartimos conocimientos y novedades del sector.",
+        "moreAboutMe": "Más sobre nosotros",
+        "statsIntro": "Algunos datos sobre nosotros.",
+        "stat1": "Años de experiencia",
+        "stat2": "Proyectos exitosos",
+        "stat3": "Clientes satisfechos",
+        "basedIn": "Basados en"
+      },
+      "blog": {
+        "badge": "Del blog",
+        "heading": "Destacados",
+        "viewAll": "Ver todos los artículos"
+      },
+      "cta": {
+        "badge": "Hablemos",
+        "heading": "Hablemos de lo que necesitas",
+        "description": "La primera consulta es gratuita y sin compromiso. Desde la primera conversación hasta la entrega final, trabajamos contigo.",
+        "primary": "Enviar mensaje",
+        "secondary": "Más sobre nosotros"
+      }
+    }
+  }
+}

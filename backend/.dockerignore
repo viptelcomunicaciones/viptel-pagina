@@ -1,0 +1,12 @@
+.env
+.env.local
+.env.*.local
+node_modules
+.next
+build
+coverage
+.git
+.gitignore
+*.md
+.vscode
+.agents

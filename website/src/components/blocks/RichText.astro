@@ -1,0 +1,72 @@
+---
+interface Props {
+  content: any
+  class?: string
+}
+
+const { content } = Astro.props
+
+function renderNode(node: any): string {
+  if (!node) return ''
+  if (node.text !== undefined) {
+    let text = node.text || ''
+    if (node.bold) text = `<strong>${text}</strong>`
+    if (node.italic) text = `<em>${text}</em>`
+    if (node.underline) text = `<u>${text}</u>`
+    if (node.code) text = `<code>${text}</code>`
+    if (node.strikethrough) text = `<s>${text}</s>`
+    return text
+  }
+  if (node.type === 'block' && node.fields) {
+    return renderBlock(node.fields)
+  }
+  const children = (node.children || []).map(renderNode).join('')
+  switch (node.type) {
+    case 'root': return children
+    case 'h1': return `<h1>${children}</h1>`
+    case 'h2': return `<h2>${children}</h2>`
+    case 'h3': return `<h3>${children}</h3>`
+    case 'h4': return `<h4>${children}</h4>`
+    case 'h5': return `<h5>${children}</h5>`
+    case 'h6': return `<h6>${children}</h6>`
+    case 'ul': return `<ul>${children}</ul>`
+    case 'ol': return `<ol>${children}</ol>`
+    case 'li': return `<li>${children}</li>`
+    case 'blockquote': return `<blockquote>${children}</blockquote>`
+    case 'link':
+      return `<a href="${node.url || node.href || '#'}" target="${node.newTab ? '_blank' : '_self'}" rel="${node.newTab ? 'noopener noreferrer' : ''}">${children}</a>`
+    case 'p': return `<p>${children}</p>`
+    default: return children
+  }
+}
+
+function renderBlock(fields: any): string {
+  switch (fields.blockType) {
+    case 'banner': {
+      const style = fields.style || 'info'
+      const content = fields.content ? renderNode(fields.content.root || fields.content) : ''
+      const styles: Record<string, string> = {
+        info: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200',
+        warning: 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200',
+        error: 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200',
+        success: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200',
+      }
+      return `<div class="rounded-lg border p-4 my-4 ${styles[style] || styles.info}">${content}</div>`
+    }
+    case 'code': {
+      const lang = fields.language || ''
+      const code = fields.code || ''
+      return `<pre class="rounded-lg bg-gray-900 dark:bg-gray-950 text-gray-100 p-4 my-4 overflow-x-auto text-sm"><code class="${lang ? 'language-' + lang : ''}">${escapeHtml(code)}</code></pre>`
+    }
+    default:
+      return ''
+  }
+}
+
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+---
+{
+  content?.root ? <div set:html={renderNode(content.root)} class={Astro.props.class} /> : null
+}

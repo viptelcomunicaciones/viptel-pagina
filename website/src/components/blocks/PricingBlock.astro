@@ -1,0 +1,45 @@
+---
+import Button from '@/components/ui/form/Button/Button.astro'
+import Icon from '@/components/ui/primitives/Icon/Icon.astro'
+import type { PricingBlock as PricingBlockType } from '@/lib/payload-types'
+
+interface Props {
+  block: PricingBlockType
+  locale?: string
+}
+
+const { block } = Astro.props
+const formattedPrice = block.price ? new Intl.NumberFormat('es-CO').format(block.price) : null
+---
+
+<section class="relative z-10 py-[var(--space-section-md)] bg-background-secondary border-t border-border">
+  <div class="mx-auto max-w-6xl px-6">
+    <div class="max-w-md mx-auto" data-reveal>
+      <div class="bg-background rounded-xl border border-border p-8 shadow-sm hover:shadow-md transition-shadow">
+        <h3 class="font-display text-2xl font-bold text-foreground mb-4">{block.name}</h3>
+        {formattedPrice && (
+          <div class="mb-6">
+            <span class="text-4xl font-bold text-foreground">${formattedPrice}</span>
+            <span class="text-foreground-muted ml-1">{block.currency}</span>
+            {block.interval && <span class="text-foreground-muted text-sm ml-1">/{block.interval === 'monthly' ? 'mes' : 'único'}</span>}
+          </div>
+        )}
+        {block.features && block.features.length > 0 && (
+          <ul class="space-y-3 mb-8">
+            {block.features.map((f) => (
+              <li class="flex items-start gap-3">
+                <Icon name={f.included !== false ? 'check' : 'x'} size="sm" class={f.included !== false ? 'text-green-500 mt-0.5' : 'text-red-400 mt-0.5'} />
+                <span class="text-foreground-muted">{f.feature}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        {block.linkText && block.linkUrl && (
+          <Button href={block.linkUrl} class="w-full">
+            {block.linkText}
+          </Button>
+        )}
+      </div>
+    </div>
+  </div>
+</section>

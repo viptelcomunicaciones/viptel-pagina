@@ -1,0 +1,39 @@
+---
+import Icon from '@/components/ui/primitives/Icon/Icon.astro'
+import type { CardsBlock as CardsBlockType } from '@/lib/payload-types'
+
+interface Props {
+  block: CardsBlockType
+  locale?: string
+}
+
+const { block } = Astro.props
+---
+
+<section class="relative z-10 py-[var(--space-section-md)] bg-background border-t border-border">
+  <div class="mx-auto max-w-6xl px-6 flex flex-col gap-8">
+    {block.heading && (
+      <div class="flex flex-col items-center gap-4 text-center" data-reveal>
+        <h2 class="font-display text-3xl md:text-4xl font-bold text-foreground">{block.heading}</h2>
+      </div>
+    )}
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {block.cards.map((card, i) => (
+        <a
+          href={card.linkUrl || '#'}
+          class:list={['group relative bg-background-secondary rounded-xl p-6 border border-border hover:border-brand-500/40 transition-all duration-200 hover:-translate-y-1 hover:shadow-md', !card.linkUrl && 'cursor-default pointer-events-none']}
+          data-reveal
+          data-reveal-delay={i || undefined}
+        >
+          {card.icon && (
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500/20 to-brand-500/5 flex items-center justify-center text-brand-500 mb-4">
+              <Icon name={card.icon} size="sm" />
+            </div>
+          )}
+          <h3 class="font-display text-lg font-bold text-foreground mb-2">{card.title}</h3>
+          {card.description && <p class="text-sm text-foreground-muted leading-relaxed">{card.description}</p>}
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
