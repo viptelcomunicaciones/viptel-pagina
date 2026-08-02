@@ -58,8 +58,7 @@ if (projectItems.length === 0 && locale !== defaultLocale) {
   projectItems = await getVisibleProjects(defaultLocale);
 }
 const featuredProjects = projectItems
-  .filter((p) => p.data.featured)
-  .sort((a, b) => a.data.order - b.data.order)
+  .sort((a, b) => (b.year ?? 0) - (a.year ?? 0))
   .slice(0, 4);
 
 let postItems = await getPublishedPosts(locale);
@@ -136,9 +135,8 @@ const projectsUrl = localizedPath('/projects', locale);
 const aboutUrl = localizedPath('/about', locale);
 const contactUrl = localizedPath('/contact', locale);
 const blogUrl = localizedPath('/blog', locale);
-// The getting-started guide lives at the default-locale URL; link there so the
-// CTA always resolves even before a locale has translated that post.
-const getStartedUrl = '/blog/astro-rocket-getting-started';
+   const servicesUrlActive = localizedPath('/services', locale);
+   const contactUrlActive = localizedPath('/contact', locale);
 
 // About-teaser copy with the configured location woven in (mirrors the original
 // page's conditional). Falls back to a location-free sentence when no city is set.
@@ -188,14 +186,13 @@ const basedInDisplay = `${city ?? 'Your City'}${country ? `, ${country}` : ''}`;
       )}
     </p>
 
-   <Fragment slot="actions">
-      <Button size="lg" href="https://github.com/hansmartensdev/Astro-Rocket">
-        {hero.github}
+    <Fragment slot="actions">
+      <Button size="lg" href={servicesUrlActive}>
+        {t('pages.home.cta.primary', locale)}
         <Icon name="arrow-right" size="sm" />
       </Button>
-      <Button size="lg" variant="outline" href={getStartedUrl}>
-        <Icon name="rocket" size="sm" />
-        {hero.getStarted}
+      <Button size="lg" variant="outline" href={contactUrlActive}>
+        {t('pages.home.cta.secondary', locale)}
         <Icon name="arrow-right" size="sm" />
       </Button>
     </Fragment>

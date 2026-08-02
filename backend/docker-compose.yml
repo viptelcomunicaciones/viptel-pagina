@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   payload:
     image: node:22-alpine
@@ -13,8 +11,8 @@ services:
     command: sh -c "corepack enable && corepack prepare pnpm@latest --activate && pnpm install && pnpm dev"
     env_file:
       - .env
-    environment:
-      - DATABASE_URL=postgres://postgres:viptel3562@host.docker.internal:5432/payload_viptel
+    # NOTE: inside Docker the DB host must be host.docker.internal.
+    # Adjust DATABASE_URL accordingly (e.g. via a .env override) — never hardcode credentials here.
 
 volumes:
   node_modules:

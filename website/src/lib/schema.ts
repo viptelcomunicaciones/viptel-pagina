@@ -65,14 +65,14 @@ export function createProfessionalServiceSchema(): WithContext<LocalBusiness> {
           address: {
             '@type': 'PostalAddress',
             addressLocality: siteConfig.address.city,
-            addressRegion: 'Noord-Brabant',
-            addressCountry: 'NL',
+    addressRegion: 'Bogotá, D.C.',
+    addressCountry: 'CO',
           },
         }
       : {}),
     areaServed: [
-      { '@type': 'Country', name: 'Netherlands' },
-      { '@type': 'Country', name: 'Worldwide' },
+      { '@type': 'Country', name: 'Colombia' },
+      { '@type': 'Continent', name: 'Latin America' },
     ],
     sameAs: siteConfig.socialLinks,
   };

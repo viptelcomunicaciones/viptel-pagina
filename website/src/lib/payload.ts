@@ -1,60 +1,186 @@
-import type { DocsResponse, Page, Post, Project } from './payload-types'
+import type { Page, Post, Project, Redirect } from './payload-types'
 import { defaultLocale } from '@/i18n'
 
 const API_URL = process.env.PAYLOAD_URL || 'http://localhost:3000'
-const FETCH_TIMEOUT = 10_000
+const FETCH_TIMEOUT = 15_000
+const API_KEY = process.env.PAYLOAD_API_KEY || ''
 
-export async function fetchAPI<T = unknown>(endpoint: string, locale = defaultLocale, query = ''): Promise<T> {
+interface DocsResponse<T> {
+  docs: T[]
+  totalDocs: number
+  limit: number
+  totalPages: number
+  page: number
+}
+
+interface FetchOptions {
+  locale?: string
+  draft?: boolean
+}
+
+function draftHeaders(): Record<string, string> {
+  return API_KEY ? { Authorization: `users API-Key ${API_KEY}` } : {}
+}
+
+async function fetchAPI<T = unknown>(
+  endpoint: string,
+  options: FetchOptions = {},
+): Promise<T> {
+  const locale = options.locale ?? defaultLocale
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT)
 
   try {
-    const url = `${API_URL}/api/${endpoint}?locale=${locale}&depth=2${query ? `&${query}` : ''}`
+    const params = new URLSearchParams()
+    params.set('locale', locale)
+    params.set('depth', '2')
+    if (options.draft) params.set('draft', 'true')
+
+    const url = `${API_URL}/api/${endpoint}?${params.toString()}`
     const res = await fetch(url, {
       signal: controller.signal,
-      headers: { 'Cache-Control': 'no-cache' },
+      headers: {
+        ...(options.draft ? draftHeaders() : {}),
+      },
     })
-    if (!res.ok) throw new Error(`Payload API error: ${res.statusText} (${res.status})`)
+
+    if (!res.ok) {
+      console.error(`[Payload] ${endpoint}: ${res.status} ${res.statusText}`)
+      throw new Error(`Payload API error: ${res.status}`)
+    }
+
     return res.json()
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      console.error(`[Payload] timeout fetching ${endpoint}`)
+    }
+    throw err
   } finally {
     clearTimeout(timeout)
   }
 }
 
-export async function getPageBySlug(slug: string, locale = defaultLocale): Promise<Page | null> {
-  const all = await getPages(locale)
-  return all.find((p) => p.slug === slug) ?? null
+// ── Pages ──────────────────────────────────────────────
+
+export async function getPageBySlug(
+  slug: string,
+  locale = defaultLocale,
+  draft = false,
+): Promise<Page | null> {
+  const data = await fetchAPI<DocsResponse<Page>>(
+    `pages?where[slug][equals]=${encodeURIComponent(slug)}`,
+    { locale, draft },
+  )
+  return data.docs?.[0] ?? null
 }
 
 export async function getPages(locale = defaultLocale): Promise<Page[]> {
-  const data = await fetchAPI<DocsResponse<Page>>('pages', locale, 'sort=createdAt&limit=100')
+  const data = await fetchAPI<DocsResponse<Page>>('pages', { locale })
   return data.docs ?? []
 }
 
-export async function getPostBySlug(slug: string, locale = defaultLocale): Promise<Post | null> {
-  const all = await getAllPosts(locale)
-  return all.find((p) => p.slug === slug) ?? null
+// ── Posts ──────────────────────────────────────────────
+
+export async function getPostBySlug(
+  slug: string,
+  locale = defaultLocale,
+  draft = false,
+): Promise<Post | null> {
+  const data = await fetchAPI<DocsResponse<Post>>(
+    `posts?where[slug][equals]=${encodeURIComponent(slug)}`,
+    { locale, draft },
+  )
+  return data.docs?.[0] ?? null
 }
 
-export async function getPosts(locale = defaultLocale, page = 1, limit = 20): Promise<DocsResponse<Post>> {
-  return fetchAPI<DocsResponse<Post>>('posts', locale, `sort=-publishedAt&limit=${limit}&page=${page}&depth=2`)
+export async function getPosts(
+  locale = defaultLocale,
+  page = 1,
+  limit = 20,
+  draft = false,
+): Promise<DocsResponse<Post>> {
+  return fetchAPI<DocsResponse<Post>>(
+    `posts?sort=-publishedAt&limit=${limit}&page=${page}&where[_status][equals]=published`,
+    { locale, draft },
+  )
 }
 
 export async function getAllPosts(locale = defaultLocale): Promise<Post[]> {
-  const data = await fetchAPI<DocsResponse<Post>>('posts', locale, 'sort=-publishedAt&limit=100&depth=2')
+  const data = await fetchAPI<DocsResponse<Post>>(
+    `posts?sort=-publishedAt&limit=100&where[_status][equals]=published`,
+    { locale },
+  )
   return data.docs ?? []
 }
 
-export async function getProjectBySlug(slug: string, locale = defaultLocale): Promise<Project | null> {
-  const all = await getAllProjects(locale)
-  return all.find((p) => p.slug === slug) ?? null
+export async function getPostsByTag(
+  tag: string,
+  locale = defaultLocale,
+  page = 1,
+  limit = 20,
+): Promise<DocsResponse<Post>> {
+  return fetchAPI<DocsResponse<Post>>(
+    `posts?sort=-publishedAt&limit=${limit}&page=${page}&where[tags.tag][equals]=${encodeURIComponent(tag)}&where[_status][equals]=published`,
+    { locale },
+  )
 }
 
-export async function getProjects(locale = defaultLocale, page = 1, limit = 20): Promise<DocsResponse<Project>> {
-  return fetchAPI<DocsResponse<Project>>('projects', locale, `sort=-year&limit=${limit}&page=${page}`)
+// ── Projects ───────────────────────────────────────────
+
+export async function getProjectBySlug(
+  slug: string,
+  locale = defaultLocale,
+  draft = false,
+): Promise<Project | null> {
+  const data = await fetchAPI<DocsResponse<Project>>(
+    `projects?where[slug][equals]=${encodeURIComponent(slug)}`,
+    { locale, draft },
+  )
+  return data.docs?.[0] ?? null
+}
+
+export async function getProjects(
+  locale = defaultLocale,
+  page = 1,
+  limit = 20,
+): Promise<DocsResponse<Project>> {
+  return fetchAPI<DocsResponse<Project>>(
+    `projects?sort=-year&limit=${limit}&page=${page}&where[_status][equals]=published`,
+    { locale },
+  )
 }
 
 export async function getAllProjects(locale = defaultLocale): Promise<Project[]> {
-  const data = await fetchAPI<DocsResponse<Project>>('projects', locale, 'sort=-year&limit=100')
+  const data = await fetchAPI<DocsResponse<Project>>(
+    `projects?sort=-year&limit=100&where[_status][equals]=published`,
+    { locale },
+  )
   return data.docs ?? []
 }
+
+export async function getProjectsByTag(
+  tag: string,
+  locale = defaultLocale,
+  page = 1,
+  limit = 20,
+): Promise<DocsResponse<Project>> {
+  return fetchAPI<DocsResponse<Project>>(
+    `projects?sort=-year&limit=${limit}&page=${page}&where[tags.tag][equals]=${encodeURIComponent(tag)}&where[_status][equals]=published`,
+    { locale },
+  )
+}
+
+// ── Redirects ──────────────────────────────────────────
+
+export async function getRedirect(from: string): Promise<Redirect | null> {
+  try {
+    const data = await fetchAPI<DocsResponse<Redirect>>(
+      `redirects?where[from][equals]=${encodeURIComponent(from)}`,
+    )
+    return data.docs?.[0] ?? null
+  } catch {
+    return null
+  }
+}
+
+export type { DocsResponse, Page, Post, Project }

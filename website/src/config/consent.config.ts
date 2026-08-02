@@ -1,41 +1,35 @@
 import type { ConsentConfig } from '@/lib/consent.types';
 
 const consentConfig: ConsentConfig = {
-  /** Bump to force re-consent when categories change */
   version: 1,
-
-  /** 'consent_mode_v2' = scripts load with denied defaults, cookieless pings
-   *  'strict' = scripts fully blocked until consent granted */
   mode: 'consent_mode_v2',
-
-  /** localStorage key for stored preferences */
   storageKey: 'cookie-consent',
 
   categories: {
     necessary: {
-      label: 'Necessary',
-      description: 'Essential cookies required for the website to function. These cannot be disabled.',
+      label: 'Necesarias',
+      description: 'Cookies esenciales para el funcionamiento del sitio. No se pueden desactivar.',
       required: true,
       defaultEnabled: true,
       gcmTypes: ['security_storage'],
     },
     analytics: {
-      label: 'Analytics',
-      description: 'Help us understand how visitors interact with the website by collecting anonymous usage data.',
+      label: 'Analíticas',
+      description: 'Nos ayudan a entender cómo los visitantes interactúan con el sitio mediante datos anónimos de uso.',
       required: false,
       defaultEnabled: false,
       gcmTypes: ['analytics_storage'],
     },
     marketing: {
       label: 'Marketing',
-      description: 'Used to deliver relevant ads and track ad campaign performance across websites.',
+      description: 'Utilizadas para mostrar anuncios relevantes y medir el rendimiento de campañas.',
       required: false,
       defaultEnabled: false,
       gcmTypes: ['ad_storage', 'ad_user_data', 'ad_personalization'],
     },
     preferences: {
-      label: 'Preferences',
-      description: 'Allow the website to remember choices you make, such as language or region.',
+      label: 'Preferencias',
+      description: 'Permiten que el sitio recuerde tus elecciones, como idioma o región.',
       required: false,
       defaultEnabled: false,
       gcmTypes: ['functionality_storage', 'personalization_storage'],
@@ -43,20 +37,19 @@ const consentConfig: ConsentConfig = {
   },
 
   ui: {
-    heading: 'Cookie Preferences',
-    description: 'We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic.',
-    acceptAll: 'Accept All',
-    declineAll: 'Decline All',
-    customize: 'Customize',
-    savePreferences: 'Save Preferences',
-    settingsHeading: 'Privacy Settings',
-    alwaysOnLabel: 'Always on',
-    privacyPolicyLabel: 'Privacy Policy',
-    bannerAriaLabel: 'Cookie consent',
-    reopenerAriaLabel: 'Open cookie settings',
+    heading: 'Preferencias de cookies',
+    description: 'Usamos cookies para mejorar tu experiencia de navegación y analizar nuestro tráfico.',
+    acceptAll: 'Aceptar todas',
+    declineAll: 'Rechazar todas',
+    customize: 'Personalizar',
+    savePreferences: 'Guardar preferencias',
+    settingsHeading: 'Configuración de privacidad',
+    alwaysOnLabel: 'Siempre activo',
+    privacyPolicyLabel: 'Política de privacidad',
+    bannerAriaLabel: 'Consentimiento de cookies',
+    reopenerAriaLabel: 'Abrir configuración de cookies',
   },
 
-  /** Milliseconds before banner slides in */
   showDelay: 500,
 };
 

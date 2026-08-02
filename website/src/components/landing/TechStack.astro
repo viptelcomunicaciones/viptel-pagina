@@ -7,10 +7,9 @@
  * marquee (the same one the homepage uses), while the badge / title / description
  * header stays the same across every breakpoint.
  *
- * The card content is driven by src/content/stack/*.mdx; the marquee pulls from
- * the same collection — so adding or editing a tool stays a single MDX edit.
+ * The card content is driven by src/data/stack.ts (static Viptel stack).
  */
-import { getCollection } from 'astro:content';
+import { viptelStack } from '@/data/stack';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import Card from '@/components/ui/data-display/Card/Card.astro';
 import Badge from '@/components/ui/data-display/Badge/Badge.astro';
@@ -27,13 +26,11 @@ interface Props {
 
 const { title, description, badge, badgeIcon, background = 'secondary' } = Astro.props;
 
-// Phone-only cards: a focused subset of the stack, in stack order. Tablet & up
-// show the full marquee instead, so these four only ever render on phones.
 const cardNames = ['Astro', 'Tailwind CSS', 'TypeScript', 'React'];
-const items = await getCollection('stack');
+const items = viptelStack;
 const cards = items
-  .filter((item) => cardNames.includes(item.data.name))
-  .sort((a, b) => a.data.order - b.data.order);
+  .filter((item) => cardNames.includes(item.name))
+  .slice(0, 4);
 
 const bgClass = background === 'primary' ? 'bg-background' : 'bg-background-secondary';
 ---
@@ -65,14 +62,14 @@ const bgClass = background === 'primary' ? 'bg-background' : 'bg-background-seco
     <div class="tech-cards" data-reveal-children>
       {cards.map((item) => (
         <div
-          style={`--tech-color: oklch(${item.data.colorOklch}); --tech-bg: oklch(${item.data.colorOklch} / 0.1);`}
+          style={`--tech-color: oklch(${item.colorOklch}); --tech-bg: oklch(${item.colorOklch} / 0.1);`}
         >
-          <Card variant="elevated" padding="md" hover={true} href={item.data.url} target="_blank" rel="noopener noreferrer" class="h-full text-center">
+          <Card variant="elevated" padding="md" hover={true} href={item.url} target="_blank" rel="noopener noreferrer" class="h-full text-center">
             <div class="flex flex-col items-center gap-[var(--space-stack-sm)]">
               <div class="tech-icon-wrap">
-                <Icon name={item.data.icon} size="lg" />
+                <Icon name={item.icon} size="lg" />
               </div>
-              <span class="font-display text-lg font-bold text-foreground">{item.data.name}</span>
+              <span class="font-display text-lg font-bold text-foreground">{item.name}</span>
             </div>
           </Card>
         </div>

@@ -1,12 +1,9 @@
-import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
 import siteConfig from '@/config/site.config';
-import { getPostSlug } from '@/lib/blog';
+import { getAllPosts } from '@/lib/payload';
 import { defaultLocale } from '@/i18n';
+import type { Post } from '@/lib/payload-types';
 
-/**
- * Escapes XML special characters
- */
 function escapeXml(text: string): string {
   return text
     .replace(/&/g, '&amp;')
@@ -16,44 +13,29 @@ function escapeXml(text: string): string {
     .replace(/'/g, '&apos;');
 }
 
-/**
- * Formats a date to RFC-822 format for RSS
- */
 function formatRfc822Date(date: Date): string {
   return date.toUTCString();
 }
 
 export async function GET(context: APIContext) {
-  // Get only the default locale's non-draft posts for RSS
-  const posts = await getCollection('blog', ({ data }) =>
-    data.locale === defaultLocale && !data.draft
-  );
-
-  // Sort posts by date (newest first)
-  const sortedPosts = posts.sort(
-    (a, b) => new Date(b.data.publishedAt).getTime() - new Date(a.data.publishedAt).getTime()
-  );
-
-  // Generate slug from post id (strip the default-locale folder prefix)
-  const getSlug = (id: string) => getPostSlug(id, defaultLocale);
+  const posts = await getAllPosts(defaultLocale).catch(() => [] as Post[]);
 
   const site = context.site?.toString() ?? siteConfig.url;
   const siteUrl = site.endsWith('/') ? site.slice(0, -1) : site;
 
-  const items = sortedPosts
+  const items = posts
     .map((post) => {
-      const link = `${siteUrl}/blog/${getSlug(post.id)}/`;
-      const categories = post.data.tags
-        .map((tag) => `<category>${escapeXml(tag)}</category>`)
+      const link = `${siteUrl}/blog/${post.slug}/`;
+      const categories = (post.tags ?? [])
+        .map((t) => `<category>${escapeXml(t.tag)}</category>`)
         .join('\n        ');
 
       return `    <item>
-      <title>${escapeXml(post.data.title)}</title>
+      <title>${escapeXml(post.title)}</title>
       <link>${link}</link>
       <guid>${link}</guid>
-      <description>${escapeXml(post.data.description)}</description>
-      <pubDate>${formatRfc822Date(post.data.publishedAt)}</pubDate>
-      <author>${escapeXml(post.data.author)}</author>
+      <description>${escapeXml(post.excerpt || '')}</description>
+      <pubDate>${formatRfc822Date(new Date(post.publishedAt))}</pubDate>
       ${categories}
     </item>`;
     })

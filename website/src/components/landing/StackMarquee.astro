@@ -17,7 +17,7 @@
  *   <StackMarquee rows={1} duration={30} />  // single strip
  *   <StackMarquee items={[{ name: 'Vercel', icon: 'brand-vercel', url: '…' }]} />
  */
-import { getCollection } from 'astro:content';
+import { viptelStack } from '@/data/stack';
 import { cn } from '@/lib/cn';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import Card from '@/components/ui/data-display/Card/Card.astro';
@@ -80,19 +80,10 @@ const {
   class: className,
 } = Astro.props;
 
-// Default source: the MDX-driven stack collection, sorted by `order`.
+// Default source: the static Viptel stack
 let data: StackItem[] = items ?? [];
 if (!items) {
-  const entries = await getCollection('stack');
-  data = entries
-    .sort((a, b) => a.data.order - b.data.order)
-    .map((e) => ({
-      name: e.data.name,
-      icon: e.data.icon,
-      url: e.data.url,
-      version: e.data.version,
-      colorOklch: e.data.colorOklch,
-    }));
+  data = viptelStack;
 }
 
 const opposite = (d: 'left' | 'right'): 'left' | 'right' => (d === 'left' ? 'right' : 'left');

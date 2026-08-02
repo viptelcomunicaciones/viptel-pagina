@@ -183,7 +183,7 @@
     "playLabel": "Reproducir video: {title}",
     "watchOn": "Ver en YouTube"
   },
-  "footer": {
+  "footer": { "credit": "Desarrollado por Viptel Comunicaciones", "builtWith": "Tecnología propia",
     "copyright": "© {year} {siteName}",
     "credit": "Tema por <a href=\"https://hansmartens.dev\" class=\"transition-colors hover:text-foreground\" target=\"_blank\" rel=\"noopener noreferrer\">Hans Martens Dev</a>",
     "builtWith": "Construido con Astro Rocket",
