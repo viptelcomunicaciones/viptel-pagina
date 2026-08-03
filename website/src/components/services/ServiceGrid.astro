@@ -1,0 +1,24 @@
+---
+import type { Service } from '@/lib/payload-types'
+import ServiceCard from './ServiceCard.astro'
+import { localizedPath } from '@/i18n'
+import { cn } from '@/lib/cn'
+
+interface Props {
+  services: Service[]
+  /** Base href prefix, e.g. "/services" or "/en/services" */
+  hrefPrefix?: string
+  class?: string
+}
+
+const { services, hrefPrefix = '/services', class: className } = Astro.props
+---
+
+<div class={cn('grid gap-6 sm:grid-cols-2 lg:grid-cols-3', className)}>
+  {services.map((service) => (
+    <ServiceCard
+      service={service}
+      href={`${hrefPrefix}/${service.slug}`}
+    />
+  ))}
+</div>

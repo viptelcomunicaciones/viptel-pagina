@@ -1,0 +1,143 @@
+8602206 feat(seed): add services seeding data (5 categories + 14 sub-services)
+---STAT---
+ backend/src/scripts/seed.ts | 113 ++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 113 insertions(+)
+diff --git a/backend/src/scripts/seed.ts b/backend/src/scripts/seed.ts
+index bd32e38..757ac04 100644
+--- a/backend/src/scripts/seed.ts
++++ b/backend/src/scripts/seed.ts
+@@ -23,10 +23,11 @@ const collections: CollectionSlug[] = [
+   'media',
+   'pages',
+   'posts',
+   'projects',
+   'redirects',
++  'services',
+   'users',
+ ]
+ 
+ const globals: GlobalSlug[] = ['header', 'footer']
+ 
+@@ -362,10 +363,122 @@ export const seed = async (payload: Payload): Promise<void> => {
+         content: paragraph(project.en.content),
+       },
+     })
+   }
+ 
++  payload.logger.info(`- Seeding services...`)
++
++  type ServiceSeed = {
++    slug: string
++    es: { title: string; shortDescription: string }
++    en: { title: string; shortDescription: string }
++    children: {
++      slug: string
++      es: { title: string; shortDescription: string }
++      en: { title: string; shortDescription: string }
++    }[]
++  }
++
++  const serviceCategories: ServiceSeed[] = [
++    {
++      slug: 'viptel-pbx',
++      es: { title: 'Viptel-PBX', shortDescription: 'Centrales telef├│nicas virtuales para empresas. Comunicaci├│n unificada sin hardware costoso.' },
++      en: { title: 'Viptel-PBX', shortDescription: 'Virtual phone systems for businesses. Unified communication without expensive hardware.' },
++      children: [
++        { slug: 'basica', es: { title: 'PBX B├ísica', shortDescription: 'Hasta 10 extensiones. Ideal para peque├▒as empresas y startups.' }, en: { title: 'Basic PBX', shortDescription: 'Up to 10 extensions. Ideal for small businesses and startups.' } },
++        { slug: 'avanzada', es: { title: 'PBX Avanzada', shortDescription: 'Extensiones ilimitadas, IVR, grabaci├│n de llamadas y reportes.' }, en: { title: 'Advanced PBX', shortDescription: 'Unlimited extensions, IVR, call recording and reports.' } },
++      ],
++    },
++    {
++      slug: 'viptel-voip',
++      es: { title: 'Viptel-VoIP', shortDescription: 'Telefon├¡a IP de alta calidad. Minutos a todo destino y n├║meros DID locales e internacionales.' },
++      en: { title: 'Viptel-VoIP', shortDescription: 'High-quality IP telephony. Minutes to all destinations and local/international DID numbers.' },
++      children: [
++        { slug: 'minutos', es: { title: 'Minutos VoIP', shortDescription: 'Terminaci├│n de llamadas nacionales e internacionales con la mejor tarifa.' }, en: { title: 'VoIP Minutes', shortDescription: 'National and international call termination at the best rate.' } },
++        { slug: 'did', es: { title: 'N├║meros DID', shortDescription: 'N├║meros virtuales locales en Colombia y m├ís de 50 pa├¡ses.' }, en: { title: 'DID Numbers', shortDescription: 'Local virtual numbers in Colombia and 50+ countries.' } },
++      ],
++    },
++    {
++      slug: 'viptel-web',
++      es: { title: 'Viptel-Web', shortDescription: 'Desarrollo web profesional. Desde sitios informativos hasta tiendas en l├¡nea avanzadas.' },
++      en: { title: 'Viptel-Web', shortDescription: 'Professional web development. From informational sites to advanced online stores.' },
++      children: [
++        { slug: 'sitio-informativo', es: { title: 'Sitio Informativo', shortDescription: 'P├ígina web de una sola p├ígina con informaci├│n de tu negocio y formulario de contacto.' }, en: { title: 'Informational Site', shortDescription: 'Single-page website with your business info and contact form.' } },
++        { slug: 'sitio-corporativo', es: { title: 'Sitio Corporativo', shortDescription: 'Sitio web multi-p├ígina con blog, portafolio y dise├▒o personalizado.' }, en: { title: 'Corporate Site', shortDescription: 'Multi-page website with blog, portfolio and custom design.' } },
++        { slug: 'tienda-basica', es: { title: 'Tienda B├ísica', shortDescription: 'E-commerce con hasta 50 productos, pasarela de pagos y panel de administraci├│n.' }, en: { title: 'Basic Store', shortDescription: 'E-commerce with up to 50 products, payment gateway and admin panel.' } },
++        { slug: 'tienda-avanzada', es: { title: 'Tienda Avanzada', shortDescription: 'E-commerce escalable con productos ilimitados, multi-idioma y funcionalidades avanzadas.' }, en: { title: 'Advanced Store', shortDescription: 'Scalable e-commerce with unlimited products, multi-language and advanced features.' } },
++      ],
++    },
++    {
++      slug: 'viptel-marketing',
++      es: { title: 'Viptel-Marketing', shortDescription: 'Marketing digital multicanal. Email, WhatsApp, SMS y audio masivo para llegar a tu audiencia.' },
++      en: { title: 'Viptel-Marketing', shortDescription: 'Multi-channel digital marketing. Email, WhatsApp, SMS and bulk audio to reach your audience.' },
++      children: [
++        { slug: 'email-masivo', es: { title: 'Email Masivo', shortDescription: 'Campa├▒as de email marketing con segmentaci├│n, automatizaci├│n y anal├¡tica.' }, en: { title: 'Bulk Email', shortDescription: 'Email marketing campaigns with segmentation, automation and analytics.' } },
++        { slug: 'whatsapp-masivo', es: { title: 'WhatsApp Masivo', shortDescription: 'Mensajer├¡a masiva por WhatsApp Business API con plantillas aprobadas.' }, en: { title: 'Bulk WhatsApp', shortDescription: 'Bulk messaging via WhatsApp Business API with approved templates.' } },
++        { slug: 'sms-masivo', es: { title: 'SMS Masivo', shortDescription: 'Env├¡o de SMS transaccionales y promocionales a nivel nacional.' }, en: { title: 'Bulk SMS', shortDescription: 'Transactional and promotional SMS delivery nationwide.' } },
++        { slug: 'audio-masivo', es: { title: 'Audio Masivo', shortDescription: 'Campa├▒as de audio masivo con IVR para notificaciones y marketing telef├│nico.' }, en: { title: 'Bulk Audio', shortDescription: 'Bulk audio campaigns with IVR for notifications and phone marketing.' } },
++      ],
++    },
++    {
++      slug: 'viptel-software',
++      es: { title: 'Viptel-Software', shortDescription: 'Software empresarial a la medida. Soluciones ERP y CRM adaptadas a tu negocio.' },
++      en: { title: 'Viptel-Software', shortDescription: 'Custom enterprise software. ERP and CRM solutions tailored to your business.' },
++      children: [
++        { slug: 'erp', es: { title: 'ERP', shortDescription: 'Sistema de planificaci├│n de recursos empresariales. Facturaci├│n, inventario, contabilidad y m├ís.' }, en: { title: 'ERP', shortDescription: 'Enterprise resource planning system. Invoicing, inventory, accounting and more.' } },
++        { slug: 'crm', es: { title: 'CRM', shortDescription: 'Gesti├│n de relaciones con clientes. Seguimiento de oportunidades, pipeline y automatizaci├│n.' }, en: { title: 'CRM', shortDescription: 'Customer relationship management. Opportunity tracking, pipeline and automation.' } },
++      ],
++    },
++  ]
++
++  for (const cat of serviceCategories) {
++    const parentDoc = await payload.create({
++      collection: 'services',
++      locale: 'es',
++      depth: 0,
++      data: {
++        title: cat.es.title,
++        slug: cat.slug,
++        shortDescription: cat.es.shortDescription,
++        _status: 'published',
++      },
++    })
++    await payload.update({
++      collection: 'services',
++      id: parentDoc.id,
++      locale: 'en',
++      data: {
++        title: cat.en.title,
++        shortDescription: cat.en.shortDescription,
++      },
++    })
++
++    for (const child of cat.children) {
++      const childDoc = await payload.create({
++        collection: 'services',
++        locale: 'es',
++        depth: 0,
++        data: {
++          title: child.es.title,
++          slug: child.slug,
++          shortDescription: child.es.shortDescription,
++          parent: parentDoc.id,
++          _status: 'published',
++        },
++      })
++      await payload.update({
++        collection: 'services',
++        id: childDoc.id,
++        locale: 'en',
++        data: {
++          title: child.en.title,
++          shortDescription: child.en.shortDescription,
++        },
++      })
++    }
++  }
++
+   payload.logger.info(`- Seeding home page...`)
+ 
+   const homePage = await payload.create({
+     collection: 'pages',
+     locale: 'es',

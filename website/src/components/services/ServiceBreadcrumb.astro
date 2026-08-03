@@ -1,0 +1,36 @@
+---
+import { t, localizedPath } from '@/i18n'
+import { cn } from '@/lib/cn'
+
+interface Props {
+  locale?: string
+  parentTitle?: string | null
+  parentSlug?: string | null
+  currentTitle: string
+  class?: string
+}
+
+const { locale = 'es', parentTitle, parentSlug, currentTitle, class: className } = Astro.props
+
+const servicesPath = localizedPath('/services', locale)
+---
+
+<nav class={cn('flex items-center gap-1 text-sm text-foreground-muted', className)} aria-label="Breadcrumb">
+  <a href={localizedPath('/', locale)} class="transition-colors hover:text-foreground">
+    {t('services.breadcrumb.home', locale)}
+  </a>
+  <span class="select-none">/</span>
+  <a href={servicesPath} class="transition-colors hover:text-foreground">
+    {t('services.breadcrumb.services', locale)}
+  </a>
+  {parentTitle && parentSlug && (
+    <>
+      <span class="select-none">/</span>
+      <a href={`${servicesPath}/${parentSlug}`} class="transition-colors hover:text-foreground">
+        {parentTitle}
+      </a>
+    </>
+  )}
+  <span class="select-none">/</span>
+  <span class="text-foreground font-medium">{currentTitle}</span>
+</nav>

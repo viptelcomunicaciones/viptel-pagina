@@ -1,0 +1,36 @@
+---
+import type { Service } from '@/lib/payload-types'
+import Icon from '@/components/ui/primitives/Icon/Icon.astro'
+import { cn } from '@/lib/cn'
+
+interface Props {
+  service: Service
+  href: string
+  class?: string
+}
+
+const { service, href, class: className } = Astro.props
+---
+
+<a
+  href={href}
+  class={cn(
+    'group flex flex-col gap-3 rounded-xl border border-border bg-background p-6 transition-all',
+    'hover:border-brand-500 hover:shadow-md',
+    className,
+  )}
+>
+  <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-950 dark:text-brand-400">
+    <Icon name={service.icon ? 'image' : 'sparkles'} size="md" />
+  </div>
+  <div class="flex flex-col gap-1">
+    <h3 class="text-base font-semibold text-foreground group-hover:text-brand-600 transition-colors">
+      {service.title}
+    </h3>
+    {service.shortDescription && (
+      <p class="text-sm text-foreground-muted line-clamp-2">
+        {service.shortDescription}
+      </p>
+    )}
+  </div>
+</a>
