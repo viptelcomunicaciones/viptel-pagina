@@ -70,6 +70,7 @@ export interface Config {
     pages: Page;
     posts: Post;
     projects: Project;
+    services: Service;
     media: Media;
     categories: Category;
     users: User;
@@ -90,6 +91,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    services: ServicesSelect<false> | ServicesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -184,6 +186,10 @@ export interface Page {
               | ({
                   relationTo: 'posts';
                   value: number | Post;
+                } | null)
+              | ({
+                  relationTo: 'services';
+                  value: number | Service;
                 } | null);
             url?: string | null;
             label: string;
@@ -543,6 +549,202 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services".
+ */
+export interface Service {
+  id: number;
+  title: string;
+  /**
+   * Dejar vacío si es una categoría. Seleccionar un servicio padre si es un sub-servicio.
+   */
+  parent?: (number | null) | Service;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  shortDescription?: string | null;
+  icon?: (number | null) | Media;
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  features?:
+    | {
+        title: string;
+        description?: string | null;
+        icon?: (number | null) | Media;
+        id?: string | null;
+      }[]
+    | null;
+  pricing?:
+    | {
+        planName: string;
+        price: number;
+        currency?: string | null;
+        period?: string | null;
+        features?:
+          | {
+              feature?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        highlighted?: boolean | null;
+        ctaLabel?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  faq?:
+    | {
+        question: string;
+        answer: {
+          root: {
+            type: string;
+            children: {
+              type: any;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  gallery?:
+    | {
+        image?: (number | null) | Media;
+        alt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  layout?:
+    | (
+        | CallToActionBlock
+        | ContentBlock
+        | {
+            heading?: string | null;
+            items: {
+              question: string;
+              answer?: {
+                root: {
+                  type: string;
+                  children: {
+                    type: any;
+                    version: number;
+                    [k: string]: unknown;
+                  }[];
+                  direction: ('ltr' | 'rtl') | null;
+                  format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                  indent: number;
+                  version: number;
+                };
+                [k: string]: unknown;
+              } | null;
+              id?: string | null;
+            }[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'faq';
+          }
+        | {
+            heading?: string | null;
+            images: {
+              image: number | Media;
+              alt?: string | null;
+              caption?: string | null;
+              id?: string | null;
+            }[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'gallery';
+          }
+        | {
+            name: string;
+            price?: number | null;
+            currency?: string | null;
+            interval?: ('one-time' | 'monthly') | null;
+            features?:
+              | {
+                  feature?: string | null;
+                  included?: boolean | null;
+                  id?: string | null;
+                }[]
+              | null;
+            linkText?: string | null;
+            linkUrl?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'pricing';
+          }
+        | {
+            heading?: string | null;
+            cards: {
+              icon?: string | null;
+              title: string;
+              description?: string | null;
+              linkUrl?: string | null;
+              id?: string | null;
+            }[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cards';
+          }
+        | {
+            heading?: string | null;
+            body?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            image: number | Media;
+            imagePosition?: ('left' | 'right') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'media-content';
+          }
+      )[]
+    | null;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+  };
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "CallToActionBlock".
  */
 export interface CallToActionBlock {
@@ -574,6 +776,10 @@ export interface CallToActionBlock {
             | ({
                 relationTo: 'posts';
                 value: number | Post;
+              } | null)
+            | ({
+                relationTo: 'services';
+                value: number | Service;
               } | null);
           url?: string | null;
           label: string;
@@ -624,6 +830,10 @@ export interface ContentBlock {
             | ({
                 relationTo: 'posts';
                 value: number | Post;
+              } | null)
+            | ({
+                relationTo: 'services';
+                value: number | Service;
               } | null);
           url?: string | null;
           label: string;
@@ -893,6 +1103,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'projects';
         value: number | Project;
+      } | null)
+    | ({
+        relationTo: 'services';
+        value: number | Service;
       } | null)
     | ({
         relationTo: 'media';
@@ -1240,6 +1454,149 @@ export interface ProjectsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services_select".
+ */
+export interface ServicesSelect<T extends boolean = true> {
+  title?: T;
+  parent?: T;
+  generateSlug?: T;
+  slug?: T;
+  shortDescription?: T;
+  icon?: T;
+  description?: T;
+  features?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        icon?: T;
+        id?: T;
+      };
+  pricing?:
+    | T
+    | {
+        planName?: T;
+        price?: T;
+        currency?: T;
+        period?: T;
+        features?:
+          | T
+          | {
+              feature?: T;
+              id?: T;
+            };
+        highlighted?: T;
+        ctaLabel?: T;
+        id?: T;
+      };
+  faq?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  gallery?:
+    | T
+    | {
+        image?: T;
+        alt?: T;
+        id?: T;
+      };
+  layout?:
+    | T
+    | {
+        cta?: T | CallToActionBlockSelect<T>;
+        content?: T | ContentBlockSelect<T>;
+        faq?:
+          | T
+          | {
+              heading?: T;
+              items?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        gallery?:
+          | T
+          | {
+              heading?: T;
+              images?:
+                | T
+                | {
+                    image?: T;
+                    alt?: T;
+                    caption?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        pricing?:
+          | T
+          | {
+              name?: T;
+              price?: T;
+              currency?: T;
+              interval?: T;
+              features?:
+                | T
+                | {
+                    feature?: T;
+                    included?: T;
+                    id?: T;
+                  };
+              linkText?: T;
+              linkUrl?: T;
+              id?: T;
+              blockName?: T;
+            };
+        cards?:
+          | T
+          | {
+              heading?: T;
+              cards?:
+                | T
+                | {
+                    icon?: T;
+                    title?: T;
+                    description?: T;
+                    linkUrl?: T;
+                    id?: T;
+                  };
+              id?: T;
+              blockName?: T;
+            };
+        'media-content'?:
+          | T
+          | {
+              heading?: T;
+              body?: T;
+              image?: T;
+              imagePosition?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -1487,6 +1844,10 @@ export interface Header {
             | ({
                 relationTo: 'posts';
                 value: number | Post;
+              } | null)
+            | ({
+                relationTo: 'services';
+                value: number | Service;
               } | null);
           url?: string | null;
           label: string;
@@ -1516,6 +1877,10 @@ export interface Footer {
             | ({
                 relationTo: 'posts';
                 value: number | Post;
+              } | null)
+            | ({
+                relationTo: 'services';
+                value: number | Service;
               } | null);
           url?: string | null;
           label: string;
@@ -1602,6 +1967,10 @@ export interface TaskSchedulePublish {
       | ({
           relationTo: 'projects';
           value: number | Project;
+        } | null)
+      | ({
+          relationTo: 'services';
+          value: number | Service;
         } | null);
     global?: string | null;
     user?: (number | null) | User;
