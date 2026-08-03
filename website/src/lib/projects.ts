@@ -54,7 +54,7 @@ export async function getProjectPageCount(locale: string = defaultLocale): Promi
 }
 
 export function collectProjectTags(projects: Project[]): string[] {
-  return [...new Set(projects.flatMap((p) => (p.tags ?? []).map((t) => t.tag)))].sort();
+  return [...new Set(projects.flatMap((p) => (p.tags ?? []).map((t) => t.tag ?? '')))].sort();
 }
 
 export function collectProjectTagsWithCounts(
@@ -74,5 +74,5 @@ export function collectProjectTagsWithCounts(
 export function collectTopProjectTags(projects: Project[], limit: number): string[] {
   return collectProjectTagsWithCounts(projects)
     .slice(0, limit)
-    .map((t) => t.tag);
+    .map((t) => t.tag ?? '');
 }

@@ -54,7 +54,7 @@ export async function getBlogPageCount(locale: string = defaultLocale): Promise<
 }
 
 export function collectTags(posts: Post[]): string[] {
-  return [...new Set(posts.flatMap((p) => (p.tags ?? []).map((t) => t.tag)))].sort();
+  return [...new Set(posts.flatMap((p) => (p.tags ?? []).map((t) => t.tag ?? '')))].sort();
 }
 
 export function collectTagsWithCounts(
@@ -74,5 +74,5 @@ export function collectTagsWithCounts(
 export function collectTopTags(posts: Post[], limit: number): string[] {
   return collectTagsWithCounts(posts)
     .slice(0, limit)
-    .map((t) => t.tag);
+    .map((t) => t.tag ?? '');
 }

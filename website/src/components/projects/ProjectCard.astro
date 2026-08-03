@@ -3,17 +3,16 @@
  * Project listing card. Extracted so the projects index, paginated pages,
  * and tag archives render identical cards from one source of truth.
  *
- * Placeholder projects render as a non-interactive card (no link), matching
- * how the listing treats projects that don't have their own detail page.
+ * Data comes from Payload CMS via the REST API — flat Project objects.
  */
 import Card from '@/components/ui/data-display/Card/Card.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
-// CollectionEntry removed — project data comes from Payload CMS directly
+import type { Project } from '@/lib/payload-types';
 import { defaultLocale } from '@/i18n';
 import { getProjectUrl } from '@/lib/projects';
 
 interface Props {
-  project: CollectionEntry<'projects'>;
+  project: Project;
   /** Stagger index for the scroll-reveal cascade. */
   index?: number;
   /**
@@ -24,14 +23,13 @@ interface Props {
 }
 
 const { project, index = 0, locale = defaultLocale } = Astro.props;
-const { data } = project;
 ---
 
 <Card
   variant="elevated"
   hover
   padding="none"
-  href={data.placeholder ? undefined : getProjectUrl(project.id, locale)}
+  href={getProjectUrl(project, locale)}
   class="group flex flex-col"
   data-reveal
   data-reveal-delay={index % 2 || undefined}
@@ -44,17 +42,17 @@ const { data } = project;
       <Icon name="arrow-up-right" size="sm" class="text-foreground-muted group-hover:text-brand-500 transition-colors shrink-0 ml-auto" />
     </div>
     <div class="mb-2 flex items-baseline gap-2">
-      <h3 class="font-display text-lg font-bold text-foreground">{data.title}</h3>
-      {data.year && (
-        <span class="text-xs text-foreground-muted">{data.year}</span>
+      <h3 class="font-display text-lg font-bold text-foreground">{project.title}</h3>
+      {project.year && (
+        <span class="text-xs text-foreground-muted">{project.year}</span>
       )}
     </div>
-    <p class="text-sm text-foreground-muted leading-relaxed mb-4 flex-1">{data.description}</p>
-    {data.tags && data.tags.length > 0 && (
+    <p class="text-sm text-foreground-muted leading-relaxed mb-4 flex-1">{project.description || ''}</p>
+    {(project.tags ?? []).length > 0 && (
       <div class="flex flex-wrap gap-1.5">
-        {data.tags.map((tag) => (
+        {(project.tags ?? []).map((t) => (
           <span class="inline-flex items-center rounded-full bg-transparent px-2.5 py-0.5 text-xs font-medium text-brand-700 dark:text-brand-400 ring-1 ring-inset ring-brand-500/40 transition-colors group-hover:ring-brand-500/80">
-            #{tag}
+            #{t.tag}
           </span>
         ))}
       </div>

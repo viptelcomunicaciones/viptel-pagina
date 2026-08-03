@@ -12,6 +12,6 @@ const { block } = Astro.props
 
 <section class="relative z-10 py-[var(--space-section-md)] bg-background">
   <div class="mx-auto max-w-3xl px-6">
-    <RichText content={block.body} class="prose prose-lg dark:prose-invert max-w-none" />
+    <RichText content={(block as any).body} class="prose prose-lg dark:prose-invert max-w-none" />
   </div>
 </section>

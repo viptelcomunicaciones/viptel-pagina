@@ -20,6 +20,7 @@ import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import BlogCard from '@/components/blog/BlogCard.astro';
 import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
 import StackMarquee from '@/components/landing/StackMarquee.astro';
+import type { StackItem } from '@/components/landing/StackMarquee.astro';
 import { viptelStack } from '@/data/stack';
 import siteConfig from '@/config/site.config';
 import { getPostUrl, getPublishedPosts } from '@/lib/blog';
@@ -48,8 +49,8 @@ const { locale = defaultLocale } = Astro.props;
 // Hero data from Payload
 const homePage = await getPageBySlug('home', locale);
 const pageHero = homePage?.hero;
-const heroTitle = pageHero?.title;
-const heroDescription = pageHero?.description;
+const heroTitle = '';
+const heroDescription = '';
 
 // Featured projects for this locale, falling back to the default locale so the
 // section is never empty on a locale that hasn't translated its projects yet.
@@ -121,9 +122,6 @@ const projectsUrl = localizedPath('/projects', locale);
 const aboutUrl = localizedPath('/about', locale);
 const contactUrl = localizedPath('/contact', locale);
 const blogUrl = localizedPath('/blog', locale);
-   const servicesUrlActive = localizedPath('/services', locale);
-   const contactUrlActive = localizedPath('/contact', locale);
-
 // About-teaser copy with the configured location woven in (mirrors the original
 // page's conditional). Falls back to a location-free sentence when no city is set.
 const city = siteConfig.address?.city;
@@ -173,11 +171,11 @@ const basedInDisplay = `${city ?? 'Your City'}${country ? `, ${country}` : ''}`;
     </p>
 
     <Fragment slot="actions">
-      <Button size="lg" href={servicesUrlActive}>
+      <Button size="lg" href={servicesUrl}>
         {t('pages.home.cta.primary', locale)}
         <Icon name="arrow-right" size="sm" />
       </Button>
-      <Button size="lg" variant="outline" href={contactUrlActive}>
+      <Button size="lg" variant="outline" href={contactUrl}>
         {t('pages.home.cta.secondary', locale)}
         <Icon name="arrow-right" size="sm" />
       </Button>
@@ -474,7 +472,6 @@ const basedInDisplay = `${city ?? 'Your City'}${country ? `, ${country}` : ''}`;
             publishedAt={new Date(post.publishedAt)}
             tags={(post.tags ?? []).map(t => t.tag)}
             author={post.populatedAuthors?.[0]?.name || 'Viptel'}
-            body={post.body}
             revealDelay={index}
             class={index === 3 ? 'hidden sm:block lg:hidden' : undefined}
           />

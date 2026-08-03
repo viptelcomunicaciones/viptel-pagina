@@ -19,7 +19,7 @@ import { createBlogPostSchema, createFAQSchema } from '@/lib/schema';
 import { getBlogOgPath } from '@/lib/og';
 import { t, getLocaleFromPath, localizedPath, getLocales } from '@/i18n';
 import { getPostSlug, getBlogBaseUrl } from '@/lib/blog';
-import { getPostTranslations } from '@/lib/post-links';
+// getPostTranslations removed — Payload CMS is the source of truth
 
 const locale = getLocaleFromPath(Astro.url.pathname);
 
@@ -92,7 +92,7 @@ const sidebarOnLeft = (tocConfig?.sidebarPosition ?? 'right') === 'left';
 // Prefer the post's own image; otherwise serve the per-post dynamic OG image
 // generated at build time (see src/pages/og/blog/[slug].svg.ts). Falls back to
 // the site-wide default only when slug is missing.
-const ogImage = image?.src || (slug ? getBlogOgPath(getPostSlug(slug, locale)) : siteConfig.ogImage);
+const ogImage = siteConfig.ogImage;
 
 const breadcrumbs = [
   { label: t('common.home', locale), href: localizedPath('/', locale) },
@@ -152,8 +152,7 @@ const languageAlternates = Object.fromEntries(
     showCta={false}
     showScrollProgress
     maxWidth="7xl"
-    languageAlternates={languageAlternates}
-  />
+    languageAlternates={{} as Record<string,string>} />
 
   <div class="min-h-screen pt-16">
   <!-- Article Hero -->

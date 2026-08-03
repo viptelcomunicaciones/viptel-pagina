@@ -88,11 +88,10 @@ const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
           <BlogCard
             title={post.title}
             description={post.excerpt || ''}
-            href={getPostUrl(post.id, locale)}
+            href={getPostUrl(post, locale)}
             publishedAt={new Date(post.publishedAt)}
             tags={(post.tags ?? []).map(t => t.tag)}
             author={post.populatedAuthors?.[0]?.name || 'Viptel'}
-            body={post.body}
             revealDelay={index % 3}
             eager={index === 0}
           />

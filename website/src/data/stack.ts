@@ -7,7 +7,6 @@ export const viptelStack: StackItem[] = [
     url: 'https://payloadcms.com',
     colorOklch: '0.65 0.22 250',
     version: '3.86',
-    description: 'Headless CMS with admin panel and REST API',
   },
   {
     name: 'Astro',
@@ -15,7 +14,6 @@ export const viptelStack: StackItem[] = [
     url: 'https://astro.build',
     colorOklch: '0.7 0.2 20',
     version: '7.1',
-    description: 'SSR web framework',
   },
   {
     name: 'Next.js',
@@ -23,7 +21,6 @@ export const viptelStack: StackItem[] = [
     url: 'https://nextjs.org',
     colorOklch: '0.2 0 0',
     version: '16.2',
-    description: 'React framework powering the CMS admin',
   },
   {
     name: 'React',
@@ -31,7 +28,6 @@ export const viptelStack: StackItem[] = [
     url: 'https://react.dev',
     colorOklch: '0.65 0.25 210',
     version: '19',
-    description: 'Interactive UI components',
   },
   {
     name: 'TypeScript',
@@ -39,7 +35,6 @@ export const viptelStack: StackItem[] = [
     url: 'https://www.typescriptlang.org',
     colorOklch: '0.65 0.22 240',
     version: '5.7',
-    description: 'Type-safe JavaScript',
   },
   {
     name: 'Tailwind CSS',
@@ -47,7 +42,6 @@ export const viptelStack: StackItem[] = [
     url: 'https://tailwindcss.com',
     colorOklch: '0.65 0.22 200',
     version: '4',
-    description: 'Utility-first CSS framework',
   },
   {
     name: 'PostgreSQL',
@@ -55,7 +49,6 @@ export const viptelStack: StackItem[] = [
     url: 'https://www.postgresql.org',
     colorOklch: '0.65 0.22 220',
     version: '16',
-    description: 'Open-source relational database',
   },
   {
     name: 'Docker',
@@ -63,6 +56,5 @@ export const viptelStack: StackItem[] = [
     url: 'https://www.docker.com',
     colorOklch: '0.65 0.22 210',
     version: '',
-    description: 'Container platform',
   },
 ];

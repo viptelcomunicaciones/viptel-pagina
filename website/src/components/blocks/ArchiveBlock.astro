@@ -14,7 +14,7 @@ let posts: any[] = []
 
 if (block.populateBy === 'selection' && block.selectedDocs?.length) {
   const all = await getAllPosts(locale)
-  posts = all.filter((p) => block.selectedDocs!.includes(p.id))
+  posts = all.filter((p) => (block.selectedDocs as any[]).some((d: any) => d === p.id || (typeof d === "object" && d.id === p.id)))
 } else {
   posts = await getAllPosts(locale)
   if (block.categories?.length) {

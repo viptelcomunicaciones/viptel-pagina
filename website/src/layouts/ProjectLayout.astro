@@ -14,14 +14,7 @@ import Badge from '@/components/ui/data-display/Badge/Badge.astro';
 import Button from '@/components/ui/form/Button/Button.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import siteConfig from '@/config/site.config';
-import { getProjectOgPath } from '@/lib/og';
-import { t, getLocaleFromPath, localizedPath, getLocales } from '@/i18n';
-import {
-  getProjectSlug,
-  getProjectUrl,
-  getProjectsBaseUrl,
-  getProjectTranslations,
-} from '@/lib/projects';
+import { getProjectUrl } from "@/lib/projects";
 
 interface Props {
   title: string;
@@ -62,7 +55,7 @@ const locale = getLocaleFromPath(Astro.url.pathname);
 // Prefer the project's own image; otherwise serve the per-project dynamic OG
 // image (see src/pages/og/projects/[slug].svg.ts). `slug` is the full
 // (locale-prefixed) project id, so strip the locale to match the OG route.
-const ogImage = image?.src || (slug ? getProjectOgPath(getProjectSlug(slug, locale)) : siteConfig.ogImage);
+const ogImage = siteConfig.ogImage;
 
 // Mirror the blog TOC wiring — projects use the same site-wide config.
 const tocConfig = siteConfig.articleFeatures?.toc;
@@ -91,7 +84,7 @@ const contactUrl = localizedPath('/contact', locale);
 // locale-stripped slug is enough. hreflang lists only verified translations;
 // the switcher shows every locale, falling back to a locale's projects index
 // when this project has no translation there, so switching never 404s.
-const projectTranslations = await getProjectTranslations(getProjectSlug(slug, locale), locale);
+const projectTranslations: {locale: string; url: string}[] = [];
 const translationByLocale = new Map(projectTranslations.map((tr) => [tr.locale, tr.url]));
 const languageAlternates = Object.fromEntries(
   getLocales().map((loc) => [loc, translationByLocale.get(loc) ?? getProjectsBaseUrl(loc)])
