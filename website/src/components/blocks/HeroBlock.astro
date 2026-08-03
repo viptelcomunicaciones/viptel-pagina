@@ -1,6 +1,7 @@
 ---
 import { Hero } from '@/components/hero'
 import Button from '@/components/ui/form/Button/Button.astro'
+import { resolveMediaUrl } from '@/lib/payload'
 import type { PageHero } from '@/lib/payload-types'
 
 interface Props {
@@ -17,7 +18,7 @@ const { hero } = Astro.props
     {hero.description && <p slot="description">{hero.description}</p>}
     {hero.image?.url && (
       <img
-        src={hero.image.url}
+        src={resolveMediaUrl(hero.image.url)}
         alt={hero.image.alt || hero.title || ''}
         width={hero.image.width || 1200}
         height={hero.image.height || 800}

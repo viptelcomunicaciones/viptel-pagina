@@ -229,4 +229,10 @@ export async function getRedirect(from: string): Promise<Redirect | null> {
   }
 }
 
+export function resolveMediaUrl(url?: string | null): string {
+  if (!url) return ''
+  if (url.startsWith('http')) return url
+  return `${API_URL}${url}`
+}
+
 export type { DocsResponse, Page, Post, Project, Service }

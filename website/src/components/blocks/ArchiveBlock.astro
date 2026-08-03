@@ -1,6 +1,6 @@
 ---
 import type { ArchiveBlock as ArchiveBlockType } from '@/lib/payload-types'
-import { getAllPosts } from '@/lib/payload'
+import { getAllPosts, resolveMediaUrl } from '@/lib/payload'
 import RichText from './RichText.astro'
 
 interface Props {
@@ -40,7 +40,7 @@ if (block.populateBy === 'selection' && block.selectedDocs?.length) {
           class="group bg-background rounded-xl border border-border overflow-hidden hover:border-brand-500/40 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
         >
           {post.coverImage?.url && (
-            <img src={post.coverImage.url} alt={post.coverImage.alt || post.title} class="w-full aspect-video object-cover" />
+            <img src={resolveMediaUrl(post.coverImage.url)} alt={post.coverImage.alt || post.title} class="w-full aspect-video object-cover" />
           )}
           <div class="p-5">
             <h3 class="font-display font-bold text-foreground group-hover:text-brand-500 transition-colors">{post.title}</h3>
