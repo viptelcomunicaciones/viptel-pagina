@@ -39,8 +39,8 @@ if (block.populateBy === 'selection' && block.selectedDocs?.length) {
           href={`/${locale === 'es' ? '' : locale + '/'}blog/${post.slug}`}
           class="group bg-background rounded-xl border border-border overflow-hidden hover:border-brand-500/40 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
         >
-          {post.coverImage?.url && (
-            <img src={resolveMediaUrl(post.coverImage.url)} alt={post.coverImage.alt || post.title} class="w-full aspect-video object-cover" />
+          {post.heroImage?.url && (
+            <img src={resolveMediaUrl(post.heroImage.url)} alt={post.heroImage.alt || post.title} class="w-full aspect-video object-cover" />
           )}
           <div class="p-5">
             <h3 class="font-display font-bold text-foreground group-hover:text-brand-500 transition-colors">{post.title}</h3>

@@ -33,9 +33,9 @@ const posts = await getAllPosts(locale)
               data-reveal
               data-reveal-delay={(i % 3) || undefined}
             >
-              {post.coverImage?.url && (
+              {post.heroImage?.url && (
                 <div class="aspect-video overflow-hidden">
-                  <img src={resolveMediaUrl(post.coverImage.url)} alt={post.coverImage.alt || post.title} class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                  <img src={resolveMediaUrl(post.heroImage.url)} alt={post.heroImage.alt || post.title} class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                 </div>
               )}
               <div class="p-6 flex flex-col flex-1">

@@ -19,6 +19,7 @@ import { Hero } from '@/components/hero';
 import siteConfig from '@/config/site.config';
 import { resolveSocialLinks } from '@/lib/utils';
 import { t, defaultLocale } from '@/i18n';
+import { resolveMediaUrl } from '@/lib/payload';
 import {
   BLOG_POSTS_PER_PAGE,
   BLOG_TAG_CLOUD_LIMIT,
@@ -78,6 +79,7 @@ const topTags = collectTopTags(posts, BLOG_TAG_CLOUD_LIMIT);
                 publishedAt={new Date(post.publishedAt)}
                 tags={(post.tags ?? []).map(t => t.tag)}
                 author={post.populatedAuthors?.[0]?.name || 'Viptel'}
+                imageUrl={post.heroImage?.url ? resolveMediaUrl(post.heroImage.url) : undefined}
                 revealDelay={index % 2}
                 eager={index === 0}
               />
@@ -114,6 +116,7 @@ const topTags = collectTopTags(posts, BLOG_TAG_CLOUD_LIMIT);
                 publishedAt={new Date(post.publishedAt)}
                 tags={(post.tags ?? []).map(t => t.tag)}
                 author={post.populatedAuthors?.[0]?.name || 'Viptel'}
+                imageUrl={post.heroImage?.url ? resolveMediaUrl(post.heroImage.url) : undefined}
                 revealDelay={index % 3}
                 eager={0 === 0 && index === 0}
               />

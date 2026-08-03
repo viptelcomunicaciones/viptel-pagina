@@ -26,7 +26,7 @@ import siteConfig from '@/config/site.config';
 import { getPostUrl, getPublishedPosts } from '@/lib/blog';
 import { getProjectUrl, getVisibleProjects } from '@/lib/projects';
 import { t, tData, defaultLocale, localizedPath } from '@/i18n';
-import { getPageBySlug } from '@/lib/payload';
+import { getPageBySlug, resolveMediaUrl } from '@/lib/payload';
 
 interface Props {
   /** Locale whose copy and content this page renders. Defaults to the site default. */
@@ -472,6 +472,7 @@ const basedInDisplay = `${city ?? 'Your City'}${country ? `, ${country}` : ''}`;
             publishedAt={new Date(post.publishedAt)}
             tags={(post.tags ?? []).map(t => t.tag)}
             author={post.populatedAuthors?.[0]?.name || 'Viptel'}
+            imageUrl={post.heroImage?.url ? resolveMediaUrl(post.heroImage.url) : undefined}
             revealDelay={index}
             class={index === 3 ? 'hidden sm:block lg:hidden' : undefined}
           />

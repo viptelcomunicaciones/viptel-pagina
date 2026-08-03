@@ -22,8 +22,8 @@ if (!post) {
 <PageLayout title={post.meta?.title || post.title} description={post.meta?.description || post.excerpt || post.title}>
   <article class="py-[var(--space-section-md)]">
     <div class="mx-auto max-w-3xl px-6">
-      {post.coverImage?.url && (
-        <img src={resolveMediaUrl(post.coverImage.url)} alt={post.coverImage.alt || post.title} class="w-full aspect-video object-cover rounded-xl mb-8 shadow-lg" />
+      {post.heroImage?.url && (
+        <img src={resolveMediaUrl(post.heroImage.url)} alt={post.heroImage.alt || post.title} class="w-full aspect-video object-cover rounded-xl mb-8 shadow-lg" />
       )}
       <h1 class="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">{post.title}</h1>
       <div class="flex flex-wrap items-center gap-4 text-sm text-foreground-muted mb-8">
