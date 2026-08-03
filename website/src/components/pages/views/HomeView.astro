@@ -306,6 +306,16 @@ const basedInDisplay = `${city ?? 'Your City'}${country ? `, ${country}` : ''}`;
             data-reveal-delay={i || undefined}
           >
             <div class="flex flex-1 flex-col p-6">
+              {project.coverImage?.url && (
+                <div class="mb-4 overflow-hidden rounded-lg">
+                  <img
+                    src={resolveMediaUrl(project.coverImage.url)}
+                    alt={project.title}
+                    class="w-full aspect-video object-cover transition-transform duration-300 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                </div>
+              )}
               <div class="mb-3 flex items-start justify-between gap-4">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500/20 to-brand-500/5 flex items-center justify-center text-brand-500 shrink-0">
                   <Icon name="layers" size="sm" />
