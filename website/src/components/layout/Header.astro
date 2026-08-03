@@ -23,7 +23,8 @@
  */
 import type { HTMLAttributes } from 'astro/types';
 import { cn } from '@/lib/cn';
-import { getNavItems, getLogoHref } from '@/config/nav.config';
+import { getLogoHref, isExternalOrAnchorHref, resolveNavItem, navItems as navConfigItems } from '@/config/nav.config';
+import { localizedPath } from '@/i18n';
 import { headerVariants, headerInnerVariants } from './header.variants';
 import Button from '@/components/ui/form/Button/Button.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
@@ -39,6 +40,9 @@ import { isEnabled as i18nIsEnabled, getLocaleFromPath, stripLocaleFromPath, t }
 export interface NavItem {
   label: string;
   href: string;
+  order?: number;
+  children?: NavItem[];
+  external?: boolean;
 }
 
 export interface HeaderAction {
@@ -136,10 +140,16 @@ const isLandingPage = currentPath === '/';
 // Localized for the active locale: hrefs are locale-prefixed and labels
 // translated (see nav.config.ts). Explicit `nav`/`extraNav` props are used
 // as-is so callers keep full control.
-const defaultNav = getNavItems(locale).map((item) => ({
-  label: item.label,
-  href: item.href,
-}));
+const defaultNav = navConfigItems.map((item) => {
+  const resolved = resolveNavItem(item, locale);
+  return {
+    label: resolved.label,
+    href: resolved.href,
+    external: resolved.external,
+    order: item.order,
+    children: item.children,
+  };
+});
 const navItems: NavItem[] = nav || [...extraNav, ...defaultNav];
 const logoHref = getLogoHref(locale);
 const ctaHref = cta.href?.startsWith('#') && !isLandingPage ? `/${cta.href}` : cta.href;
@@ -259,26 +269,86 @@ const buttonId = `${menuId}-button`;
           </nav>
         ) : (
           <nav class="hidden items-center gap-1 lg:flex" aria-label={t('nav.mainNav', locale)}>
-            {navItems.map(({ label, href }) => (
-              <a
-                href={href.startsWith('#') && !isLandingPage ? `/${href}` : href}
-                class={cn(
-                  'nav-link relative rounded-md px-3 py-2 text-sm',
-                  'transition-all duration-(--transition-fast)',
-                  isFloating && 'hdr-invert-text',
-                  isFloating
-                    ? (isActive(href)
-                        ? 'hdr-nav-active font-semibold'
-                        : 'font-medium')
-                    : (isActive(href)
-                        ? 'nav-link-active font-semibold text-foreground bg-secondary'
-                        : 'nav-link-inactive font-medium text-foreground-muted hover:text-foreground hover:bg-secondary/70')
-                )}
-                aria-current={isActive(href) ? 'page' : undefined}
-              >
-                {label}
-              </a>
-            ))}
+            {navItems.map((item) => {
+              const { label, href } = item
+              if (item.children && item.children.length > 0) {
+                return (
+                  <div class="relative group">
+                    <a
+                      href={href.startsWith('#') && !isLandingPage ? `/${href}` : href}
+                      class={cn(
+                        'nav-link inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm',
+                        'transition-all duration-(--transition-fast)',
+                        isFloating && 'hdr-invert-text',
+                        isFloating
+                          ? (isActive(href)
+                              ? 'hdr-nav-active font-semibold'
+                              : 'font-medium')
+                          : (isActive(href)
+                              ? 'nav-link-active font-semibold text-foreground bg-secondary'
+                              : 'nav-link-inactive font-medium text-foreground-muted hover:text-foreground hover:bg-secondary/70')
+                      )}
+                      aria-current={isActive(href) ? 'page' : undefined}
+                      aria-haspopup="true"
+                      aria-expanded="false"
+                    >
+                      {label}
+                      <svg class="h-3 w-3 opacity-60" viewBox="0 0 12 12" fill="currentColor"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                    </a>
+                    <div class="absolute left-0 top-full pt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50">
+                      <div class="rounded-xl border border-border bg-background p-1.5 shadow-lg min-w-[180px]">
+                        {item.children.sort((a, b) => a.order - b.order).map((child) => {
+                          const childHref = child.external || isExternalOrAnchorHref(child.href)
+                            ? child.href
+                            : localizedPath(child.href, locale)
+                          return (
+                            <a
+                              href={childHref}
+                              target={child.external ? '_blank' : undefined}
+                              rel={child.external ? 'noopener noreferrer' : undefined}
+                              class={cn(
+                                'block rounded-lg px-3 py-2 text-sm transition-colors',
+                                isActive(child.href)
+                                  ? 'bg-secondary font-medium text-foreground'
+                                  : 'text-foreground-muted hover:bg-secondary hover:text-foreground'
+                              )}
+                            >
+                              {child.label}
+                            </a>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )
+              }
+
+              return (
+                <a
+                  href={item.external || isExternalOrAnchorHref(href) ? href : (href.startsWith('#') && !isLandingPage ? `/${href}` : href)}
+                  target={item.external ? '_blank' : undefined}
+                  rel={item.external ? 'noopener noreferrer' : undefined}
+                  class={cn(
+                    'nav-link relative inline-flex items-center gap-1 rounded-md px-3 py-2 text-sm',
+                    'transition-all duration-(--transition-fast)',
+                    isFloating && 'hdr-invert-text',
+                    isFloating
+                      ? (isActive(href)
+                          ? 'hdr-nav-active font-semibold'
+                          : 'font-medium')
+                      : (isActive(href)
+                          ? 'nav-link-active font-semibold text-foreground bg-secondary'
+                          : 'nav-link-inactive font-medium text-foreground-muted hover:text-foreground hover:bg-secondary/70')
+                  )}
+                  aria-current={isActive(href) ? 'page' : undefined}
+                >
+                  {label}
+                  {item.external && (
+                    <svg class="h-3 w-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
+                  )}
+                </a>
+              )
+            })}
           </nav>
         ))
     }
@@ -476,9 +546,43 @@ const buttonId = `${menuId}-button`;
             <section class="mobile-menu-section">
               <p class="mobile-menu-label">{t('nav.sectionNavigate', locale)}</p>
               <ul class="space-y-0.5">
-                {navItems.map(({ label, href }, idx) => {
+                {navItems.map((item, idx) => {
+                  const { label, href } = item
                   const active = isActive(href);
-                  const resolvedHref = href.startsWith('#') && !isLandingPage ? `/${href}` : href;
+                  const resolvedHref = item.external || isExternalOrAnchorHref(href) ? href : (href.startsWith('#') && !isLandingPage ? `/${href}` : href);
+                  if (item.children && item.children.length > 0) {
+                    return (
+                      <li>
+                        <details class="group">
+                          <summary class={cn(
+                            'mobile-menu-row mobile-menu-stagger flex cursor-pointer items-center gap-3 rounded-xl px-3 py-3 text-base transition-colors list-none marker:hidden',
+                            active ? 'mobile-menu-row-active' : 'mobile-menu-row-inactive'
+                          )}
+                            style={`--stagger-index: ${idx}`}
+                          >
+                            <span class="mobile-menu-tile">
+                              <Icon name={getNavIcon(href)} size="sm" />
+                            </span>
+                            <span class="flex-1">{label}</span>
+                            <svg class="h-4 w-4 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                          </summary>
+                          <div class="ml-10 mt-1 flex flex-col gap-0.5">
+                            {item.children.sort((a, b) => a.order - b.order).map((child) => {
+                              const childHref = child.external || isExternalOrAnchorHref(child.href) ? child.href : child.href
+                              return (
+                                <a href={childHref} target={child.external ? '_blank' : undefined} rel={child.external ? 'noopener noreferrer' : undefined}
+                                  class="mobile-menu-row rounded-lg px-3 py-2 text-sm text-foreground-muted transition-colors hover:text-foreground hover:bg-secondary/50 flex items-center gap-2"
+                                >
+                                  {child.label}
+                                  {child.external && <Icon name="arrow-up-right" size="sm" />}
+                                </a>
+                              )
+                            })}
+                          </div>
+                        </details>
+                      </li>
+                    )
+                  }
                   return (
                     <li>
                       <a

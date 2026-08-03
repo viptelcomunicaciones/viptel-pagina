@@ -19,7 +19,40 @@
       "projects": "Projects",
       "blog": "Blog",
       "about": "About us",
-      "contact": "Contact"
+      "contact": "Contact",
+      "shop": "Shop"
+    }
+  },
+  "services": {
+    "breadcrumb": {
+      "home": "Home",
+      "services": "Services"
+    },
+    "overview": {
+      "hero": {
+        "badge": "Services",
+        "title": "Enterprise solutions",
+        "description": "Telecommunications, web development, digital marketing and custom software for your business."
+      },
+      "cta": {
+        "title": "Ready to get started?",
+        "description": "Tell us about your project and we'll help you find the ideal solution.",
+        "button": "Contact us"
+      }
+    },
+    "detail": {
+      "features": "Features",
+      "pricing": "Plans and pricing",
+      "faq": "Frequently asked questions",
+      "gallery": "Gallery",
+      "cta": "Request a quote",
+      "subServices": "Included services"
+    },
+    "pricing": {
+      "currency": "USD",
+      "period": "/month",
+      "highlighted": "Recommended",
+      "cta": "Get started"
     }
   },
   "common": {

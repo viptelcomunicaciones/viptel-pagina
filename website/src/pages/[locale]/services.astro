@@ -1,15 +1,18 @@
 ---
-import ServicesView from '@/components/pages/views/ServicesView.astro';
-import { getSecondaryLocales } from '@/i18n';
+import ServicesOverviewView from '@/components/pages/views/ServicesOverviewView.astro'
+import { getServiceCategories, getServicesByParent } from '@/lib/payload'
+import { getSecondaryLocales } from '@/i18n'
 
-// Locale-prefixed Services page (`/<locale>/services`). One page per non-default
-// locale; emits nothing when i18n is off. Untranslated copy falls back to the
-// default locale so the LanguageSwitcher never lands on a 404.
 export function getStaticPaths() {
-  return getSecondaryLocales().map((locale) => ({ params: { locale } }));
+  return getSecondaryLocales().map((locale) => ({ params: { locale } }))
 }
 
-const { locale } = Astro.params;
+const { locale } = Astro.params
+const categories = await getServiceCategories(locale)
+const childrenMap: Record<string, any[]> = {}
+for (const cat of categories) {
+  childrenMap[cat.id] = await getServicesByParent(cat.id, locale)
+}
 ---
 
-<ServicesView locale={locale} />
+<ServicesOverviewView categories={categories} childrenMap={childrenMap} hrefPrefix={`/${locale}/services`} locale={locale} />

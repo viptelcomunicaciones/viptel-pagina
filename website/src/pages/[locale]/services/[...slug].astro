@@ -1,0 +1,39 @@
+---
+import ServiceView from '@/components/pages/views/ServiceView.astro'
+import { getServiceBySlug, getServicesByParent } from '@/lib/payload'
+import { getSecondaryLocales } from '@/i18n'
+
+export const prerender = false
+
+export function getStaticPaths() {
+  return getSecondaryLocales().map((locale) => ({ params: { locale } }))
+}
+
+const { slug, locale } = Astro.params as { slug: string; locale: string }
+if (!slug) return Astro.redirect('/404')
+
+const service = await getServiceBySlug(slug, locale)
+if (!service) return Astro.redirect('/404')
+
+let parentService = null
+let childrenServices: any[] = []
+
+if (service.parent) {
+  const parentSlug = typeof service.parent === 'object' && service.parent !== null
+    ? (service.parent as any).slug
+    : null
+  if (parentSlug) {
+    parentService = await getServiceBySlug(parentSlug, locale)
+  }
+} else {
+  childrenServices = await getServicesByParent(service.id, locale)
+}
+---
+
+<ServiceView
+  service={service}
+  parentService={parentService}
+  childrenServices={childrenServices}
+  hrefPrefix={`/${locale}/services`}
+  locale={locale}
+/>

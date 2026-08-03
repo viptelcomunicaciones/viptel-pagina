@@ -1,0 +1,37 @@
+---
+import ServiceView from '@/components/pages/views/ServiceView.astro'
+import { getServiceBySlug, getServicesByParent } from '@/lib/payload'
+import { defaultLocale } from '@/i18n'
+
+export const prerender = false
+
+const { slug } = Astro.params
+if (!slug) return Astro.redirect('/404')
+
+const locale = defaultLocale
+const service = await getServiceBySlug(slug, locale)
+if (!service) return Astro.redirect('/404')
+
+let parentService = null
+let childrenServices: any[] = []
+
+// If this service has a parent, it's a sub-service
+if (service.parent) {
+  const parentSlug = typeof service.parent === 'object' && service.parent !== null
+    ? (service.parent as any).slug
+    : null
+  if (parentSlug) {
+    parentService = await getServiceBySlug(parentSlug, locale)
+  }
+} else {
+  // It's a category — fetch its children
+  childrenServices = await getServicesByParent(service.id, locale)
+}
+---
+
+<ServiceView
+  service={service}
+  parentService={parentService}
+  childrenServices={childrenServices}
+  locale={locale}
+/>

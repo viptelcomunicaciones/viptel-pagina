@@ -19,7 +19,40 @@
       "projects": "Portafolio",
       "blog": "Blog",
       "about": "Nosotros",
-      "contact": "Contacto"
+      "contact": "Contacto",
+      "shop": "Tienda"
+    }
+  },
+  "services": {
+    "breadcrumb": {
+      "home": "Inicio",
+      "services": "Servicios"
+    },
+    "overview": {
+      "hero": {
+        "badge": "Servicios",
+        "title": "Soluciones empresariales",
+        "description": "Telecomunicaciones, desarrollo web, marketing digital y software a la medida para tu empresa."
+      },
+      "cta": {
+        "title": "¿Listo para empezar?",
+        "description": "Cuéntanos tu proyecto y te ayudamos a encontrar la solución ideal.",
+        "button": "Contáctanos"
+      }
+    },
+    "detail": {
+      "features": "Características",
+      "pricing": "Planes y precios",
+      "faq": "Preguntas frecuentes",
+      "gallery": "Galería",
+      "cta": "Solicitar cotización",
+      "subServices": "Servicios incluidos"
+    },
+    "pricing": {
+      "currency": "COP",
+      "period": "/mes",
+      "highlighted": "Recomendado",
+      "cta": "Contratar"
     }
   },
   "common": {

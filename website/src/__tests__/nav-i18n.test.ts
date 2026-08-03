@@ -28,6 +28,7 @@ describe('nav config — locale resolution (es default, en secondary)', () => {
       '/en/blog',
       '/en/about',
       '/en/contact',
+      'https://tienda.viptelcomunicaciones.com',
     ]);
   });
 

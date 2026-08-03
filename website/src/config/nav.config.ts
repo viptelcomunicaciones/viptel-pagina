@@ -47,6 +47,7 @@ export interface NavItem {
   external?: boolean;
   /** i18n dictionary key for the label (e.g. `'nav.items.blog'`). Falls back to `label`. */
   labelKey?: string;
+  children?: NavItem[];
   /** Per-locale label/path overrides, keyed by locale code. */
   locales?: Record<string, NavItemOverride>;
 }
@@ -70,11 +71,21 @@ export interface ResolvedNavItem {
 
 export const navItems: NavItem[] = [
   { label: 'Inicio', href: '/', order: 0, labelKey: 'nav.items.home' },
-  { label: 'Servicios', href: '/services', order: 1, labelKey: 'nav.items.services' },
+  {
+    label: 'Servicios', href: '/services', order: 1, labelKey: 'nav.items.services',
+    children: [
+      { label: 'Viptel-PBX', href: '/services/viptel-pbx', order: 0 },
+      { label: 'Viptel-VoIP', href: '/services/viptel-voip', order: 1 },
+      { label: 'Viptel-Web', href: '/services/viptel-web', order: 2 },
+      { label: 'Viptel-Marketing', href: '/services/viptel-marketing', order: 3 },
+      { label: 'Viptel-Software', href: '/services/viptel-software', order: 4 },
+    ],
+  },
   { label: 'Portafolio', href: '/projects', order: 2, labelKey: 'nav.items.projects' },
   { label: 'Blog', href: '/blog', order: 3, labelKey: 'nav.items.blog' },
   { label: 'Nosotros', href: '/about', order: 4, labelKey: 'nav.items.about' },
   { label: 'Contacto', href: '/contact', order: 5, labelKey: 'nav.items.contact' },
+  { label: 'Tienda', href: 'https://tienda.viptelcomunicaciones.com', external: true, order: 6, labelKey: 'nav.items.shop' },
 ];
 
 export const footerNavItems: NavItem[] = [
@@ -84,6 +95,7 @@ export const footerNavItems: NavItem[] = [
   { label: 'Blog', href: '/blog', order: 3, labelKey: 'nav.items.blog' },
   { label: 'Nosotros', href: '/about', order: 4, labelKey: 'nav.items.about' },
   { label: 'Contacto', href: '/contact', order: 5, labelKey: 'nav.items.contact' },
+  { label: 'Tienda', href: 'https://tienda.viptelcomunicaciones.com', external: true, order: 6, labelKey: 'nav.items.shop' },
 ];
 
 export const legalLinks: LegalLink[] = [];
@@ -92,7 +104,7 @@ export const legalLinks: LegalLink[] = [];
  * Hrefs that must never be locale-prefixed: absolute/protocol-relative URLs,
  * `mailto:`/`tel:` links, and in-page `#anchor`s.
  */
-function isExternalOrAnchorHref(href: string): boolean {
+export function isExternalOrAnchorHref(href: string): boolean {
   return (
     /^(https?:)?\/\//.test(href) ||
     href.startsWith('mailto:') ||
