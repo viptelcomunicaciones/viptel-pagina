@@ -23,6 +23,9 @@ const dirname = path.dirname(filename)
 
 export default buildConfig({
   admin: {
+    components: {
+      afterNavLinks: ['@/components/LogoutButton#LogoutButton'],
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },

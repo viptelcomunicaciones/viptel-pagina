@@ -7,3 +7,5 @@ Task 5: complete (commit 1a8e983, trivial file copy)
 Task 6: complete (commit 5263557, build passes)
 Tasks 7-14: complete (commit 7159f9f, 38/38 tests, build passes)
 Tasks 15-19: complete (commit 5e28eaa, build passes, 5/5 + 38/38 tests, services seeded)
+Task 20-fix: commit edcbf4e — 2 bugs fixed: (1) slug extraction for sub-service URLs, (2) Promise.all parallelization for overview
+All routes verified 200: /services, /services/viptel-pbx, /services/viptel-pbx/basica, /en/services, /en/services/viptel-pbx
