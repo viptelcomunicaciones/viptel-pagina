@@ -1,0 +1,17 @@
+5e28eaa feat: services overview/detail views, routes, dropdown nav, and Tienda link
+---STAT---
+ website/src/__tests__/nav-i18n.test.ts             |   1 +
+ website/src/components/layout/Header.astro         | 158 +++++++++++++++++----
+ .../src/components/pages/views/ServiceView.astro   |  27 ++++
+ .../pages/views/ServicesOverviewView.astro         |  80 +++++++++++
+ .../{ServicesView.astro => ServicesView.astro.bak} |   0
+ website/src/config/nav.config.ts                   |  16 ++-
+ website/src/i18n/en.json                           |  35 ++++-
+ website/src/i18n/es.json                           |  35 ++++-
+ website/src/pages/[locale]/services.astro          |  19 +--
+ website/src/pages/[locale]/services.astro.bak      |  15 ++
+ .../src/pages/[locale]/services/[...slug].astro    |  39 +++++
+ website/src/pages/services.astro                   |  15 +-
+ website/src/pages/services.astro.bak               |   9 ++
+ website/src/pages/services/[...slug].astro         |  37 +++++
+ 14 files changed, 442 insertions(+), 44 deletions(-)

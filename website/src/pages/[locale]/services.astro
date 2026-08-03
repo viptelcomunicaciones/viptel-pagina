@@ -10,9 +10,8 @@ export function getStaticPaths() {
 const { locale } = Astro.params
 const categories = await getServiceCategories(locale)
 const childrenMap: Record<string, any[]> = {}
-for (const cat of categories) {
-  childrenMap[cat.id] = await getServicesByParent(cat.id, locale)
-}
+const childResults = await Promise.all(categories.map((cat) => getServicesByParent(cat.id, locale)))
+categories.forEach((cat, i) => { childrenMap[cat.id] = childResults[i] })
 ---
 
 <ServicesOverviewView categories={categories} childrenMap={childrenMap} hrefPrefix={`/${locale}/services`} locale={locale} />

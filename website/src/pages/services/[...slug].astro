@@ -9,7 +9,8 @@ const { slug } = Astro.params
 if (!slug) return Astro.redirect('/404')
 
 const locale = defaultLocale
-const service = await getServiceBySlug(slug, locale)
+const querySlug = slug.includes('/') ? slug.split('/').pop()! : slug
+const service = await getServiceBySlug(querySlug, locale)
 if (!service) return Astro.redirect('/404')
 
 let parentService = null

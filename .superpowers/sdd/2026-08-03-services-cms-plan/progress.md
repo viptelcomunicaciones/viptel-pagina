@@ -5,3 +5,5 @@ Task 3: complete (commits 5ccafb5..0561f6a, review clean; minor (deferred): Coll
 Task 4: complete (commits 0561f6a..8602206, review clean)
 Task 5: complete (commit 1a8e983, trivial file copy)
 Task 6: complete (commit 5263557, build passes)
+Tasks 7-14: complete (commit 7159f9f, 38/38 tests, build passes)
+Tasks 15-19: complete (commit 5e28eaa, build passes, 5/5 + 38/38 tests, services seeded)

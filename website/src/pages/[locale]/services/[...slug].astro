@@ -12,7 +12,8 @@ export function getStaticPaths() {
 const { slug, locale } = Astro.params as { slug: string; locale: string }
 if (!slug) return Astro.redirect('/404')
 
-const service = await getServiceBySlug(slug, locale)
+const querySlug = slug.includes('/') ? slug.split('/').pop()! : slug
+const service = await getServiceBySlug(querySlug, locale)
 if (!service) return Astro.redirect('/404')
 
 let parentService = null
