@@ -1,4 +1,4 @@
-import type { Page, Post, Project, Redirect } from './payload-types'
+import type { Page, Post, Project, Redirect, Service } from './payload-types'
 import { defaultLocale } from '@/i18n'
 
 const API_URL = process.env.PAYLOAD_URL || 'http://localhost:3000'
@@ -171,6 +171,51 @@ export async function getProjectsByTag(
   )
 }
 
+// ── Services ───────────────────────────────────────────
+
+export async function getServiceCategories(
+  locale = defaultLocale,
+): Promise<Service[]> {
+  const data = await fetchAPI<DocsResponse<Service>>(
+    `services?where[parent][exists]=false&where[_status][equals]=published`,
+    { locale },
+  )
+  return data.docs ?? []
+}
+
+export async function getServicesByParent(
+  parentId: string,
+  locale = defaultLocale,
+): Promise<Service[]> {
+  const data = await fetchAPI<DocsResponse<Service>>(
+    `services?where[parent][equals]=${encodeURIComponent(parentId)}&where[_status][equals]=published`,
+    { locale },
+  )
+  return data.docs ?? []
+}
+
+export async function getServiceBySlug(
+  slug: string,
+  locale = defaultLocale,
+  draft = false,
+): Promise<Service | null> {
+  const data = await fetchAPI<DocsResponse<Service>>(
+    `services?where[slug][equals]=${encodeURIComponent(slug)}`,
+    { locale, draft },
+  )
+  return data.docs?.[0] ?? null
+}
+
+export async function getAllServices(
+  locale = defaultLocale,
+): Promise<Service[]> {
+  const data = await fetchAPI<DocsResponse<Service>>(
+    `services?limit=100&where[_status][equals]=published`,
+    { locale },
+  )
+  return data.docs ?? []
+}
+
 // ── Redirects ──────────────────────────────────────────
 
 export async function getRedirect(from: string): Promise<Redirect | null> {
@@ -184,4 +229,4 @@ export async function getRedirect(from: string): Promise<Redirect | null> {
   }
 }
 
-export type { DocsResponse, Page, Post, Project }
+export type { DocsResponse, Page, Post, Project, Service }
