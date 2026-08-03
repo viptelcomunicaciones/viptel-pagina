@@ -20,7 +20,7 @@ import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import BlogCard from '@/components/blog/BlogCard.astro';
 import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
 import StackMarquee from '@/components/landing/StackMarquee.astro';
-import { getCollection } from 'astro:content';
+import { viptelStack } from '@/data/stack';
 import siteConfig from '@/config/site.config';
 import { getPostUrl, getPublishedPosts } from '@/lib/blog';
 import { getProjectUrl, getVisibleProjects } from '@/lib/projects';
@@ -65,28 +65,14 @@ let postItems = await getPublishedPosts(locale);
 if (postItems.length === 0 && locale !== defaultLocale) {
   postItems = await getPublishedPosts(defaultLocale);
 }
-const posts = [...postItems]
-  .sort((a, b) => {
-    if (a.data.featured !== b.data.featured) return a.data.featured ? -1 : 1;
-    return b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf();
-  })
-  .slice(0, 4);
+const posts = [...postItems].slice(0, 4);
 
 // Hero marquee — a focused subset of the tech stack, in this order, pulled from
 // the same `stack` collection so icons and links stay single-sourced. Seven logos
 // are wide enough to fill the constrained hero width and loop seamlessly on their
 // own; the Tech-stack section further down still shows the full stack.
 const heroStackOrder = ['Astro', 'Tailwind CSS', 'TypeScript', 'React', 'GitHub', 'Vercel', 'Claude'];
-const heroStackItems = (await getCollection('stack'))
-  .filter((e) => heroStackOrder.includes(e.data.name))
-  .sort((a, b) => heroStackOrder.indexOf(a.data.name) - heroStackOrder.indexOf(b.data.name))
-  .map((e) => ({
-    name: e.data.name,
-    icon: e.data.icon,
-    url: e.data.url,
-    version: e.data.version,
-    colorOklch: e.data.colorOklch,
-  }));
+const heroStackItems = viptelStack.filter((e: StackItem) => heroStackOrder.includes(e.name)).sort((a, b) => heroStackOrder.indexOf(a.name) - heroStackOrder.indexOf(b.name));
 
 const hero = tData<{
   badge: string;
@@ -316,7 +302,7 @@ const basedInDisplay = `${city ?? 'Your City'}${country ? `, ${country}` : ''}`;
             variant="elevated"
             hover
             padding="none"
-            href={project.data.placeholder ? undefined : getProjectUrl(project.id, project.data.locale)}
+            href={getProjectUrl(project, locale)}
             class="group flex flex-col"
             data-reveal
             data-reveal-delay={i || undefined}
@@ -329,15 +315,15 @@ const basedInDisplay = `${city ?? 'Your City'}${country ? `, ${country}` : ''}`;
                 <Icon name="arrow-up-right" size="sm" class="text-foreground-muted group-hover:text-brand-500 transition-colors shrink-0 ml-auto" />
               </div>
               <div class="mb-2 flex items-baseline gap-2">
-                <h3 class="font-display text-lg font-bold text-foreground">{project.data.title}</h3>
-                {project.data.year && (
-                  <span class="text-xs text-foreground-muted">{project.data.year}</span>
+                <h3 class="font-display text-lg font-bold text-foreground">{project.title}</h3>
+                {project.year && (
+                  <span class="text-xs text-foreground-muted">{project.year}</span>
                 )}
               </div>
-              <p class="text-sm text-foreground-muted leading-relaxed mb-4 flex-1">{project.data.description}</p>
-              {project.data.tags && project.data.tags.length > 0 && (
+              <p class="text-sm text-foreground-muted leading-relaxed mb-4 flex-1">{project.description || ''}</p>
+              {(project.tags ?? []).length > 0 && (
                 <div class="flex flex-wrap gap-1.5">
-                  {project.data.tags.map((tag) => (
+                  {(project.tags ?? []).map((tag) => (
                     <span class="inline-flex items-center rounded-full bg-transparent px-2.5 py-0.5 text-xs font-medium text-brand-700 dark:text-brand-400 ring-1 ring-inset ring-brand-500/40 transition-colors group-hover:ring-brand-500/80">
                       #{tag}
                     </span>
@@ -482,14 +468,12 @@ const basedInDisplay = `${city ?? 'Your City'}${country ? `, ${country}` : ''}`;
       <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {posts.map((post, index) => (
           <BlogCard
-            title={post.data.title}
-            description={post.data.description}
-            href={getPostUrl(post.id, post.data.locale)}
-            publishedAt={post.data.publishedAt}
-            tags={post.data.tags}
-            author={post.data.author}
-            image={post.data.image}
-            svgSlug={post.data.svgSlug}
+            title={post.title}
+            description={post.excerpt || ''}
+            href={getPostUrl(post, locale)}
+            publishedAt={new Date(post.publishedAt)}
+            tags={(post.tags ?? []).map(t => t.tag)}
+            author={post.populatedAuthors?.[0]?.name || 'Viptel'}
             body={post.body}
             revealDelay={index}
             class={index === 3 ? 'hidden sm:block lg:hidden' : undefined}

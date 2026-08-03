@@ -36,7 +36,8 @@ async function fetchAPI<T = unknown>(
     params.set('depth', '2')
     if (options.draft) params.set('draft', 'true')
 
-    const url = `${API_URL}/api/${endpoint}?${params.toString()}`
+    const separator = endpoint.includes('?') ? '&' : '?'
+    const url = `${API_URL}/api/${endpoint}${separator}${params.toString()}`
     const res = await fetch(url, {
       signal: controller.signal,
       headers: {

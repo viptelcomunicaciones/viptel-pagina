@@ -47,6 +47,10 @@ const iconMap: Record<string, string> = {
   'brand-vercel':     'simple-icons:vercel',
   'brand-mdx':        'simple-icons:mdx',
   'brand-claude':     'simple-icons:claude',
+  'brand-payload':    'simple-icons:payloadcms',
+  'brand-nextjs':     'simple-icons:nextdotjs',
+  'brand-postgresql': 'simple-icons:postgresql',
+  'brand-docker':     'simple-icons:docker',
 };
 
 export function Icon({

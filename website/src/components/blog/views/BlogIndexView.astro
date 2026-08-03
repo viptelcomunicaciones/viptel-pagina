@@ -41,18 +41,14 @@ const posts = await getPublishedPosts(locale);
 
 // Featured posts always appear on page 1; the "All posts" grid paginates
 // the non-featured set so the first impression stays curated.
-const featuredPosts = posts.filter((post) => post.data.featured);
-const nonFeaturedPosts = posts.filter((post) => !post.data.featured);
-// If everything is featured, mirror it into the main grid so the page isn't empty.
-const regularPostsAll = nonFeaturedPosts.length > 0 ? nonFeaturedPosts : posts;
-
+const regularPostsAll = posts;
 const totalPages = Math.max(1, Math.ceil(regularPostsAll.length / BLOG_POSTS_PER_PAGE));
 const regularPosts = regularPostsAll.slice(0, BLOG_POSTS_PER_PAGE);
 
 const topTags = collectTopTags(posts, BLOG_TAG_CLOUD_LIMIT);
 ---
 
-<PageLayout title={t('blog.metaTitle', locale)} description={t('blog.metaDescription', locale)} showScrollProgress eagerReveal footerBackground={featuredPosts.length > 0 ? 'default' : 'secondary'}>
+<PageLayout title={t('blog.metaTitle', locale)} description={t('blog.metaDescription', locale)} showScrollProgress eagerReveal footerBackground='secondary'>
   <Hero layout="centered" size="sm" class="isolate" showHeroHalo>
     <Badge slot="badge" variant="brand" pill>
       <Icon name="book" size="sm" />
@@ -76,14 +72,12 @@ const topTags = collectTopTags(posts, BLOG_TAG_CLOUD_LIMIT);
           <div class="grid gap-6 sm:grid-cols-2">
             {featuredPosts.map((post, index) => (
               <BlogCard
-                title={post.data.title}
-                description={post.data.description}
+                title={post.title}
+                description={post.excerpt || ''}
                 href={getPostUrl(post.id, locale)}
-                publishedAt={post.data.publishedAt}
-                tags={post.data.tags}
-                author={post.data.author}
-                image={post.data.image}
-                svgSlug={post.data.svgSlug}
+                publishedAt={new Date(post.publishedAt)}
+                tags={(post.tags ?? []).map(t => t.tag)}
+                author={post.populatedAuthors?.[0]?.name || 'Viptel'}
                 body={post.body}
                 revealDelay={index % 2}
                 eager={index === 0}
@@ -115,14 +109,12 @@ const topTags = collectTopTags(posts, BLOG_TAG_CLOUD_LIMIT);
           <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {regularPosts.map((post, index) => (
               <BlogCard
-                title={post.data.title}
-                description={post.data.description}
+                title={post.title}
+                description={post.excerpt || ''}
                 href={getPostUrl(post.id, locale)}
-                publishedAt={post.data.publishedAt}
-                tags={post.data.tags}
-                author={post.data.author}
-                image={post.data.image}
-                svgSlug={post.data.svgSlug}
+                publishedAt={new Date(post.publishedAt)}
+                tags={(post.tags ?? []).map(t => t.tag)}
+                author={post.populatedAuthors?.[0]?.name || 'Viptel'}
                 body={post.body}
                 revealDelay={index % 3}
                 eager={featuredPosts.length === 0 && index === 0}
