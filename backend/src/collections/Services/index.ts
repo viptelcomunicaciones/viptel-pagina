@@ -1,4 +1,4 @@
-import type { CollectionConfig, CollectionSlug } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
@@ -55,7 +55,7 @@ export const Services: CollectionConfig = {
     {
       name: 'parent',
       type: 'relationship',
-      relationTo: 'services' as CollectionSlug,
+      relationTo: 'services',
       admin: {
         position: 'sidebar',
         description: 'Dejar vacío si es una categoría. Seleccionar un servicio padre si es un sub-servicio.',

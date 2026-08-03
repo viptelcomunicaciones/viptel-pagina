@@ -1,0 +1,216 @@
+5ccafb5 feat(backend): register Services collection, update SEO plugin and link field
+---STAT---
+ backend/src/collections/Services/index.ts    | 6 +++---
+ backend/src/fields/link.ts                   | 4 ++--
+ backend/src/payload.config.ts                | 3 ++-
+ backend/src/plugins/index.ts                 | 4 ++--
+ backend/src/utilities/generatePreviewPath.ts | 7 ++++---
+ 5 files changed, 13 insertions(+), 11 deletions(-)
+---DIFF---
+diff --git a/backend/src/collections/Services/index.ts b/backend/src/collections/Services/index.ts
+index 4028aa0..17f2721 100644
+--- a/backend/src/collections/Services/index.ts
++++ b/backend/src/collections/Services/index.ts
+@@ -1,27 +1,27 @@
+-import type { CollectionConfig } from 'payload'
++import type { CollectionConfig, CollectionSlug } from 'payload'
+ 
+ import { authenticated } from '../../access/authenticated'
+ import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
+ import { CallToAction } from '../../blocks/CallToAction/config'
+ import { Cards } from '../../blocks/Cards/config'
+ import { Content } from '../../blocks/Content/config'
+ import { FAQ } from '../../blocks/FAQ/config'
+ import { Gallery } from '../../blocks/Gallery/config'
+ import { MediaContent } from '../../blocks/MediaContent/config'
+ import { Pricing } from '../../blocks/Pricing/config'
+ import { seoTab } from '../../fields/seoTab'
+ import { slugField } from 'payload'
+ import { populatePublishedAt } from '../../hooks/populatePublishedAt'
+ import { generatePreviewPath } from '../../utilities/generatePreviewPath'
+ 
+-export const Services: CollectionConfig<'services'> = {
++export const Services: CollectionConfig = {
+   slug: 'services',
+   access: {
+     create: authenticated,
+     delete: authenticated,
+     read: authenticatedOrPublished,
+     update: authenticated,
+   },
+   defaultPopulate: {
+     title: true,
+     slug: true,
+@@ -48,21 +48,21 @@ export const Services: CollectionConfig<'services'> = {
+   fields: [
+     {
+       name: 'title',
+       type: 'text',
+       localized: true,
+       required: true,
+     },
+     {
+       name: 'parent',
+       type: 'relationship',
+-      relationTo: 'services',
++      relationTo: 'services' as CollectionSlug,
+       admin: {
+         position: 'sidebar',
+         description: 'Dejar vac├¡o si es una categor├¡a. Seleccionar un servicio padre si es un sub-servicio.',
+       },
+     },
+     slugField(),
+     {
+       name: 'shortDescription',
+       type: 'textarea',
+       localized: true,
+diff --git a/backend/src/fields/link.ts b/backend/src/fields/link.ts
+index 2834e25..03e048c 100644
+--- a/backend/src/fields/link.ts
++++ b/backend/src/fields/link.ts
+@@ -1,11 +1,11 @@
+-import type { Field, GroupField } from 'payload'
++import type { CollectionSlug, Field, GroupField } from 'payload'
+ 
+ import deepMerge from '@/utilities/deepMerge'
+ 
+ export type LinkAppearances = 'default' | 'outline'
+ 
+ export const appearanceOptions: Record<LinkAppearances, { label: string; value: string }> = {
+   default: {
+     label: 'Default',
+     value: 'default',
+   },
+@@ -68,21 +68,21 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides =
+   }
+ 
+   const linkTypes: Field[] = [
+     {
+       name: 'reference',
+       type: 'relationship',
+       admin: {
+         condition: (_, siblingData) => siblingData?.type === 'reference',
+       },
+       label: 'Document to link to',
+-      relationTo: ['pages', 'posts'],
++      relationTo: ['pages', 'posts', 'services'] as CollectionSlug[],
+       required: true,
+     },
+     {
+       name: 'url',
+       type: 'text',
+       admin: {
+         condition: (_, siblingData) => siblingData?.type === 'custom',
+       },
+       label: 'Custom URL',
+       required: true,
+diff --git a/backend/src/payload.config.ts b/backend/src/payload.config.ts
+index 3c5fdac..30226e5 100644
+--- a/backend/src/payload.config.ts
++++ b/backend/src/payload.config.ts
+@@ -3,20 +3,21 @@ import { resendAdapter } from '@payloadcms/email-resend'
+ import sharp from 'sharp'
+ import path from 'path'
+ import { buildConfig, PayloadRequest } from 'payload'
+ import { fileURLToPath } from 'url'
+ 
+ import { Categories } from './collections/Categories'
+ import { Media } from './collections/Media'
+ import { Pages } from './collections/Pages'
+ import { Posts } from './collections/Posts'
+ import { Projects } from './collections/Projects'
++import { Services } from './collections/Services'
+ import { Users } from './collections/Users'
+ import { Footer } from './Footer/config'
+ import { Header } from './Header/config'
+ import { plugins } from './plugins'
+ import { defaultLexical } from '@/fields/defaultLexical'
+ import { getFrontendURL, getServerSideURL } from './utilities/getURL'
+ 
+ const filename = fileURLToPath(import.meta.url)
+ const dirname = path.dirname(filename)
+ 
+@@ -53,21 +54,21 @@ export default buildConfig({
+       ],
+     },
+   },
+   // This config helps us configure global or default features that the other editors can inherit
+   editor: defaultLexical,
+   db: postgresAdapter({
+     pool: {
+       connectionString: process.env.DATABASE_URL || '',
+     },
+   }),
+-  collections: [Pages, Posts, Projects, Media, Categories, Users],
++  collections: [Pages, Posts, Projects, Services, Media, Categories, Users],
+   cors: [getServerSideURL(), getFrontendURL()].filter(Boolean),
+   globals: [Header, Footer],
+   plugins,
+   secret: process.env.PAYLOAD_SECRET || '',
+   sharp,
+   typescript: {
+     outputFile: path.resolve(dirname, 'payload-types.ts'),
+   },
+   email: process.env.RESEND_API_KEY
+     ? resendAdapter({
+diff --git a/backend/src/plugins/index.ts b/backend/src/plugins/index.ts
+index fc95bcc..99a70d5 100644
+--- a/backend/src/plugins/index.ts
++++ b/backend/src/plugins/index.ts
+@@ -5,23 +5,23 @@ import type { Plugin } from 'payload'
+ import type { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
+ 
+ import type { Page, Post, Project } from '@/payload-types'
+ import { getFrontendURL } from '@/utilities/getURL'
+ 
+ const generateTitle: GenerateTitle<Post | Page | Project> = ({ doc }) => {
+   return doc?.title ? `Viptel ÔÇö ${doc.title}` : 'Viptel Comunicaciones'
+ }
+ 
+ // Public URLs live in the Astro frontend, not in the CMS
+-const generateURL: GenerateURL<Post | Page | Project> = ({ doc }) => {
++const generateURL: GenerateURL<Post | Page | Project> = ({ doc, collectionConfig }) => {
+   const url = getFrontendURL()
+-
++  if (collectionConfig?.slug === 'services') return doc?.slug ? `${url}/services/${doc.slug}` : url
+   return doc?.slug ? `${url}/${doc.slug}` : url
+ }
+ 
+ export const plugins: Plugin[] = [
+   redirectsPlugin({
+     collections: ['pages', 'posts'],
+     overrides: {
+       // @ts-expect-error - This is a valid override, mapped fields don't resolve to the same type
+       fields: ({ defaultFields }) => {
+         return defaultFields.map((field) => {
+diff --git a/backend/src/utilities/generatePreviewPath.ts b/backend/src/utilities/generatePreviewPath.ts
+index 387ad92..39df25c 100644
+--- a/backend/src/utilities/generatePreviewPath.ts
++++ b/backend/src/utilities/generatePreviewPath.ts
+@@ -1,22 +1,23 @@
+-import type { CollectionSlug, PayloadRequest } from 'payload'
++import type { PayloadRequest } from 'payload'
+ 
+ import { getFrontendURL } from './getURL'
+ 
+-const collectionPrefixMap: Partial<Record<CollectionSlug, string>> = {
++const collectionPrefixMap: Record<string, string> = {
+   posts: '/blog',
+   projects: '/projects',
++  services: '/services',
+   pages: '',
+ }
+ 
+ type Props = {
+-  collection: keyof typeof collectionPrefixMap
++  collection: string
+   slug: string
+   req: PayloadRequest
+ }
+ 
+ // Points to the Astro preview endpoint. Astro validates the secret,
+ // sets a preview cookie and fetches drafts via the REST API (?draft=true)
+ export const generatePreviewPath = ({ collection, slug, req }: Props) => {
+   if (slug === undefined || slug === null) {
+     return null
+   }

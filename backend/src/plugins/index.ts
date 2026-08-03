@@ -4,15 +4,15 @@ import { seoPlugin } from '@payloadcms/plugin-seo'
 import type { Plugin } from 'payload'
 import type { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 
-import type { Page, Post, Project } from '@/payload-types'
+import type { Page, Post, Project, Service } from '@/payload-types'
 import { getFrontendURL } from '@/utilities/getURL'
 
-const generateTitle: GenerateTitle<Post | Page | Project> = ({ doc }) => {
+const generateTitle: GenerateTitle<Post | Page | Project | Service> = ({ doc }) => {
   return doc?.title ? `Viptel — ${doc.title}` : 'Viptel Comunicaciones'
 }
 
 // Public URLs live in the Astro frontend, not in the CMS
-const generateURL: GenerateURL<Post | Page | Project> = ({ doc, collectionConfig }) => {
+const generateURL: GenerateURL<Post | Page | Project | Service> = ({ doc, collectionConfig }) => {
   const url = getFrontendURL()
   if (collectionConfig?.slug === 'services') return doc?.slug ? `${url}/services/${doc.slug}` : url
   return doc?.slug ? `${url}/${doc.slug}` : url
