@@ -12,9 +12,9 @@ const generateTitle: GenerateTitle<Post | Page | Project> = ({ doc }) => {
 }
 
 // Public URLs live in the Astro frontend, not in the CMS
-const generateURL: GenerateURL<Post | Page | Project> = ({ doc }) => {
+const generateURL: GenerateURL<Post | Page | Project> = ({ doc, collectionConfig }) => {
   const url = getFrontendURL()
-
+  if (collectionConfig?.slug === 'services') return doc?.slug ? `${url}/services/${doc.slug}` : url
   return doc?.slug ? `${url}/${doc.slug}` : url
 }
 

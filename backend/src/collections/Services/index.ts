@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, CollectionSlug } from 'payload'
 
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
@@ -14,7 +14,7 @@ import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 
-export const Services: CollectionConfig<'services'> = {
+export const Services: CollectionConfig = {
   slug: 'services',
   access: {
     create: authenticated,
@@ -55,7 +55,7 @@ export const Services: CollectionConfig<'services'> = {
     {
       name: 'parent',
       type: 'relationship',
-      relationTo: 'services',
+      relationTo: 'services' as CollectionSlug,
       admin: {
         position: 'sidebar',
         description: 'Dejar vacío si es una categoría. Seleccionar un servicio padre si es un sub-servicio.',
