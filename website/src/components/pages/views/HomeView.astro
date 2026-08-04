@@ -3,7 +3,7 @@
  * HomeView — the landing page body, CMS-driven.
  *
  * Fetches the "home" page from Payload CMS and renders:
- * - Hero (Astro design: typing effect, stack marquee, CTAs)
+ * - Hero (Astro design: typing effect, stack marquee, CTAs from Payload)
  * - Layout blocks via BlockRenderer (editable from Payload admin)
  *
  * Shared by the default-locale route (`/`) and the locale-prefixed
@@ -18,12 +18,23 @@ import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import StackMarquee from '@/components/landing/StackMarquee.astro';
 import type { StackItem } from '@/components/landing/StackMarquee.astro';
 import { viptelStack } from '@/data/stack';
-import { getPageBySlug } from '@/lib/payload';
+import { getPageBySlug, resolveMediaUrl } from '@/lib/payload';
 import { t, defaultLocale, localizedPath } from '@/i18n';
 import type { PageBlock } from '@/lib/payload-types';
 
+interface HeroLink {
+  link?: {
+    type?: string;
+    label?: string | null;
+    url?: string | null;
+    appearance?: string | null;
+    reference?: any;
+    newTab?: boolean | null;
+  };
+  id?: string | null;
+}
+
 interface Props {
-  /** Locale whose copy and content this page renders. Defaults to the site default. */
   locale?: string;
 }
 
@@ -33,26 +44,34 @@ const home = await getPageBySlug('home', locale);
 
 function extractRichText(richText: any): string {
   try {
-    const root = richText?.root
-    if (!root || !Array.isArray(root.children)) return ''
+    const root = richText?.root;
+    if (!root || !Array.isArray(root.children)) return '';
     return root.children
       .filter((c: any) => c.type === 'paragraph' || c.type === 'heading')
       .map((c: any) => c.children?.map((t: any) => t.text || '').join('') || '')
-      .join(' ')
+      .join(' ');
   } catch {
-    return ''
+    return '';
   }
 }
 
 const heroTitle = extractRichText(home?.hero?.richText);
+const heroLinks: HeroLink[] = home?.hero?.links ?? [];
+const heroImageUrl = home?.hero?.media?.url ? resolveMediaUrl(home.hero.media.url) : null;
+
+function getLinkUrl(link: HeroLink['link']): string {
+  if (!link) return '#';
+  if (link.type === 'custom') return link.url || '#';
+  if (link.reference && typeof link.reference === 'object' && 'slug' in link.reference) {
+    return `/${link.reference.slug}`;
+  }
+  return link.url || '#';
+}
 
 const heroStackOrder = ['Astro', 'Tailwind CSS', 'TypeScript', 'React', 'GitHub', 'Vercel', 'Claude'];
 const heroStackItems = viptelStack
   .filter((e: StackItem) => heroStackOrder.includes(e.name))
   .sort((a, b) => heroStackOrder.indexOf(a.name) - heroStackOrder.indexOf(b.name));
-
-const servicesUrl = localizedPath('/services', locale);
-const contactUrl = localizedPath('/contact', locale);
 ---
 
 <LandingLayout
@@ -63,14 +82,20 @@ const contactUrl = localizedPath('/contact', locale);
   includeProfessionalServiceSchema={true}
 >
   <!-- Hero -->
-  <Hero layout="centered" size="xl" class="hero-dark-gradient" fullHeight>
+  <Hero
+    layout="centered"
+    size="xl"
+    class="hero-dark-gradient"
+    fullHeight
+    style={heroImageUrl ? `background-image: linear-gradient(rgba(0,0,0,0.55),rgba(0,0,0,0.3)), url(${heroImageUrl}); background-size: cover; background-position: center;` : ''}
+  >
     <Badge slot="badge" variant="brand" pill pulse class="dark:text-brand-200">
       {t('pages.home.hero.badge', locale)}
     </Badge>
 
     <h1 slot="title" class="!text-[clamp(2rem,12.6vw,3rem)] sm:!text-5xl md:!text-6xl lg:!text-7xl">
       {heroTitle ? (
-        <span class="text-brand-600 dark:text-foreground [-webkit-text-fill-color:currentColor]">{heroTitle}</span>
+        <span class={heroImageUrl ? 'text-white [-webkit-text-fill-color:currentColor]' : 'text-brand-600 dark:text-foreground [-webkit-text-fill-color:currentColor]'}>{heroTitle}</span>
       ) : (
         <>
           <span class="text-brand-600 dark:text-foreground [-webkit-text-fill-color:currentColor] whitespace-nowrap">{t('pages.home.hero.titleLine1', locale)}</span><br />
@@ -80,19 +105,41 @@ const contactUrl = localizedPath('/contact', locale);
     </h1>
 
     <p slot="description" class="!text-balance">
-      <span class="sm:hidden">{t('pages.home.hero.descriptionMobile', locale)}</span>
-      <span class="hidden sm:inline">{t('pages.home.hero.description', locale)}</span>
+      <span class={heroImageUrl ? 'text-white/80' : ''}>
+        <span class="sm:hidden">{t('pages.home.hero.descriptionMobile', locale)}</span>
+        <span class="hidden sm:inline">{t('pages.home.hero.description', locale)}</span>
+      </span>
     </p>
 
     <Fragment slot="actions">
-      <Button size="lg" href={servicesUrl}>
-        {t('pages.home.cta.primary', locale)}
-        <Icon name="arrow-right" size="sm" />
-      </Button>
-      <Button size="lg" variant="outline" href={contactUrl}>
-        {t('pages.home.cta.secondary', locale)}
-        <Icon name="arrow-right" size="sm" />
-      </Button>
+      {heroLinks.length > 0 ? (
+        heroLinks.map((item) => {
+          const link = item.link;
+          if (!link) return null;
+          return (
+            <Button
+              size="lg"
+              href={getLinkUrl(link)}
+              variant={link.appearance === 'outline' ? 'outline' : 'default'}
+              target={link.newTab ? '_blank' : undefined}
+            >
+              {link.label}
+              <Icon name="arrow-right" size="sm" />
+            </Button>
+          );
+        })
+      ) : (
+        <>
+          <Button size="lg" href={localizedPath('/services', locale)}>
+            {t('pages.home.cta.primary', locale)}
+            <Icon name="arrow-right" size="sm" />
+          </Button>
+          <Button size="lg" variant="outline" href={localizedPath('/contact', locale)}>
+            {t('pages.home.cta.secondary', locale)}
+            <Icon name="arrow-right" size="sm" />
+          </Button>
+        </>
+      )}
     </Fragment>
 
     <div slot="bottom" class="mx-auto w-full max-w-6xl px-6">
