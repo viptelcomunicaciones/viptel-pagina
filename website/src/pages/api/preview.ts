@@ -1,10 +1,11 @@
 import type { APIRoute } from 'astro';
+import { PREVIEW_SECRET } from 'astro:env/server';
 
 export const GET: APIRoute = async ({ url, cookies, redirect }) => {
   const path = url.searchParams.get('path');
   const secret = url.searchParams.get('secret');
 
-  if (secret !== process.env.PREVIEW_SECRET) {
+  if (secret !== PREVIEW_SECRET) {
     return new Response('Invalid preview secret', { status: 401 });
   }
 
