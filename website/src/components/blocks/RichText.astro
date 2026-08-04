@@ -1,4 +1,6 @@
 ---
+import { resolveMediaUrl } from '@/lib/payload'
+
 interface Props {
   content: any
   class?: string
@@ -6,67 +8,159 @@ interface Props {
 
 const { content } = Astro.props
 
+const FORMAT_BOLD = 1
+const FORMAT_ITALIC = 2
+const FORMAT_STRIKETHROUGH = 4
+const FORMAT_UNDERLINE = 8
+const FORMAT_CODE = 16
+
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+}
+
+function wrapFormat(text: string, format: number): string {
+  let result = text
+  if (format & FORMAT_BOLD) result = `<strong>${result}</strong>`
+  if (format & FORMAT_ITALIC) result = `<em>${result}</em>`
+  if (format & FORMAT_STRIKETHROUGH) result = `<s>${result}</s>`
+  if (format & FORMAT_UNDERLINE) result = `<u>${result}</u>`
+  if (format & FORMAT_CODE) result = `<code>${result}</code>`
+  return result
+}
+
+function resolveLinkUrl(fields: any): { href: string; isExternal: boolean } {
+  if (!fields) return { href: '#', isExternal: false }
+
+  const linkType = fields.linkType || 'custom'
+
+  if (linkType === 'custom' || linkType === undefined) {
+    return { href: fields.url || '#', isExternal: Boolean(fields.newTab) }
+  }
+
+  if (linkType === 'internal' && fields.doc?.value) {
+    const doc = fields.doc.value
+    const relationTo = fields.doc.relationTo || 'posts'
+    const prefix = relationTo === 'projects' ? '/projects' : '/blog'
+    return { href: `${prefix}/${doc.slug}`, isExternal: false }
+  }
+
+  return { href: fields.url || '#', isExternal: Boolean(fields.newTab) }
+}
+
+function renderChildren(nodes: any[]): string {
+  if (!nodes || !Array.isArray(nodes)) return ''
+  return nodes.map(renderNode).join('')
+}
+
 function renderNode(node: any): string {
   if (!node) return ''
-  if (node.text !== undefined) {
-    let text = node.text || ''
-    if (node.bold) text = `<strong>${text}</strong>`
-    if (node.italic) text = `<em>${text}</em>`
-    if (node.underline) text = `<u>${text}</u>`
-    if (node.code) text = `<code>${text}</code>`
-    if (node.strikethrough) text = `<s>${text}</s>`
-    return text
+
+  // Text node — apply Lexical bit-flag formatting
+  if (node.type === 'text') {
+    const raw = node.text || ''
+    const escaped = escapeHtml(raw)
+    return wrapFormat(escaped, node.format || 0)
   }
+
+  // Heading — Lexical uses type=heading + tag property
+  if (node.type === 'heading') {
+    const tag = node.tag || 'h2'
+    const children = renderChildren(node.children)
+    return `<${tag}>${children}</${tag}>`
+  }
+
+  // Paragraph — Lexical type is 'paragraph' (not 'p')
+  if (node.type === 'paragraph') {
+    const children = renderChildren(node.children)
+    const align = node.format ? ` style="text-align:${node.format}"` : ''
+    if (!children.trim()) return ''
+    return `<p${align}>${children}</p>`
+  }
+
+  // Link — Lexical embeds link in children, fields contain URL info
+  if (node.type === 'link' || node.type === 'autolink') {
+    const children = renderChildren(node.children)
+    const { href, isExternal } = resolveLinkUrl(node.fields)
+    const attrs = [
+      `href="${href}"`,
+      isExternal ? 'target="_blank"' : '',
+      isExternal ? 'rel="noopener noreferrer"' : '',
+    ].filter(Boolean).join(' ')
+    return `<a ${attrs}>${children}</a>`
+  }
+
+  // Lists
+  if (node.type === 'list') {
+    const children = renderChildren(node.children)
+    if (node.listType === 'number') return `<ol>${children}</ol>`
+    return `<ul>${children}</ul>`
+  }
+  if (node.type === 'listitem') {
+    const children = renderChildren(node.children)
+    return `<li>${children}</li>`
+  }
+
+  // Blockquote
+  if (node.type === 'quote') {
+    const children = renderChildren(node.children)
+    return `<blockquote>${children}</blockquote>`
+  }
+
+  // Line break
+  if (node.type === 'linebreak') {
+    return '<br />'
+  }
+
+  // Horizontal rule
+  if (node.type === 'horizontalrule') {
+    return '<hr />'
+  }
+
+  // Image upload
+  if (node.type === 'upload' && node.value) {
+    const url = node.value.url ? resolveMediaUrl(node.value.url) : ''
+    const alt = node.value.alt || ''
+    return `<img src="${url}" alt="${alt}" class="rounded-lg max-w-full" />`
+  }
+
+  // Nested Payload blocks (banner, code)
   if (node.type === 'block' && node.fields) {
     return renderBlock(node.fields)
   }
-  const children = (node.children || []).map(renderNode).join('')
-  switch (node.type) {
-    case 'root': return children
-    case 'h1': return `<h1>${children}</h1>`
-    case 'h2': return `<h2>${children}</h2>`
-    case 'h3': return `<h3>${children}</h3>`
-    case 'h4': return `<h4>${children}</h4>`
-    case 'h5': return `<h5>${children}</h5>`
-    case 'h6': return `<h6>${children}</h6>`
-    case 'ul': return `<ul>${children}</ul>`
-    case 'ol': return `<ol>${children}</ol>`
-    case 'li': return `<li>${children}</li>`
-    case 'blockquote': return `<blockquote>${children}</blockquote>`
-    case 'link':
-      return `<a href="${node.url || node.href || '#'}" target="${node.newTab ? '_blank' : '_self'}" rel="${node.newTab ? 'noopener noreferrer' : ''}">${children}</a>`
-    case 'p': return `<p>${children}</p>`
-    default: return children
+
+  // Root or generic container — recurse children
+  if (node.children && Array.isArray(node.children)) {
+    return renderChildren(node.children)
   }
+
+  // Fallback for unknown types
+  return ''
 }
 
 function renderBlock(fields: any): string {
   switch (fields.blockType) {
     case 'banner': {
       const style = fields.style || 'info'
-      const content = fields.content ? renderNode(fields.content.root || fields.content) : ''
+      const blockContent = fields.content?.root ? renderNode(fields.content.root) : ''
       const styles: Record<string, string> = {
         info: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200',
         warning: 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200',
         error: 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200',
         success: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200',
       }
-      return `<div class="rounded-lg border p-4 my-4 ${styles[style] || styles.info}">${content}</div>`
+      return `<div class="rounded-lg border p-4 my-4 ${styles[style] || styles.info}">${blockContent}</div>`
     }
     case 'code': {
       const lang = fields.language || ''
       const code = fields.code || ''
-      return `<pre class="rounded-lg bg-gray-900 dark:bg-gray-950 text-gray-100 p-4 my-4 overflow-x-auto text-sm"><code class="${lang ? 'language-' + lang : ''}">${escapeHtml(code)}</code></pre>`
+      return `<pre class="rounded-lg bg-gray-900 dark:bg-gray-950 text-gray-100 p-4 my-4 overflow-x-auto text-sm"><code${lang ? ` class="language-${lang}"` : ''}>${escapeHtml(code)}</code></pre>`
     }
     default:
       return ''
   }
 }
 
-function escapeHtml(str: string): string {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
-}
+const html = content?.root ? renderNode(content.root) : ''
 ---
-{
-  content?.root ? <div set:html={renderNode(content.root)} class={Astro.props.class} /> : null
-}
+
+{html ? <div set:html={html} class={Astro.props.class} /> : null}
