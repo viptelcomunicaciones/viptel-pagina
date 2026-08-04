@@ -8,10 +8,28 @@ interface Props {
 }
 
 const { block } = Astro.props
+
+const columns = block.columns ?? []
 ---
 
-<section class="relative z-10 py-[var(--space-section-md)] bg-background">
-  <div class="mx-auto max-w-3xl px-6">
-    <RichText content={(block as any).body} class="prose prose-lg dark:prose-invert max-w-none" />
+<section class="relative z-10 py-[var(--space-section-md)] bg-background border-t border-border">
+  <div class="mx-auto max-w-6xl px-6">
+    {columns.length > 0 && (
+      <div class="grid gap-8" class:list={[
+        columns.length > 1 && 'md:grid-cols-2',
+        columns.length > 2 && 'md:grid-cols-3',
+      ]}>
+        {columns.map((col) => (
+          <div class:list={[
+            col.size === 'oneThird' && 'md:col-span-1',
+            col.size === 'half' && 'md:col-span-1',
+            col.size === 'twoThirds' && 'md:col-span-2',
+            col.size === 'full' && 'md:col-span-full',
+          ]}>
+            <RichText content={col.richText} class="prose prose-lg dark:prose-invert max-w-none" />
+          </div>
+        ))}
+      </div>
+    )}
   </div>
 </section>
