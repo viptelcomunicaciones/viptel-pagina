@@ -7,15 +7,17 @@ import config from '../payload.config'
 const collectionsWithVersions: CollectionSlug[] = ['pages', 'posts', 'projects', 'services']
 
 export const cleanVersions = async (payload: Payload): Promise<void> => {
-  payload.logger.info('Cleaning ALL draft versions...')
+  payload.logger.info('Cleaning draft versions (published docs are preserved)...')
 
   for (const collection of collectionsWithVersions) {
-    payload.logger.info(`  - ${collection}: deleting versions...`)
+    // Count published docs first
+    const published = await payload.count({ collection, where: { _status: { equals: 'published' } } })
+    payload.logger.info(`  - ${collection}: ${published.totalDocs} published, cleaning versions...`)
     const result = await payload.db.deleteVersions({ collection, where: {} })
-    payload.logger.info(`    → ${result.length} versions deleted`)
+    payload.logger.info(`    → ${result.length} draft versions deleted (${published.totalDocs} published docs preserved)`)
   }
 
-  payload.logger.info('Done. All draft versions cleaned. Published documents remain intact.')
+  payload.logger.info('Done. All draft versions cleaned.')
 }
 
 const payload = await getPayload({ config })
