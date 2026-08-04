@@ -1,6 +1,6 @@
 ---
 import type { ArchiveBlock as ArchiveBlockType } from '@/lib/payload-types'
-import { getAllPosts, resolveMediaUrl } from '@/lib/payload'
+import { getAllPosts, getAllProjects, resolveMediaUrl } from '@/lib/payload'
 import RichText from './RichText.astro'
 
 interface Props {
@@ -10,23 +10,26 @@ interface Props {
 
 const { block, locale = 'es' } = Astro.props
 
-let posts: any[] = []
+let items: any[] = []
+const isProjects = (block as any).relationTo === 'projects'
 
 if (block.populateBy === 'selection' && block.selectedDocs?.length) {
-  const all = await getAllPosts(locale)
-  posts = all.filter((p) => (block.selectedDocs as any[]).some((d: any) => d === p.id || (typeof d === "object" && d.id === p.id)))
+  const all = isProjects ? await getAllProjects(locale) : await getAllPosts(locale)
+  items = all.filter((p) => (block.selectedDocs as any[]).some((d: any) => d === p.id || (typeof d === 'object' && d.id === p.id)))
 } else {
-  posts = await getAllPosts(locale)
+  items = isProjects ? await getAllProjects(locale) : await getAllPosts(locale)
   if (block.categories?.length) {
-    posts = posts.filter((p) =>
-      p.categories?.some((c: any) => block.categories!.includes(typeof c === 'number' ? c : c.id))
+    items = items.filter((p) =>
+      p.categories?.some((c: any) => block.categories!.includes(typeof c === 'number' ? c : c.id)),
     )
   }
-  if (block.limit) posts = posts.slice(0, block.limit)
+  if (block.limit) items = items.slice(0, block.limit)
 }
+
+const linkPrefix = isProjects ? '/projects' : '/blog'
 ---
 
-<section class="py-[var(--space-section-md)]">
+<section class="py-[var(--space-section-md)] bg-background-secondary border-t border-border">
   <div class="mx-auto max-w-6xl px-6">
     {block.introContent && (
       <div class="text-center mb-12">
@@ -34,19 +37,32 @@ if (block.populateBy === 'selection' && block.selectedDocs?.length) {
       </div>
     )}
     <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {posts.map((post) => (
+      {items.map((item) => (
         <a
-          href={`/${locale === 'es' ? '' : locale + '/'}blog/${post.slug}`}
+          href={`/${locale === 'es' ? '' : locale + '/'}${linkPrefix}/${item.slug}`}
           class="group bg-background rounded-xl border border-border overflow-hidden hover:border-brand-500/40 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
         >
-          {post.heroImage?.url && (
-            <img src={resolveMediaUrl(post.heroImage.url)} alt={post.heroImage.alt || post.title} class="w-full aspect-video object-cover" />
+          {(item.heroImage?.url || item.coverImage?.url) && (
+            <img
+              src={resolveMediaUrl(item.heroImage?.url || item.coverImage?.url)}
+              alt={(item.heroImage?.alt || item.coverImage?.alt) || item.title}
+              class="w-full aspect-video object-cover"
+            />
           )}
           <div class="p-5">
-            <h3 class="font-display font-bold text-foreground group-hover:text-brand-500 transition-colors">{post.title}</h3>
-            {post.excerpt && <p class="text-sm text-foreground-muted mt-2">{post.excerpt}</p>}
-            {post.publishedAt && (
-              <time class="text-xs text-foreground-muted mt-3 block">{new Date(post.publishedAt).toLocaleDateString(locale === 'en' ? 'en-US' : 'es-CO', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
+            <h3 class="font-display font-bold text-foreground group-hover:text-brand-500 transition-colors">
+              {item.title}
+            </h3>
+            {(item.excerpt || item.description) && (
+              <p class="text-sm text-foreground-muted mt-2">{item.excerpt || item.description}</p>
+            )}
+            {item.publishedAt && (
+              <time class="text-xs text-foreground-muted mt-3 block">
+                {new Date(item.publishedAt).toLocaleDateString(
+                  locale === 'en' ? 'en-US' : 'es-CO',
+                  { year: 'numeric', month: 'long', day: 'numeric' },
+                )}
+              </time>
             )}
           </div>
         </a>

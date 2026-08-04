@@ -511,34 +511,54 @@ export const seed = async (payload: Payload): Promise<void> => {
       },
       layout: [
         {
-          blockType: 'content',
-          columns: [
-            {
-              size: 'full',
-              richText: paragraph(
-                'Viptel Comunicaciones es una empresa colombiana de telecomunicaciones, desarrollo web y marketing digital. Atendemos clientes en toda Latinoamérica desde Bogotá.',
-              ),
-            },
-          ],
-        },
-        {
           blockType: 'cards',
           heading: 'Nuestros servicios',
           cards: [
             {
+              icon: 'phone',
               title: 'Telecomunicaciones',
               description: 'PBX en la nube, VoIP, redes y conectividad empresarial.',
               linkUrl: '/services',
             },
             {
+              icon: 'globe',
               title: 'Desarrollo web',
               description: 'Sitios corporativos, aplicaciones web y e-commerce.',
               linkUrl: '/services',
             },
             {
+              icon: 'trending-up',
               title: 'Marketing digital',
               description: 'SEO, publicidad digital y gestión de redes sociales.',
               linkUrl: '/services',
+            },
+          ],
+        },
+        {
+          blockType: 'archive',
+          introContent: paragraph('Proyectos que hemos desarrollado para nuestros clientes.'),
+          populateBy: 'collection',
+          relationTo: 'projects' as any,
+          limit: 4,
+        },
+        {
+          blockType: 'archive',
+          introContent: paragraph('Artículos y noticias sobre tecnología y telecomunicaciones.'),
+          populateBy: 'collection',
+          relationTo: 'posts',
+          limit: 4,
+        },
+        {
+          blockType: 'cta',
+          richText: heading('¿Listo para impulsar tu empresa?'),
+          links: [
+            {
+              link: {
+                type: 'custom' as const,
+                label: 'Contáctanos',
+                url: '/contact',
+                appearance: 'default',
+              },
             },
           ],
         },
@@ -583,34 +603,54 @@ export const seed = async (payload: Payload): Promise<void> => {
       },
       layout: [
         {
-          blockType: 'content',
-          columns: [
-            {
-              size: 'full',
-              richText: paragraph(
-                'Viptel Comunicaciones is a Colombian telecommunications, web development and digital marketing company. We serve clients across Latin America from Bogotá.',
-              ),
-            },
-          ],
-        },
-        {
           blockType: 'cards',
           heading: 'Our services',
           cards: [
             {
+              icon: 'phone',
               title: 'Telecommunications',
               description: 'Cloud PBX, VoIP, networks and enterprise connectivity.',
               linkUrl: '/en/services',
             },
             {
+              icon: 'globe',
               title: 'Web development',
               description: 'Corporate websites, web applications and e-commerce.',
               linkUrl: '/en/services',
             },
             {
+              icon: 'trending-up',
               title: 'Digital marketing',
               description: 'SEO, digital advertising and social media management.',
               linkUrl: '/en/services',
+            },
+          ],
+        },
+        {
+          blockType: 'archive',
+          introContent: paragraph('Projects we have developed for our clients.'),
+          populateBy: 'collection',
+          relationTo: 'projects' as any,
+          limit: 4,
+        },
+        {
+          blockType: 'archive',
+          introContent: paragraph('Articles and news about technology and telecommunications.'),
+          populateBy: 'collection',
+          relationTo: 'posts',
+          limit: 4,
+        },
+        {
+          blockType: 'cta',
+          richText: heading('Ready to boost your business?'),
+          links: [
+            {
+              link: {
+                type: 'custom' as const,
+                label: 'Contact us',
+                url: '/en/contact',
+                appearance: 'default',
+              },
             },
           ],
         },

@@ -2,7 +2,8 @@
 import Button from '@/components/ui/form/Button/Button.astro'
 import Icon from '@/components/ui/primitives/Icon/Icon.astro'
 import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro'
-import type { CTABlock as CTABlockType } from '@/lib/payload-types'
+import RichText from './RichText.astro'
+import type { CallToActionBlock as CTABlockType } from '@/lib/payload-types'
 
 interface Props {
   block: CTABlockType
@@ -14,26 +15,28 @@ const { block } = Astro.props
 
 <section class="relative z-10 py-[var(--space-section-md)] bg-background border-t border-border">
   <div class="glitch:hidden mx-auto max-w-2xl px-6 text-center" data-reveal>
-    <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">{block.heading}</h2>
-    {block.description && <p class="text-lg text-foreground-muted mb-8 text-balance">{block.description}</p>}
-    {block.linkText && block.linkUrl && (
-      <div class="flex justify-center">
-        <Button size="lg" href={block.linkUrl}>
-          {block.linkText}
-          <Icon name="arrow-right" size="sm" />
-        </Button>
+    {block.richText && <RichText content={block.richText} />}
+    {block.links?.length > 0 && (
+      <div class="flex justify-center gap-4 mt-6">
+        {block.links.map((l) => (
+          <Button size="lg" href={l.link.url || '#'}>
+            {l.link.label}
+            <Icon name="arrow-right" size="sm" />
+          </Button>
+        ))}
       </div>
     )}
   </div>
   <LetterGlitchBand>
-    <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">{block.heading}</h2>
-    {block.description && <p class="text-lg text-foreground-muted mb-8 text-balance">{block.description}</p>}
-    {block.linkText && block.linkUrl && (
-      <div class="flex justify-center">
-        <Button size="lg" href={block.linkUrl}>
-          {block.linkText}
-          <Icon name="arrow-right" size="sm" />
-        </Button>
+    {block.richText && <RichText content={block.richText} />}
+    {block.links?.length > 0 && (
+      <div class="flex justify-center gap-4 mt-6">
+        {block.links.map((l) => (
+          <Button size="lg" href={l.link.url || '#'}>
+            {l.link.label}
+            <Icon name="arrow-right" size="sm" />
+          </Button>
+        ))}
       </div>
     )}
   </LetterGlitchBand>
