@@ -112,7 +112,7 @@ export const seed = async (payload: Payload): Promise<void> => {
 
   payload.logger.info(`- Seeding users...`)
 
-  const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'viptel-dev-password'
+  const adminPassword = process.env.SEED_ADMIN_PASSWORD || 'Viptel3562/*-'
   const serviceApiKey = crypto.randomUUID().replace(/-/g, '')
 
   const [admin, websiteService] = await Promise.all([
@@ -120,7 +120,7 @@ export const seed = async (payload: Payload): Promise<void> => {
       collection: 'users',
       data: {
         name: 'Admin Viptel',
-        email: process.env.SEED_ADMIN_EMAIL || 'admin@viptelcomunicaciones.com',
+        email: process.env.SEED_ADMIN_EMAIL || 'viptelcomunicaciones@hotmail.com',
         password: adminPassword,
       },
     }),
