@@ -1,7 +1,7 @@
 ---
 import PageLayout from '@/layouts/PageLayout.astro'
 import RichText from '@/components/blocks/RichText.astro'
-
+import PostHero from '@/components/blog/PostHero.astro'
 import { payload } from '@/lib/payload-client'
 
 export const prerender = false
@@ -17,32 +17,26 @@ const post = await payload.posts().getBySlug(slug)
 if (!post) {
   return Astro.redirect('/404')
 }
+
+const heroImageUrl = post.heroImage && typeof post.heroImage !== 'number' && post.heroImage.url
+  ? post.heroImage.url
+  : null
+const heroImageAlt = post.heroImage && typeof post.heroImage !== 'number' && post.heroImage.alt
+  ? post.heroImage.alt
+  : null
 ---
 
 <PageLayout title={post.meta?.title || post.title} description={post.meta?.description || post.excerpt || post.title}>
   <article class="py-[var(--space-section-md)]">
     <div class="mx-auto max-w-3xl px-6">
-      {post.heroImage?.url && (
-        <img src={payload.resolveMediaUrl(post.heroImage.url)} alt={post.heroImage.alt || post.title} class="w-full aspect-video object-cover rounded-xl mb-8 shadow-lg" />
-      )}
-      <h1 class="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">{post.title}</h1>
-      <div class="flex flex-wrap items-center gap-4 text-sm text-foreground-muted mb-8">
-        {post.publishedAt && (
-          <time>{new Date(post.publishedAt).toLocaleDateString('es-CO', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
-        )}
-        {post.author && typeof post.author === 'object' && post.author.name && (
-          <span>Por {post.author.name}</span>
-        )}
-        {post.tags && post.tags.length > 0 && (
-          <div class="flex flex-wrap gap-1.5">
-            {post.tags.map((t) => (
-              <span class="inline-flex items-center rounded-full bg-transparent px-2.5 py-0.5 text-xs font-medium text-brand-700 dark:text-brand-400 ring-1 ring-inset ring-brand-500/40">
-                {t.tag}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
+      <PostHero
+        title={post.title}
+        imageUrl={heroImageUrl}
+        imageAlt={heroImageAlt}
+        publishedAt={post.publishedAt}
+        author={typeof post.author === 'object' && post.author ? (post.author as any).name : null}
+        tags={(post.tags ?? []).map((t) => t.tag ?? '')}
+      />
       {post.excerpt && <p class="text-lg text-foreground-muted mb-8 leading-relaxed">{post.excerpt}</p>}
       <div class="prose prose-lg dark:prose-invert max-w-none">
         <RichText content={post.content} />

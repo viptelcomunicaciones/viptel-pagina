@@ -7,6 +7,7 @@ import PricingBlock from './PricingBlock.astro'
 import CTABlock from './CTABlock.astro'
 import FAQBlock from './FAQBlock.astro'
 import GalleryBlock from './GalleryBlock.astro'
+import MediaBlockRenderer from './MediaBlockRenderer.astro'
 import ArchiveBlock from './ArchiveBlock.astro'
 
 interface Props {
@@ -21,6 +22,7 @@ const { layout, locale = 'es' } = Astro.props
   switch (block.blockType) {
     case 'content': return <ContentBlock block={block} locale={locale} />
     case 'media-content': return <MediaContentBlock block={block} locale={locale} />
+    case 'mediaBlock': return <MediaBlockRenderer block={block} locale={locale} />
     case 'cards': return <CardsBlock block={block} locale={locale} />
     case 'pricing': return <PricingBlock block={block} locale={locale} />
     case 'cta': return <CTABlock block={block} locale={locale} />

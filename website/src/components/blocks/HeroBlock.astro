@@ -1,4 +1,11 @@
 ---
+/**
+ * RenderHero — renders the hero section for CMS pages based on Payload hero type.
+ * HighImpact: full-width background image with overlay text + links
+ * MediumImpact: centered text + links above, large image below
+ * LowImpact: minimal heading only in container
+ * None: no hero rendered
+ */
 import { Hero } from '@/components/hero'
 import Button from '@/components/ui/form/Button/Button.astro'
 import { payload } from '@/lib/payload-client'
@@ -10,29 +17,89 @@ interface Props {
 }
 
 const { hero } = Astro.props
+
+function getRichTextText(richText: any): string {
+  try {
+    const root = richText?.root
+    if (!root || !Array.isArray(root.children)) return ''
+    return root.children
+      .filter((c: any) => c.type === 'paragraph' || c.type === 'heading')
+      .map((c: any) => c.children?.map((t: any) => t.text || '').join('') || '')
+      .join(' ')
+  } catch {
+    return ''
+  }
+}
+
+function resolveLinkUrl(link: any): string {
+  if (!link.link) return '#'
+  if (link.link.type === 'custom' || !link.link.reference) return link.link.url || '#'
+  return `/${link.link.reference?.slug || ''}`
+}
+
+const isHigh = hero.type === 'highImpact'
+const isMedium = hero.type === 'mediumImpact'
+const isLow = hero.type === 'lowImpact'
+const showHero = isHigh || isMedium || isLow
+
+const heroTitle = getRichTextText(hero.richText)
+const heroImageUrl = hero.media && typeof hero.media !== 'number' && hero.media.url
+  ? payload.resolveMediaUrl(hero.media.url)
+  : null
+const heroLinks: any[] = hero.links ?? []
 ---
 
-<section class="relative z-10 py-[var(--space-section-md)]">
-  <Hero layout="centered" size={hero.type === 'highImpact' ? 'xl' : hero.type === 'mediumImpact' ? 'lg' : 'md'} class="isolate" showHeroHalo>
-    <h1 slot="title">{hero.title}</h1>
-    {hero.description && <p slot="description">{hero.description}</p>}
-    {hero.image?.url && (
-      <img
-        src={payload.resolveMediaUrl(hero.image.url)}
-        alt={hero.image.alt || hero.title || ''}
-        width={hero.image.width || 1200}
-        height={hero.image.height || 800}
-        class="w-full max-h-[400px] object-cover rounded-xl shadow-lg mb-6"
-      />
+{showHero && (
+  <>
+    {isHigh && (
+      <section class="relative flex items-center justify-center text-white min-h-[60vh]" data-theme="dark"
+        style={heroImageUrl ? `background-image: linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.3)), url(${heroImageUrl}); background-size: cover; background-position: center;` : ''}
+      >
+        <div class="container z-10 mx-auto max-w-[36.5rem] px-6 text-center">
+          {heroTitle && <h1 class="font-display text-3xl md:text-5xl font-bold mb-6">{heroTitle}</h1>}
+          {heroLinks.length > 0 && (
+            <div class="flex justify-center gap-4">
+              {heroLinks.map((item) => (
+                <Button size="lg" href={resolveLinkUrl(item)} variant={item.link?.appearance === 'outline' ? 'outline' : 'default'}>
+                  {item.link?.label}
+                </Button>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
     )}
-    {hero.links && hero.links.length > 0 && (
-      <Fragment slot="actions">
-        {hero.links.map((link) => (
-          <Button size="lg" href={link.url}>
-            {link.label}
-          </Button>
-        ))}
-      </Fragment>
+
+    {isMedium && (
+      <section class="pt-16">
+        <div class="mx-auto max-w-6xl px-6">
+          <div class="mx-auto max-w-[48rem] text-center mb-8">
+            {heroTitle && <h1 class="font-display text-3xl md:text-4xl font-bold text-foreground mb-6">{heroTitle}</h1>}
+            {heroLinks.length > 0 && (
+              <div class="flex justify-center gap-4">
+                {heroLinks.map((item) => (
+                  <Button size="lg" href={resolveLinkUrl(item)} variant={item.link?.appearance === 'outline' ? 'outline' : 'default'}>
+                    {item.link?.label}
+                  </Button>
+                ))}
+              </div>
+            )}
+          </div>
+          {heroImageUrl && (
+            <img src={heroImageUrl} alt={heroTitle} class="w-full rounded-xl shadow-lg mt-8" />
+          )}
+        </div>
+      </section>
     )}
-  </Hero>
-</section>
+
+    {isLow && (
+      <section class="pt-16 pb-4">
+        <div class="mx-auto max-w-6xl px-6">
+          <div class="max-w-[48rem]">
+            {heroTitle && <h1 class="font-display text-3xl md:text-4xl font-bold text-foreground">{heroTitle}</h1>}
+          </div>
+        </div>
+      </section>
+    )}
+  </>
+)}
