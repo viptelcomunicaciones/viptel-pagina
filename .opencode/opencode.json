@@ -6,9 +6,9 @@
     "backend/AGENTS.md",
     "website/AGENTS.md"
   ],
-  "mcpServers": {
+  "mcp": {
     "payload": {
-      "type": "http",
+      "type": "remote",
       "url": "http://localhost:3000/api/mcp",
       "headers": {
         "Authorization": "Bearer cd194ccb-aec6-48ef-b916-67f1e538ee07"
