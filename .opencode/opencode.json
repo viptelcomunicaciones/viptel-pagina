@@ -6,6 +6,12 @@
     "backend/AGENTS.md",
     "website/AGENTS.md"
   ],
+  "mcpServers": {
+    "payload": {
+      "command": "npx",
+      "args": ["-y", "@payloadcms/mcp"]
+    }
+  },
   "agent": {
     "build": {
       "description": "Agente de construcción para Viptel Comunicaciones - monorepo con backend Payload CMS + Next.js y frontend Astro",
