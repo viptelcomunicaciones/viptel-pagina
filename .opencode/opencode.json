@@ -15,6 +15,20 @@
         "edit": true,
         "bash": true
       }
+    },
+    "academico": {
+      "description": "Agente académico para aprender y entender Viptel Comunicaciones — monorepo backend Payload CMS + Next.js y frontend Astro SSR. Conoce la arquitectura, colecciones, flujos de datos, i18n y todas las convenciones del proyecto.",
+      "model": "opencode-go/deepseek-v4-pro",
+      "instructions": [
+        "PROJECT-KNOWLEDGE.md",
+        "project-knowledge/SKILL.md",
+        "backend/.agents/skills/payload/SKILL.md"
+      ],
+      "tools": {
+        "read": true,
+        "glob": true,
+        "grep": true
+      }
     }
   },
   "command": {

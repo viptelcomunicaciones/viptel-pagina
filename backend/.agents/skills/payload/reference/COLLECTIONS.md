@@ -1,303 +1,202 @@
-# Payload CMS Collections Reference
+# Colecciones
 
-Complete reference for collection configurations and patterns.
+## Users (`users`)
 
-## Basic Collection
+**Archivo**: `src/collections/Users/index.ts`
+**Admin group**: "Admin"
+**Auth**: Email/password + API key (`useAPIKey: true`)
 
-```ts
-import type { CollectionConfig } from 'payload'
+| Campo | Tipo | Requerido |
+|---|---|---|
+| `name` | text | No |
+| `email` | email (auth) | Sí |
 
-export const Posts: CollectionConfig = {
-  slug: 'posts',
-  labels: {
-    singular: 'Post',
-    plural: 'Posts',
-  },
-  admin: {
-    useAsTitle: 'title',
-    defaultColumns: ['title', 'author', 'status', 'createdAt'],
-    group: 'Content', // Organize in admin sidebar
-    description: 'Blog posts and articles',
-    listSearchableFields: ['title', 'slug'],
-  },
-  fields: [
-    {
-      name: 'title',
-      type: 'text',
-      required: true,
-      index: true,
-    },
-    {
-      name: 'slug',
-      type: 'text',
-      unique: true,
-      index: true,
-      admin: { position: 'sidebar' },
-    },
-    {
-      name: 'status',
-      type: 'select',
-      options: ['draft', 'published'],
-      defaultValue: 'draft',
-    },
-  ],
-  defaultSort: '-createdAt',
-  timestamps: true,
-}
-```
+**Acceso**: Todas las operaciones requieren `authenticated`.
+**Timestamps**: Activados.
 
-## Auth Collection
+La API key permite crear un service account que el website usa para acceder a drafts.
 
-```ts
-export const Users: CollectionConfig = {
-  slug: 'users',
-  auth: {
-    tokenExpiration: 7200, // 2 hours
-    verify: true,
-    maxLoginAttempts: 5,
-    lockTime: 600000, // 10 minutes
-    useAPIKey: true,
-  },
-  admin: {
-    useAsTitle: 'email',
-  },
-  fields: [
-    {
-      name: 'roles',
-      type: 'select',
-      hasMany: true,
-      options: ['admin', 'editor', 'user'],
-      required: true,
-      defaultValue: ['user'],
-      saveToJWT: true,
-    },
-    {
-      name: 'name',
-      type: 'text',
-      required: true,
-    },
-  ],
-}
-```
+---
 
-## Upload Collection
+## Media (`media`)
 
-```ts
-export const Media: CollectionConfig = {
-  slug: 'media',
-  upload: {
-    staticDir: 'media',
-    mimeTypes: ['image/*'],
-    imageSizes: [
-      {
-        name: 'thumbnail',
-        width: 400,
-        height: 300,
-        position: 'centre',
-      },
-      {
-        name: 'card',
-        width: 768,
-        height: 1024,
-      },
-    ],
-    adminThumbnail: 'thumbnail',
-    focalPoint: true,
-    crop: true,
-  },
-  access: {
-    read: () => true,
-  },
-  fields: [
-    {
-      name: 'alt',
-      type: 'text',
-      required: true,
-    },
-    {
-      name: 'caption',
-      type: 'text',
-      localized: true,
-    },
-  ],
-}
-```
+**Archivo**: `src/collections/Media.ts`
+**Acceso**: Create/delete/update → authenticated; Read → anyone
 
-## Live Preview
+**Upload config**:
+- Static dir: `public/media` (o `MEDIA_PATH` env)
+- Focal point: enabled
+- Folders: enabled
 
-Enable real-time content preview during editing.
+**Image sizes**:
 
-```ts
-import type { CollectionConfig } from 'payload'
+| Nombre | Width | Height | Notas |
+|---|---|---|---|
+| thumbnail | 300 | — | Admin thumbnail |
+| square | 500 | 500 | — |
+| small | 600 | — | — |
+| medium | 900 | — | — |
+| large | 1400 | — | — |
+| xlarge | 1920 | — | — |
+| og | 1200 | 630 | crop: center |
 
-const generatePreviewPath = ({
-  slug,
-  collection,
-  req,
-}: {
-  slug: string
-  collection: string
-  req: any
-}) => {
-  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL
-  return `${baseUrl}/api/preview?slug=${slug}&collection=${collection}`
-}
+**Campos**:
+- `alt` — text, required
+- `caption` — richText (Lexical)
 
-export const Pages: CollectionConfig = {
-  slug: 'pages',
-  admin: {
-    useAsTitle: 'title',
-    // Live preview during editing
-    livePreview: {
-      url: ({ data, req }) =>
-        generatePreviewPath({
-          slug: data?.slug as string,
-          collection: 'pages',
-          req,
-        }),
-    },
-    // Static preview button
-    preview: (data, { req }) =>
-      generatePreviewPath({
-        slug: data?.slug as string,
-        collection: 'pages',
-        req,
-      }),
-  },
-  fields: [
-    { name: 'title', type: 'text' },
-    { name: 'slug', type: 'text' },
-  ],
-}
-```
+---
 
-## Versioning & Drafts
+## Categories (`categories`)
 
-Payload maintains version history and supports draft/publish workflows.
+**Archivo**: `src/collections/Categories.ts`
+**Admin group**: "Content"
+**Acceso**: Create/delete/update → authenticated; Read → anyone
 
-```ts
-import type { CollectionConfig } from 'payload'
+| Campo | Tipo | Localizado |
+|---|---|---|
+| `title` | text | Sí |
+| `slug` | text (auto-generated) | No |
 
-// Basic versioning (audit log only)
-export const Users: CollectionConfig = {
-  slug: 'users',
-  versions: true, // or { maxPerDoc: 100 }
-  fields: [{ name: 'name', type: 'text' }],
-}
+**Use as title**: `title`
 
-// Drafts enabled (draft/publish workflow)
-export const Posts: CollectionConfig = {
-  slug: 'posts',
-  versions: {
-    drafts: true, // Enables _status field
-    maxPerDoc: 50,
-  },
-  fields: [{ name: 'title', type: 'text' }],
-}
+---
 
-// Full configuration with autosave and scheduled publish
-export const Pages: CollectionConfig = {
-  slug: 'pages',
-  versions: {
-    drafts: {
-      autosave: true, // Auto-save while editing
-      schedulePublish: true, // Schedule future publish/unpublish
-      validate: false, // Don't validate drafts (default)
-    },
-    maxPerDoc: 100, // Keep last 100 versions (0 = unlimited)
-  },
-  fields: [{ name: 'title', type: 'text' }],
-}
-```
+## Pages (`pages`)
 
-### Draft API Usage
+**Archivo**: `src/collections/Pages/index.ts`
+**Admin group**: "Content"
+**Acceso**: Read → `authenticatedOrPublished`; Write → authenticated
+**Versiones**: Drafts (autosave 100ms, schedulePublish, max 50 versions)
+**Live preview**: Apunta al frontend Astro
+**Default populate**: `title`, `slug`
 
-```ts
-// Create draft
-await payload.create({
-  collection: 'posts',
-  data: { title: 'Draft Post' },
-  draft: true, // Saves as draft, skips required field validation
-})
+### Tabs
 
-// Update as draft
-await payload.update({
-  collection: 'posts',
-  id: '123',
-  data: { title: 'Updated Draft' },
-  draft: true,
-})
+**Hero**:
+- `type` — select: none, highImpact, mediumImpact, lowImpact
+- `richText` — Lexical (condicional: highImpact/mediumImpact)
+- `links` — linkGroup (max 2)
+- `media` — upload (condicional: highImpact/mediumImpact)
 
-// Read with drafts (returns newest draft if available)
-const post = await payload.findByID({
-  collection: 'posts',
-  id: '123',
-  draft: true, // Returns draft version if exists
-})
+**Content**:
+- `layout` — blocks, localized, required
+  - Bloques disponibles: CallToAction, Content, MediaBlock, Archive, Cards, Pricing, FAQ, Gallery, MediaContent
 
-// Query only published (REST API)
-// GET /api/posts (returns only _status: 'published')
+**SEO**:
+- Meta title, image, description con overview/preview panels
 
-// Access control for drafts
-export const Posts: CollectionConfig = {
-  slug: 'posts',
-  versions: { drafts: true },
-  access: {
-    read: ({ req: { user } }) => {
-      // Public can only see published
-      if (!user) return { _status: { equals: 'published' } }
-      // Authenticated can see all
-      return true
-    },
-  },
-  fields: [{ name: 'title', type: 'text' }],
-}
-```
+### Sidebar
+- `publishedAt` — date
+- `slug` — auto-generated
 
-### Document Status
+**Hooks**: `beforeChange` → `populatePublishedAt`
+**Plugin**: `nested-docs` — jerarquía padre/hijo con breadcrumbs
 
-The `_status` field is auto-injected when drafts are enabled:
+---
 
-- `draft` - Never published
-- `published` - Published with no newer drafts
-- `changed` - Published but has newer unpublished drafts
+## Posts (`posts`)
 
-## Globals
+**Archivo**: `src/collections/Posts/index.ts`
+**Admin group**: "Content"
+**Acceso**: Read → `authenticatedOrPublished`
+**Versiones**: Drafts (autosave 100ms, schedulePublish, max 50)
+**Default populate**: `title`, `slug`, `categories`, `meta.image`, `meta.description`
 
-Globals are single-instance documents (not collections).
+### Tabs
 
-```ts
-import type { GlobalConfig } from 'payload'
+**Content**:
+- `heroImage` — upload/media
+- `content` — richText (Lexical), localized, required
+  - Features: HeadingFeature (h1-h4), BlocksFeature (Banner, Code, MediaBlock), FixedToolbar, InlineToolbar, HorizontalRule
 
-export const Header: GlobalConfig = {
-  slug: 'header',
-  label: 'Header',
-  admin: {
-    group: 'Settings',
-  },
-  fields: [
-    {
-      name: 'logo',
-      type: 'upload',
-      relationTo: 'media',
-      required: true,
-    },
-    {
-      name: 'nav',
-      type: 'array',
-      maxRows: 8,
-      fields: [
-        {
-          name: 'link',
-          type: 'relationship',
-          relationTo: 'pages',
-        },
-        {
-          name: 'label',
-          type: 'text',
-        },
-      ],
-    },
-  ],
-}
-```
+**Meta**:
+- `excerpt` — textarea, localized
+- `relatedPosts` — relationship a posts (hasMany, filtrado para excluir self)
+- `categories` — relationship a categories (hasMany, sidebar)
+
+**SEO**:
+- Meta title, image, description
+
+### Sidebar
+- `publishedAt` — date con day+time picker, auto-set a `new Date()` al publicar
+- `authors` — relationship a users (hasMany)
+- `populatedAuthors` — array (disabled, readonly, hidden) — expone nombres de autores
+- `tags` — array de `{ tag: text }`
+
+**Hooks**: `afterRead` → `populateAuthors` (copia nombres de users a `populatedAuthors`)
+
+---
+
+## Projects (`projects`)
+
+**Archivo**: `src/collections/Projects/index.ts`
+**Admin group**: "Content"
+**Acceso**: Read → `authenticatedOrPublished`
+**Versiones**: Drafts (autosave 100ms, schedulePublish, max 50)
+**Default columns**: title, client, year, _status
+**Default populate**: `title`, `slug`
+
+### Tabs
+
+**Content**:
+- `description` — textarea, localized
+- `coverImage` — upload/media
+- `content` — richText (Lexical), localized
+- `gallery` — array de `{ image: upload/media, alt: text }`
+
+**Meta**:
+- `client` — text (sidebar)
+- `year` — number (sidebar)
+- `tags` — array de `{ tag: text }` (sidebar)
+
+**SEO**:
+- Meta title, image, description
+
+### Sidebar
+- `publishedAt` — date
+- `slug` — auto-generated
+
+**Hooks**: `beforeChange` → `populatePublishedAt`
+
+---
+
+## Services (`services`)
+
+**Archivo**: `src/collections/Services/index.ts`
+**Admin group**: "Content"
+**Acceso**: Read → `authenticatedOrPublished`
+**Versiones**: Drafts (autosave 100ms, schedulePublish, max 50)
+**Default columns**: title, parent, _status
+**Default populate**: `title`, `slug`
+
+### Estructura jerárquica
+- `parent` — relationship a services (self-referencing)
+- Servicios sin `parent` son categorías (top-level)
+- Servicios con `parent` son sub-servicios
+
+Servicios de ejemplo: `viptel-pbx` → `basica`, `avanzada`
+
+### Campos principales
+- `title` — text, localized, required
+- `slug` — auto-generated
+- `shortDescription` — textarea, localized
+- `icon` — upload/media
+
+### Tabs
+
+**Content**:
+- `description` — richText, localized
+- `features` — array, localized: `{ title (text, localized), description (textarea, localized), icon (upload/media) }`
+- `pricing` — array, localized: `{ planName (text, localized), price (number), currency (text, default COP), period (text, default /mes), features (array de strings), highlighted (checkbox), ctaLabel (text, localized) }`
+- `faq` — array, localized: `{ question (text, localized), answer (richText, localized) }`
+- `gallery` — array: `{ image (upload/media), alt (text) }`
+- `layout` — blocks, localized: CallToAction, Content, FAQ, Gallery, Pricing, Cards, MediaContent
+
+**SEO**:
+- Meta title, image, description
+
+### Sidebar
+- `publishedAt` — date
+- `parent` — self-relationship
+
+**Hooks**: `beforeChange` → `populatePublishedAt`

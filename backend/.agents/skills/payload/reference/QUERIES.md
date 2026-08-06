@@ -1,274 +1,144 @@
-# Payload CMS Querying Reference
+# Patrones de Query
 
-Complete reference for querying data across Local API, REST, and GraphQL.
+Cómo el website consulta la API de Payload. Implementado en `website/src/lib/payload.ts`.
 
-## Query Operators
+## Fetch wrapper
 
-```ts
-import type { Where } from 'payload'
+Todas las requests pasan por `fetchAPI<T>(endpoint, { locale, draft? })`:
 
-// Equals
-const equalsQuery: Where = { color: { equals: 'blue' } }
+```typescript
+const fetchAPI = async <T>(endpoint: string, options?: FetchOptions) => {
+  const url = new URL(`${PAYLOAD_URL}/api/${endpoint}`)
+  url.searchParams.set('locale', locale)
+  url.searchParams.set('depth', '2')
 
-// Not equals
-const notEqualsQuery: Where = { status: { not_equals: 'draft' } }
+  const headers: HeadersInit = {}
+  if (draft) {
+    headers.Authorization = `users API-Key ${PAYLOAD_API_KEY}`
+  }
 
-// Greater/less than
-const greaterThanQuery: Where = { price: { greater_than: 100 } }
-const lessThanEqualQuery: Where = { age: { less_than_equal: 65 } }
-
-// Contains (case-insensitive)
-const containsQuery: Where = { title: { contains: 'payload' } }
-
-// Like (all words present)
-const likeQuery: Where = { description: { like: 'cms headless' } }
-
-// In/not in
-const inQuery: Where = { category: { in: ['tech', 'news'] } }
-
-// Exists
-const existsQuery: Where = { image: { exists: true } }
-
-// Near (point fields)
-const nearQuery: Where = { location: { near: '-122.4194,37.7749,10000' } }
-```
-
-## AND/OR Logic
-
-```ts
-import type { Where } from 'payload'
-
-const complexQuery: Where = {
-  or: [
-    { color: { equals: 'mint' } },
-    {
-      and: [{ color: { equals: 'white' } }, { featured: { equals: false } }],
-    },
-  ],
-}
-```
-
-## Nested Properties
-
-```ts
-import type { Where } from 'payload'
-
-const nestedQuery: Where = {
-  'author.role': { equals: 'editor' },
-  'meta.featured': { exists: true },
-}
-```
-
-## Local API
-
-```ts
-// Find documents
-const posts = await payload.find({
-  collection: 'posts',
-  where: {
-    status: { equals: 'published' },
-    'author.name': { contains: 'john' },
-  },
-  depth: 2,
-  limit: 10,
-  page: 1,
-  sort: '-createdAt',
-  locale: 'en',
-  select: {
-    title: true,
-    author: true,
-  },
-})
-
-// Find by ID
-const post = await payload.findByID({
-  collection: 'posts',
-  id: '123',
-  depth: 2,
-})
-
-// Create
-const post = await payload.create({
-  collection: 'posts',
-  data: {
-    title: 'New Post',
-    status: 'draft',
-  },
-})
-
-// Update
-await payload.update({
-  collection: 'posts',
-  id: '123',
-  data: {
-    status: 'published',
-  },
-})
-
-// Delete
-await payload.delete({
-  collection: 'posts',
-  id: '123',
-})
-
-// Count
-const count = await payload.count({
-  collection: 'posts',
-  where: {
-    status: { equals: 'published' },
-  },
-})
-```
-
-### Threading req Parameter
-
-When performing operations in hooks or nested operations, pass the `req` parameter to maintain transaction context:
-
-```ts
-// ✅ CORRECT: Pass req for transaction safety
-const afterChange: CollectionAfterChangeHook = async ({ doc, req }) => {
-  await req.payload.create({
-    collection: 'audit-log',
-    data: { action: 'created', docId: doc.id },
-    req, // Maintains transaction atomicity
+  const res = await fetch(url.toString(), {
+    headers,
+    signal: AbortSignal.timeout(15000),
   })
-}
-
-// ❌ WRONG: Missing req breaks transaction
-const afterChange: CollectionAfterChangeHook = async ({ doc, req }) => {
-  await req.payload.create({
-    collection: 'audit-log',
-    data: { action: 'created', docId: doc.id },
-    // Missing req - runs in separate transaction
-  })
+  return res.json() as Promise<DocsResponse<T>>
 }
 ```
 
-This is critical for MongoDB replica sets and Postgres. See [ADAPTERS.md#threading-req-through-operations](ADAPTERS.md#threading-req-through-operations) for details.
+**Características**:
+- Timeout de 15 segundos
+- `depth=2` en todas las requests (resuelve relaciones hasta 2 niveles)
+- `locale` siempre presente
+- `Authorization` header solo cuando `draft=true`
 
-### Access Control in Local API
+## Tipos de respuesta
 
-**Important**: Local API bypasses access control by default (`overrideAccess: true`). When passing a `user` parameter, you must explicitly set `overrideAccess: false` to respect that user's permissions.
-
-```ts
-// ❌ WRONG: User is passed but access control is bypassed
-const posts = await payload.find({
-  collection: 'posts',
-  user: currentUser,
-  // Missing: overrideAccess: false
-  // Result: Operation runs with ADMIN privileges, ignoring user's permissions
-})
-
-// ✅ CORRECT: Respects user's access control permissions
-const posts = await payload.find({
-  collection: 'posts',
-  user: currentUser,
-  overrideAccess: false, // Required to enforce access control
-  // Result: User only sees posts they have permission to read
-})
-
-// Administrative operation (intentionally bypass access control)
-const allPosts = await payload.find({
-  collection: 'posts',
-  // No user parameter
-  // overrideAccess defaults to true
-  // Result: Returns all posts regardless of access control
-})
-```
-
-**When to use `overrideAccess: false`:**
-
-- Performing operations on behalf of a user
-- Testing access control logic
-- API routes that should respect user permissions
-- Any operation where `user` parameter is provided
-
-**When `overrideAccess: true` is appropriate:**
-
-- Administrative operations (migrations, seeds, cron jobs)
-- Internal system operations
-- Operations explicitly intended to bypass access control
-
-See [ACCESS-CONTROL.md#important-notes](ACCESS-CONTROL.md#important-notes) for more details.
-
-## REST API
-
-```ts
-import { stringify } from 'qs-esm'
-
-const query = {
-  status: { equals: 'published' },
-}
-
-const queryString = stringify(
-  {
-    where: query,
-    depth: 2,
-    limit: 10,
-  },
-  { addQueryPrefix: true },
-)
-
-const response = await fetch(`https://api.example.com/api/posts${queryString}`)
-const data = await response.json()
-```
-
-### REST Endpoints
-
-```txt
-GET    /api/{collection}           - Find documents
-GET    /api/{collection}/{id}      - Find by ID
-POST   /api/{collection}           - Create
-PATCH  /api/{collection}/{id}      - Update
-DELETE /api/{collection}/{id}      - Delete
-GET    /api/{collection}/count     - Count documents
-
-GET    /api/globals/{slug}         - Get global
-POST   /api/globals/{slug}         - Update global
-```
-
-## GraphQL
-
-```graphql
-query {
-  Posts(where: { status: { equals: published } }, limit: 10, sort: "-createdAt") {
-    docs {
-      id
-      title
-      author {
-        name
-      }
-    }
-    totalDocs
-    hasNextPage
-  }
-}
-
-mutation {
-  createPost(data: { title: "New Post", status: draft }) {
-    id
-    title
-  }
-}
-
-mutation {
-  updatePost(id: "123", data: { status: published }) {
-    id
-    status
-  }
-}
-
-mutation {
-  deletePost(id: "123") {
-    id
-  }
+```typescript
+interface DocsResponse<T> {
+  docs: T[]
+  totalDocs: number
+  limit: number
+  totalPages: number
+  page: number
+  hasPrevPage: boolean
+  hasNextPage: boolean
+  prevPage: number | null
+  nextPage: number | null
 }
 ```
 
-## Performance Best Practices
+## Queries por colección
 
-- Set `maxDepth` on relationships to prevent over-fetching
-- Use `select` to limit returned fields
-- Index frequently queried fields
-- Use `virtual` fields for computed data
-- Cache expensive operations in hook `context`
+### Pages
+```typescript
+getPageBySlug(slug, locale, draft?)
+// GET /api/pages?locale=es&depth=2&where[slug][equals]=home
+
+getPages(locale)
+// GET /api/pages?locale=es&depth=2
+```
+
+### Posts
+```typescript
+getPosts(locale, page, limit, draft?)
+// GET /api/posts?locale=es&depth=2&sort=-publishedAt&page=1&limit=12
+//      &where[_status][equals]=published
+
+getAllPosts(locale)
+// GET /api/posts?locale=es&depth=2&limit=100
+
+getPostsByTag(tag, locale, page, limit)
+// GET /api/posts?locale=es&depth=2&where[tags.tag][equals]=voip&page=1&limit=12
+
+getPostBySlug(slug, locale, draft?)
+// GET /api/posts?locale=es&depth=2&where[slug][equals]=pbx-en-la-nube
+```
+
+### Projects
+```typescript
+getProjects(locale, page, limit)
+// GET /api/projects?locale=es&depth=2&sort=-year&page=1&limit=12
+
+getAllProjects(locale)
+// GET /api/projects?locale=es&depth=2&limit=100
+
+getProjectsByTag(tag, locale, page, limit)
+// GET /api/projects?locale=es&depth=2&where[tags.tag][equals]=redes
+
+getProjectBySlug(slug, locale, draft?)
+// GET /api/projects?locale=es&depth=2&where[slug][equals]=red-corporativa
+```
+
+### Services
+```typescript
+getServiceCategories(locale)
+// GET /api/services?locale=es&depth=2&where[parent][exists]=false
+// Devuelve solo servicios top-level (categorías)
+
+getServicesByParent(parentId, locale)
+// GET /api/services?locale=es&depth=2&where[parent][equals]=ID
+
+getServiceBySlug(slug, locale, draft?)
+// GET /api/services?locale=es&depth=2&where[slug][equals]=viptel-pbx
+
+getAllServices(locale)
+// GET /api/services?locale=es&depth=2&limit=100
+```
+
+### Redirects
+```typescript
+getRedirect(from)
+// GET /api/redirects?where[from][equals]=/old-page
+```
+
+### Globals
+```typescript
+// Header y Footer se consultan directamente en los layouts:
+fetch(`${PAYLOAD_URL}/api/globals/header?locale=${locale}`)
+fetch(`${PAYLOAD_URL}/api/globals/footer?locale=${locale}`)
+```
+
+### Media
+```typescript
+resolveMediaUrl(url)
+// Si es relativa → prepend PAYLOAD_URL
+// Si es absoluta → devolver tal cual
+```
+
+## Filtros comunes
+
+| Filtro | Sintaxis | Ejemplo |
+|---|---|---|
+| Igual | `where[field][equals]` | `where[slug][equals]=home` |
+| No existe | `where[field][exists]` | `where[parent][exists]=false` |
+| En array | `where[field][in]` | `where[id][in]=1,2,3` |
+| Estado | `where[_status][equals]` | `where[_status][equals]=published` |
+| Tag en array | `where[tags.tag][equals]` | `where[tags.tag][equals]=voip` |
+
+## Draft mode
+
+El website detecta drafts vía:
+1. Cookie `__prv` (seteada por `/api/preview`)
+2. Pasa `draft=true` a `fetchAPI`
+3. `fetchAPI` añade header `Authorization: users API-Key {key}`
+4. Backend ejecuta `authenticatedOrPublished` → user=true vía API key → devuelve draft

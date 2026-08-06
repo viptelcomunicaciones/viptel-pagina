@@ -16,6 +16,7 @@ import { hero } from '@/heros/config'
 import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
+import { Code } from '@/blocks/Code/config'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -79,6 +80,7 @@ export const Pages: CollectionConfig<'pages'> = {
                 FAQ,
                 Gallery,
                 MediaContent,
+                Code,
               ],
               required: true,
               admin: {
