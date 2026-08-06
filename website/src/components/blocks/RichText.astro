@@ -1,5 +1,5 @@
 ---
-import { resolveMediaUrl } from '@/lib/payload'
+import { payload } from '@/lib/payload-client'
 
 interface Props {
   content: any
@@ -118,7 +118,7 @@ function renderNode(node: any): string {
 
   // Image upload
   if (node.type === 'upload' && node.value) {
-    const url = node.value.url ? resolveMediaUrl(node.value.url) : ''
+    const url = node.value.url ? payload.resolveMediaUrl(node.value.url) : ''
     const alt = node.value.alt || ''
     return `<img src="${url}" alt="${alt}" class="rounded-lg max-w-full" />`
   }

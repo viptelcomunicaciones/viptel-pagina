@@ -1,6 +1,6 @@
 ---
 import ServiceView from '@/components/pages/views/ServiceView.astro'
-import { getServiceBySlug, getServicesByParent } from '@/lib/payload'
+import { payload } from '@/lib/payload-client'
 import { getSecondaryLocales } from '@/i18n'
 
 export const prerender = false
@@ -13,7 +13,7 @@ const { slug, locale } = Astro.params as { slug: string; locale: string }
 if (!slug) return Astro.redirect('/404')
 
 const querySlug = slug.includes('/') ? slug.split('/').pop()! : slug
-const service = await getServiceBySlug(querySlug, locale)
+const service = await payload.services().getBySlug(querySlug, locale)
 if (!service) return Astro.redirect('/404')
 
 let parentService = null
@@ -24,10 +24,10 @@ if (service.parent) {
     ? (service.parent as any).slug
     : null
   if (parentSlug) {
-    parentService = await getServiceBySlug(parentSlug, locale)
+    parentService = await payload.services().getBySlug(parentSlug, locale)
   }
 } else {
-  childrenServices = await getServicesByParent(service.id, locale)
+  childrenServices = await payload.services().getByParent(service.id, locale)
 }
 ---
 

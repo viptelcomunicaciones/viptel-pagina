@@ -2,7 +2,7 @@
 import PageLayout from '@/layouts/PageLayout.astro'
 import RichText from '@/components/blocks/RichText.astro'
 import { defaultLocale } from '@/i18n'
-import { getPostBySlug, resolveMediaUrl } from '@/lib/payload'
+import { payload } from '@/lib/payload-client'
 
 export const prerender = false
 
@@ -12,7 +12,7 @@ if (!slug) {
   return Astro.redirect('/404')
 }
 
-const post = await getPostBySlug(slug, locale)
+const post = await payload.posts().getBySlug(slug, locale)
 
 if (!post) {
   return Astro.redirect('/404')
@@ -23,7 +23,7 @@ if (!post) {
   <article class="py-[var(--space-section-md)]">
     <div class="mx-auto max-w-3xl px-6">
       {post.heroImage?.url && (
-        <img src={resolveMediaUrl(post.heroImage.url)} alt={post.heroImage.alt || post.title} class="w-full aspect-video object-cover rounded-xl mb-8 shadow-lg" />
+        <img src={payload.resolveMediaUrl(post.heroImage.url)} alt={post.heroImage.alt || post.title} class="w-full aspect-video object-cover rounded-xl mb-8 shadow-lg" />
       )}
       <h1 class="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">{post.title}</h1>
       <div class="flex flex-wrap items-center gap-4 text-sm text-foreground-muted mb-8">

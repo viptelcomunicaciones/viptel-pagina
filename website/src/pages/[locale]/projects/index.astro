@@ -4,12 +4,12 @@ import { Hero } from '@/components/hero'
 import Badge from '@/components/ui/data-display/Badge/Badge.astro'
 import Icon from '@/components/ui/primitives/Icon/Icon.astro'
 import { t, defaultLocale } from '@/i18n'
-import { getAllProjects } from '@/lib/payload'
+import { payload } from '@/lib/payload-client'
 
 export const prerender = false
 
 const { locale = defaultLocale } = Astro.params
-const projects = await getAllProjects(locale)
+const projects = await payload.projects().getAll(locale)
 ---
 
 <PageLayout title={t('projects.metaTitle', locale)} description={t('projects.metaDescription', locale)} eagerReveal footerBackground="secondary">

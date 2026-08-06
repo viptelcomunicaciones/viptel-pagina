@@ -18,7 +18,7 @@ import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import StackMarquee from '@/components/landing/StackMarquee.astro';
 import type { StackItem } from '@/components/landing/StackMarquee.astro';
 import { viptelStack } from '@/data/stack';
-import { getPageBySlug, resolveMediaUrl } from '@/lib/payload';
+import { payload } from '@/lib/payload-client';
 import { t, defaultLocale, localizedPath } from '@/i18n';
 import type { PageBlock } from '@/lib/payload-types';
 
@@ -40,7 +40,7 @@ interface Props {
 
 const { locale = defaultLocale } = Astro.props;
 
-const home = await getPageBySlug('home', locale);
+const home = await payload.pages().getBySlug('home', locale);
 
 function extractRichText(richText: any): string {
   try {
@@ -57,7 +57,7 @@ function extractRichText(richText: any): string {
 
 const heroTitle = extractRichText(home?.hero?.richText);
 const heroLinks: HeroLink[] = home?.hero?.links ?? [];
-const heroImageUrl = home?.hero?.media && typeof home.hero.media !== 'number' && home.hero.media.url ? resolveMediaUrl(home.hero.media.url) : null;
+const heroImageUrl = home?.hero?.media && typeof home.hero.media !== 'number' && home.hero.media.url ? payload.resolveMediaUrl(home.hero.media.url) : null;
 
 function getLinkUrl(link: HeroLink['link']): string {
   if (!link) return '#';

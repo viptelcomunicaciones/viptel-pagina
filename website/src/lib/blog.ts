@@ -7,7 +7,7 @@ import siteConfig from '@/config/site.config';
 import { defaultLocale, localizedPath, isEnabled, getLocales } from '@/i18n';
 import { tagToSlug, findTagBySlug } from '@/lib/tags';
 import type { Post } from '@/lib/payload-types';
-import { getAllPosts, getPosts, getPostsByTag } from '@/lib/payload';
+import { payload } from '@/lib/payload-client';
 
 export const BLOG_POSTS_PER_PAGE = siteConfig.blog?.postsPerPage ?? 12;
 export const BLOG_TAG_CLOUD_LIMIT = siteConfig.blog?.tagCloudLimit ?? 10;
@@ -41,12 +41,12 @@ export function getSecondaryLocales(): string[] {
 }
 
 export async function getPublishedPosts(locale: string = defaultLocale): Promise<Post[]> {
-  return getAllPosts(locale);
+  return payload.posts().getAll(locale);
 }
 
 export async function getBlogPageCount(locale: string = defaultLocale): Promise<number> {
   try {
-    const { totalPages } = await getPosts(locale, 1, BLOG_POSTS_PER_PAGE);
+    const { totalPages } = await payload.posts().getPaginated(locale, 1, BLOG_POSTS_PER_PAGE);
     return totalPages ?? 1;
   } catch {
     return 1;

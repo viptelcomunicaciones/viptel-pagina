@@ -3,7 +3,7 @@ import { Image } from 'astro:assets'
 import { t } from '@/i18n'
 import { cn } from '@/lib/cn'
 
-import { resolveMediaUrl } from '@/lib/payload'
+import { payload } from '@/lib/payload-client'
 
 interface GalleryImage {
   id?: string | null
@@ -22,7 +22,7 @@ const { gallery, locale = 'es', class: className } = Astro.props
 function getImageUrl(img: GalleryImage): string | null {
   if (typeof img.image === 'object' && img.image && 'url' in img.image) {
     const rawUrl = img.image.url as string | null
-    return rawUrl ? resolveMediaUrl(rawUrl) : null
+    return rawUrl ? payload.resolveMediaUrl(rawUrl) : null
   }
   return null
 }

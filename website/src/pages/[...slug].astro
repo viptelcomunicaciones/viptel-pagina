@@ -2,7 +2,7 @@
 import PageLayout from '@/layouts/PageLayout.astro'
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro'
 import HeroBlock from '@/components/blocks/HeroBlock.astro'
-import { getPageBySlug } from '@/lib/payload'
+import { payload } from '@/lib/payload-client'
 
 export const prerender = false
 
@@ -12,7 +12,7 @@ if (!slug) {
   return Astro.redirect('/404')
 }
 
-const page = await getPageBySlug(slug)
+const page = await payload.pages().getBySlug(slug)
 
 if (!page) {
   return Astro.redirect('/404')

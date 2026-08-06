@@ -7,7 +7,7 @@ import siteConfig from '@/config/site.config';
 import { defaultLocale, localizedPath, isEnabled, getLocales } from '@/i18n';
 import { tagToSlug, findTagBySlug } from '@/lib/tags';
 import type { Project } from '@/lib/payload-types';
-import { getAllProjects, getProjects, getProjectsByTag } from '@/lib/payload';
+import { payload } from '@/lib/payload-client';
 
 export { tagToSlug, findTagBySlug };
 
@@ -41,12 +41,12 @@ export function getSecondaryLocales(): string[] {
 }
 
 export async function getVisibleProjects(locale: string = defaultLocale): Promise<Project[]> {
-  return getAllProjects(locale);
+  return payload.projects().getAll(locale);
 }
 
 export async function getProjectPageCount(locale: string = defaultLocale): Promise<number> {
   try {
-    const { totalPages } = await getProjects(locale, 1, PROJECTS_PER_PAGE);
+    const { totalPages } = await payload.projects().getPaginated(locale, 1, PROJECTS_PER_PAGE);
     return totalPages ?? 1;
   } catch {
     return 1;

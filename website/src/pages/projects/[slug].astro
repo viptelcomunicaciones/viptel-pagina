@@ -1,7 +1,7 @@
 ---
 import PageLayout from '@/layouts/PageLayout.astro'
 import RichText from '@/components/blocks/RichText.astro'
-import { getProjectBySlug, getAllProjects, resolveMediaUrl } from '@/lib/payload'
+import { payload } from '@/lib/payload-client'
 
 export const prerender = false
 
@@ -11,13 +11,13 @@ if (!slug) {
   return Astro.redirect('/404')
 }
 
-const project = await getProjectBySlug(slug)
+const project = await payload.projects().getBySlug(slug)
 
 if (!project) {
   return Astro.redirect('/404')
 }
 
-const allProjects = await getAllProjects()
+const allProjects = await payload.projects().getAll()
 const related = allProjects.filter((p) => p.slug !== slug).slice(0, 3)
 ---
 
@@ -40,7 +40,7 @@ const related = allProjects.filter((p) => p.slug !== slug).slice(0, 3)
       {project.description && <p class="text-lg text-foreground-muted mb-8 leading-relaxed">{project.description}</p>}
 
       {project.coverImage?.url && (
-        <img src={resolveMediaUrl(project.coverImage.url)} alt={project.coverImage.alt || project.title} class="w-full aspect-video object-cover rounded-xl mb-8 shadow-lg" />
+        <img src={payload.resolveMediaUrl(project.coverImage.url)} alt={project.coverImage.alt || project.title} class="w-full aspect-video object-cover rounded-xl mb-8 shadow-lg" />
       )}
 
       {project.content && (
@@ -54,7 +54,7 @@ const related = allProjects.filter((p) => p.slug !== slug).slice(0, 3)
           {project.gallery.map((img) => (
             img.image?.url && (
               <div class="overflow-hidden rounded-xl aspect-square">
-                <img src={resolveMediaUrl(img.image.url)} alt={img.alt || img.image.alt || ''} class="w-full h-full object-cover" />
+                <img src={payload.resolveMediaUrl(img.image.url)} alt={img.alt || img.image.alt || ''} class="w-full h-full object-cover" />
               </div>
             )
           ))}

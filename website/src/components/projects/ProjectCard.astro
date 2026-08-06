@@ -10,7 +10,7 @@ import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import type { Project } from '@/lib/payload-types';
 import { defaultLocale } from '@/i18n';
 import { getProjectUrl } from '@/lib/projects';
-import { resolveMediaUrl } from '@/lib/payload';
+import { payload } from '@/lib/payload-client';
 
 interface Props {
   project: Project;
@@ -39,7 +39,7 @@ const { project, index = 0, locale = defaultLocale } = Astro.props;
     {project.coverImage?.url && (
       <div class="mb-4 overflow-hidden rounded-lg">
         <img
-          src={resolveMediaUrl(project.coverImage.url)}
+          src={payload.resolveMediaUrl(project.coverImage.url)}
           alt={project.coverImage.alt || project.title}
           class="w-full aspect-video object-cover transition-transform duration-300 group-hover:scale-105"
           loading="lazy"

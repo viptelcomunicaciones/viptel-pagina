@@ -2,7 +2,7 @@
 import BlogCard from './BlogCard.astro';
 import { t, defaultLocale } from '@/i18n';
 import { getPostUrl } from '@/lib/blog';
-import { getAllPosts } from '@/lib/payload';
+import { payload } from '@/lib/payload-client';
 import type { Post } from '@/lib/payload-types';
 
 interface Props {
@@ -14,7 +14,7 @@ interface Props {
 
 const { currentSlug, tags, locale = defaultLocale, maxPosts = 3 } = Astro.props;
 
-const allPosts = await getAllPosts(locale).catch(() => [] as Post[]);
+const allPosts = await payload.posts().getAll(locale).catch(() => [] as Post[]);
 
 const relatedPosts = allPosts
   .filter((post) => {

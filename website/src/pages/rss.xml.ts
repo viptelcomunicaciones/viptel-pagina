@@ -1,6 +1,6 @@
 import type { APIContext } from 'astro';
 import siteConfig from '@/config/site.config';
-import { getAllPosts } from '@/lib/payload';
+import { payload } from '@/lib/payload-client';
 import { defaultLocale } from '@/i18n';
 import type { Post } from '@/lib/payload-types';
 
@@ -18,7 +18,7 @@ function formatRfc822Date(date: Date): string {
 }
 
 export async function GET(context: APIContext) {
-  const posts = await getAllPosts(defaultLocale).catch(() => [] as Post[]);
+  const posts = await payload.posts().getAll(defaultLocale).catch(() => [] as Post[]);
 
   const site = context.site?.toString() ?? siteConfig.url;
   const siteUrl = site.endsWith('/') ? site.slice(0, -1) : site;

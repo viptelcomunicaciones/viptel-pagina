@@ -1,6 +1,6 @@
 ---
 import type { ArchiveBlock as ArchiveBlockType } from '@/lib/payload-types'
-import { getAllPosts, getAllProjects, resolveMediaUrl } from '@/lib/payload'
+import { payload } from '@/lib/payload-client'
 import RichText from './RichText.astro'
 
 interface Props {
@@ -14,10 +14,10 @@ let items: any[] = []
 const isProjects = (block as any).relationTo === 'projects'
 
 if (block.populateBy === 'selection' && block.selectedDocs?.length) {
-  const all = isProjects ? await getAllProjects(locale) : await getAllPosts(locale)
+  const all = isProjects ? await payload.projects().getAll(locale) : await payload.posts().getAll(locale)
   items = all.filter((p) => (block.selectedDocs as any[]).some((d: any) => d === p.id || (typeof d === 'object' && d.id === p.id)))
 } else {
-  items = isProjects ? await getAllProjects(locale) : await getAllPosts(locale)
+  items = isProjects ? await payload.projects().getAll(locale) : await payload.posts().getAll(locale)
   if (block.categories?.length) {
     items = items.filter((p) =>
       p.categories?.some((c: any) => block.categories!.includes(typeof c === 'number' ? c : c.id)),
@@ -44,7 +44,7 @@ const linkPrefix = isProjects ? '/projects' : '/blog'
         >
           {(item.heroImage?.url || item.coverImage?.url) && (
             <img
-              src={resolveMediaUrl(item.heroImage?.url || item.coverImage?.url)}
+              src={payload.resolveMediaUrl(item.heroImage?.url || item.coverImage?.url)}
               alt={(item.heroImage?.alt || item.coverImage?.alt) || item.title}
               class="w-full aspect-video object-cover"
             />

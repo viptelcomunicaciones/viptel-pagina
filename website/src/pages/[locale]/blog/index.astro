@@ -4,12 +4,12 @@ import { Hero } from '@/components/hero'
 import Badge from '@/components/ui/data-display/Badge/Badge.astro'
 import Icon from '@/components/ui/primitives/Icon/Icon.astro'
 import { t, defaultLocale } from '@/i18n'
-import { getAllPosts, resolveMediaUrl } from '@/lib/payload'
+import { payload } from '@/lib/payload-client'
 
 export const prerender = false
 
 const { locale = defaultLocale } = Astro.params
-const posts = await getAllPosts(locale)
+const posts = await payload.posts().getAll(locale)
 ---
 
 <PageLayout title={t('blog.metaTitle', locale)} description={t('blog.metaDescription', locale)} showScrollProgress eagerReveal>
@@ -34,7 +34,7 @@ const posts = await getAllPosts(locale)
             >
               {post.heroImage?.url && (
                 <div class="aspect-video overflow-hidden">
-                  <img src={resolveMediaUrl(post.heroImage.url)} alt={post.heroImage.alt || post.title} class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                  <img src={payload.resolveMediaUrl(post.heroImage.url)} alt={post.heroImage.alt || post.title} class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                 </div>
               )}
               <div class="p-6 flex flex-col flex-1">
