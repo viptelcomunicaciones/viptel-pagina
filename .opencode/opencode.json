@@ -11,7 +11,7 @@
       "type": "http",
       "url": "http://localhost:3000/api/mcp",
       "headers": {
-        "Authorization": "users API-Key cd194ccb-aec6-48ef-b916-67f1e538ee07"
+        "Authorization": "Bearer cd194ccb-aec6-48ef-b916-67f1e538ee07"
       },
       "enabled": true
     }
