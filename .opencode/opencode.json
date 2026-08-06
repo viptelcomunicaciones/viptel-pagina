@@ -6,10 +6,11 @@
     "backend/AGENTS.md",
     "website/AGENTS.md"
   ],
-  "mcpServers": {
+    "mcp": {
     "payload": {
-      "command": "npx",
-      "args": ["-y", "@payloadcms/mcp"]
+      "type": "http",
+      "url": "http://localhost:3000/api/mcp",
+      "enabled": true
     }
   },
   "agent": {

@@ -14,6 +14,7 @@ import { Services } from './collections/Services'
 import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
+import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getFrontendURL, getServerSideURL } from './utilities/getURL'
@@ -67,7 +68,7 @@ export default buildConfig({
   collections: [Pages, Posts, Projects, Services, Media, Categories, Users],
   cors: [getServerSideURL(), getFrontendURL()].filter(Boolean),
   globals: [Header, Footer],
-  plugins,
+  plugins: [...plugins, mcpPlugin({})],
   secret: process.env.PAYLOAD_SECRET || '',
   sharp,
   typescript: {
