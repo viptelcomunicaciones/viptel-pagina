@@ -1,0 +1,24 @@
+---
+/**
+ * BlockSection — consistent section wrapper for CMS content blocks.
+ * Applies standard spacing, border, and reveal animations.
+ */
+import { cn } from '@/lib/cn'
+
+interface Props {
+  background?: 'default' | 'secondary'
+  class?: string
+}
+
+const { background = 'default', class: className } = Astro.props
+---
+
+<section
+  class={cn(
+    'relative z-10 py-[var(--space-section-md)] border-t border-border',
+    background === 'secondary' ? 'bg-background-secondary' : 'bg-background',
+    className,
+  )}
+>
+  <slot />
+</section>

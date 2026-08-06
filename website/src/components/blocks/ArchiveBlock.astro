@@ -1,6 +1,7 @@
 ---
-import type { ArchiveBlock as ArchiveBlockType } from '@/lib/payload-types'
+import type { ArchiveBlock as ArchiveBlockType, Post, Project } from '@/lib/payload-types'
 import { payload } from '@/lib/payload-client'
+import { localizedPath } from '@/i18n'
 import RichText from './RichText.astro'
 
 interface Props {
@@ -10,17 +11,19 @@ interface Props {
 
 const { block, locale = 'es' } = Astro.props
 
-let items: any[] = []
-const isProjects = (block as any).relationTo === 'projects'
+type ArchiveItem = Post | Project
+let items: ArchiveItem[] = []
+const isProjects = block.relationTo === 'projects'
 
 if (block.populateBy === 'selection' && block.selectedDocs?.length) {
-  const all = isProjects ? await payload.projects().getAll(locale) : await payload.posts().getAll(locale)
-  items = all.filter((p) => (block.selectedDocs as any[]).some((d: any) => d === p.id || (typeof d === 'object' && d.id === p.id)))
+  const all: ArchiveItem[] = isProjects ? await payload.projects().getAll(locale) : await payload.posts().getAll(locale)
+  const selectedIds = new Set(block.selectedDocs.map((d) => (typeof d === 'object' ? (d as any).id : d)))
+  items = all.filter((p) => selectedIds.has(p.id))
 } else {
   items = isProjects ? await payload.projects().getAll(locale) : await payload.posts().getAll(locale)
   if (block.categories?.length) {
     items = items.filter((p) =>
-      p.categories?.some((c: any) => block.categories!.includes(typeof c === 'number' ? c : c.id)),
+      p.categories?.some((c) => block.categories!.includes(typeof c === 'number' ? c : (c as any).id)),
     )
   }
   if (block.limit) items = items.slice(0, block.limit)
@@ -39,7 +42,7 @@ const linkPrefix = isProjects ? '/projects' : '/blog'
     <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
       {items.map((item) => (
         <a
-          href={`${locale === 'es' ? '' : '/' + locale}${linkPrefix}/${item.slug}`}
+          href={localizedPath(`${linkPrefix}/${item.slug}`, locale)}
           class="group bg-background rounded-xl border border-border overflow-hidden hover:border-brand-500/40 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
         >
           {(item.heroImage?.url || item.coverImage?.url) && (

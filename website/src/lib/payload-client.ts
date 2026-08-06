@@ -1,19 +1,18 @@
 /**
  * PayloadClient — SOLID REST client for Payload CMS.
  *
- * Principles:
- * - Single Responsibility: one query class per collection
- * - Open/Closed: extend via new query classes, base client untouched
- * - Interface Segregation: each query class exposes only relevant methods
- * - Dependency Inversion: components depend on this client, not raw fetch
- *
  * Usage:
  *   import { payload } from '@/lib/payload-client'
  *   const home = await payload.pages().getBySlug('home', 'es')
- *   const posts = await payload.posts().getLatest(4, 'es')
  */
 import type { Page, Post, Project, Redirect, Service } from './payload-types'
 import { defaultLocale } from '@/i18n'
+
+// ── Constants ────────────────────────────────────────────
+
+const DEFAULT_TIMEOUT = 15_000
+const DEFAULT_DEPTH = 2
+const MAX_DOCS_PER_PAGE = 100
 
 // ── Types ───────────────────────────────────────────────
 
@@ -46,10 +45,9 @@ export class PayloadClient {
   constructor(config: PayloadClientConfig) {
     this.url = config.url
     this.key = config.key ?? ''
-    this.timeout = config.timeout ?? 15_000
+    this.timeout = config.timeout ?? DEFAULT_TIMEOUT
   }
 
-  /** Low-level fetch with timeout, error handling, and auth headers. */
   async fetchAPI<T = unknown>(endpoint: string, options: FetchOptions = {}): Promise<T> {
     const locale = options.locale ?? defaultLocale
     const controller = new AbortController()
@@ -58,24 +56,22 @@ export class PayloadClient {
     try {
       const params = new URLSearchParams()
       params.set('locale', locale)
-      params.set('depth', '2')
+      params.set('depth', String(DEFAULT_DEPTH))
       if (options.draft) params.set('draft', 'true')
 
       const separator = endpoint.includes('?') ? '&' : '?'
-      const finalUrl = `${this.url}/api/${endpoint}${separator}${params.toString()}`
+      const url = `${this.url}/api/${endpoint}${separator}${params.toString()}`
 
       const headers: Record<string, string> = {}
       if (options.draft && this.key) {
         headers['Authorization'] = `users API-Key ${this.key}`
       }
 
-      const res = await fetch(finalUrl, { signal: controller.signal, headers })
-
+      const res = await fetch(url, { signal: controller.signal, headers })
       if (!res.ok) {
         console.error(`[Payload] ${endpoint}: ${res.status} ${res.statusText}`)
         throw new Error(`Payload API error: ${res.status}`)
       }
-
       return res.json()
     } catch (err) {
       if (err instanceof DOMException && err.name === 'AbortError') {
@@ -87,14 +83,11 @@ export class PayloadClient {
     }
   }
 
-  /** Resolve relative Payload media URLs to absolute URLs. */
   resolveMediaUrl(mediaUrl?: string | null): string {
     if (!mediaUrl) return ''
     if (mediaUrl.startsWith('http')) return mediaUrl
     return `${this.url}${mediaUrl}`
   }
-
-  // ── Collection accessors ───────────────────────────────
 
   pages(): PageQueries {
     return new PageQueries(this)
@@ -117,17 +110,33 @@ export class PayloadClient {
   }
 }
 
-// ── Collection Query Classes ─────────────────────────────
+// ── Base Query Class ─────────────────────────────────────
 
-class PageQueries {
-  constructor(private client: PayloadClient) {}
+class QueryBase<T> {
+  constructor(protected client: PayloadClient, private slug: string) {}
 
-  async getBySlug(slug: string, locale = defaultLocale, draft = false): Promise<Page | null> {
-    const data = await this.client.fetchAPI<DocsResponse<Page>>(
-      `pages?where[slug][equals]=${encodeURIComponent(slug)}`,
+  async getBySlug(slug: string, locale = defaultLocale, draft = false): Promise<T | null> {
+    const data = await this.client.fetchAPI<DocsResponse<T>>(
+      `${this.slug}?where[slug][equals]=${encodeURIComponent(slug)}`,
       { locale, draft },
     )
     return data.docs?.[0] ?? null
+  }
+
+  async getAll(locale = defaultLocale): Promise<T[]> {
+    const data = await this.client.fetchAPI<DocsResponse<T>>(
+      `${this.slug}?limit=${MAX_DOCS_PER_PAGE}&where[_status][equals]=published`,
+      { locale },
+    )
+    return data.docs ?? []
+  }
+}
+
+// ── Collection Query Classes ─────────────────────────────
+
+class PageQueries extends QueryBase<Page> {
+  constructor(client: PayloadClient) {
+    super(client, 'pages')
   }
 
   async getAll(locale = defaultLocale): Promise<Page[]> {
@@ -136,43 +145,27 @@ class PageQueries {
   }
 }
 
-class PostQueries {
-  constructor(private client: PayloadClient) {}
-
-  async getBySlug(slug: string, locale = defaultLocale, draft = false): Promise<Post | null> {
-    const data = await this.client.fetchAPI<DocsResponse<Post>>(
-      `posts?where[slug][equals]=${encodeURIComponent(slug)}`,
-      { locale, draft },
-    )
-    return data.docs?.[0] ?? null
+class PostQueries extends QueryBase<Post> {
+  constructor(client: PayloadClient) {
+    super(client, 'posts')
   }
 
-  async getPaginated(
-    locale = defaultLocale,
-    page = 1,
-    limit = 20,
-    draft = false,
-  ): Promise<DocsResponse<Post>> {
+  async getAll(locale = defaultLocale): Promise<Post[]> {
+    const data = await this.client.fetchAPI<DocsResponse<Post>>(
+      `posts?sort=-publishedAt&limit=${MAX_DOCS_PER_PAGE}&where[_status][equals]=published`,
+      { locale },
+    )
+    return data.docs ?? []
+  }
+
+  async getPaginated(locale = defaultLocale, page = 1, limit = 20, draft = false): Promise<DocsResponse<Post>> {
     return this.client.fetchAPI<DocsResponse<Post>>(
       `posts?sort=-publishedAt&limit=${limit}&page=${page}&where[_status][equals]=published`,
       { locale, draft },
     )
   }
 
-  async getAll(locale = defaultLocale): Promise<Post[]> {
-    const data = await this.client.fetchAPI<DocsResponse<Post>>(
-      `posts?sort=-publishedAt&limit=100&where[_status][equals]=published`,
-      { locale },
-    )
-    return data.docs ?? []
-  }
-
-  async getByTag(
-    tag: string,
-    locale = defaultLocale,
-    page = 1,
-    limit = 20,
-  ): Promise<DocsResponse<Post>> {
+  async getByTag(tag: string, locale = defaultLocale, page = 1, limit = 20): Promise<DocsResponse<Post>> {
     return this.client.fetchAPI<DocsResponse<Post>>(
       `posts?sort=-publishedAt&limit=${limit}&page=${page}&where[tags.tag][equals]=${encodeURIComponent(tag)}&where[_status][equals]=published`,
       { locale },
@@ -180,15 +173,17 @@ class PostQueries {
   }
 }
 
-class ProjectQueries {
-  constructor(private client: PayloadClient) {}
+class ProjectQueries extends QueryBase<Project> {
+  constructor(client: PayloadClient) {
+    super(client, 'projects')
+  }
 
-  async getBySlug(slug: string, locale = defaultLocale, draft = false): Promise<Project | null> {
+  async getAll(locale = defaultLocale): Promise<Project[]> {
     const data = await this.client.fetchAPI<DocsResponse<Project>>(
-      `projects?where[slug][equals]=${encodeURIComponent(slug)}`,
-      { locale, draft },
+      `projects?sort=-year&limit=${MAX_DOCS_PER_PAGE}&where[_status][equals]=published`,
+      { locale },
     )
-    return data.docs?.[0] ?? null
+    return data.docs ?? []
   }
 
   async getPaginated(locale = defaultLocale, page = 1, limit = 20): Promise<DocsResponse<Project>> {
@@ -198,20 +193,7 @@ class ProjectQueries {
     )
   }
 
-  async getAll(locale = defaultLocale): Promise<Project[]> {
-    const data = await this.client.fetchAPI<DocsResponse<Project>>(
-      `projects?sort=-year&limit=100&where[_status][equals]=published`,
-      { locale },
-    )
-    return data.docs ?? []
-  }
-
-  async getByTag(
-    tag: string,
-    locale = defaultLocale,
-    page = 1,
-    limit = 20,
-  ): Promise<DocsResponse<Project>> {
+  async getByTag(tag: string, locale = defaultLocale, page = 1, limit = 20): Promise<DocsResponse<Project>> {
     return this.client.fetchAPI<DocsResponse<Project>>(
       `projects?sort=-year&limit=${limit}&page=${page}&where[tags.tag][equals]=${encodeURIComponent(tag)}&where[_status][equals]=published`,
       { locale },
@@ -219,8 +201,18 @@ class ProjectQueries {
   }
 }
 
-class ServiceQueries {
-  constructor(private client: PayloadClient) {}
+class ServiceQueries extends QueryBase<Service> {
+  constructor(client: PayloadClient) {
+    super(client, 'services')
+  }
+
+  async getAll(locale = defaultLocale): Promise<Service[]> {
+    const data = await this.client.fetchAPI<DocsResponse<Service>>(
+      `services?limit=${MAX_DOCS_PER_PAGE}&where[_status][equals]=published`,
+      { locale },
+    )
+    return data.docs ?? []
+  }
 
   async getCategories(locale = defaultLocale): Promise<Service[]> {
     const data = await this.client.fetchAPI<DocsResponse<Service>>(
@@ -233,22 +225,6 @@ class ServiceQueries {
   async getByParent(parentId: string, locale = defaultLocale): Promise<Service[]> {
     const data = await this.client.fetchAPI<DocsResponse<Service>>(
       `services?where[parent][equals]=${encodeURIComponent(parentId)}&where[_status][equals]=published`,
-      { locale },
-    )
-    return data.docs ?? []
-  }
-
-  async getBySlug(slug: string, locale = defaultLocale, draft = false): Promise<Service | null> {
-    const data = await this.client.fetchAPI<DocsResponse<Service>>(
-      `services?where[slug][equals]=${encodeURIComponent(slug)}`,
-      { locale, draft },
-    )
-    return data.docs?.[0] ?? null
-  }
-
-  async getAll(locale = defaultLocale): Promise<Service[]> {
-    const data = await this.client.fetchAPI<DocsResponse<Service>>(
-      `services?limit=100&where[_status][equals]=published`,
       { locale },
     )
     return data.docs ?? []

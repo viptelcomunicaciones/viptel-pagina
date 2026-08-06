@@ -35,6 +35,7 @@ import ThemeSelector from '@/components/layout/ThemeSelector.astro';
 import ThemeSelectorDropdown from '@/components/layout/ThemeSelectorDropdown.astro';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher.astro';
 import siteConfig from '@/config/site.config';
+import { resolveSocialLink } from '@/lib/utils';
 import { isEnabled as i18nIsEnabled, getLocaleFromPath, stripLocaleFromPath, t } from '@/i18n';
 
 export interface NavItem {
@@ -195,13 +196,8 @@ function isActive(href: string): boolean {
 }
 
 function getSocialIconData(url: string): { icon: string; label: string } {
-  if (url.includes('github.com'))    return { icon: 'github',    label: 'GitHub' };
-  if (url.includes('instagram.com')) return { icon: 'instagram', label: 'Instagram' };
-  if (url.includes('x.com') || url.includes('twitter.com')) return { icon: 'x-twitter', label: 'X' };
-  if (url.includes('linkedin.com'))  return { icon: 'linkedin',  label: 'LinkedIn' };
-  if (url.includes('bsky.app'))      return { icon: 'bluesky',   label: 'Bluesky' };
-  if (url.includes('youtube.com'))   return { icon: 'youtube',   label: 'YouTube' };
-  return { icon: 'link', label: 'Social' };
+  const resolved = resolveSocialLink(url);
+  return resolved ? { icon: resolved.icon, label: resolved.label } : { icon: 'link', label: 'Social' };
 }
 
 function getNavIcon(href: string): string {

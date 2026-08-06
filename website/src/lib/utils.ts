@@ -79,6 +79,7 @@ const SOCIAL_PLATFORMS = [
   { key: 'linkedin',  match: /linkedin\.com/i,                label: 'LinkedIn',    icon: 'linkedin'  },
   { key: 'instagram', match: /instagram\.com/i,               label: 'Instagram',   icon: 'instagram' },
   { key: 'bluesky',   match: /bsky\.app|bluesky\.social/i,    label: 'Bluesky',     icon: 'bluesky'   },
+  { key: 'youtube',   match: /youtube\.com/i,                 label: 'YouTube',     icon: 'youtube'   },
 ] as const;
 
 export interface ResolvedSocialLink {
@@ -90,8 +91,13 @@ export interface ResolvedSocialLink {
 
 export function resolveSocialLinks(urls: string[]): ResolvedSocialLink[] {
   return urls.flatMap((href) => {
-    const platform = SOCIAL_PLATFORMS.find((p) => p.match.test(href));
-    if (!platform) return [];
-    return [{ key: platform.key, href, label: platform.label, icon: platform.icon }];
+    const result = resolveSocialLink(href);
+    return result ? [result] : [];
   });
+}
+
+export function resolveSocialLink(href: string): ResolvedSocialLink | null {
+  const platform = SOCIAL_PLATFORMS.find((p) => p.match.test(href));
+  if (!platform) return null;
+  return { key: platform.key, href, label: platform.label, icon: platform.icon };
 }
