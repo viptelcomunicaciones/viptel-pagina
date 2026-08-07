@@ -15,9 +15,7 @@ import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { mcpPlugin } from '@payloadcms/plugin-mcp'
-import { searchPlugin } from '@payloadcms/plugin-search'
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
-import { beforeSyncWithSearch } from './search/beforeSync'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getFrontendURL, getServerSideURL } from './utilities/getURL'
@@ -74,22 +72,9 @@ export default buildConfig({
   cors: [getServerSideURL(), getFrontendURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [...plugins, mcpPlugin({}), formBuilderPlugin({
-    fields: {
-      payment: false,
-    },
+    fields: { payment: false },
     formSubmissionOverrides: {
       fields: ({ defaultFields }) => defaultFields,
-    },
-  }), searchPlugin({
-    collections: ['posts', 'pages', 'projects'],
-    defaultPriorities: {
-      pages: 10,
-      posts: 20,
-      projects: 30,
-    },
-    beforeSync: beforeSyncWithSearch,
-    searchOverrides: {
-      slug: 'search',
     },
   })],
   secret: process.env.PAYLOAD_SECRET || '',
