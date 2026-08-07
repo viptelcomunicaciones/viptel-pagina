@@ -12,12 +12,16 @@ import { t, getLocaleFromPath } from '@/i18n';
 interface Props {
   currentPage: number;
   totalPages: number;
-  /** Function that returns the href for a given page number (1-based). */
   href: (page: number) => string;
+  totalDocs?: number;
+  pageSize?: number;
 }
 
-const { currentPage, totalPages, href } = Astro.props;
+const { currentPage, totalPages, href, totalDocs, pageSize = 12 } = Astro.props;
 const locale = getLocaleFromPath(Astro.url.pathname);
+
+const startItem = (currentPage - 1) * pageSize + 1
+const endItem = Math.min(currentPage * pageSize, totalDocs ?? Infinity)
 
 if (totalPages <= 1) {
   // Render nothing — pagination has no purpose with one page.
@@ -42,7 +46,13 @@ const nextHref = currentPage < totalPages ? href(currentPage + 1) : null;
 ---
 
 {totalPages > 1 && (
-  <nav class="mt-12 flex items-center justify-center gap-2" aria-label={t('pagination.label', locale)}>
+  <div class="flex flex-col items-center gap-4 mt-12">
+    {totalDocs !== undefined && (
+      <p class="text-sm text-foreground-muted">
+        {t('pagination.showing', locale, { start: String(startItem), end: String(endItem), total: String(totalDocs) })}
+      </p>
+    )}
+    <nav class="flex items-center justify-center gap-2" aria-label={t('pagination.label', locale)}>
     <a
       href={prevHref ?? undefined}
       class:list={[
@@ -120,4 +130,5 @@ const nextHref = currentPage < totalPages ? href(currentPage + 1) : null;
       <Icon name="arrow-right" size="sm" />
     </a>
   </nav>
+  </div>
 )}

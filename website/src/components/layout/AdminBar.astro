@@ -1,0 +1,50 @@
+---
+/**
+ * AdminBar — floating bar shown on the frontend when logged into Payload CMS.
+ * Allows editors to jump directly to the admin panel to edit the current page.
+ */
+---
+
+<script>
+  async function initAdminBar() {
+    const url = new URL(window.location.href)
+    // Only show on actual pages, not assets or API routes
+    if (url.pathname.match(/\.(png|jpg|gif|svg|webp|css|js|json|xml|ico|txt|woff2?)$/)) return
+
+    try {
+      const payloadUrl = 'http://localhost:3000'
+      const res = await fetch(`${payloadUrl}/api/users/me`, { credentials: 'include' })
+      if (!res.ok) return
+
+      const bar = document.createElement('div')
+      bar.id = 'payload-admin-bar'
+      bar.innerHTML = `
+        <style>
+          #payload-admin-bar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
+            background: #000; color: #fff; font-family: system-ui, sans-serif;
+            font-size: 13px; display: flex; align-items: center; justify-content: space-between;
+            padding: 0 16px; height: 36px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          }
+          #payload-admin-bar a, #payload-admin-bar span { color: #fff; text-decoration: none; margin-left: 12px; }
+          #payload-admin-bar a:hover { text-decoration: underline; }
+          #payload-admin-bar .brand { font-weight: 600; }
+          html { margin-top: 36px; }
+        </style>
+        <span class="brand">Viptel CMS</span>
+        <div>
+          <a href="${payloadUrl}/admin/collections/pages" target="_blank">Pages</a>
+          <a href="${payloadUrl}/admin/collections/posts" target="_blank">Posts</a>
+          <a href="${payloadUrl}/admin/collections/projects" target="_blank">Projects</a>
+          <a href="${payloadUrl}/admin" target="_blank">Admin</a>
+          <a href="${payloadUrl}/admin/logout">Salir</a>
+        </div>
+      `
+      document.body.prepend(bar)
+    } catch {
+      // Can't reach Payload — skip
+    }
+  }
+
+  initAdminBar()
+</script>

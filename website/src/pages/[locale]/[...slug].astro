@@ -12,6 +12,13 @@ if (!slug || !locale) {
   return Astro.redirect('/404')
 }
 
+// Check CMS redirects first
+const redirect = await payload.redirects().get(`/${locale}/${slug}`)
+if (redirect) {
+  const target = typeof redirect.to === 'string' ? redirect.to : `/${(redirect.to as any)?.slug || ''}`
+  return Astro.redirect(target, redirect.type === '301' ? 301 : 302)
+}
+
 const page = await payload.pages().getBySlug(slug, locale)
 
 if (!page) {

@@ -150,7 +150,8 @@
     "page": "Página {current} de {total}",
     "label": "Paginación",
     "previousPage": "Página anterior",
-    "nextPage": "Página siguiente"
+    "nextPage": "Página siguiente",
+    "showing": "Mostrando {{start}}-{{end}} de {{total}}"
   },
   "errors": {
     "pageNotFound": "Página no encontrada",
