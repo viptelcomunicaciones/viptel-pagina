@@ -15,15 +15,20 @@ export const prerender = false
 const { slug } = Astro.params
 const locale = defaultLocale
 
-if (!slug) {
-  Astro.response.status = 404
+let page = null
+let is404 = false
+
+if (slug) {
+  const redirect = await payload.redirects().get(`/${slug}`)
+  if (redirect) {
+    const target = typeof redirect.to === 'string' ? redirect.to : `/${(redirect.to as any)?.slug || ''}`
+    return Astro.redirect(target, redirect.type === '301' ? 301 : 302)
+  }
+  page = await payload.pages().getBySlug(slug)
+  if (!page) is404 = true
+} else {
+  is404 = true
 }
-
-const redirect = slug ? await payload.redirects().get(`/${slug}`) : null
-const page = slug && !redirect ? await payload.pages().getBySlug(slug) : null
-if (redirect) return Astro.redirect(typeof redirect.to === 'string' ? redirect.to : `/${(redirect.to as any)?.slug || ''}`, redirect.type === '301' ? 301 : 302)
-
-const is404 = !page && slug !== undefined
 
 const recoveryLinks = [
   { icon: 'layers', title: t('projects.title', locale), description: t('errors.projectsDesc', locale), href: '/projects' },
@@ -60,11 +65,9 @@ const recoveryLinks = [
       </div>
     </section>
   </PageLayout>
-) : page ? (
+) : (
   <PageLayout title={page.meta?.title || page.title} description={page.meta?.description || page.title}>
     {page.hero && <HeroBlock hero={page.hero} locale={locale} />}
     <BlockRenderer layout={page.layout} locale={locale} />
   </PageLayout>
-) : (
-  <div class="py-24 text-center"><h1 class="text-4xl font-bold">404</h1><p>Page not found</p></div>
 )}
