@@ -663,6 +663,85 @@ export const seed = async (payload: Payload): Promise<void> => {
     },
   })
 
+  payload.logger.info('- Seeding about page...')
+
+  const aboutPage = await payload.create({
+    collection: 'pages',
+    locale: 'es',
+    depth: 0,
+    data: {
+      title: 'Nosotros',
+      slug: 'about',
+      hero: { type: 'lowImpact', richText: heading('Viptel Comunicaciones') },
+      layout: [
+        { blockType: 'cards', heading: 'Que ofrecemos', cards: [
+          { icon: 'phone', title: 'Telecomunicaciones', description: 'PBX en la nube, VoIP, redes y conectividad empresarial para tu negocio.', linkUrl: '/services' },
+          { icon: 'globe', title: 'Desarrollo Web', description: 'Sitios corporativos, aplicaciones web y e-commerce a la medida.', linkUrl: '/services' },
+          { icon: 'trending-up', title: 'Marketing Digital', description: 'SEO, publicidad digital y gestion de redes sociales.', linkUrl: '/services' },
+        ]},
+        { blockType: 'cards', heading: 'Nuestros principios', cards: [
+          { icon: 'check-circle', title: 'Calidad Primero', description: 'Cada proyecto cumple con los mas altos estandares de la industria.', linkUrl: '' },
+          { icon: 'users', title: 'Experiencia', description: 'Anos de experiencia en telecomunicaciones y tecnologia empresarial.', linkUrl: '' },
+          { icon: 'lightbulb', title: 'Innovacion', description: 'Tecnologia de punta adaptada a las necesidades de tu empresa.', linkUrl: '' },
+        ]},
+        { blockType: 'faq', heading: 'Preguntas frecuentes', items: [
+          { question: 'Que servicios ofrecen?', answer: paragraph('Ofrecemos telecomunicaciones (PBX, VoIP), desarrollo web, marketing digital y software empresarial.') },
+          { question: 'Donde estan ubicados?', answer: paragraph('Nuestra oficina principal esta en Bogota, Colombia. Atendemos clientes en toda Latinoamerica.') },
+          { question: 'Como empiezo un proyecto?', answer: paragraph('Contactanos a traves del formulario en la pagina de contacto y te responderemos en menos de 24 horas.') },
+        ]},
+        { blockType: 'content', columns: [{ size: 'full', richText: heading('Open Source') }] },
+      ],
+      meta: { title: 'Nosotros — Viptel Comunicaciones', description: 'Empresa colombiana de telecomunicaciones, desarrollo web y marketing digital. Bogota, Colombia.' },
+      _status: 'published',
+    },
+  })
+
+  await payload.update({ collection: 'pages', id: aboutPage.id, locale: 'en', data: {
+    title: 'About Us',
+    hero: { type: 'lowImpact', richText: heading('Viptel Comunicaciones') },
+    layout: [
+      { blockType: 'cards', heading: 'What we offer', cards: [
+        { icon: 'phone', title: 'Telecommunications', description: 'Cloud PBX, VoIP, networks and enterprise connectivity.', linkUrl: '/en/services' },
+        { icon: 'globe', title: 'Web Development', description: 'Corporate websites, web apps and custom e-commerce.', linkUrl: '/en/services' },
+        { icon: 'trending-up', title: 'Digital Marketing', description: 'SEO, digital advertising and social media management.', linkUrl: '/en/services' },
+      ]},
+      { blockType: 'cards', heading: 'Our principles', cards: [
+        { icon: 'check-circle', title: 'Quality First', description: 'Every project meets the highest industry standards.', linkUrl: '' },
+        { icon: 'users', title: 'Experience', description: 'Years of experience in telecommunications and enterprise technology.', linkUrl: '' },
+        { icon: 'lightbulb', title: 'Innovation', description: 'Cutting-edge technology tailored to your business needs.', linkUrl: '' },
+      ]},
+      { blockType: 'faq', heading: 'FAQ', items: [
+        { question: 'What services do you offer?', answer: paragraph('We offer telecommunications (PBX, VoIP), web development, digital marketing and enterprise software.') },
+        { question: 'Where are you located?', answer: paragraph('Our main office is in Bogota, Colombia. We serve clients across Latin America.') },
+        { question: 'How do I start a project?', answer: paragraph('Contact us through the form on the contact page and we will respond within 24 hours.') },
+      ]},
+      { blockType: 'content', columns: [{ size: 'full', richText: heading('Open Source') }] },
+    ],
+    meta: { title: 'About Us — Viptel Comunicaciones', description: 'Colombian telecommunications, web development and digital marketing company. Bogota, Colombia.' },
+  }})
+
+  payload.logger.info('- Seeding contact page...')
+
+  const contactPage = await payload.create({
+    collection: 'pages',
+    locale: 'es',
+    depth: 0,
+    data: {
+      title: 'Contacto',
+      slug: 'contact',
+      hero: { type: 'lowImpact', richText: heading('Cuentanos sobre tu proyecto') },
+      layout: [{ blockType: 'content', columns: [{ size: 'full', richText: paragraph('Completa el formulario y te contactaremos en menos de 24 horas.') }] }],
+      meta: { title: 'Contacto — Viptel Comunicaciones', description: 'Contactanos para soluciones de telecomunicaciones, desarrollo web y marketing digital.' },
+      _status: 'published',
+    },
+  })
+
+  await payload.update({ collection: 'pages', id: contactPage.id, locale: 'en', data: {
+    title: 'Contact',
+    hero: { type: 'lowImpact', richText: heading('Tell us about your project') },
+    meta: { title: 'Contact — Viptel Comunicaciones', description: 'Contact us for telecommunications, web development and digital marketing solutions.' },
+  }})
+
   payload.logger.info(`- Seeding globals...`)
 
   const headerNav = {

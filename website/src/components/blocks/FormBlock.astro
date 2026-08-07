@@ -1,0 +1,30 @@
+---
+import Card from '@/components/ui/data-display/Card/Card.astro'
+import type { FormBlock as FormBlockType } from '@/lib/payload-types'
+
+interface Props {
+  block: FormBlockType
+  locale?: string
+}
+
+const { block } = Astro.props
+const formId = block.form && typeof block.form !== 'number' ? block.form.id : null
+---
+
+{formId ? (
+  <section class="py-[var(--space-section-md)] bg-background border-t border-border">
+    <div class="mx-auto max-w-2xl px-6">
+      <Card variant="elevated" padding="lg">
+        <p class="text-center text-foreground-muted text-sm">
+          Formulario ID: {formId} — configuralo en el panel de administracion.
+        </p>
+      </Card>
+    </div>
+  </section>
+) : (
+  <section class="py-[var(--space-section-md)] bg-background border-t border-border">
+    <div class="mx-auto max-w-2xl px-6 text-center text-foreground-muted">
+      Selecciona un formulario en el bloque desde el panel de administracion.
+    </div>
+  </section>
+)}

@@ -299,6 +299,8 @@ export interface Page {
         blockName?: string | null;
         blockType: 'media-content';
       }
+    | CodeBlock
+    | FormBlock
   )[];
   meta?: {
     title?: string | null;
@@ -2018,6 +2020,24 @@ export interface CodeBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'code';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormBlock".
+ */
+export interface FormBlock {
+  form: number | Form;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'formBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "forms".
+ */
+export interface Form {
+  id: number;
+  title: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

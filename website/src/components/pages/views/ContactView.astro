@@ -1,136 +1,96 @@
 ---
-/**
- * ContactView — the Contact page body.
- *
- * Shared by the default-locale route (`/contact`) and the locale-prefixed route
- * (`/<locale>/contact`). Page copy is read from `pages.contact.*`; the embedded
- * `ContactForm` localizes itself from the URL path, so the form fields follow
- * the active locale automatically. Untranslated keys fall back to the default
- * locale.
- */
 import PageLayout from '@/layouts/PageLayout.astro';
+import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import Badge from '@/components/ui/data-display/Badge/Badge.astro';
 import Card from '@/components/ui/data-display/Card/Card.astro';
 import { Hero } from '@/components/hero';
 import ContactForm from '@/components/patterns/ContactForm.astro';
+import { payload } from '@/lib/payload-client';
+import { t, defaultLocale } from '@/i18n';
 import siteConfig from '@/config/site.config';
 import { resolveSocialLinks } from '@/lib/utils';
-import { t, tData, defaultLocale } from '@/i18n';
+import type { PageBlock } from '@/lib/payload-types';
 
 interface Props {
-  /** Locale whose copy this page renders. Defaults to the site default. */
   locale?: string;
 }
 
 const { locale = defaultLocale } = Astro.props;
-
-const hero = tData<{ badge: string; titleLead: string; titleHighlight: string; description: string }>(
-  'pages.contact.hero',
-  locale
-)!;
-
+const contact = await payload.pages().getBySlug('contact', locale);
 const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
 
-const channels = [
-  {
-    icon: 'mail',
-    label: t('pages.contact.emailLabel', locale),
-    value: siteConfig.email,
-    note: t('pages.contact.emailNote', locale),
-    href: `mailto:${siteConfig.email}`,
-    external: false,
-  },
-  ...socialLinks.map((link) => ({
-    icon: link.icon,
-    label: link.label,
-    value: link.href.replace(/^https?:\/\/(www\.)?/, ''),
-    note: t('pages.contact.socialNote', locale),
-    href: link.href,
-    external: true,
-  })),
-];
+function extractRichText(richText: any): string {
+  try {
+    const root = richText?.root;
+    if (!root || !Array.isArray(root.children)) return '';
+    return root.children
+      .filter((c: any) => c.type === 'paragraph' || c.type === 'heading')
+      .map((c: any) => c.children?.map((t: any) => t.text || '').join('') || '')
+      .join(' ');
+  } catch { return '' }
+}
+
+const heroTitle = extractRichText(contact?.hero?.richText);
 ---
 
-<PageLayout
-  title={t('pages.contact.meta.title', locale)}
-  description={t('pages.contact.meta.description', locale)}
-  eagerReveal
->
+<PageLayout title={t('pages.contact.meta.title', locale)} description={t('pages.contact.meta.description', locale)}>
   <Hero layout="centered" size="sm" class="isolate" showHeroHalo>
-    <Badge slot="badge" variant="brand" pill>
-      <Icon name="mail" size="sm" />
-      {hero.badge}
-    </Badge>
-
+    <Badge slot="badge" variant="brand" pill><Icon name="mail" size="sm" />{t('pages.contact.hero.badge', locale)}</Badge>
     <h1 slot="title">
-      {hero.titleLead} <span class="text-brand-500">{hero.titleHighlight}</span>
+      {heroTitle || <><span class="text-foreground">{t('pages.contact.hero.titleLead', locale)}</span> <span class="text-brand-500">{t('pages.contact.hero.titleHighlight', locale)}</span></>}
     </h1>
-
-    <p slot="description" class="!text-balance">
-      {hero.description}
-    </p>
+    <p slot="description" class="text-balance!">{t('pages.contact.hero.description', locale)}</p>
   </Hero>
 
-  <!-- Contact Section -->
-  <section class="relative isolate overflow-hidden py-[var(--space-section-md)] bg-background-secondary border-t border-border">
-    <div class="relative z-10 mx-auto max-w-5xl px-6">
-      <div class="grid grid-cols-1 glitch:grid-cols-5 gap-10 glitch:gap-16 items-stretch">
+  <!-- CMS Layout Blocks -->
+  {contact?.layout && contact.layout.length > 0 ? (
+    <BlockRenderer layout={contact.layout as PageBlock[]} locale={locale} />
+  ) : null}
 
-        <!-- Left column: contact form -->
-        <div class="glitch:col-span-3 h-full sm:max-w-xl sm:mx-auto glitch:max-w-none glitch:mx-0" data-reveal data-reveal-ease="smooth">
-          <Card padding="lg" class="h-full flex flex-col justify-center">
-            <h2 class="font-display text-xl font-bold text-foreground mb-6 sm:text-center glitch:text-left">{t('pages.contact.formTitle', locale)}</h2>
-            <ContactForm />
-          </Card>
-        </div>
-
-        <!-- Right column: contact channels -->
-        <div class="glitch:col-span-2 space-y-4 sm:max-w-xl sm:mx-auto glitch:max-w-none glitch:mx-0" data-reveal data-reveal-delay="1" data-reveal-ease="smooth">
-          <div class="sm:text-center glitch:text-left">
-            <h2 class="font-display text-lg font-bold text-foreground mb-1">{t('pages.contact.channelsTitle', locale)}</h2>
-            <p class="text-sm text-foreground-muted">{t('pages.contact.channelsSubtitle', locale)}</p>
-          </div>
-
-          <!-- Channel list -->
-          <div class="space-y-2">
-            {channels.map((ch) => (
-              <a
-                href={ch.href}
-                {...ch.external ? { target: '_blank', rel: 'noopener noreferrer' } : {}}
-                class="block group"
-              >
-                <Card hover padding="sm" class="h-full">
-                  <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-brand-500/20 to-brand-500/5 flex items-center justify-center text-brand-500">
-                      <Icon name={ch.icon} size="sm" />
-                    </div>
-                    <div class="min-w-0 flex-1">
-                      <p class="font-semibold text-sm text-foreground">{ch.label}</p>
-                      <p class="text-xs text-foreground-muted truncate">{ch.value}</p>
-                    </div>
-                    <Icon name="arrow-up-right" size="sm" class="text-foreground-muted group-hover:text-brand-500 transition-colors shrink-0" />
-                  </div>
-                </Card>
-              </a>
-            ))}
-          </div>
-
-          <!-- Location card -->
-          <Card hover padding="sm" class="bg-brand-500/5 border-brand-500/20">
+  <!-- Contact Form + Channels (Astro design, always present) -->
+  <section class="bg-background-secondary py-[var(--space-section-md)] border-t border-border">
+    <div class="mx-auto max-w-6xl px-6 grid gap-10 lg:grid-cols-2">
+      <div>
+        <h2 class="font-display text-2xl font-bold text-foreground mb-6">{t('pages.contact.formTitle', locale)}</h2>
+        <Card variant="elevated" padding="lg">
+          <ContactForm />
+        </Card>
+      </div>
+      <div class="flex flex-col gap-6">
+        <h2 class="font-display text-2xl font-bold text-foreground">{t('pages.contact.channelsTitle', locale)}</h2>
+        <p class="text-foreground-muted">{t('pages.contact.channelsSubtitle', locale)}</p>
+        <Card variant="elevated" padding="lg">
+          <div class="flex flex-col gap-4">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-brand-500/20 to-brand-500/5 flex items-center justify-center text-brand-500">
-                <Icon name="map-pin" size="sm" />
-              </div>
-              <div>
-                <p class="font-semibold text-sm text-foreground">{siteConfig.address?.city ?? 'Your City'}</p>
-                <p class="text-xs text-foreground-muted mt-0.5">{t('pages.contact.basedIn', locale, { country: siteConfig.address?.country ?? 'Your Country' })}</p>
+              <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-500/20 to-brand-500/5 flex items-center justify-center text-brand-500 shrink-0"><Icon name="mail" size="sm" /></div>
+              <div><p class="text-sm font-medium text-foreground">{t('pages.contact.emailLabel', locale)}</p><a href={`mailto:${siteConfig.email}`} class="text-sm text-brand-500 hover:underline">{siteConfig.email}</a></div>
+            </div>
+            <p class="text-xs text-foreground-muted">{t('pages.contact.emailNote', locale)}</p>
+          </div>
+        </Card>
+        {socialLinks.length > 0 && (
+          <Card variant="elevated" padding="lg">
+            <div class="flex flex-col gap-3">
+              <p class="text-sm text-foreground-muted">{t('pages.contact.socialNote', locale)}</p>
+              <div class="flex gap-3">
+                {socialLinks.map((link) => (
+                  <a href={link.href} target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm text-foreground-muted hover:border-brand-500 hover:text-brand-500 transition-colors">
+                    <Icon name={link.icon} size="sm" />{link.label}
+                  </a>
+                ))}
               </div>
             </div>
           </Card>
-
-        </div>
-
+        )}
+        {siteConfig.address?.city && (
+          <Card variant="elevated" padding="lg">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-500/20 to-brand-500/5 flex items-center justify-center text-brand-500 shrink-0"><Icon name="map-pin" size="sm" /></div>
+              <p class="text-sm text-foreground">{t('pages.contact.basedIn', locale)} {siteConfig.address.city}{siteConfig.address.country ? ', ' + siteConfig.address.country : ''}</p>
+            </div>
+          </Card>
+        )}
       </div>
     </div>
   </section>

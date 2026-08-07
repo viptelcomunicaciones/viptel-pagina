@@ -16,7 +16,7 @@ const { locale, slug } = Astro.params
 
 const isValidLocale = locale === 'es' || locale === 'en'
 
-if (!slug || !isValidLocale) {
+if (!isValidLocale) {
   Astro.response.status = 404
 }
 
@@ -24,7 +24,7 @@ const redirect = slug && isValidLocale ? await payload.redirects().get(`/${local
 const page = slug && isValidLocale && !redirect ? await payload.pages().getBySlug(slug, locale) : null
 if (redirect) return Astro.redirect(typeof redirect.to === 'string' ? redirect.to : `/${(redirect.to as any)?.slug || ''}`, redirect.type === '301' ? 301 : 302)
 
-const is404 = !page
+const is404 = !page || !slug
 
 const recoveryLinks = [
   { icon: 'layers', title: t('projects.title', locale), description: t('errors.projectsDesc', locale), href: `/${locale}/projects` },
