@@ -1,50 +1,136 @@
 ---
 /**
- * AdminBar — floating bar shown on the frontend when logged into Payload CMS.
- * Allows editors to jump directly to the admin panel to edit the current page.
+ * AdminBar — barra de edición flotante visible solo cuando estás logueado al CMS.
+ * No interfiere con el diseño: agrega padding-top al body y ajusta el header.
  */
 ---
 
 <script>
   async function initAdminBar() {
-    const url = new URL(window.location.href)
-    // Only show on actual pages, not assets or API routes
-    if (url.pathname.match(/\.(png|jpg|gif|svg|webp|css|js|json|xml|ico|txt|woff2?)$/)) return
+    const isAdminPage = window.location.pathname.startsWith('/admin')
+    if (isAdminPage) return
 
-    try {
-      const payloadUrl = 'http://localhost:3000'
-      const res = await fetch(`${payloadUrl}/api/users/me`, { credentials: 'include' })
-      if (!res.ok) return
+    const PAYLOAD_URL = 'http://localhost:3000'
+
+    async function checkAuth() {
+      try {
+        const res = await fetch(`${PAYLOAD_URL}/api/users/me`, { credentials: 'include' })
+        return res.ok
+      } catch {
+        return false
+      }
+    }
+
+    async function render() {
+      const existing = document.getElementById('payload-admin-bar')
+      const loggedIn = await checkAuth()
+
+      if (!loggedIn) {
+        if (existing) {
+          existing.remove()
+          document.body.style.paddingTop = ''
+          document.documentElement.style.setProperty('--admin-bar-height', '0px')
+        }
+        return
+      }
+
+      if (existing) return
 
       const bar = document.createElement('div')
       bar.id = 'payload-admin-bar'
       bar.innerHTML = `
-        <style>
-          #payload-admin-bar {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
-            background: #000; color: #fff; font-family: system-ui, sans-serif;
-            font-size: 13px; display: flex; align-items: center; justify-content: space-between;
-            padding: 0 16px; height: 36px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-          }
-          #payload-admin-bar a, #payload-admin-bar span { color: #fff; text-decoration: none; margin-left: 12px; }
-          #payload-admin-bar a:hover { text-decoration: underline; }
-          #payload-admin-bar .brand { font-weight: 600; }
-          html { margin-top: 36px; }
-        </style>
-        <span class="brand">Viptel CMS</span>
-        <div>
-          <a href="${payloadUrl}/admin/collections/pages" target="_blank">Pages</a>
-          <a href="${payloadUrl}/admin/collections/posts" target="_blank">Posts</a>
-          <a href="${payloadUrl}/admin/collections/projects" target="_blank">Projects</a>
-          <a href="${payloadUrl}/admin" target="_blank">Admin</a>
-          <a href="${payloadUrl}/admin/logout">Salir</a>
+        <span class="pab-brand">Viptel CMS</span>
+        <div class="pab-links">
+          <a href="${PAYLOAD_URL}/admin/collections/pages" target="_blank">Páginas</a>
+          <a href="${PAYLOAD_URL}/admin/collections/posts" target="_blank">Blog</a>
+          <a href="${PAYLOAD_URL}/admin/collections/projects" target="_blank">Proyectos</a>
+          <a href="${PAYLOAD_URL}/admin/collections/services" target="_blank">Servicios</a>
+          <a href="${PAYLOAD_URL}/admin" target="_blank">Admin</a>
+          <button type="button" class="pab-logout">Salir</button>
         </div>
       `
       document.body.prepend(bar)
-    } catch {
-      // Can't reach Payload — skip
+
+      // Push body content down so the bar doesn't overlay
+      document.body.style.paddingTop = '36px'
+      document.documentElement.style.setProperty('--admin-bar-height', '36px')
+
+      // Logout handler — hide immediately
+      bar.querySelector('.pab-logout')?.addEventListener('click', async () => {
+        await fetch(`${PAYLOAD_URL}/api/users/logout`, { method: 'POST' })
+        bar.remove()
+        document.body.style.paddingTop = ''
+        document.documentElement.style.setProperty('--admin-bar-height', '0px')
+      })
     }
+
+    // Initial check
+    await render()
+
+    // Re-check when page becomes visible (tab switch)
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) render()
+    })
+
+    // Re-check every 60s
+    setInterval(render, 60000)
   }
 
   initAdminBar()
 </script>
+
+<style is:global>
+  #payload-admin-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 99999;
+    background: #111;
+    color: #fff;
+    font-family: system-ui, sans-serif;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    height: 36px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  }
+  #payload-admin-bar .pab-brand {
+    font-weight: 600;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+  }
+  #payload-admin-bar .pab-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #payload-admin-bar a {
+    color: #ccc;
+    text-decoration: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.15s, color 0.15s;
+  }
+  #payload-admin-bar a:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+  }
+  #payload-admin-bar .pab-logout {
+    background: none;
+    border: 1px solid #555;
+    color: #aaa;
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-left: 4px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  #payload-admin-bar .pab-logout:hover {
+    border-color: #e44;
+    color: #e44;
+  }
+</style>
