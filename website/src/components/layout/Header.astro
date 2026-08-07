@@ -37,6 +37,7 @@ import LanguageSwitcher from '@/components/layout/LanguageSwitcher.astro';
 import siteConfig from '@/config/site.config';
 import { resolveSocialLink } from '@/lib/utils';
 import { isEnabled as i18nIsEnabled, getLocaleFromPath, stripLocaleFromPath, t } from '@/i18n';
+import AdminBar from '@/components/layout/AdminBar.astro';
 
 export interface NavItem {
   label: string;
@@ -233,6 +234,7 @@ const buttonId = `${menuId}-button`;
   data-header-invert-on-return={invertOnReturn ? 'true' : 'false'}
   {...attrs}
 >
+  <AdminBar />
   <div class={cn(innerClasses, 'hdr-inner')}>
     {
       !hideLogo &&

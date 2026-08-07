@@ -1,22 +1,18 @@
 ---
-/**
- * AdminBar — barra de edición visible solo al estar logueado al CMS.
- * No interfiere con el diseño: baja el header 36px sin tocar el body.
- */
+// AdminBar — shows inside the header when logged into Payload CMS
 ---
 
 <script>
-  async function initAdminBar() {
-    if (window.location.pathname.startsWith('/admin')) return
-
+  (async function() {
     const PAYLOAD_URL = 'http://localhost:3000'
+    if (window.location.pathname.startsWith('/admin')) return
 
     async function checkAuth() {
       try {
         const res = await fetch(`${PAYLOAD_URL}/api/users/me`, { credentials: 'include' })
         if (!res.ok) return false
         const data = await res.json()
-        return data && data.user !== undefined && data.user !== null
+        return !!(data && data.user)
       } catch { return false }
     }
 
@@ -24,73 +20,31 @@
       const existing = document.getElementById('payload-admin-bar')
       const loggedIn = await checkAuth()
 
-      if (!loggedIn) {
-        if (existing) {
-          existing.remove()
-          removeBarStyle()
-        }
-        return
-      }
-
+      if (!loggedIn) { existing?.remove(); return }
       if (existing) return
 
       const bar = document.createElement('div')
       bar.id = 'payload-admin-bar'
-      bar.innerHTML = `
-        <span class="pab-brand">Viptel CMS</span>
-        <nav class="pab-links">
-          <a href="${PAYLOAD_URL}/admin/collections/pages" target="_blank">Pages</a>
-          <a href="${PAYLOAD_URL}/admin/collections/posts" target="_blank">Blog</a>
-          <a href="${PAYLOAD_URL}/admin/collections/projects" target="_blank">Projects</a>
-          <a href="${PAYLOAD_URL}/admin/collections/services" target="_blank">Services</a>
-          <a href="${PAYLOAD_URL}/admin" target="_blank">Admin</a>
-          <button type="button" class="pab-logout">Salir</button>
-        </nav>
-      `
-      document.body.prepend(bar)
-      addBarStyle()
+      bar.style.cssText = 'position:static;width:100%;background:#111;color:#fff;font-family:system-ui;font-size:12px;display:flex;align-items:center;justify-content:space-between;padding:4px 16px;height:28px'
+      bar.innerHTML = `<span style="font-weight:600">Viptel CMS</span>
+        <nav style="display:flex;align-items:center;gap:2px">
+          <a href="${PAYLOAD_URL}/admin/collections/pages" target="_blank" style="color:#ccc;text-decoration:none;padding:2px 6px;border-radius:4px;font-size:12px">Pages</a>
+          <a href="${PAYLOAD_URL}/admin/collections/posts" target="_blank" style="color:#ccc;text-decoration:none;padding:2px 6px;border-radius:4px;font-size:12px">Blog</a>
+          <a href="${PAYLOAD_URL}/admin/collections/projects" target="_blank" style="color:#ccc;text-decoration:none;padding:2px 6px;border-radius:4px;font-size:12px">Projects</a>
+          <a href="${PAYLOAD_URL}/admin/collections/services" target="_blank" style="color:#ccc;text-decoration:none;padding:2px 6px;border-radius:4px;font-size:12px">Services</a>
+          <a href="${PAYLOAD_URL}/admin" target="_blank" style="color:#ccc;text-decoration:none;padding:2px 6px;border-radius:4px;font-size:12px">Admin</a>
+          <button style="background:none;border:1px solid #555;color:#aaa;cursor:pointer;padding:1px 6px;border-radius:3px;font-size:11px;margin-left:2px">Salir</button>
+        </nav>`
+      document.currentScript?.closest('header')?.prepend(bar)
 
-      bar.querySelector('.pab-logout')?.addEventListener('click', async () => {
+      bar.querySelector('button')?.addEventListener('click', async (e) => {
+        e.preventDefault()
         await fetch(`${PAYLOAD_URL}/api/users/logout`, { method: 'POST', credentials: 'include' })
         bar.remove()
-        removeBarStyle()
       })
     }
 
-    function addBarStyle() {
-      if (document.getElementById('pab-dynamic-style')) return
-      const style = document.createElement('style')
-      style.id = 'pab-dynamic-style'
-      style.textContent = 'header[data-header-position]{top:36px!important}'
-      document.head.appendChild(style)
-    }
-
-    function removeBarStyle() {
-      document.getElementById('pab-dynamic-style')?.remove()
-    }
-
     await render()
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) render() })
     setInterval(render, 30000)
-  }
-
-  initAdminBar()
+  })()
 </script>
-
-<style>
-  #payload-admin-bar {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
-    background: #111; color: #fff; font-family: system-ui, sans-serif;
-    font-size: 13px; display: flex; align-items: center; justify-content: space-between;
-    padding: 0 16px; height: 36px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  }
-  #payload-admin-bar .pab-brand { font-weight: 600; }
-  #payload-admin-bar .pab-links { display: flex; align-items: center; gap: 4px; }
-  #payload-admin-bar a { color: #ccc; text-decoration: none; padding: 4px 8px; border-radius: 4px; }
-  #payload-admin-bar a:hover { background: rgba(255,255,255,0.1); color: #fff; }
-  #payload-admin-bar .pab-logout {
-    background: none; border: 1px solid #555; color: #aaa; cursor: pointer;
-    padding: 3px 8px; border-radius: 4px; font-size: 12px; margin-left: 4px;
-  }
-  #payload-admin-bar .pab-logout:hover { border-color: #e44; color: #e44; }
-</style>
