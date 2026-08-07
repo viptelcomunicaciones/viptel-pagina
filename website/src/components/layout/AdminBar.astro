@@ -1,21 +1,23 @@
 ---
 /**
  * AdminBar — barra de edición flotante visible solo cuando estás logueado al CMS.
- * No interfiere con el diseño: agrega padding-top al body y ajusta el header.
+ * Usa body padding-top para no sobreponerse al header/hero.
+ * Verifica auth real (data.user !== undefined, no solo res.ok).
  */
 ---
 
 <script>
   async function initAdminBar() {
-    const isAdminPage = window.location.pathname.startsWith('/admin')
-    if (isAdminPage) return
+    if (window.location.pathname.startsWith('/admin')) return
 
     const PAYLOAD_URL = 'http://localhost:3000'
 
     async function checkAuth() {
       try {
         const res = await fetch(`${PAYLOAD_URL}/api/users/me`, { credentials: 'include' })
-        return res.ok
+        if (!res.ok) return false
+        const data = await res.json()
+        return data && data.user !== undefined && data.user !== null
       } catch {
         return false
       }
@@ -29,7 +31,7 @@
         if (existing) {
           existing.remove()
           document.body.style.paddingTop = ''
-          document.documentElement.style.setProperty('--admin-bar-height', '0px')
+          document.documentElement.style.setProperty('--payload-admin-bar-height', '0px')
         }
         return
       }
@@ -38,99 +40,50 @@
 
       const bar = document.createElement('div')
       bar.id = 'payload-admin-bar'
+      bar.className = 'pab-bar'
       bar.innerHTML = `
         <span class="pab-brand">Viptel CMS</span>
-        <div class="pab-links">
+        <nav class="pab-links">
           <a href="${PAYLOAD_URL}/admin/collections/pages" target="_blank">Páginas</a>
           <a href="${PAYLOAD_URL}/admin/collections/posts" target="_blank">Blog</a>
           <a href="${PAYLOAD_URL}/admin/collections/projects" target="_blank">Proyectos</a>
           <a href="${PAYLOAD_URL}/admin/collections/services" target="_blank">Servicios</a>
           <a href="${PAYLOAD_URL}/admin" target="_blank">Admin</a>
-          <button type="button" class="pab-logout">Salir</button>
-        </div>
+          <button type="button" id="pab-logout-btn">Salir</button>
+        </nav>
       `
       document.body.prepend(bar)
-
-      // Push body content down so the bar doesn't overlay
       document.body.style.paddingTop = '36px'
-      document.documentElement.style.setProperty('--admin-bar-height', '36px')
 
-      // Logout handler — hide immediately
-      bar.querySelector('.pab-logout')?.addEventListener('click', async () => {
-        await fetch(`${PAYLOAD_URL}/api/users/logout`, { method: 'POST' })
+      document.getElementById('pab-logout-btn')?.addEventListener('click', async () => {
+        await fetch(`${PAYLOAD_URL}/api/users/logout`, { method: 'POST', credentials: 'include' })
         bar.remove()
         document.body.style.paddingTop = ''
-        document.documentElement.style.setProperty('--admin-bar-height', '0px')
       })
     }
 
-    // Initial check
     await render()
-
-    // Re-check when page becomes visible (tab switch)
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) render()
-    })
-
-    // Re-check every 60s
-    setInterval(render, 60000)
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) render() })
+    setInterval(render, 30000)
   }
 
   initAdminBar()
 </script>
 
-<style is:global>
-  #payload-admin-bar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 99999;
-    background: #111;
-    color: #fff;
-    font-family: system-ui, sans-serif;
-    font-size: 13px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
-    height: 36px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+<style>
+  .pab-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
+    background: #111; color: #fff; font-family: system-ui, sans-serif;
+    font-size: 13px; display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px; height: 36px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   }
-  #payload-admin-bar .pab-brand {
-    font-weight: 600;
-    font-size: 14px;
-    letter-spacing: 0.5px;
+  .pab-bar .pab-brand { font-weight: 600; }
+  .pab-bar .pab-links { display: flex; align-items: center; gap: 4px; }
+  .pab-bar a { color: #ccc; text-decoration: none; padding: 4px 8px; border-radius: 4px; }
+  .pab-bar a:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  .pab-bar button {
+    background: none; border: 1px solid #555; color: #aaa; cursor: pointer;
+    padding: 3px 8px; border-radius: 4px; font-size: 12px; margin-left: 4px;
   }
-  #payload-admin-bar .pab-links {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  #payload-admin-bar a {
-    color: #ccc;
-    text-decoration: none;
-    padding: 4px 8px;
-    border-radius: 4px;
-    transition: background 0.15s, color 0.15s;
-  }
-  #payload-admin-bar a:hover {
-    background: rgba(255,255,255,0.1);
-    color: #fff;
-  }
-  #payload-admin-bar .pab-logout {
-    background: none;
-    border: 1px solid #555;
-    color: #aaa;
-    cursor: pointer;
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    margin-left: 4px;
-    transition: border-color 0.15s, color 0.15s;
-  }
-  #payload-admin-bar .pab-logout:hover {
-    border-color: #e44;
-    color: #e44;
-  }
+  .pab-bar button:hover { border-color: #e44; color: #e44; }
 </style>
