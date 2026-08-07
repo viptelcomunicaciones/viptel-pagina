@@ -14,15 +14,17 @@ export const prerender = false
 
 const { locale, slug } = Astro.params
 
-if (!slug || !locale) {
+const isValidLocale = locale === 'es' || locale === 'en'
+
+if (!slug || !isValidLocale) {
   Astro.response.status = 404
 }
 
-const redirect = slug ? await payload.redirects().get(`/${locale}/${slug}`) : null
-const page = slug && !redirect ? await payload.pages().getBySlug(slug, locale) : null
+const redirect = slug && isValidLocale ? await payload.redirects().get(`/${locale}/${slug}`) : null
+const page = slug && isValidLocale && !redirect ? await payload.pages().getBySlug(slug, locale) : null
 if (redirect) return Astro.redirect(typeof redirect.to === 'string' ? redirect.to : `/${(redirect.to as any)?.slug || ''}`, redirect.type === '301' ? 301 : 302)
 
-const is404 = !page && slug !== undefined
+const is404 = !page
 
 const recoveryLinks = [
   { icon: 'layers', title: t('projects.title', locale), description: t('errors.projectsDesc', locale), href: `/${locale}/projects` },
