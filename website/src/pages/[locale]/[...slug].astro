@@ -22,7 +22,7 @@ if (redirect) {
 const page = await payload.pages().getBySlug(slug, locale)
 
 if (!page) {
-  return Astro.rewrite('/404')
+  return Astro.redirect('/404')
 }
 ---
 
