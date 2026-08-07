@@ -1,5 +1,11 @@
 ---
+/**
+ * FormBlock — renders a Payload Form Builder form in Astro.
+ * Fetches form fields from Payload CMS and renders them as HTML inputs.
+ * Submits to Payload's form-submissions endpoint.
+ */
 import Card from '@/components/ui/data-display/Card/Card.astro'
+import Button from '@/components/ui/form/Button/Button.astro'
 import type { FormBlock as FormBlockType } from '@/lib/payload-types'
 
 interface Props {
@@ -8,23 +14,199 @@ interface Props {
 }
 
 const { block } = Astro.props
-const formId = block.form && typeof block.form !== 'number' ? block.form.id : null
+const PAYLOAD_URL = 'http://localhost:3000'
+
+const formId = block.form && typeof block.form !== 'number' ? ((block.form as any).id || block.form) : null
+
+let fields: any[] = []
+let formTitle = ''
+
+if (formId) {
+  try {
+    const res = await fetch(`${PAYLOAD_URL}/api/forms/${formId}?depth=1`)
+    if (res.ok) {
+      const data: any = await res.json()
+      fields = data.fields || []
+      formTitle = data.title || ''
+    }
+  } catch {}
+}
 ---
 
-{formId ? (
-  <section class="py-[var(--space-section-md)] bg-background border-t border-border">
-    <div class="mx-auto max-w-2xl px-6">
-      <Card variant="elevated" padding="lg">
-        <p class="text-center text-foreground-muted text-sm">
-          Formulario ID: {formId} — configuralo en el panel de administracion.
-        </p>
-      </Card>
-    </div>
-  </section>
-) : (
-  <section class="py-[var(--space-section-md)] bg-background border-t border-border">
-    <div class="mx-auto max-w-2xl px-6 text-center text-foreground-muted">
-      Selecciona un formulario en el bloque desde el panel de administracion.
-    </div>
-  </section>
-)}
+<section class="py-[var(--space-section-md)] bg-background-secondary border-t border-border">
+  <div class="mx-auto max-w-2xl px-6">
+    <Card variant="elevated" padding="lg">
+      {formId ? (
+        <>
+          {formTitle && <h2 class="font-display text-2xl font-bold text-foreground mb-2">{formTitle}</h2>}
+          <p class="text-sm text-foreground-muted mb-6">Completa el formulario y te contactaremos pronto.</p>
+
+          <form id={`payload-form-${formId}`} class="flex flex-col gap-4" data-form-id={formId}>
+            {fields.map((field: any) => {
+              const name = field.name || field.blockName || ''
+              const label = field.label || name || ''
+              const required = field.required || false
+              const inputId = `field-${field.id || Math.random()}`
+
+              switch (field.blockType) {
+                case 'text':
+                case 'email':
+                  return (
+                    <div class="flex flex-col gap-1">
+                      <label for={inputId} class="text-sm font-medium text-foreground">
+                        {label}{required && <span class="text-red-500 ml-0.5">*</span>}
+                      </label>
+                      <input
+                        id={inputId}
+                        type={field.blockType === 'email' ? 'email' : 'text'}
+                        name={name}
+                        required={required}
+                        class="rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-foreground-muted focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition-colors"
+                        placeholder={label}
+                      />
+                    </div>
+                  )
+
+                case 'textarea':
+                case 'message':
+                  return (
+                    <div class="flex flex-col gap-1">
+                      <label for={inputId} class="text-sm font-medium text-foreground">
+                        {label}{required && <span class="text-red-500 ml-0.5">*</span>}
+                      </label>
+                      <textarea
+                        id={inputId}
+                        name={name}
+                        required={required}
+                        rows={4}
+                        class="rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-foreground-muted focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition-colors resize-y"
+                        placeholder={label}
+                      />
+                    </div>
+                  )
+
+                case 'number':
+                  return (
+                    <div class="flex flex-col gap-1">
+                      <label for={inputId} class="text-sm font-medium text-foreground">
+                        {label}{required && <span class="text-red-500 ml-0.5">*</span>}
+                      </label>
+                      <input
+                        id={inputId}
+                        type="number"
+                        name={name}
+                        required={required}
+                        class="rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition-colors"
+                        placeholder={label}
+                      />
+                    </div>
+                  )
+
+                case 'checkbox':
+                  return (
+                    <div class="flex items-center gap-3">
+                      <input
+                        id={inputId}
+                        type="checkbox"
+                        name={name}
+                        class="h-4 w-4 rounded border-border text-brand-500 focus:ring-brand-500"
+                      />
+                      <label for={inputId} class="text-sm font-medium text-foreground">
+                        {label}{required && <span class="text-red-500 ml-0.5">*</span>}
+                      </label>
+                    </div>
+                  )
+
+                case 'select':
+                case 'state':
+                case 'country':
+                  const options = field.options || []
+                  return (
+                    <div class="flex flex-col gap-1">
+                      <label for={inputId} class="text-sm font-medium text-foreground">
+                        {label}{required && <span class="text-red-500 ml-0.5">*</span>}
+                      </label>
+                      <select
+                        id={inputId}
+                        name={name}
+                        required={required}
+                        class="rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition-colors"
+                      >
+                        <option value="">{label}...</option>
+                        {options.map((opt: any) => (
+                          <option value={opt.value || opt.label}>{opt.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )
+
+                default:
+                  return (
+                    <div class="flex flex-col gap-1">
+                      <label for={inputId} class="text-sm font-medium text-foreground">
+                        {label}{required && <span class="text-red-500 ml-0.5">*</span>}
+                      </label>
+                      <input
+                        id={inputId}
+                        type="text"
+                        name={name}
+                        required={required}
+                        class="rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-foreground-muted focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition-colors"
+                        placeholder={label}
+                      />
+                    </div>
+                  )
+              }
+            })}
+
+            {fields.length > 0 && (
+              <div class="mt-2">
+                <Button type="submit" size="lg" class="w-full sm:w-auto">
+                  Enviar
+                </Button>
+              </div>
+            )}
+
+            <div id={`payload-form-${formId}-status`} class="hidden mt-4 p-4 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 text-sm">
+              ¡Gracias! Tu mensaje ha sido enviado. Te contactaremos pronto.
+            </div>
+          </form>
+
+          <script>
+            (function() {
+              const form = document.getElementById('payload-form-{formId}')
+              if (!form) return
+              const status = document.getElementById('payload-form-{formId}-status')
+
+              form.addEventListener('submit', async (e) => {
+                e.preventDefault()
+                const formData = new FormData(form)
+                const data: Record<string, any> = { form: '{formId}', submissionData: [] }
+
+                formData.forEach((value, key) => {
+                  data.submissionData.push({ field: key, value: String(value) })
+                })
+
+                try {
+                  const res = await fetch('{PAYLOAD_URL}/api/form-submissions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                  })
+                  if (res.ok) {
+                    form.style.display = 'none'
+                    status?.classList.remove('hidden')
+                  }
+                } catch {}
+              })
+            })()
+          </script>
+        </>
+      ) : (
+        <div class="py-8 text-center text-foreground-muted">
+          <p>Selecciona un formulario en el bloque desde el panel de administración.</p>
+        </div>
+      )}
+    </Card>
+  </div>
+</section>
