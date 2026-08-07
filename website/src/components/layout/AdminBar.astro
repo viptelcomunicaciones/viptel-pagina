@@ -1,8 +1,7 @@
 ---
 /**
- * AdminBar — barra de edición flotante visible solo cuando estás logueado al CMS.
- * Usa body padding-top para no sobreponerse al header/hero.
- * Verifica auth real (data.user !== undefined, no solo res.ok).
+ * AdminBar — barra de edición visible solo al estar logueado al CMS.
+ * No interfiere con el diseño: baja el header 36px sin tocar el body.
  */
 ---
 
@@ -18,9 +17,7 @@
         if (!res.ok) return false
         const data = await res.json()
         return data && data.user !== undefined && data.user !== null
-      } catch {
-        return false
-      }
+      } catch { return false }
     }
 
     async function render() {
@@ -30,8 +27,7 @@
       if (!loggedIn) {
         if (existing) {
           existing.remove()
-          document.body.style.paddingTop = ''
-          document.documentElement.style.setProperty('--payload-admin-bar-height', '0px')
+          removeBarStyle()
         }
         return
       }
@@ -40,26 +36,37 @@
 
       const bar = document.createElement('div')
       bar.id = 'payload-admin-bar'
-      bar.className = 'pab-bar'
       bar.innerHTML = `
         <span class="pab-brand">Viptel CMS</span>
         <nav class="pab-links">
-          <a href="${PAYLOAD_URL}/admin/collections/pages" target="_blank">Páginas</a>
+          <a href="${PAYLOAD_URL}/admin/collections/pages" target="_blank">Pages</a>
           <a href="${PAYLOAD_URL}/admin/collections/posts" target="_blank">Blog</a>
-          <a href="${PAYLOAD_URL}/admin/collections/projects" target="_blank">Proyectos</a>
-          <a href="${PAYLOAD_URL}/admin/collections/services" target="_blank">Servicios</a>
+          <a href="${PAYLOAD_URL}/admin/collections/projects" target="_blank">Projects</a>
+          <a href="${PAYLOAD_URL}/admin/collections/services" target="_blank">Services</a>
           <a href="${PAYLOAD_URL}/admin" target="_blank">Admin</a>
-          <button type="button" id="pab-logout-btn">Salir</button>
+          <button type="button" class="pab-logout">Salir</button>
         </nav>
       `
       document.body.prepend(bar)
-      document.body.style.paddingTop = '36px'
+      addBarStyle()
 
-      document.getElementById('pab-logout-btn')?.addEventListener('click', async () => {
+      bar.querySelector('.pab-logout')?.addEventListener('click', async () => {
         await fetch(`${PAYLOAD_URL}/api/users/logout`, { method: 'POST', credentials: 'include' })
         bar.remove()
-        document.body.style.paddingTop = ''
+        removeBarStyle()
       })
+    }
+
+    function addBarStyle() {
+      if (document.getElementById('pab-dynamic-style')) return
+      const style = document.createElement('style')
+      style.id = 'pab-dynamic-style'
+      style.textContent = 'header[data-header-position]{top:36px!important}'
+      document.head.appendChild(style)
+    }
+
+    function removeBarStyle() {
+      document.getElementById('pab-dynamic-style')?.remove()
     }
 
     await render()
@@ -71,19 +78,19 @@
 </script>
 
 <style>
-  .pab-bar {
+  #payload-admin-bar {
     position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
     background: #111; color: #fff; font-family: system-ui, sans-serif;
     font-size: 13px; display: flex; align-items: center; justify-content: space-between;
     padding: 0 16px; height: 36px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   }
-  .pab-bar .pab-brand { font-weight: 600; }
-  .pab-bar .pab-links { display: flex; align-items: center; gap: 4px; }
-  .pab-bar a { color: #ccc; text-decoration: none; padding: 4px 8px; border-radius: 4px; }
-  .pab-bar a:hover { background: rgba(255,255,255,0.1); color: #fff; }
-  .pab-bar button {
+  #payload-admin-bar .pab-brand { font-weight: 600; }
+  #payload-admin-bar .pab-links { display: flex; align-items: center; gap: 4px; }
+  #payload-admin-bar a { color: #ccc; text-decoration: none; padding: 4px 8px; border-radius: 4px; }
+  #payload-admin-bar a:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  #payload-admin-bar .pab-logout {
     background: none; border: 1px solid #555; color: #aaa; cursor: pointer;
     padding: 3px 8px; border-radius: 4px; font-size: 12px; margin-left: 4px;
   }
-  .pab-bar button:hover { border-color: #e44; color: #e44; }
+  #payload-admin-bar .pab-logout:hover { border-color: #e44; color: #e44; }
 </style>
