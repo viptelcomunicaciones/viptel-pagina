@@ -2,16 +2,10 @@
 import Icon from '@/components/ui/primitives/Icon/Icon.astro'
 import { t } from '@/i18n'
 import { cn } from '@/lib/cn'
-
-interface Feature {
-  id?: string | null
-  title: string
-  description?: string | null
-  icon?: string | { url?: string | null } | null
-}
+import type { Service } from '@/lib/payload-types'
 
 interface Props {
-  features: Feature[]
+  features: NonNullable<Service['features']>
   locale?: string
   class?: string
 }
@@ -25,7 +19,7 @@ const { features, locale = 'es', class: className } = Astro.props
       {t('services.detail.features', locale)}
     </h2>
     <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-      {features.map((feature, idx) => (
+      {features.map((feature) => (
         <div class="flex flex-col items-center gap-3 rounded-xl border border-border bg-background p-6 text-center">
           <div class="flex h-12 w-12 items-center justify-center rounded-full bg-brand-50 text-brand-600 dark:bg-brand-950 dark:text-brand-400">
             <Icon name="check-circle" size="md" />

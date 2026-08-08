@@ -18,12 +18,33 @@ import { resolveSocialLinks } from '@/lib/utils';
 import { createBlogPostSchema, createFAQSchema } from '@/lib/schema';
 import { getBlogOgPath } from '@/lib/og';
 import { t, getLocaleFromPath, localizedPath, getLocales } from '@/i18n';
-import { getPostSlug, getBlogBaseUrl } from '@/lib/blog';
-// getPostTranslations removed — Payload CMS is the source of truth
+import { getPostSlug, getPostUrl, getBlogBaseUrl } from '@/lib/blog';
+import { payload } from '@/lib/payload-client';
+// Translations resolve against Payload CMS: the same slug looked up in every
+// locale. If a locale has no matching post, the blog index URL is used as the
+// fallback so switching language never lands on a 404.
 
 const locale = getLocaleFromPath(Astro.url.pathname);
 
 const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
+
+async function getPostTranslations(
+  slug: string,
+  _locale: string,
+  uid?: string
+): Promise<{ locale: string; url: string }[]> {
+  const postSlug = slug || uid || '';
+  const translations: { locale: string; url: string }[] = [];
+  for (const loc of getLocales()) {
+    try {
+      const post = await payload.posts().getBySlug(postSlug, loc);
+      translations.push({ locale: loc, url: post ? getPostUrl(post, loc) : getBlogBaseUrl(loc) });
+    } catch {
+      translations.push({ locale: loc, url: getBlogBaseUrl(loc) });
+    }
+  }
+  return translations;
+}
 
 interface Props {
   title: string;
@@ -124,9 +145,6 @@ const schemas = faqSchema ? [blogPostingSchema, faqSchema] : [blogPostingSchema]
 // there, so switching language never lands on a 404.
 const postTranslations = await getPostTranslations(slug, locale, uid);
 const translationByLocale = new Map(postTranslations.map((tr) => [tr.locale, tr.url]));
-const languageAlternates = Object.fromEntries(
-  getLocales().map((loc) => [loc, translationByLocale.get(loc) ?? getBlogBaseUrl(loc)])
-);
 ---
 
 <BaseLayout

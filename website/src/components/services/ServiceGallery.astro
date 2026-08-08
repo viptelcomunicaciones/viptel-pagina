@@ -1,25 +1,19 @@
 ---
-import { Image } from 'astro:assets'
 import { t } from '@/i18n'
 import { cn } from '@/lib/cn'
 
 import { payload } from '@/lib/payload-client'
-
-interface GalleryImage {
-  id?: string | null
-  image?: string | { url?: string | null; alt?: string | null } | null
-  alt?: string | null
-}
+import type { Service } from '@/lib/payload-types'
 
 interface Props {
-  gallery: GalleryImage[]
+  gallery: NonNullable<Service['gallery']>
   locale?: string
   class?: string
 }
 
 const { gallery, locale = 'es', class: className } = Astro.props
 
-function getImageUrl(img: GalleryImage): string | null {
+function getImageUrl(img: NonNullable<Service['gallery']>[number]): string | null {
   if (typeof img.image === 'object' && img.image && 'url' in img.image) {
     const rawUrl = img.image.url as string | null
     return rawUrl ? payload.resolveMediaUrl(rawUrl) : null
@@ -27,7 +21,7 @@ function getImageUrl(img: GalleryImage): string | null {
   return null
 }
 
-function getImageAlt(img: GalleryImage): string {
+function getImageAlt(img: NonNullable<Service['gallery']>[number]): string {
   return img.alt || (typeof img.image === 'object' && img.image && 'alt' in img.image ? (img.image.alt as string) || '' : '')
 }
 

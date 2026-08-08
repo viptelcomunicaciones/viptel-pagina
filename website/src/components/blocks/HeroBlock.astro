@@ -9,7 +9,7 @@
 import { Hero } from '@/components/hero'
 import Button from '@/components/ui/form/Button/Button.astro'
 import { payload } from '@/lib/payload-client'
-import type { PageHero } from '@/lib/payload-types'
+import type { PageHero } from '@/lib/block-types'
 
 interface Props {
   hero: PageHero
@@ -60,7 +60,7 @@ const heroLinks: any[] = hero.links ?? []
           {heroLinks.length > 0 && (
             <div class="flex justify-center gap-4">
               {heroLinks.map((item) => (
-                <Button size="lg" href={resolveLinkUrl(item)} variant={item.link?.appearance === 'outline' ? 'outline' : 'default'}>
+                <Button size="lg" href={resolveLinkUrl(item)} variant={item.link?.appearance === 'outline' ? 'outline' : 'primary'}>
                   {item.link?.label}
                 </Button>
               ))}
@@ -78,7 +78,7 @@ const heroLinks: any[] = hero.links ?? []
             {heroLinks.length > 0 && (
               <div class="flex justify-center gap-4">
                 {heroLinks.map((item) => (
-                  <Button size="lg" href={resolveLinkUrl(item)} variant={item.link?.appearance === 'outline' ? 'outline' : 'default'}>
+                  <Button size="lg" href={resolveLinkUrl(item)} variant={item.link?.appearance === 'outline' ? 'outline' : 'primary'}>
                     {item.link?.label}
                   </Button>
                 ))}

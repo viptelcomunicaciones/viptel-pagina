@@ -39,7 +39,7 @@ const related = allProjects.filter((p) => p.slug !== slug).slice(0, 3)
       <h1 class="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">{project.title}</h1>
       {project.description && <p class="text-lg text-foreground-muted mb-8 leading-relaxed">{project.description}</p>}
 
-      {project.coverImage?.url && (
+      {project.coverImage && typeof project.coverImage !== 'number' && project.coverImage.url && (
         <img src={payload.resolveMediaUrl(project.coverImage.url)} alt={project.coverImage.alt || project.title} class="w-full aspect-video object-cover rounded-xl mb-8 shadow-lg" />
       )}
 
@@ -52,7 +52,7 @@ const related = allProjects.filter((p) => p.slug !== slug).slice(0, 3)
       {project.gallery && project.gallery.length > 0 && (
         <div class="grid gap-4 grid-cols-2 md:grid-cols-3">
           {project.gallery.map((img) => (
-            img.image?.url && (
+            img.image && typeof img.image !== 'number' && img.image.url && (
               <div class="overflow-hidden rounded-xl aspect-square">
                 <img src={payload.resolveMediaUrl(img.image.url)} alt={img.alt || img.image.alt || ''} class="w-full h-full object-cover" />
               </div>

@@ -32,7 +32,7 @@ const posts = await payload.posts().getAll(locale)
               class="group bg-background rounded-xl border border-border overflow-hidden hover:border-brand-500/40 hover:shadow-md transition-all duration-200 hover:-translate-y-1 flex flex-col"
               data-reveal data-reveal-delay={(i % 3) || undefined}
             >
-              {post.heroImage?.url && (
+              {post.heroImage && typeof post.heroImage !== 'number' && post.heroImage.url && (
                 <div class="aspect-video overflow-hidden">
                   <img src={payload.resolveMediaUrl(post.heroImage.url)} alt={post.heroImage.alt || post.title} class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                 </div>

@@ -36,7 +36,7 @@ const { project, index = 0, locale = defaultLocale } = Astro.props;
   data-reveal-delay={index % 2 || undefined}
 >
   <div class="flex flex-1 flex-col p-6">
-    {project.coverImage?.url && (
+    {project.coverImage && typeof project.coverImage !== 'number' && project.coverImage.url && (
       <div class="mb-4 overflow-hidden rounded-lg">
         <img
           src={payload.resolveMediaUrl(project.coverImage.url)}

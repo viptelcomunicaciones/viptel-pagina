@@ -34,7 +34,7 @@ const heroImageAlt = post.heroImage && typeof post.heroImage !== 'number' && pos
         imageUrl={heroImageUrl}
         imageAlt={heroImageAlt}
         publishedAt={post.publishedAt}
-        author={typeof post.author === 'object' && post.author ? (post.author as any).name : null}
+        author={post.populatedAuthors?.[0]?.name ?? null}
         tags={(post.tags ?? []).map((t) => t.tag ?? '')}
       />
       {post.excerpt && <p class="text-lg text-foreground-muted mb-8 leading-relaxed">{post.excerpt}</p>}

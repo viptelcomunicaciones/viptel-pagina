@@ -33,7 +33,7 @@ const posts = await payload.posts().getAll(locale)
               data-reveal
               data-reveal-delay={(i % 3) || undefined}
             >
-              {post.heroImage?.url && (
+              {post.heroImage && typeof post.heroImage !== 'number' && post.heroImage.url && (
                 <div class="aspect-video overflow-hidden">
                   <img src={payload.resolveMediaUrl(post.heroImage.url)} alt={post.heroImage.alt || post.title} class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
                 </div>

@@ -174,7 +174,7 @@ if (formId) {
 
           <script>
             (function() {
-              const form = document.getElementById('payload-form-{formId}')
+              const form = document.getElementById('payload-form-{formId}') as HTMLFormElement | null
               if (!form) return
               const status = document.getElementById('payload-form-{formId}-status')
 

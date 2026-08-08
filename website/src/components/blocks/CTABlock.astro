@@ -11,14 +11,15 @@ interface Props {
 }
 
 const { block } = Astro.props
+const links = block.links ?? []
 ---
 
 <section class="relative z-10 py-[var(--space-section-md)] bg-background border-t border-border">
   <div class="glitch:hidden mx-auto max-w-2xl px-6 text-center" data-reveal>
     {block.richText && <RichText content={block.richText} />}
-    {block.links?.length > 0 && (
+    {links.length > 0 && (
       <div class="flex justify-center gap-4 mt-6">
-        {block.links.map((l) => (
+        {links.map((l) => (
           <Button size="lg" href={l.link.url || '#'}>
             {l.link.label}
             <Icon name="arrow-right" size="sm" />
@@ -29,9 +30,9 @@ const { block } = Astro.props
   </div>
   <LetterGlitchBand>
     {block.richText && <RichText content={block.richText} />}
-    {block.links?.length > 0 && (
+    {links.length > 0 && (
       <div class="flex justify-center gap-4 mt-6">
-        {block.links.map((l) => (
+        {links.map((l) => (
           <Button size="lg" href={l.link.url || '#'}>
             {l.link.label}
             <Icon name="arrow-right" size="sm" />

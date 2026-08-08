@@ -222,9 +222,9 @@ class ServiceQueries extends QueryBase<Service> {
     return data.docs ?? []
   }
 
-  async getByParent(parentId: string, locale = defaultLocale): Promise<Service[]> {
+  async getByParent(parentId: string | number, locale = defaultLocale): Promise<Service[]> {
     const data = await this.client.fetchAPI<DocsResponse<Service>>(
-      `services?where[parent][equals]=${encodeURIComponent(parentId)}&where[_status][equals]=published`,
+      `services?where[parent][equals]=${encodeURIComponent(String(parentId))}&where[_status][equals]=published`,
       { locale },
     )
     return data.docs ?? []

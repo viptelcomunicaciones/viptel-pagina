@@ -1,6 +1,6 @@
 ---
 import { payload } from '@/lib/payload-client'
-import type { GalleryBlock as GalleryBlockType } from '@/lib/payload-types'
+import type { GalleryBlock as GalleryBlockType } from '@/lib/block-types'
 
 interface Props {
   block: GalleryBlockType
@@ -8,6 +8,10 @@ interface Props {
 }
 
 const { block } = Astro.props
+const slides = (block.images ?? []).flatMap((img) => {
+  const image = typeof img.image === 'object' && img.image !== null ? img.image : undefined
+  return image ? [{ image, alt: img.alt, caption: img.caption, id: img.id }] : []
+})
 ---
 
 <section class="relative z-10 py-[var(--space-section-md)] bg-background border-t border-border">
@@ -16,7 +20,7 @@ const { block } = Astro.props
       <h2 class="font-display text-3xl md:text-4xl font-bold text-foreground text-center mb-12" data-reveal>{block.heading}</h2>
     )}
     <div class="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-      {block.images.map((img, i) => (
+      {slides.map((img, i) => (
         <div class="group relative overflow-hidden rounded-xl aspect-square" data-reveal data-reveal-delay={(i % 4) || undefined}>
           <img
             src={payload.resolveMediaUrl(img.image?.url)}

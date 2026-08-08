@@ -32,7 +32,7 @@ export function collectTagsWithCounts<T extends { tags?: { tag?: string | null }
   const counts = new Map<string, number>()
   for (const item of items) {
     for (const t of item.tags ?? []) {
-      counts.set(t.tag, (counts.get(t.tag) ?? 0) + 1)
+      counts.set(t.tag ?? '', (counts.get(t.tag ?? '') ?? 0) + 1)
     }
   }
   return [...counts.entries()]

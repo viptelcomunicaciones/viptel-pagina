@@ -1,7 +1,6 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { getCollection } from 'astro:content';
 import { renderOgSvg } from '@/lib/og';
-import { getPostSlug } from '@/lib/blog';
 import { defaultLocale } from '@/i18n';
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -9,7 +8,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
     return data.locale === defaultLocale && (import.meta.env.PROD ? data.draft !== true : true);
   });
   return posts.map((post) => ({
-    params: { slug: getPostSlug(post.id, post.data.locale) },
+    params: { slug: post.id },
     props: {
       title: post.data.title,
       description: post.data.description,

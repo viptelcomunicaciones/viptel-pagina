@@ -37,7 +37,7 @@ const recoveryLinks = [
 ]
 ---
 
-{is404 ? (
+{is404 || !page ? (
   <PageLayout title={t('errors.metaTitle', locale)} description={t('errors.metaDescription', locale)} noindex eagerReveal>
     <Hero layout="centered" size="sm">
       <Badge slot="badge" variant="brand" pill><Icon name="compass" size="sm" />{t('errors.badge', locale)}</Badge>

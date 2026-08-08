@@ -1,7 +1,7 @@
 ---
 import RichText from './RichText.astro'
 import { payload } from '@/lib/payload-client'
-import type { MediaContentBlock as MediaContentBlockType } from '@/lib/payload-types'
+import type { MediaContentBlock as MediaContentBlockType } from '@/lib/block-types'
 
 interface Props {
   block: MediaContentBlockType
@@ -10,7 +10,8 @@ interface Props {
 
 const { block } = Astro.props
 const isLeft = block.imagePosition === 'left'
-const mediaUrl = block.image?.url
+const image = typeof block.image === 'object' && block.image !== null ? block.image : undefined
+const mediaUrl = image?.url
 ---
 
 <section class="relative z-10 py-[var(--space-section-md)] bg-background-secondary border-t border-border">
@@ -18,7 +19,7 @@ const mediaUrl = block.image?.url
     <div class={`grid gap-10 md:grid-cols-2 md:gap-12 items-center`}>
       {isLeft && mediaUrl && (
         <div data-reveal>
-          <img src={payload.resolveMediaUrl(mediaUrl)} alt={block.image?.alt || ''} class="w-full h-auto rounded-xl shadow-lg" />
+          <img src={payload.resolveMediaUrl(mediaUrl)} alt={image?.alt || ''} class="w-full h-auto rounded-xl shadow-lg" />
         </div>
       )}
       <div data-reveal data-reveal-delay={isLeft ? '1' : '0'}>
@@ -29,7 +30,7 @@ const mediaUrl = block.image?.url
       </div>
       {!isLeft && mediaUrl && (
         <div data-reveal data-reveal-delay="1">
-          <img src={payload.resolveMediaUrl(mediaUrl)} alt={block.image?.alt || ''} class="w-full h-auto rounded-xl shadow-lg" />
+          <img src={payload.resolveMediaUrl(mediaUrl)} alt={image?.alt || ''} class="w-full h-auto rounded-xl shadow-lg" />
         </div>
       )}
     </div>

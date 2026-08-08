@@ -295,7 +295,7 @@ const buttonId = `${menuId}-button`;
                     </a>
                     <div class="absolute left-0 top-full pt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50">
                       <div class="rounded-xl border border-border bg-background p-1.5 shadow-lg min-w-[180px]">
-                        {item.children.sort((a, b) => a.order - b.order).map((child) => {
+                        {item.children.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map((child) => {
                           const childHref = child.external || isExternalOrAnchorHref(child.href)
                             ? child.href
                             : localizedPath(child.href, locale)
@@ -565,7 +565,7 @@ const buttonId = `${menuId}-button`;
                             <svg class="h-4 w-4 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
                           </summary>
                           <div class="ml-10 mt-1 flex flex-col gap-0.5">
-                            {item.children.sort((a, b) => a.order - b.order).map((child) => {
+{item.children.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map((child) => {
                               const childHref = child.external || isExternalOrAnchorHref(child.href) ? child.href : child.href
                               return (
                                 <a href={childHref} target={child.external ? '_blank' : undefined} rel={child.external ? 'noopener noreferrer' : undefined}

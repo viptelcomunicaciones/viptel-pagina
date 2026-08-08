@@ -11,22 +11,52 @@ interface Props {
 
 const { block, locale = 'es' } = Astro.props
 
-type ArchiveItem = Post | Project
-let items: ArchiveItem[] = []
+interface ArchiveCard {
+  slug: string
+  title: string
+  imageUrl?: string
+  imageAlt?: string
+  description?: string
+  publishedAt?: string | null
+}
+
+function toCard(item: Post | Project): ArchiveCard {
+  const heroImage = 'heroImage' in item ? item.heroImage : undefined
+  const coverImage = 'coverImage' in item ? item.coverImage : undefined
+  const image = typeof heroImage === 'object' && heroImage !== null ? heroImage
+    : typeof coverImage === 'object' && coverImage !== null ? coverImage
+    : undefined
+  const description = 'excerpt' in item
+    ? item.excerpt
+    : (item as Project).description
+  return {
+    slug: item.slug,
+    title: item.title,
+    imageUrl: image?.url ?? undefined,
+    imageAlt: image?.alt ?? undefined,
+    description: description ?? undefined,
+    publishedAt: item.publishedAt,
+  }
+}
+
+let items: ArchiveCard[] = []
 const isProjects = block.relationTo === 'projects'
 
 if (block.populateBy === 'selection' && block.selectedDocs?.length) {
-  const all: ArchiveItem[] = isProjects ? await payload.projects().getAll(locale) : await payload.posts().getAll(locale)
+  const all: (Post | Project)[] = isProjects ? await payload.projects().getAll(locale) : await payload.posts().getAll(locale)
   const selectedIds = new Set(block.selectedDocs.map((d) => (typeof d === 'object' ? (d as any).id : d)))
-  items = all.filter((p) => selectedIds.has(p.id))
+  items = all.filter((p) => selectedIds.has(p.id)).map(toCard)
 } else {
-  items = isProjects ? await payload.projects().getAll(locale) : await payload.posts().getAll(locale)
+  const all: (Post | Project)[] = isProjects ? await payload.projects().getAll(locale) : await payload.posts().getAll(locale)
+  let selected = all
   if (block.categories?.length) {
-    items = items.filter((p) =>
-      p.categories?.some((c) => block.categories!.includes(typeof c === 'number' ? c : (c as any).id)),
-    )
+    selected = selected.filter((p) => {
+      const categories = 'categories' in p ? p.categories : undefined
+      return categories?.some((c) => block.categories!.includes(typeof c === 'number' ? c : (c as any).id))
+    })
   }
-  if (block.limit) items = items.slice(0, block.limit)
+  if (block.limit) selected = selected.slice(0, block.limit)
+  items = selected.map(toCard)
 }
 
 const linkPrefix = isProjects ? '/projects' : '/blog'
@@ -45,10 +75,10 @@ const linkPrefix = isProjects ? '/projects' : '/blog'
           href={localizedPath(`${linkPrefix}/${item.slug}`, locale)}
           class="group bg-background rounded-xl border border-border overflow-hidden hover:border-brand-500/40 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
         >
-          {(item.heroImage?.url || item.coverImage?.url) && (
+          {item.imageUrl && (
             <img
-              src={payload.resolveMediaUrl(item.heroImage?.url || item.coverImage?.url)}
-              alt={(item.heroImage?.alt || item.coverImage?.alt) || item.title}
+              src={payload.resolveMediaUrl(item.imageUrl)}
+              alt={item.imageAlt || item.title}
               class="w-full aspect-video object-cover"
             />
           )}
@@ -56,8 +86,8 @@ const linkPrefix = isProjects ? '/projects' : '/blog'
             <h3 class="font-display font-bold text-foreground group-hover:text-brand-500 transition-colors">
               {item.title}
             </h3>
-            {(item.excerpt || item.description) && (
-              <p class="text-sm text-foreground-muted mt-2">{item.excerpt || item.description}</p>
+            {item.description && (
+              <p class="text-sm text-foreground-muted mt-2">{item.description}</p>
             )}
             {item.publishedAt && (
               <time class="text-xs text-foreground-muted mt-3 block">

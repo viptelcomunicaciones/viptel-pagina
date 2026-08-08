@@ -14,7 +14,8 @@ import Badge from '@/components/ui/data-display/Badge/Badge.astro';
 import Button from '@/components/ui/form/Button/Button.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import siteConfig from '@/config/site.config';
-import { getProjectUrl } from "@/lib/projects";
+import { t, getLocaleFromPath, localizedPath, getLocales } from '@/i18n';
+import { getProjectUrl, getProjectsBaseUrl } from "@/lib/projects";
 
 interface Props {
   title: string;

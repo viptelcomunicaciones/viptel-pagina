@@ -22,13 +22,13 @@ if (!post) {
 <PageLayout title={post.title} description={post.excerpt || post.title}>
   <article class="py-[var(--space-section-md)]">
     <div class="mx-auto max-w-3xl px-6">
-      {post.heroImage?.url && (
+      {post.heroImage && typeof post.heroImage !== 'number' && post.heroImage.url && (
         <img src={payload.resolveMediaUrl(post.heroImage.url)} alt={post.heroImage.alt || post.title} class="w-full aspect-video object-cover rounded-xl mb-8 shadow-lg" />
       )}
       <h1 class="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">{post.title}</h1>
       <div class="flex flex-wrap items-center gap-4 text-sm text-foreground-muted mb-8">
         {post.publishedAt && <time>{new Date(post.publishedAt).toLocaleDateString(locale === 'es' ? 'es-CO' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</time>}
-        {post.author && typeof post.author === 'object' && post.author.name && <span>Por {post.author.name}</span>}
+        {post.populatedAuthors?.[0]?.name && <span>Por {post.populatedAuthors[0].name}</span>}
         {post.tags && post.tags.length > 0 && (
           <div class="flex flex-wrap gap-1.5">
             {post.tags.map((t) => (

@@ -7,7 +7,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const tags = collectTags(posts);
 
   return tags.map((tag) => {
-    const count = posts.filter((p) => p.data.tags.includes(tag)).length;
+    const count = posts.filter((p) => (p.tags ?? []).some((t) => t.tag === tag)).length;
     return {
       params: { tag: tagToSlug(tag) },
       props: { tag, count },

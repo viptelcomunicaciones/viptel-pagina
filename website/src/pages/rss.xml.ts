@@ -27,7 +27,7 @@ export async function GET(context: APIContext) {
     .map((post) => {
       const link = `${siteUrl}/blog/${post.slug}/`;
       const categories = (post.tags ?? [])
-        .map((t) => `<category>${escapeXml(t.tag)}</category>`)
+        .map((t) => `<category>${escapeXml(t.tag ?? '')}</category>`)
         .join('\n        ');
 
       return `    <item>
@@ -35,7 +35,7 @@ export async function GET(context: APIContext) {
       <link>${link}</link>
       <guid>${link}</guid>
       <description>${escapeXml(post.excerpt || '')}</description>
-      <pubDate>${formatRfc822Date(new Date(post.publishedAt))}</pubDate>
+      <pubDate>${formatRfc822Date(post.publishedAt ? new Date(post.publishedAt) : new Date())}</pubDate>
       ${categories}
     </item>`;
     })

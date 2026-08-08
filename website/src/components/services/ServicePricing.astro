@@ -3,25 +3,10 @@ import Button from '@/components/ui/form/Button/Button.astro'
 import Icon from '@/components/ui/primitives/Icon/Icon.astro'
 import { t } from '@/i18n'
 import { cn } from '@/lib/cn'
-
-interface PriceFeature {
-  id?: string | null
-  feature: string
-}
-
-interface PricePlan {
-  id?: string | null
-  planName: string
-  price: number
-  currency?: string | null
-  period?: string | null
-  features?: PriceFeature[] | null
-  highlighted?: boolean | null
-  ctaLabel?: string | null
-}
+import type { Service } from '@/lib/payload-types'
 
 interface Props {
-  plans: PricePlan[]
+  plans: NonNullable<Service['pricing']>
   locale?: string
   class?: string
 }
@@ -69,7 +54,7 @@ const { plans, locale = 'es', class: className } = Astro.props
           <div class="mt-auto pt-6">
             <Button
               fullWidth
-              variant={plan.highlighted ? 'default' : 'outline'}
+              variant={plan.highlighted ? 'primary' : 'outline'}
               href="/contact"
             >
               {plan.ctaLabel || t('services.pricing.cta', locale)}
