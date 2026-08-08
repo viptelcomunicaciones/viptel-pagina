@@ -20,7 +20,7 @@ import type { StackItem } from '@/components/landing/StackMarquee.astro';
 import { viptelStack } from '@/data/stack';
 import { payload } from '@/lib/payload-client';
 import { t, defaultLocale, localizedPath } from '@/i18n';
-import type { PageBlock } from '@/lib/payload-types';
+import type { PageBlock } from '@/lib/block-types';
 
 interface HeroLink {
   link?: {
@@ -59,24 +59,17 @@ const heroTitle = extractRichText(home?.hero?.richText);
 const heroLinks: HeroLink[] = home?.hero?.links ?? [];
 const heroImageUrl = home?.hero?.media && typeof home.hero.media !== 'number' && home.hero.media.url ? payload.resolveMediaUrl(home.hero.media.url) : null;
 
-function getLinkUrl(link: HeroLink['link']): string {
-  if (!link) return '#';
-  if (link.type === 'custom') return link.url || '#';
-  if (link.reference && typeof link.reference === 'object' && 'slug' in link.reference) {
-    return `/${link.reference.slug}`;
-  }
-  return link.url || '#';
-}
-
 const heroType = home?.hero?.type || 'none'
 const isHighImpact = heroType === 'highImpact'
 const isMediumImpact = heroType === 'mediumImpact'
-const showHero = heroType !== 'none'
 
 // Helper to get a Payload link URL (handles custom URLs and references)
 function getLinkUrl(link: HeroLink['link']): string {
   if (!link) return '#'
   if (link.type === 'custom' || link.type === undefined) return link.url || '#'
+  if (link.reference && typeof link.reference === 'object' && 'slug' in link.reference) {
+    return `/${link.reference.slug}`
+  }
   return link.url || '#'
 }
 
@@ -114,7 +107,7 @@ const heroStackItems = viptelStack
         </span>
       </p>
       <Fragment slot="actions">
-        {heroLinks.length > 0 ? heroLinks.map((item) => { const link = item.link; if (!link) return null; return <Button size="lg" href={getLinkUrl(link)} variant={link.appearance === 'outline' ? 'outline' : 'default'} target={link.newTab ? '_blank' : undefined}>{link.label}<Icon name="arrow-right" size="sm" /></Button> }) : (
+        {heroLinks.length > 0 ? heroLinks.map((item) => { const link = item.link; if (!link) return null; return <Button size="lg" href={getLinkUrl(link)} variant={link.appearance === 'outline' ? 'outline' : 'primary'} target={link.newTab ? '_blank' : undefined}>{link.label}<Icon name="arrow-right" size="sm" /></Button> }) : (
           <><Button size="lg" href={localizedPath('/services', locale)}>{t('pages.home.cta.primary', locale)}<Icon name="arrow-right" size="sm" /></Button>
           <Button size="lg" variant="outline" href={localizedPath('/contact', locale)}>{t('pages.home.cta.secondary', locale)}<Icon name="arrow-right" size="sm" /></Button></>
         )}
@@ -133,7 +126,7 @@ const heroStackItems = viptelStack
           {heroTitle && <h1 class="font-display text-3xl md:text-4xl font-bold text-foreground mb-6">{heroTitle}</h1>}
           {heroLinks.length > 0 && (
             <div class="flex justify-center gap-4 mb-8">
-              {heroLinks.map((item) => { const link = item.link; if (!link) return null; return <Button size="lg" href={getLinkUrl(link)} variant={link.appearance === 'outline' ? 'outline' : 'default'} target={link.newTab ? '_blank' : undefined}>{link.label}<Icon name="arrow-right" size="sm" /></Button> })}
+              {heroLinks.map((item) => { const link = item.link; if (!link) return null; return <Button size="lg" href={getLinkUrl(link)} variant={link.appearance === 'outline' ? 'outline' : 'primary'} target={link.newTab ? '_blank' : undefined}>{link.label}<Icon name="arrow-right" size="sm" /></Button> })}
             </div>
           )}
         </div>
