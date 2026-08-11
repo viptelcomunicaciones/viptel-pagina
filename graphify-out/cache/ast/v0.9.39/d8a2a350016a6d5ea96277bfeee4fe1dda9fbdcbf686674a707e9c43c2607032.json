@@ -1,0 +1,1 @@
+{"nodes": [{"id": "$graphify-root$_website_src_components_blog_blogimagesvg_astro", "label": "BlogImageSVG.astro", "file_type": "code", "source_file": "website/src/components/blog/BlogImageSVG.astro", "source_location": "L1"}], "edges": [], "raw_calls": [], "parse_errors": {"first_error_line": 2}}

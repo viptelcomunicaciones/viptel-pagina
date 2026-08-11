@@ -8,6 +8,7 @@ import {
   getSecondaryLocales,
   tagToSlug,
 } from '@/lib/projects';
+import { isValidLocale } from '@/i18n';
 
 // Locale-prefixed tag archives (`/<locale>/projects/tag/<tag>`). One page per
 // (non-default locale × tag that exists in that locale). Emits nothing when
@@ -43,6 +44,11 @@ export async function getStaticPaths() {
 }
 
 const { locale } = Astro.params;
+
+if (!isValidLocale(locale) || !Astro.props) {
+  return Astro.redirect('/404')
+}
+
 const { tag, projects, visibleTags } = Astro.props;
 ---
 

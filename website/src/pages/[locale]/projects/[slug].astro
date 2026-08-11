@@ -1,12 +1,16 @@
 ---
 import PageLayout from '@/layouts/PageLayout.astro'
 import RichText from '@/components/blocks/RichText.astro'
-import { defaultLocale } from '@/i18n'
+import { defaultLocale, isValidLocale } from '@/i18n'
 import { payload } from '@/lib/payload-client'
 
 export const prerender = false
 
 const { locale = defaultLocale, slug } = Astro.params
+
+if (!isValidLocale(locale)) {
+  return Astro.redirect('/404')
+}
 
 if (!slug) {
   return Astro.redirect('/404')

@@ -1,7 +1,7 @@
 ---
 import ServiceView from '@/components/pages/views/ServiceView.astro'
 import { payload } from '@/lib/payload-client'
-import { getSecondaryLocales } from '@/i18n'
+import { getSecondaryLocales, isValidLocale } from '@/i18n'
 
 export const prerender = false
 
@@ -10,6 +10,11 @@ export function getStaticPaths() {
 }
 
 const { slug, locale } = Astro.params as { slug: string; locale: string }
+
+if (!isValidLocale(locale)) {
+  return Astro.redirect('/404')
+}
+
 if (!slug) return Astro.redirect('/404')
 
 const querySlug = slug.includes('/') ? slug.split('/').pop()! : slug

@@ -1,6 +1,6 @@
 ---
 import ContactView from '@/components/pages/views/ContactView.astro';
-import { getSecondaryLocales } from '@/i18n';
+import { getSecondaryLocales, isValidLocale } from '@/i18n';
 
 // Locale-prefixed Contact page (`/<locale>/contact`). One page per non-default
 // locale; emits nothing when i18n is off. Untranslated copy falls back to the
@@ -10,6 +10,10 @@ export function getStaticPaths() {
 }
 
 const { locale } = Astro.params;
+
+if (!isValidLocale(locale)) {
+  return Astro.redirect('/404')
+}
 ---
 
 <ContactView locale={locale} />

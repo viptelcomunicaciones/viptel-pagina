@@ -3,12 +3,17 @@ import PageLayout from '@/layouts/PageLayout.astro'
 import { Hero } from '@/components/hero'
 import Badge from '@/components/ui/data-display/Badge/Badge.astro'
 import Icon from '@/components/ui/primitives/Icon/Icon.astro'
-import { t, defaultLocale } from '@/i18n'
+import { t, defaultLocale, isValidLocale } from '@/i18n'
 import { payload } from '@/lib/payload-client'
 
 export const prerender = false
 
 const { locale = defaultLocale } = Astro.params
+
+if (!isValidLocale(locale)) {
+  return Astro.redirect('/404')
+}
+
 const posts = await payload.posts().getAll(locale)
 ---
 

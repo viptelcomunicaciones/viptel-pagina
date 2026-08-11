@@ -1,13 +1,18 @@
 ---
 import ServicesOverviewView from '@/components/pages/views/ServicesOverviewView.astro'
 import { payload } from '@/lib/payload-client'
-import { getSecondaryLocales } from '@/i18n'
+import { getSecondaryLocales, isValidLocale } from '@/i18n'
 
 export function getStaticPaths() {
   return getSecondaryLocales().map((locale) => ({ params: { locale } }))
 }
 
 const { locale } = Astro.params
+
+if (!isValidLocale(locale)) {
+  return Astro.redirect('/404')
+}
+
 const categories = await payload.services().getCategories(locale)
 const childrenMap: Record<string, any[]> = {}
 const childResults = await Promise.all(categories.map((cat) => payload.services().getByParent(cat.id, locale)))

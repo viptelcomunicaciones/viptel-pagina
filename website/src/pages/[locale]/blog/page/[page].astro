@@ -1,6 +1,7 @@
 ---
 import BlogPageView from '@/components/blog/views/BlogPageView.astro';
 import { getBlogPageCount, getSecondaryLocales } from '@/lib/blog';
+import { isValidLocale } from '@/i18n';
 
 // Locale-prefixed paginated blog index (`/<locale>/blog/page/N`, N >= 2).
 // Page 1 lives at `/<locale>/blog`. Emits nothing when i18n is off.
@@ -24,6 +25,11 @@ export async function getStaticPaths() {
 }
 
 const { locale } = Astro.params;
+
+if (!isValidLocale(locale) || !Astro.props) {
+  return Astro.redirect('/404')
+}
+
 const { page, totalPages } = Astro.props;
 ---
 

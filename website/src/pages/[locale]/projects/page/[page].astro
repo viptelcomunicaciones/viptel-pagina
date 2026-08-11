@@ -1,6 +1,7 @@
 ---
 import ProjectsPageView from '@/components/projects/views/ProjectsPageView.astro';
 import { getProjectPageCount, getSecondaryLocales } from '@/lib/projects';
+import { isValidLocale } from '@/i18n';
 
 // Locale-prefixed paginated projects index (`/<locale>/projects/page/N`, N >= 2).
 // Page 1 lives at `/<locale>/projects`. Emits nothing when i18n is off.
@@ -24,6 +25,11 @@ export async function getStaticPaths() {
 }
 
 const { locale } = Astro.params;
+
+if (!isValidLocale(locale) || !Astro.props) {
+  return Astro.redirect('/404')
+}
+
 const { page, totalPages } = Astro.props;
 ---
 
