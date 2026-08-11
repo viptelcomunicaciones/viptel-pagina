@@ -7,7 +7,7 @@ import Badge from '@/components/ui/data-display/Badge/Badge.astro'
 import Card from '@/components/ui/data-display/Card/Card.astro'
 import Button from '@/components/ui/form/Button/Button.astro'
 import { Hero } from '@/components/hero'
-import { payload } from '@/lib/payload-client'
+import { payload, redirectTarget } from '@/lib/payload-client'
 import { t, defaultLocale } from '@/i18n'
 
 export const prerender = false
@@ -15,14 +15,17 @@ export const prerender = false
 const { slug } = Astro.params
 const locale = defaultLocale
 
+// /home es la fuente de datos de la landing — nunca una página pública.
+if (slug === 'home') return Astro.redirect('/', 301)
+
 let page = null
 let is404 = false
 
 if (slug) {
   const redirect = await payload.redirects().get(`/${slug}`)
   if (redirect) {
-    const target = typeof redirect.to === 'string' ? redirect.to : `/${(redirect.to as any)?.slug || ''}`
-    return Astro.redirect(target, redirect.type === '301' ? 301 : 302)
+    const { target, status } = redirectTarget(redirect)
+    return Astro.redirect(target, status)
   }
   page = await payload.pages().getBySlug(slug)
   if (!page) is404 = true

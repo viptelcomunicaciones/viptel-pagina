@@ -228,105 +228,107 @@ export interface Page {
       | null;
     media?: (number | null) | Media;
   };
-  layout: (
-    | CallToActionBlock
-    | ContentBlock
-    | MediaBlock
-    | ArchiveBlock
-    | {
-        heading?: string | null;
-        cards: {
-          icon?: string | null;
-          title: string;
-          description?: string | null;
-          linkUrl?: string | null;
-          id?: string | null;
-        }[];
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'cards';
-      }
-    | {
-        name: string;
-        price?: number | null;
-        currency?: string | null;
-        interval?: ('one-time' | 'monthly') | null;
-        features?:
-          | {
-              feature?: string | null;
-              included?: boolean | null;
+  layout?:
+    | (
+        | CallToActionBlock
+        | ContentBlock
+        | MediaBlock
+        | ArchiveBlock
+        | {
+            heading?: string | null;
+            cards: {
+              icon?: string | null;
+              title: string;
+              description?: string | null;
+              linkUrl?: string | null;
               id?: string | null;
-            }[]
-          | null;
-        linkText?: string | null;
-        linkUrl?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'pricing';
-      }
-    | {
-        heading?: string | null;
-        items: {
-          question: string;
-          answer?: {
-            root: {
-              type: string;
-              children: {
-                type: any;
-                version: number;
-                [k: string]: unknown;
-              }[];
-              direction: ('ltr' | 'rtl') | null;
-              format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-              indent: number;
-              version: number;
-            };
-            [k: string]: unknown;
-          } | null;
-          id?: string | null;
-        }[];
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'faq';
-      }
-    | {
-        heading?: string | null;
-        images: {
-          image: number | Media;
-          alt?: string | null;
-          caption?: string | null;
-          id?: string | null;
-        }[];
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'gallery';
-      }
-    | {
-        heading?: string | null;
-        body?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
             }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        image: number | Media;
-        imagePosition?: ('left' | 'right') | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'media-content';
-      }
-    | CodeBlock
-    | FormBlock
-  )[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cards';
+          }
+        | {
+            name: string;
+            price?: number | null;
+            currency?: string | null;
+            interval?: ('one-time' | 'monthly') | null;
+            features?:
+              | {
+                  feature?: string | null;
+                  included?: boolean | null;
+                  id?: string | null;
+                }[]
+              | null;
+            linkText?: string | null;
+            linkUrl?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'pricing';
+          }
+        | {
+            heading?: string | null;
+            items: {
+              question: string;
+              answer?: {
+                root: {
+                  type: string;
+                  children: {
+                    type: any;
+                    version: number;
+                    [k: string]: unknown;
+                  }[];
+                  direction: ('ltr' | 'rtl') | null;
+                  format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                  indent: number;
+                  version: number;
+                };
+                [k: string]: unknown;
+              } | null;
+              id?: string | null;
+            }[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'faq';
+          }
+        | {
+            heading?: string | null;
+            images: {
+              image: number | Media;
+              alt?: string | null;
+              caption?: string | null;
+              id?: string | null;
+            }[];
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'gallery';
+          }
+        | {
+            heading?: string | null;
+            body?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            image: number | Media;
+            imagePosition?: ('left' | 'right') | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'media-content';
+          }
+        | CodeBlock
+        | FormBlock
+      )[]
+    | null;
   meta?: {
     title?: string | null;
     /**
@@ -362,7 +364,7 @@ export interface Post {
   id: number;
   title: string;
   heroImage?: (number | null) | Media;
-  content: {
+  content?: {
     root: {
       type: string;
       children: {
@@ -376,7 +378,7 @@ export interface Post {
       version: number;
     };
     [k: string]: unknown;
-  };
+  } | null;
   excerpt?: string | null;
   relatedPosts?: (number | Post)[] | null;
   categories?: (number | Category)[] | null;

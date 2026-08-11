@@ -2,7 +2,7 @@
 import PageLayout from '@/layouts/PageLayout.astro'
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro'
 import HeroBlock from '@/components/blocks/HeroBlock.astro'
-import { payload } from '@/lib/payload-client'
+import { payload, redirectTarget } from '@/lib/payload-client'
 import { isValidLocale, defaultLocale } from '@/i18n'
 
 export const prerender = false
@@ -22,10 +22,14 @@ const pageSlug = isLocale ? (slug ?? '') : [locale, slug].filter(Boolean).join('
 // Los redirects sí se guardan con el path completo (prefijo de locale incluido).
 const redirectFrom = isLocale ? `/${locale}/${slug ?? ''}` : `/${pageSlug}`
 
+// /home es la fuente de datos de la landing — nunca una página pública.
+// Return top-level (el return anidado no emite con i18n routing).
+if (pageSlug === 'home') return Astro.redirect('/', 301)
+
 const redirect = await payload.redirects().get(redirectFrom)
 if (redirect) {
-  const target = typeof redirect.to === 'string' ? redirect.to : `/${(redirect.to as any)?.slug || ''}`
-  return Astro.redirect(target, redirect.type === '301' ? 301 : 302)
+  const { target, status } = redirectTarget(redirect)
+  return Astro.redirect(target, status)
 }
 
 const page = await payload.pages().getBySlug(pageSlug, effectiveLocale)

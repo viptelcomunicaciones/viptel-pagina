@@ -246,6 +246,17 @@ class RedirectQueries {
   }
 }
 
+// The redirects collection is created without a `type` field (the plugin only
+// adds it when `redirectTypes` is configured), so a missing/invalid type means
+// the redirect is permanent (301).
+export function redirectTarget(redirect: Redirect): { target: string; status: number } {
+  const target = typeof redirect.to === 'string' ? redirect.to : `/${(redirect.to as any)?.slug || ''}`
+  const status = [301, 302, 303, 307, 308].includes(Number((redirect as any).type))
+    ? Number((redirect as any).type)
+    : 301
+  return { target, status }
+}
+
 // ── Singleton ────────────────────────────────────────────
 
 export const payload = new PayloadClient({

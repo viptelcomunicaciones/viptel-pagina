@@ -3,7 +3,7 @@ import HomeView from '@/components/pages/views/HomeView.astro';
 import PageLayout from '@/layouts/PageLayout.astro';
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
 import HeroBlock from '@/components/blocks/HeroBlock.astro';
-import { payload } from '@/lib/payload-client';
+import { payload, redirectTarget } from '@/lib/payload-client';
 import { getSecondaryLocales, isValidLocale, defaultLocale } from '@/i18n';
 
 // Locale-prefixed landing page (`/<locale>`). One page per non-default locale;
@@ -18,6 +18,14 @@ export function getStaticPaths() {
 }
 
 const { locale } = Astro.params;
+
+// En SSR esta ruta también intercepta URLs de un segmento (`/home`, `/terminos`).
+// Los redirects de Payload se guardan con el path completo.
+const redirect = await payload.redirects().get(`/${locale}`)
+if (redirect) {
+  const { target, status } = redirectTarget(redirect)
+  return Astro.redirect(target, status)
+}
 
 let rootPage = null
 if (!isValidLocale(locale)) {
