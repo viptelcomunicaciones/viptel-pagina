@@ -21,6 +21,8 @@ const generateURL: GenerateURL<Post | Page | Project | Service> = ({ doc, collec
 export const plugins: Plugin[] = [
   redirectsPlugin({
     collections: ['pages', 'posts', 'services'],
+    redirectTypes: ['301', '302'],
+    redirectTypeFieldOverride: { defaultValue: '301', required: false },
     overrides: {
       // @ts-expect-error - This is a valid override, mapped fields don't resolve to the same type
       fields: ({ defaultFields }) => {
