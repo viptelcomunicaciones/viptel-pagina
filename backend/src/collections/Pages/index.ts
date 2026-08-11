@@ -84,7 +84,6 @@ export const Pages: CollectionConfig<'pages'> = {
                 Code,
                 Form,
               ],
-              required: true,
               admin: {
                 initCollapsed: true,
               },
