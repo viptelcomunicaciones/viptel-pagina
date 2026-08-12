@@ -26,6 +26,10 @@ interface Props extends HTMLAttributes<'section'> {
   showScrollIndicator?: boolean;
   /** Stretch the section to fill at least the full viewport height (min-h-[100dvh]) */
   fullHeight?: boolean;
+  /** Background image (resolved media URL) — painted with a dark overlay for text contrast */
+  backgroundImage?: string;
+  /** Invert title/description colours for use over a dark background image */
+  onDark?: boolean;
 }
 
 const {
@@ -39,6 +43,8 @@ const {
   bottomFade = false,
   showScrollIndicator = false,
   fullHeight = false,
+  backgroundImage,
+  onDark = false,
   class: className,
   ...attrs
 } = Astro.props;
@@ -91,9 +97,23 @@ const gridClasses = cn(
   // between the actions and the bottom slot.
   isFlooredBottom && 'my-auto'
 );
+
+// Light-on-dark variants used when a hero paints a background image behind it.
+// Both variants are written out fully so Tailwind can see them at build time.
+const titleSlotClasses = onDark
+  ? '[&>h1]:text-white [&>h2]:text-white'
+  : '[&>h1]:text-foreground [&>h2]:text-foreground';
+
+const descriptionSlotClasses = onDark
+  ? 'text-white/85 [&>p]:text-white/85'
+  : 'text-foreground-muted [&>p]:text-foreground-muted';
+
+const sectionStyle = backgroundImage
+  ? `background-image: linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.3)), url(${backgroundImage}); background-size: cover; background-position: center;`
+  : undefined;
 ---
 
-<section class={sectionClasses} {...attrs}>
+<section class={sectionClasses} style={sectionStyle} {...attrs}>
   {showHeroHalo && <HeroGrid />}
   {showHeroHalo && <HeroBeam />}
 
@@ -159,8 +179,9 @@ const gridClasses = cn(
       {hasTitleSlot && (
         <div class={cn(
           'hero-title-slot mb-[var(--space-heading-gap)]',
-          '[&>h1]:font-display [&>h1]:text-5xl [&>h1]:leading-[1.1] [&>h1]:font-bold [&>h1]:tracking-tight [&>h1]:text-balance [&>h1]:text-foreground md:[&>h1]:text-6xl lg:[&>h1]:text-7xl',
-          '[&>h2]:font-display [&>h2]:text-4xl [&>h2]:leading-[1.1] [&>h2]:font-bold [&>h2]:tracking-tight [&>h2]:text-balance [&>h2]:text-foreground md:[&>h2]:text-5xl lg:[&>h2]:text-6xl'
+          '[&>h1]:font-display [&>h1]:text-5xl [&>h1]:leading-[1.1] [&>h1]:font-bold [&>h1]:tracking-tight [&>h1]:text-balance md:[&>h1]:text-6xl lg:[&>h1]:text-7xl',
+          '[&>h2]:font-display [&>h2]:text-4xl [&>h2]:leading-[1.1] [&>h2]:font-bold [&>h2]:tracking-tight [&>h2]:text-balance md:[&>h2]:text-5xl lg:[&>h2]:text-6xl',
+          titleSlotClasses
         )}>
           <slot name="title" />
         </div>
@@ -169,8 +190,9 @@ const gridClasses = cn(
       {/* Description Slot */}
       {hasDescriptionSlot && (
         <div class={cn(
-          'mb-[var(--space-stack-lg)] max-w-xl text-lg leading-relaxed text-foreground-muted',
-          '[&>p]:text-lg [&>p]:leading-relaxed [&>p]:text-foreground-muted',
+          'mb-[var(--space-stack-lg)] max-w-xl text-lg leading-relaxed',
+          '[&>p]:text-lg [&>p]:leading-relaxed',
+          descriptionSlotClasses,
           layout === 'centered' && 'mx-auto'
         )}>
           <slot name="description" />

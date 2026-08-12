@@ -5,6 +5,7 @@
     "dev": "pnpm --parallel -r run dev",
     "dev:backend": "pnpm --filter ./backend dev",
     "dev:website": "pnpm --filter ./website dev",
+    "generate:types": "pnpm --filter ./backend generate:types && pnpm --filter ./website generate:types",
     "build": "pnpm -r run build",
     "build:backend": "pnpm --filter ./backend build",
     "build:website": "pnpm --filter ./website build"

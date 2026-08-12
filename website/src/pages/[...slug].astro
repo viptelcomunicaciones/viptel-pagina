@@ -1,7 +1,7 @@
 ---
 import PageLayout from '@/layouts/PageLayout.astro'
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro'
-import HeroBlock from '@/components/blocks/HeroBlock.astro'
+import RenderHero from '@/components/heros/RenderHero.astro'
 import Icon from '@/components/ui/primitives/Icon/Icon.astro'
 import Badge from '@/components/ui/data-display/Badge/Badge.astro'
 import Card from '@/components/ui/data-display/Card/Card.astro'
@@ -70,7 +70,7 @@ const recoveryLinks = [
   </PageLayout>
 ) : (
   <PageLayout title={page.meta?.title || page.title} description={page.meta?.description || page.title}>
-    {page.hero && <HeroBlock hero={page.hero} locale={locale} />}
+    {page.hero && <RenderHero hero={page.hero} locale={locale} />}
     <BlockRenderer layout={page.layout} locale={locale} />
   </PageLayout>
 )}

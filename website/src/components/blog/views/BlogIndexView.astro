@@ -40,11 +40,8 @@ const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
 
 const posts = await getPublishedPosts(locale);
 
-// Featured posts always appear on page 1; the "All posts" grid paginates
-// the non-featured set so the first impression stays curated.
-const regularPostsAll = posts;
-const totalPages = Math.max(1, Math.ceil(regularPostsAll.length / BLOG_POSTS_PER_PAGE));
-const regularPosts = regularPostsAll.slice(0, BLOG_POSTS_PER_PAGE);
+const totalPages = Math.max(1, Math.ceil(posts.length / BLOG_POSTS_PER_PAGE));
+const regularPosts = posts.slice(0, BLOG_POSTS_PER_PAGE);
 
 const topTags = collectTopTags(posts, BLOG_TAG_CLOUD_LIMIT);
 ---
@@ -61,29 +58,10 @@ const topTags = collectTopTags(posts, BLOG_TAG_CLOUD_LIMIT);
     <p slot="description" class="!text-balance">{t('blog.heroDescription', locale)}</p>
   </Hero>
 
-  <!-- Featured Posts Section -->
-  {
-    0 > 0 && (
-      <section id="featured-section" class="bg-background-secondary py-[var(--space-section-md)] border-t border-border">
-        <div class="mx-auto max-w-6xl px-6 flex flex-col gap-8">
-          <h2 class="font-display text-foreground text-3xl md:text-4xl font-bold text-center" data-reveal>
-            {t('blog.featured', locale)}
-          </h2>
-        </div>
-      </section>
-    )
-  }
-
   <!-- All Posts Section -->
-  <section class:list={[0 > 0 ? 'bg-background' : 'bg-background-secondary', 'py-[var(--space-section-md)] border-t border-border']}>
+  <section class="bg-background-secondary py-[var(--space-section-md)] border-t border-border">
     <div class="mx-auto max-w-6xl px-6 flex flex-col gap-8">
       <div class="flex flex-col items-center gap-4" data-reveal>
-        {
-          false && (
-            <h2 class="font-display text-foreground text-3xl md:text-4xl font-bold text-center">{t('blog.allPosts', locale)}</h2>
-          )
-        }
-
         {topTags.length > 0 && (
           <TagList tags={topTags} locale={locale} class="justify-center" />
         )}
@@ -102,7 +80,7 @@ const topTags = collectTopTags(posts, BLOG_TAG_CLOUD_LIMIT);
                 author={post.populatedAuthors?.[0]?.name || 'Viptel'}
                 imageUrl={post.heroImage && typeof post.heroImage !== 'number' ? payload.resolveMediaUrl(post.heroImage.url ?? '') : undefined}
                 revealDelay={index % 3}
-                eager={0 === 0 && index === 0}
+                eager={index === 0}
               />
             ))}
           </div>
@@ -126,7 +104,7 @@ const topTags = collectTopTags(posts, BLOG_TAG_CLOUD_LIMIT);
 
   <!-- Follow CTA Section -->
   <!-- Mobile: standard CTA, no LetterGlitch -->
-  <CTA variant="default" size="md" maxWidth="lg" glow={false} data-reveal class:list={['glitch:hidden', 0 > 0 && '!bg-background-secondary']}>
+  <CTA variant="default" size="md" maxWidth="lg" glow={false} data-reveal class="glitch:hidden">
     <h2 slot="heading" class="!text-4xl">{t('blog.followAlong', locale)}</h2>
     <p slot="description" class="!text-lg text-balance">{t('blog.followAlongLead', locale)}</p>
 
@@ -160,7 +138,7 @@ const topTags = collectTopTags(posts, BLOG_TAG_CLOUD_LIMIT);
   </CTA>
 
   <!-- Desktop: contained LetterGlitch band with glass card -->
-  <section class:list={['hidden glitch:block relative z-10 py-[var(--space-section-md)]', 0 > 0 ? 'bg-background-secondary' : 'bg-background']}>
+  <section class="hidden glitch:block relative z-10 py-[var(--space-section-md)] bg-background">
     <LetterGlitchBand>
       <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">{t('blog.followAlong', locale)}</h2>
       <p class="text-lg text-foreground-muted mb-8 text-balance">{t('blog.followAlongLead', locale)}</p>

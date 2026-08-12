@@ -1,0 +1,25 @@
+---
+/**
+ * LowImpactHero — minimal, left-aligned heading. Rendered when the CMS hero
+ * type is `lowImpact`. Uses the `split` layout without an `aside` slot so the
+ * content stays left-aligned in a single column.
+ */
+import { Hero } from '@/components/hero'
+import RichText from '@/components/blocks/RichText.astro'
+import { extractHeroTitle } from './hero-helpers'
+import type { PageHero } from '@/lib/block-types'
+
+interface Props {
+  hero: PageHero
+  locale?: string
+}
+
+const { hero } = Astro.props
+
+const title = extractHeroTitle(hero.richText)
+---
+
+<Hero size="sm" layout="split">
+  {title && <h1 slot="title">{title}</h1>}
+  <RichText slot="description" content={hero.richText} excludeFirstHeading />
+</Hero>

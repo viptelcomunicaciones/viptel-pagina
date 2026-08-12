@@ -2,7 +2,7 @@
 import HomeView from '@/components/pages/views/HomeView.astro';
 import PageLayout from '@/layouts/PageLayout.astro';
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
-import HeroBlock from '@/components/blocks/HeroBlock.astro';
+import RenderHero from '@/components/heros/RenderHero.astro';
 import { payload, redirectTarget } from '@/lib/payload-client';
 import { getSecondaryLocales, isValidLocale, defaultLocale } from '@/i18n';
 
@@ -36,7 +36,7 @@ if (!isValidLocale(locale)) {
 
 {rootPage ? (
   <PageLayout title={rootPage.meta?.title || rootPage.title} description={rootPage.meta?.description || rootPage.title}>
-    {rootPage.hero && <HeroBlock hero={rootPage.hero} locale={defaultLocale} />}
+    {rootPage.hero && <RenderHero hero={rootPage.hero} locale={defaultLocale} />}
     <BlockRenderer layout={rootPage.layout} locale={defaultLocale} />
   </PageLayout>
 ) : (

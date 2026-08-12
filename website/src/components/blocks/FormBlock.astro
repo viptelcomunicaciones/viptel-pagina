@@ -29,7 +29,7 @@ if (formId) {
       fields = data.fields || []
       formTitle = data.title || ''
     }
-  } catch {}
+  } catch { /* form unavailable — render the fallback */ }
 }
 ---
 
@@ -119,7 +119,7 @@ if (formId) {
 
                 case 'select':
                 case 'state':
-                case 'country':
+                case 'country': {
                   const options = field.options || []
                   return (
                     <div class="flex flex-col gap-1">
@@ -139,6 +139,7 @@ if (formId) {
                       </select>
                     </div>
                   )
+                }
 
                 default:
                   return (
@@ -197,7 +198,7 @@ if (formId) {
                     form.style.display = 'none'
                     status?.classList.remove('hidden')
                   }
-                } catch {}
+                } catch { /* submission failed — keep the form visible */ }
               })
             })()
           </script>

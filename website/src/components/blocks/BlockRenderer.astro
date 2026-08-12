@@ -1,5 +1,6 @@
 ---
 import type { PageBlock } from '@/lib/block-types'
+import type { AstroComponentFactory } from 'astro/runtime/server/index.js'
 import ContentBlock from './ContentBlock.astro'
 import MediaContentBlock from './MediaContentBlock.astro'
 import CardsBlock from './CardsBlock.astro'
@@ -12,25 +13,31 @@ import ArchiveBlock from './ArchiveBlock.astro'
 import FormBlockRenderer from './FormBlock.astro'
 
 interface Props {
-  layout: PageBlock[]
+  layout?: PageBlock[] | null
   locale?: string
 }
 
-const { layout, locale = 'es' } = Astro.props
+const { layout: rawLayout, locale = 'es' } = Astro.props
+const layout = rawLayout ?? []
+
+// Single registration point for page blocks: adding a new block type means
+// creating its component and adding one entry here (open/closed principle).
+const renderers: Record<string, AstroComponentFactory> = {
+  content: ContentBlock,
+  'media-content': MediaContentBlock,
+  mediaBlock: MediaBlockRenderer,
+  cards: CardsBlock,
+  pricing: PricingBlock,
+  cta: CTABlock,
+  faq: FAQBlock,
+  gallery: GalleryBlock,
+  archive: ArchiveBlock,
+  formBlock: FormBlockRenderer,
+}
 ---
 
 {layout.map((block) => {
-  switch (block.blockType) {
-    case 'content': return <ContentBlock block={block} locale={locale} />
-    case 'media-content': return <MediaContentBlock block={block} locale={locale} />
-    case 'mediaBlock': return <MediaBlockRenderer block={block} locale={locale} />
-    case 'cards': return <CardsBlock block={block} locale={locale} />
-    case 'pricing': return <PricingBlock block={block} locale={locale} />
-    case 'cta': return <CTABlock block={block} locale={locale} />
-    case 'faq': return <FAQBlock block={block} locale={locale} />
-    case 'gallery': return <GalleryBlock block={block} locale={locale} />
-    case 'archive': return <ArchiveBlock block={block} locale={locale} />
-    case 'formBlock': return <FormBlockRenderer block={block} locale={locale} />
-    default: return null
-  }
+  const Renderer = renderers[block.blockType]
+  if (!Renderer) return null
+  return <Renderer block={block} locale={locale} />
 })}

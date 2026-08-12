@@ -29,6 +29,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "generate:types": "node scripts/copy-payload-types.mjs",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",

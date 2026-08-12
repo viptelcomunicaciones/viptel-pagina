@@ -1,7 +1,7 @@
 ---
 import PageLayout from '@/layouts/PageLayout.astro'
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro'
-import HeroBlock from '@/components/blocks/HeroBlock.astro'
+import RenderHero from '@/components/heros/RenderHero.astro'
 import { payload, redirectTarget } from '@/lib/payload-client'
 import { isValidLocale, defaultLocale } from '@/i18n'
 
@@ -39,6 +39,6 @@ if (!page) {
 ---
 
 <PageLayout title={page.meta?.title || page.title} description={page.meta?.description || page.title}>
-  {page.hero && <HeroBlock hero={page.hero} locale={effectiveLocale} />}
+  {page.hero && <RenderHero hero={page.hero} locale={effectiveLocale} />}
   <BlockRenderer layout={page.layout} locale={effectiveLocale} />
 </PageLayout>

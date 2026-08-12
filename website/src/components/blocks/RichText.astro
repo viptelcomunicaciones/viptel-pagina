@@ -4,9 +4,11 @@ import { payload } from '@/lib/payload-client'
 interface Props {
   content: any
   class?: string
+  /** Skip the first heading node (used by heros where the heading renders in its own slot) */
+  excludeFirstHeading?: boolean
 }
 
-const { content } = Astro.props
+const { content, excludeFirstHeading = false } = Astro.props
 
 const FORMAT_BOLD = 1
 const FORMAT_ITALIC = 2
@@ -160,7 +162,16 @@ function renderBlock(fields: any): string {
   }
 }
 
-const html = content?.root ? renderNode(content.root) : ''
+let rootChildren = content?.root?.children ?? []
+
+if (excludeFirstHeading && Array.isArray(rootChildren)) {
+  const firstHeadingIndex = rootChildren.findIndex((node: any) => node?.type === 'heading')
+  if (firstHeadingIndex > -1) {
+    rootChildren = [...rootChildren.slice(0, firstHeadingIndex), ...rootChildren.slice(firstHeadingIndex + 1)]
+  }
+}
+
+const html = content?.root ? renderNode({ ...content.root, children: rootChildren }) : ''
 ---
 
 {html ? <div set:html={html} class={Astro.props.class} /> : null}
