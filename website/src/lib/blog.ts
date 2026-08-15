@@ -38,15 +38,6 @@ export async function getPublishedPosts(locale = defaultLocale): Promise<Post[]>
   return payload.posts().getAll(locale)
 }
 
-export async function getBlogPageCount(locale = defaultLocale): Promise<number> {
-  try {
-    const { totalPages } = await payload.posts().getPaginated(locale, 1, BLOG_POSTS_PER_PAGE)
-    return totalPages ?? 1
-  } catch {
-    return 1
-  }
-}
-
 export function collectTags(posts: Post[]): string[] {
   return [...new Set(posts.flatMap((p) => (p.tags ?? []).map((t) => t.tag ?? '')))].sort()
 }

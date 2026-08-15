@@ -1,67 +1,10 @@
 ---
-import PageLayout from '@/layouts/PageLayout.astro'
-import { Hero } from '@/components/hero'
-import Badge from '@/components/ui/data-display/Badge/Badge.astro'
-import Icon from '@/components/ui/primitives/Icon/Icon.astro'
-import { t, defaultLocale } from '@/i18n'
-import { payload } from '@/lib/payload-client'
+import BlogIndexView from '@/components/blog/views/BlogIndexView.astro';
+import { defaultLocale } from '@/i18n';
 
 export const prerender = false
 
 const locale = defaultLocale
-const posts = await payload.posts().getAll(locale)
 ---
 
-<PageLayout title={t('blog.metaTitle', locale)} description={t('blog.metaDescription', locale)} showScrollProgress eagerReveal>
-  <Hero layout="centered" size="sm" class="isolate" showHeroHalo>
-    <Badge slot="badge" variant="brand" pill>
-      <Icon name="book" size="sm" />
-      {t('blog.heroBadge', locale)}
-    </Badge>
-    <h1 slot="title">{t('blog.title', locale)}</h1>
-    <p slot="description">{t('blog.heroDescription', locale)}</p>
-  </Hero>
-
-  <section class="py-[var(--space-section-md)] bg-background-secondary border-t border-border">
-    <div class="mx-auto max-w-6xl px-6">
-      {posts.length > 0 ? (
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post, i) => (
-            <a
-              href={`/${locale === defaultLocale ? '' : locale + '/'}blog/${post.slug}`}
-              class="group bg-background rounded-xl border border-border overflow-hidden hover:border-brand-500/40 hover:shadow-md transition-all duration-200 hover:-translate-y-1 flex flex-col"
-              data-reveal
-              data-reveal-delay={(i % 3) || undefined}
-            >
-              {post.heroImage && typeof post.heroImage !== 'number' && post.heroImage.url && (
-                <div class="aspect-video overflow-hidden">
-                  <img src={payload.resolveMediaUrl(post.heroImage.url)} alt={post.heroImage.alt || post.title} class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                </div>
-              )}
-              <div class="p-6 flex flex-col flex-1">
-                {post.publishedAt && (
-                  <time class="text-xs text-foreground-muted mb-2">{new Date(post.publishedAt).toLocaleDateString(locale === 'es' ? 'es-CO' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</time>
-                )}
-                <h2 class="font-display text-lg font-bold text-foreground mb-2 group-hover:text-brand-500 transition-colors">{post.title}</h2>
-                {post.excerpt && <p class="text-sm text-foreground-muted leading-relaxed flex-1">{post.excerpt}</p>}
-                {post.tags && post.tags.length > 0 && (
-                  <div class="flex flex-wrap gap-1.5 mt-4">
-                    {post.tags.map((t) => (
-                      <span class="inline-flex items-center rounded-full bg-transparent px-2.5 py-0.5 text-xs font-medium text-brand-700 dark:text-brand-400 ring-1 ring-inset ring-brand-500/40">
-                        {t.tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </a>
-          ))}
-        </div>
-      ) : (
-        <div class="py-16 text-center">
-          <p class="text-foreground-muted text-lg">{t('blog.noPosts', locale)}</p>
-        </div>
-      )}
-    </div>
-  </section>
-</PageLayout>
+<BlogIndexView locale={locale} />

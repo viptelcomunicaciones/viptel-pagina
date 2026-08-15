@@ -38,15 +38,6 @@ export async function getVisibleProjects(locale = defaultLocale): Promise<Projec
   return payload.projects().getAll(locale)
 }
 
-export async function getProjectPageCount(locale = defaultLocale): Promise<number> {
-  try {
-    const { totalPages } = await payload.projects().getPaginated(locale, 1, PROJECTS_PER_PAGE)
-    return totalPages ?? 1
-  } catch {
-    return 1
-  }
-}
-
 export function collectProjectTags(projects: Project[]): string[] {
   return [...new Set(projects.flatMap((p) => (p.tags ?? []).map((t) => t.tag ?? '')))].sort()
 }

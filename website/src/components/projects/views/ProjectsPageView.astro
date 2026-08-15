@@ -17,6 +17,7 @@ import ProjectCard from '@/components/projects/ProjectCard.astro';
 import ProjectTagList from '@/components/projects/ProjectTagList.astro';
 import Pagination from '@/components/blog/Pagination.astro';
 import { t, defaultLocale, localizedPath } from '@/i18n';
+import { payload } from '@/lib/payload-client';
 import {
   collectTopProjectTags,
   getProjectsBaseUrl,
@@ -31,17 +32,16 @@ interface Props {
   locale?: string;
   /** 1-based page number (always >= 2 for this view). */
   page: number;
-  /** Total number of index pages for this locale. */
-  totalPages: number;
 }
 
-const { locale = defaultLocale, page, totalPages } = Astro.props;
+const { locale = defaultLocale, page } = Astro.props;
 
-const projects = await getVisibleProjects(locale);
-const start = (page - 1) * PROJECTS_PER_PAGE;
-const pageProjects = projects.slice(start, start + PROJECTS_PER_PAGE);
+const { docs, totalDocs, totalPages } = await payload.projects().getPaginated(locale, page, PROJECTS_PER_PAGE);
 
-const topTags = collectTopProjectTags(projects, PROJECT_TAG_CLOUD_LIMIT);
+const pageProjects = docs;
+
+const allProjects = await getVisibleProjects(locale);
+const topTags = collectTopProjectTags(allProjects, PROJECT_TAG_CLOUD_LIMIT);
 
 const projectsHref = getProjectsBaseUrl(locale);
 const contactUrl = localizedPath('/contact', locale);
@@ -93,6 +93,8 @@ const aboutUrl = localizedPath('/about', locale);
         currentPage={page}
         totalPages={totalPages}
         href={(p) => getProjectsPageUrl(p, locale)}
+        totalDocs={totalDocs}
+        pageSize={PROJECTS_PER_PAGE}
       />
     </div>
   </section>

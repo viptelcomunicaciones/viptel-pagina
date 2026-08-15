@@ -395,6 +395,10 @@ export interface Post {
   };
   publishedAt?: string | null;
   authors?: (number | User)[] | null;
+  /**
+   * Controla la tabla de contenidos "En esta página" de este artículo.
+   */
+  toc?: ('inherit' | 'enabled' | 'disabled') | null;
   populatedAuthors?:
     | {
         id?: string | null;
@@ -983,6 +987,14 @@ export interface Project {
         id?: string | null;
       }[]
     | null;
+  /**
+   * URL del proyecto en vivo (botón "Ver sitio en vivo").
+   */
+  websiteUrl?: string | null;
+  /**
+   * URL del código fuente (botón "Ver código fuente").
+   */
+  sourceUrl?: string | null;
   meta?: {
     title?: string | null;
     /**
@@ -992,6 +1004,10 @@ export interface Project {
     description?: string | null;
   };
   publishedAt?: string | null;
+  /**
+   * Controla la tabla de contenidos "En esta página" de este artículo.
+   */
+  toc?: ('inherit' | 'enabled' | 'disabled') | null;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
@@ -1725,6 +1741,7 @@ export interface PostsSelect<T extends boolean = true> {
       };
   publishedAt?: T;
   authors?: T;
+  toc?: T;
   populatedAuthors?:
     | T
     | {
@@ -1767,6 +1784,8 @@ export interface ProjectsSelect<T extends boolean = true> {
         tag?: T;
         id?: T;
       };
+  websiteUrl?: T;
+  sourceUrl?: T;
   meta?:
     | T
     | {
@@ -1775,6 +1794,7 @@ export interface ProjectsSelect<T extends boolean = true> {
         description?: T;
       };
   publishedAt?: T;
+  toc?: T;
   generateSlug?: T;
   slug?: T;
   updatedAt?: T;

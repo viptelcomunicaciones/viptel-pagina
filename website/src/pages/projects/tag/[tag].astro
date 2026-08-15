@@ -1,0 +1,33 @@
+---
+import ProjectsTagView from '@/components/projects/views/ProjectsTagView.astro';
+import { defaultLocale } from '@/i18n';
+import {
+  collectProjectTags,
+  collectTopProjectTags,
+  findTagBySlug,
+  getVisibleProjects,
+  PROJECT_TAG_CLOUD_LIMIT,
+} from '@/lib/projects';
+
+export const prerender = false
+
+// Default-locale tag archive (`/projects/tag/<slug>`). Resolved on demand.
+const locale = defaultLocale
+
+const slug = Astro.params.tag ?? ''
+const allProjects = await getVisibleProjects(locale)
+const tags = collectProjectTags(allProjects)
+const tag = findTagBySlug(slug, tags)
+
+if (!tag) {
+  return Astro.redirect('/404')
+}
+
+const projects = allProjects.filter((p) => (p.tags ?? []).some((t) => t.tag === tag))
+const topTags = collectTopProjectTags(allProjects, PROJECT_TAG_CLOUD_LIMIT)
+const visibleTags = topTags.includes(tag)
+  ? topTags
+  : [tag, ...topTags.slice(0, PROJECT_TAG_CLOUD_LIMIT - 1)]
+---
+
+<ProjectsTagView locale={locale} tag={tag} projects={projects} visibleTags={visibleTags} />

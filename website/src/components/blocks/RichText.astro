@@ -1,5 +1,6 @@
 ---
 import { payload } from '@/lib/payload-client'
+import { slugify } from '@/lib/headings'
 
 interface Props {
   content: any
@@ -9,6 +10,22 @@ interface Props {
 }
 
 const { content, excludeFirstHeading = false } = Astro.props
+
+interface RenderCtx {
+  usedSlugs: Set<string>
+}
+
+function textContent(nodes: any[]): string {
+  if (!Array.isArray(nodes)) return ''
+  return nodes
+    .map((n) => {
+      if (!n) return ''
+      if (n.type === 'text') return n.text || ''
+      if (Array.isArray(n.children)) return textContent(n.children)
+      return ''
+    })
+    .join('')
+}
 
 const FORMAT_BOLD = 1
 const FORMAT_ITALIC = 2
@@ -49,12 +66,12 @@ function resolveLinkUrl(fields: any): { href: string; isExternal: boolean } {
   return { href: fields.url || '#', isExternal: Boolean(fields.newTab) }
 }
 
-function renderChildren(nodes: any[]): string {
+function renderChildren(nodes: any[], ctx: RenderCtx): string {
   if (!nodes || !Array.isArray(nodes)) return ''
-  return nodes.map(renderNode).join('')
+  return nodes.map((n) => renderNode(n, ctx)).join('')
 }
 
-function renderNode(node: any): string {
+function renderNode(node: any, ctx: RenderCtx): string {
   if (!node) return ''
 
   // Text node — apply Lexical bit-flag formatting
@@ -64,16 +81,26 @@ function renderNode(node: any): string {
     return wrapFormat(escaped, node.format || 0)
   }
 
-  // Heading — Lexical uses type=heading + tag property
+  // Heading — Lexical uses type=heading + tag property. Emits a stable `id`
+  // (same slugify as src/lib/headings.ts) so the blog's "On this page" TOC
+  // can link to the headings.
   if (node.type === 'heading') {
     const tag = node.tag || 'h2'
-    const children = renderChildren(node.children)
-    return `<${tag}>${children}</${tag}>`
+    const children = renderChildren(node.children, ctx)
+    const base = slugify(textContent(node.children))
+    let slug = base
+    let i = 2
+    while (ctx.usedSlugs.has(slug)) {
+      slug = `${base}-${i}`
+      i += 1
+    }
+    ctx.usedSlugs.add(slug)
+    return `<${tag} id="${slug}">${children}</${tag}>`
   }
 
   // Paragraph — Lexical type is 'paragraph' (not 'p')
   if (node.type === 'paragraph') {
-    const children = renderChildren(node.children)
+    const children = renderChildren(node.children, ctx)
     const align = node.format ? ` style="text-align:${node.format}"` : ''
     if (!children.trim()) return ''
     return `<p${align}>${children}</p>`
@@ -81,7 +108,7 @@ function renderNode(node: any): string {
 
   // Link — Lexical embeds link in children, fields contain URL info
   if (node.type === 'link' || node.type === 'autolink') {
-    const children = renderChildren(node.children)
+    const children = renderChildren(node.children, ctx)
     const { href, isExternal } = resolveLinkUrl(node.fields)
     const attrs = [
       `href="${href}"`,
@@ -93,18 +120,18 @@ function renderNode(node: any): string {
 
   // Lists
   if (node.type === 'list') {
-    const children = renderChildren(node.children)
+    const children = renderChildren(node.children, ctx)
     if (node.listType === 'number') return `<ol>${children}</ol>`
     return `<ul>${children}</ul>`
   }
   if (node.type === 'listitem') {
-    const children = renderChildren(node.children)
+    const children = renderChildren(node.children, ctx)
     return `<li>${children}</li>`
   }
 
   // Blockquote
   if (node.type === 'quote') {
-    const children = renderChildren(node.children)
+    const children = renderChildren(node.children, ctx)
     return `<blockquote>${children}</blockquote>`
   }
 
@@ -127,23 +154,23 @@ function renderNode(node: any): string {
 
   // Nested Payload blocks (banner, code)
   if (node.type === 'block' && node.fields) {
-    return renderBlock(node.fields)
+    return renderBlock(node.fields, ctx)
   }
 
   // Root or generic container — recurse children
   if (node.children && Array.isArray(node.children)) {
-    return renderChildren(node.children)
+    return renderChildren(node.children, ctx)
   }
 
   // Fallback for unknown types
   return ''
 }
 
-function renderBlock(fields: any): string {
+function renderBlock(fields: any, ctx: RenderCtx): string {
   switch (fields.blockType) {
     case 'banner': {
       const style = fields.style || 'info'
-      const blockContent = fields.content?.root ? renderNode(fields.content.root) : ''
+      const blockContent = fields.content?.root ? renderNode(fields.content.root, ctx) : ''
       const styles: Record<string, string> = {
         info: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200',
         warning: 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200',
@@ -171,7 +198,9 @@ if (excludeFirstHeading && Array.isArray(rootChildren)) {
   }
 }
 
-const html = content?.root ? renderNode({ ...content.root, children: rootChildren }) : ''
+const ctx: RenderCtx = { usedSlugs: new Set() }
+
+const html = content?.root ? renderNode({ ...content.root, children: rootChildren }, ctx) : ''
 ---
 
 {html ? <div set:html={html} class={Astro.props.class} /> : null}

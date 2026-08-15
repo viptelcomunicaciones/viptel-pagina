@@ -1,6 +1,6 @@
 ---
 import PageLayout from '@/layouts/PageLayout.astro'
-import RichText from '@/components/blocks/RichText.astro'
+import ProjectLayout from '@/layouts/ProjectLayout.astro'
 import { defaultLocale, isValidLocale } from '@/i18n'
 import { payload } from '@/lib/payload-client'
 
@@ -27,65 +27,5 @@ const related = allProjects.filter((p) => p.slug !== slug).slice(0, 3)
 ---
 
 <PageLayout title={project.meta?.title || project.title} description={project.meta?.description || project.description || project.title}>
-  <article class="py-[var(--space-section-md)]">
-    <div class="mx-auto max-w-4xl px-6">
-      <div class="flex flex-wrap items-center gap-4 text-sm text-foreground-muted mb-8">
-        {project.client && <span class="font-semibold text-foreground">{project.client}</span>}
-        {project.year && <span>{project.year}</span>}
-        {project.tags && project.tags.length > 0 && (
-          <div class="flex flex-wrap gap-1.5">
-            {project.tags.map((t) => (
-              <span class="inline-flex items-center rounded-full bg-transparent px-2.5 py-0.5 text-xs font-medium text-brand-700 dark:text-brand-400 ring-1 ring-inset ring-brand-500/40">{t.tag}</span>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <h1 class="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">{project.title}</h1>
-      {project.description && <p class="text-lg text-foreground-muted mb-8 leading-relaxed">{project.description}</p>}
-
-      {project.coverImage && typeof project.coverImage !== 'number' && project.coverImage.url && (
-        <img src={payload.resolveMediaUrl(project.coverImage.url)} alt={project.coverImage.alt || project.title} class="w-full aspect-video object-cover rounded-xl mb-8 shadow-lg" />
-      )}
-
-      {project.content && (
-        <div class="prose prose-lg dark:prose-invert max-w-none mb-12">
-          <RichText content={project.content} />
-        </div>
-      )}
-
-      {project.gallery && project.gallery.length > 0 && (
-        <div class="grid gap-4 grid-cols-2 md:grid-cols-3">
-          {project.gallery.map((img) => (
-            img.image && typeof img.image !== 'number' && img.image.url && (
-              <div class="overflow-hidden rounded-xl aspect-square">
-                <img src={payload.resolveMediaUrl(img.image.url)} alt={img.alt || img.image.alt || ''} class="w-full h-full object-cover" />
-              </div>
-            )
-          ))}
-        </div>
-      )}
-    </div>
-  </article>
-
-  {related.length > 0 && (
-    <section class="py-[var(--space-section-md)] bg-background-secondary border-t border-border">
-      <div class="mx-auto max-w-6xl px-6">
-        <h2 class="font-display text-2xl font-bold text-foreground mb-8 text-center">
-          {locale === 'en' ? 'Related projects' : 'Proyectos relacionados'}
-        </h2>
-        <div class="grid gap-6 md:grid-cols-3">
-          {related.map((p) => (
-            <a
-              href={`/${locale === defaultLocale ? '' : locale + '/'}projects/${p.slug}`}
-              class="group bg-background rounded-xl border border-border p-6 hover:border-brand-500/40 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
-            >
-              <h3 class="font-display font-bold text-foreground group-hover:text-brand-500 transition-colors">{p.title}</h3>
-              {p.description && <p class="text-sm text-foreground-muted mt-2">{p.description}</p>}
-            </a>
-          ))}
-        </div>
-      </div>
-    </section>
-  )}
+  <ProjectLayout project={project} locale={locale} related={related} />
 </PageLayout>

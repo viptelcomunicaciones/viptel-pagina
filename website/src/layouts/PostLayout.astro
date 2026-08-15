@@ -1,0 +1,151 @@
+---
+/**
+ * PostLayout — article body for CMS-driven blog posts.
+ *
+ * Renders the post hero (author + publication date + reading time), the
+ * "On this page" table of contents (sticky sidebar on desktop, collapsible
+ * card on mobile), the article content, and a back-to-blog footer.
+ *
+ * The route is expected to wrap this in `PageLayout` so <head> SEO/meta stay
+ * on the page and this layout only owns the article body.
+ */
+import siteConfig from '@/config/site.config'
+import type { Post } from '@/lib/payload-types'
+import { payload } from '@/lib/payload-client'
+import { t, localizedPath } from '@/i18n'
+import { getBlogBaseUrl } from '@/lib/blog'
+import { formatDate, getReadingTime } from '@/lib/utils'
+import { extractHeadings, getPlainText } from '@/lib/headings'
+import Breadcrumbs from '@/components/seo/Breadcrumbs.astro'
+import ArticleHero from '@/components/blog/ArticleHero.astro'
+import TableOfContents from '@/components/blog/TableOfContents.astro'
+import RichText from '@/components/blocks/RichText.astro'
+import Button from '@/components/ui/form/Button/Button.astro'
+import Icon from '@/components/ui/primitives/Icon/Icon.astro'
+
+interface Props {
+  post: Post
+  locale?: string
+}
+
+const { post, locale = 'es' } = Astro.props
+
+const author = post.populatedAuthors?.[0]?.name ?? undefined
+const tags = (post.tags ?? []).map((tag) => tag.tag ?? '').filter(Boolean)
+
+const publishedAt = post.publishedAt
+  ? new Date(post.publishedAt)
+  : new Date(post.createdAt ?? Date.now())
+const updatedAt =
+  post.updatedAt &&
+  post.publishedAt &&
+  new Date(post.updatedAt).toDateString() !== new Date(post.publishedAt).toDateString()
+    ? new Date(post.updatedAt)
+    : undefined
+
+const bodyText = getPlainText(post.content)
+const readingTime = getReadingTime(bodyText)
+
+const tocConfig = siteConfig.articleFeatures?.toc
+const showToc = post.toc === 'enabled' || (!!tocConfig?.enabled && post.toc !== 'disabled')
+const tocLayout = tocConfig?.layout ?? 'auto'
+const sidebarActive = showToc && (tocLayout === 'sidebar' || tocLayout === 'auto')
+const inlineActive = showToc && tocLayout === 'inline'
+const sidebarOnLeft = (tocConfig?.sidebarPosition ?? 'right') === 'left'
+
+const headings = extractHeadings(post.content)
+
+const heroImage = post.heroImage && typeof post.heroImage !== 'number' ? post.heroImage : null
+const imageUrl = heroImage?.url ? payload.resolveMediaUrl(heroImage.url) : undefined
+const imageAlt = heroImage?.alt ?? undefined
+
+const breadcrumbs = [
+  { label: t('common.home', locale), href: localizedPath('/', locale) },
+  { label: t('blog.title', locale), href: getBlogBaseUrl(locale) },
+  { label: post.title },
+]
+---
+
+<ArticleHero
+  title={post.title}
+  description={post.excerpt || ''}
+  publishedAt={publishedAt}
+  updatedAt={updatedAt}
+  author={author}
+  tags={tags}
+  imageUrl={imageUrl}
+  imageAlt={imageAlt}
+  body={bodyText}
+/>
+
+<article class="pt-8 pb-[var(--space-section-md)]">
+  <div
+    class:list={[
+      'mx-auto px-6 max-w-7xl',
+      sidebarActive &&
+        (sidebarOnLeft
+          ? 'xl:grid xl:grid-cols-[15rem_minmax(0,1fr)] xl:gap-10'
+          : 'xl:grid xl:grid-cols-[minmax(0,1fr)_15rem] xl:gap-10'),
+    ]}
+  >
+    {sidebarActive && sidebarOnLeft && (
+      <aside class="hidden xl:block" aria-label={t('blog.tableOfContents', locale)}>
+        <TableOfContents
+          headings={headings}
+          maxDepth={tocConfig?.maxDepth ?? 3}
+          minHeadings={tocConfig?.minHeadings ?? 3}
+          sticky
+        />
+      </aside>
+    )}
+
+    <div class:list={['min-w-0 max-w-4xl w-full mx-auto', sidebarActive && 'xl:mx-0']}>
+      <Breadcrumbs items={breadcrumbs} class="mb-8" />
+
+      {sidebarActive && (
+        <div class="xl:hidden mb-10">
+          <TableOfContents
+            headings={headings}
+            maxDepth={tocConfig?.maxDepth ?? 3}
+            minHeadings={tocConfig?.minHeadings ?? 3}
+            collapsible
+          />
+        </div>
+      )}
+
+      {inlineActive && (
+        <div class="mb-10 rounded-xl border border-border bg-background-secondary p-5">
+          <TableOfContents
+            headings={headings}
+            maxDepth={tocConfig?.maxDepth ?? 3}
+            minHeadings={tocConfig?.minHeadings ?? 3}
+          />
+        </div>
+      )}
+
+      <div class="sm:rounded-xl sm:border sm:border-border sm:bg-card sm:p-8 lg:p-10">
+        <div class="prose prose-lg dark:prose-invert max-w-none">
+          <RichText content={post.content} />
+        </div>
+      </div>
+
+      <footer class="border-border mt-12 border-t pt-8 flex justify-center">
+        <Button href={getBlogBaseUrl(locale)} variant="brand-outline" size="sm">
+          <Icon name="arrow-left" size="sm" />
+          {t('blog.backToBlog', locale)}
+        </Button>
+      </footer>
+    </div>
+
+    {sidebarActive && !sidebarOnLeft && (
+      <aside class="hidden xl:block" aria-label={t('blog.tableOfContents', locale)}>
+        <TableOfContents
+          headings={headings}
+          maxDepth={tocConfig?.maxDepth ?? 3}
+          minHeadings={tocConfig?.minHeadings ?? 3}
+          sticky
+        />
+      </aside>
+    )}
+  </div>
+</article>

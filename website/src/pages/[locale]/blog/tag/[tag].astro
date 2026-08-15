@@ -1,55 +1,37 @@
 ---
 import BlogTagView from '@/components/blog/views/BlogTagView.astro';
+import { defaultLocale, isValidLocale } from '@/i18n';
 import {
   BLOG_TAG_CLOUD_LIMIT,
   collectTags,
   collectTopTags,
+  findTagBySlug,
   getPublishedPosts,
-  getSecondaryLocales,
-  tagToSlug,
 } from '@/lib/blog';
-import { isValidLocale } from '@/i18n';
 
-// Locale-prefixed tag archives (`/<locale>/blog/tag/<tag>`). One page per
-// (non-default locale × tag that exists in that locale). Emits nothing when
-// i18n is off.
-export async function getStaticPaths() {
-  const paths: {
-    params: { locale: string; tag: string };
-    props: {
-      tag: string;
-      posts: Awaited<ReturnType<typeof getPublishedPosts>>;
-      visibleTags: string[];
-    };
-  }[] = [];
+export const prerender = false
 
-  for (const locale of getSecondaryLocales()) {
-    const posts = await getPublishedPosts(locale);
-    const tags = collectTags(posts);
-    const topTags = collectTopTags(posts, BLOG_TAG_CLOUD_LIMIT);
+// Locale-prefixed tag archive (`/<locale>/blog/tag/<slug>`). Resolved on demand.
+const { locale = defaultLocale } = Astro.params
 
-    for (const tag of tags) {
-      const postsForTag = posts.filter((p) => (p.tags ?? []).some((t) => t.tag === tag));
-      const visibleTags = topTags.includes(tag)
-        ? topTags
-        : [tag, ...topTags.slice(0, BLOG_TAG_CLOUD_LIMIT - 1)];
-      paths.push({
-        params: { locale, tag: tagToSlug(tag) },
-        props: { tag, posts: postsForTag, visibleTags },
-      });
-    }
-  }
-
-  return paths;
-}
-
-const { locale } = Astro.params;
-
-if (!isValidLocale(locale) || !Astro.props) {
+if (!isValidLocale(locale)) {
   return Astro.redirect('/404')
 }
 
-const { tag, posts, visibleTags } = Astro.props;
+const slug = Astro.params.tag ?? ''
+const allPosts = await getPublishedPosts(locale)
+const tags = collectTags(allPosts)
+const tag = findTagBySlug(slug, tags)
+
+if (!tag) {
+  return Astro.redirect('/404')
+}
+
+const posts = allPosts.filter((p) => (p.tags ?? []).some((t) => t.tag === tag))
+const topTags = collectTopTags(allPosts, BLOG_TAG_CLOUD_LIMIT)
+const visibleTags = topTags.includes(tag)
+  ? topTags
+  : [tag, ...topTags.slice(0, BLOG_TAG_CLOUD_LIMIT - 1)]
 ---
 
 <BlogTagView locale={locale} tag={tag} posts={posts} visibleTags={visibleTags} />

@@ -1,8 +1,21 @@
 import type { CollectionConfig } from 'payload'
 
+import {
+  BlocksFeature,
+  FixedToolbarFeature,
+  HeadingFeature,
+  HorizontalRuleFeature,
+  InlineToolbarFeature,
+  lexicalEditor,
+} from '@payloadcms/richtext-lexical'
+
+import { Banner } from '../../blocks/Banner/config'
+import { Code } from '../../blocks/Code/config'
+import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { seoTab } from '../../fields/seoTab'
+import { tocField } from '../../fields/tocField'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 
@@ -66,6 +79,18 @@ export const Projects: CollectionConfig<'projects'> = {
               name: 'content',
               type: 'richText',
               localized: true,
+              editor: lexicalEditor({
+                features: ({ rootFeatures }) => {
+                  return [
+                    ...rootFeatures,
+                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+                    BlocksFeature({ blocks: [Banner, Code, MediaBlock] }),
+                    FixedToolbarFeature(),
+                    InlineToolbarFeature(),
+                    HorizontalRuleFeature(),
+                  ]
+                },
+              }),
             },
             {
               name: 'gallery',
@@ -114,6 +139,22 @@ export const Projects: CollectionConfig<'projects'> = {
                 },
               ],
             },
+            {
+              name: 'websiteUrl',
+              type: 'text',
+              admin: {
+                position: 'sidebar',
+                description: 'URL del proyecto en vivo (botón "Ver sitio en vivo").',
+              },
+            },
+            {
+              name: 'sourceUrl',
+              type: 'text',
+              admin: {
+                position: 'sidebar',
+                description: 'URL del código fuente (botón "Ver código fuente").',
+              },
+            },
           ],
         },
         seoTab,
@@ -126,6 +167,7 @@ export const Projects: CollectionConfig<'projects'> = {
         position: 'sidebar',
       },
     },
+    tocField(),
     slugField(),
   ],
   hooks: {

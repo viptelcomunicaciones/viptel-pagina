@@ -38,12 +38,12 @@ const { locale = defaultLocale } = Astro.props;
 
 const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
 
-const posts = await getPublishedPosts(locale);
+const { docs, totalDocs, totalPages } = await payload.posts().getPaginated(locale, 1, BLOG_POSTS_PER_PAGE);
 
-const totalPages = Math.max(1, Math.ceil(posts.length / BLOG_POSTS_PER_PAGE));
-const regularPosts = posts.slice(0, BLOG_POSTS_PER_PAGE);
+const allPosts = await getPublishedPosts(locale);
+const topTags = collectTopTags(allPosts, BLOG_TAG_CLOUD_LIMIT);
 
-const topTags = collectTopTags(posts, BLOG_TAG_CLOUD_LIMIT);
+const regularPosts = docs;
 ---
 
 <PageLayout title={t('blog.metaTitle', locale)} description={t('blog.metaDescription', locale)} showScrollProgress eagerReveal footerBackground='secondary'>
@@ -98,6 +98,8 @@ const topTags = collectTopTags(posts, BLOG_TAG_CLOUD_LIMIT);
         currentPage={1}
         totalPages={totalPages}
         href={(page) => getBlogPageUrl(page, locale)}
+        totalDocs={totalDocs}
+        pageSize={BLOG_POSTS_PER_PAGE}
       />
     </div>
   </section>

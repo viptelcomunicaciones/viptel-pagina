@@ -1,0 +1,17 @@
+---
+import ProjectsPageView from '@/components/projects/views/ProjectsPageView.astro';
+import { defaultLocale } from '@/i18n';
+
+export const prerender = false
+
+// Default-locale paginated projects index (`/projects/page/N`, N >= 2).
+// Page 1 lives at `/projects`. Rendered on demand.
+const locale = defaultLocale
+
+const page = Number(Astro.params.page)
+if (!Number.isInteger(page) || page < 2) {
+  return Astro.redirect('/404')
+}
+---
+
+<ProjectsPageView locale={locale} page={page} />

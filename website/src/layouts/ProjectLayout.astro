@@ -1,301 +1,233 @@
 ---
-import type { ImageMetadata, MarkdownHeading } from 'astro';
-import type { CollectionEntry } from 'astro:content';
-import type { GallerySlide } from '@/lib/gallery';
-import BaseLayout from './BaseLayout.astro';
-import Header from '@/components/layout/Header.astro';
-import Footer from '@/components/layout/Footer.astro';
-import Breadcrumbs from '@/components/seo/Breadcrumbs.astro';
-import ProjectHero from '@/components/projects/ProjectHero.astro';
-import TableOfContents from '@/components/blog/TableOfContents.astro';
-import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
-import Card from '@/components/ui/data-display/Card/Card.astro';
-import Badge from '@/components/ui/data-display/Badge/Badge.astro';
-import Button from '@/components/ui/form/Button/Button.astro';
-import Icon from '@/components/ui/primitives/Icon/Icon.astro';
-import siteConfig from '@/config/site.config';
-import { t, getLocaleFromPath, localizedPath, getLocales } from '@/i18n';
-import { getProjectUrl, getProjectsBaseUrl } from "@/lib/projects";
+/**
+ * ProjectLayout — article body for CMS-driven portfolio projects.
+ *
+ * Renders the project hero (title, description, tags, client/year meta,
+ * live/source buttons, cover image), the "On this page" table of contents
+ * (sticky sidebar on desktop, collapsible card on mobile), the content,
+ * gallery, a back-to-projects footer, related projects, and a closing CTA.
+ *
+ * The route wraps this in `PageLayout` so <head> SEO/meta stay on the page.
+ */
+import siteConfig from '@/config/site.config'
+import type { Project } from '@/lib/payload-types'
+import { payload } from '@/lib/payload-client'
+import { t, localizedPath } from '@/i18n'
+import { extractHeadings } from '@/lib/headings'
+import Breadcrumbs from '@/components/seo/Breadcrumbs.astro'
+import TableOfContents from '@/components/blog/TableOfContents.astro'
+import RichText from '@/components/blocks/RichText.astro'
+import Button from '@/components/ui/form/Button/Button.astro'
+import Icon from '@/components/ui/primitives/Icon/Icon.astro'
+import TagList from '@/components/blog/TagList.astro'
+import CTA from '@/components/ui/marketing/CTA/CTA.astro'
 
 interface Props {
-  title: string;
-  description: string;
-  meta?: string[];
-  url?: string;
-  repo?: string;
-  image?: ImageMetadata;
-  imageAlt?: string;
-  gallery?: GallerySlide[];
-  tags?: string[];
-  /** Project slug, used to resolve the per-project dynamic OG image. */
-  slug?: string;
-  related?: CollectionEntry<'projects'>[];
-  headings?: MarkdownHeading[];
-  /** Per-project override: hide table of contents on this project */
-  toc?: boolean;
+  project: Project
+  locale?: string
+  related?: Project[]
 }
 
-const {
-  title,
-  description,
-  meta = [],
-  url,
-  repo,
-  image,
-  imageAlt,
-  gallery = [],
-  tags = [],
-  slug = '',
-  related = [],
-  headings = [],
-  toc: tocOverride,
-} = Astro.props;
+const { project, locale = 'es', related = [] } = Astro.props
 
-const locale = getLocaleFromPath(Astro.url.pathname);
+const tags = (project.tags ?? []).map((tag) => tag.tag ?? '').filter(Boolean)
 
-// Prefer the project's own image; otherwise serve the per-project dynamic OG
-// image (see src/pages/og/projects/[slug].svg.ts). `slug` is the full
-// (locale-prefixed) project id, so strip the locale to match the OG route.
-const ogImage = siteConfig.ogImage;
+const tocConfig = siteConfig.articleFeatures?.toc
+const showToc = project.toc === 'enabled' || (!!tocConfig?.enabled && project.toc !== 'disabled')
+const tocLayout = tocConfig?.layout ?? 'auto'
+const sidebarActive = showToc && (tocLayout === 'sidebar' || tocLayout === 'auto')
+const inlineActive = showToc && tocLayout === 'inline'
+const sidebarOnLeft = (tocConfig?.sidebarPosition ?? 'right') === 'left'
 
-// Mirror the blog TOC wiring — projects use the same site-wide config.
-const tocConfig = siteConfig.articleFeatures?.toc;
-const showToc = !!tocConfig?.enabled && tocOverride !== false;
-const tocLayout = tocConfig?.layout ?? 'auto';
-const sidebarActive = showToc && (tocLayout === 'sidebar' || tocLayout === 'auto');
-// Inline TOC is now opt-in: 'auto' shows only the desktop sidebar so the
-// mobile/landscape/tablet experience isn't dominated by a TOC card the
-// majority of visitors don't use. Posts that want the inline TOC visible
-// everywhere can set `toc.layout: 'inline'` in frontmatter.
-const inlineActive = showToc && tocLayout === 'inline';
-const sidebarOnLeft = (tocConfig?.sidebarPosition ?? 'right') === 'left';
+const headings = extractHeadings(project.content)
+
+const coverImage =
+  project.coverImage && typeof project.coverImage !== 'number' ? project.coverImage : null
+const coverUrl = coverImage?.url ? payload.resolveMediaUrl(coverImage.url) : undefined
+const coverAlt = coverImage?.alt ?? undefined
 
 const breadcrumbs = [
   { label: t('common.home', locale), href: localizedPath('/', locale) },
-  { label: t('projects.title', locale), href: getProjectsBaseUrl(locale) },
-  { label: title },
-];
-
-const projectsHref = getProjectsBaseUrl(locale);
-const contactUrl = localizedPath('/contact', locale);
-
-// Resolve this project's real per-locale URLs so the hreflang tags and the
-// LanguageSwitcher point at the matching translation. Projects share one slug
-// across locales, so unlike the blog (which uses canonical uids) matching the
-// locale-stripped slug is enough. hreflang lists only verified translations;
-// the switcher shows every locale, falling back to a locale's projects index
-// when this project has no translation there, so switching never 404s.
-const projectTranslations: {locale: string; url: string}[] = [];
-const translationByLocale = new Map(projectTranslations.map((tr) => [tr.locale, tr.url]));
-const languageAlternates = Object.fromEntries(
-  getLocales().map((loc) => [loc, translationByLocale.get(loc) ?? getProjectsBaseUrl(loc)])
-);
+  { label: t('projects.title', locale), href: localizedPath('/projects', locale) },
+  { label: project.title },
+]
 ---
 
-<BaseLayout
-  title={title}
-  description={description}
-  image={ogImage}
-  imageAlt={imageAlt || title}
-  localeAlternates={projectTranslations}
->
-  <Header
-    slot="header"
-    position="fixed"
-    shape="bar"
-    variant="solid"
-    size="lg"
-    showCta={false}
-    showScrollProgress
-    maxWidth="7xl"
-    languageAlternates={languageAlternates}
-  />
+<header class="relative isolate overflow-hidden pt-[var(--space-page-top-sm)] pb-[var(--space-section-sm)]">
+  <div class="relative z-[1] mx-auto max-w-4xl px-6">
+    <h1 class="font-display text-4xl font-bold tracking-tight text-foreground md:text-5xl lg:text-6xl mb-[var(--space-heading-gap)]">
+      {project.title}
+    </h1>
 
-  <div class="min-h-screen pt-16">
-    <ProjectHero
-      title={title}
-      description={description}
-      meta={meta}
-      url={url}
-      repo={repo}
-      image={image}
-      imageAlt={imageAlt}
-      gallery={gallery}
-      tags={tags}
-    />
-
-    <article class="pt-8 pb-[var(--space-section-md)]">
-      <div class:list={[
-        'mx-auto px-6 max-w-7xl',
-        sidebarActive && (sidebarOnLeft
-          ? 'xl:grid xl:grid-cols-[15rem_minmax(0,1fr)] xl:gap-10'
-          : 'xl:grid xl:grid-cols-[minmax(0,1fr)_15rem] xl:gap-10'),
-      ]}>
-        {sidebarActive && sidebarOnLeft && (
-          <aside class="hidden xl:block" aria-label={t('blog.tableOfContents', locale)}>
-            <TableOfContents
-              headings={headings}
-              maxDepth={tocConfig?.maxDepth ?? 3}
-              minHeadings={tocConfig?.minHeadings ?? 3}
-              sticky
-            />
-          </aside>
-        )}
-
-        <div class:list={['min-w-0 max-w-4xl w-full mx-auto', sidebarActive && 'xl:mx-0']}>
-          <Breadcrumbs items={breadcrumbs} class="mb-8" />
-
-          {sidebarActive && (
-            <div class="xl:hidden mb-10">
-              <TableOfContents
-                headings={headings}
-                maxDepth={tocConfig?.maxDepth ?? 3}
-                minHeadings={tocConfig?.minHeadings ?? 3}
-                collapsible
-              />
-            </div>
-          )}
-
-          {inlineActive && (
-            <div class="mb-10 rounded-xl border border-border bg-background-secondary p-5">
-              <TableOfContents
-                headings={headings}
-                maxDepth={tocConfig?.maxDepth ?? 3}
-                minHeadings={tocConfig?.minHeadings ?? 3}
-              />
-            </div>
-          )}
-
-          <!--
-            Framed reading surface, matching the TOC card. Starts at `sm` so
-            a phone held upright keeps the full screen width for the text.
-          -->
-          <div class="sm:rounded-xl sm:border sm:border-border sm:bg-card sm:p-8 lg:p-10">
-            <div class="prose prose-lg max-w-none" data-reveal-content>
-              <slot />
-            </div>
-          </div>
-
-          <footer class="border-border mt-12 border-t pt-8 flex justify-center" data-reveal>
-            <Button href={projectsHref} variant="brand-outline" size="sm">
-              <Icon name="arrow-left" size="sm" />
-              {t('projects.backToProjects', locale)}
-            </Button>
-          </footer>
-        </div>
-
-        {sidebarActive && !sidebarOnLeft && (
-          <aside class="hidden xl:block" aria-label={t('blog.tableOfContents', locale)}>
-            <TableOfContents
-              headings={headings}
-              maxDepth={tocConfig?.maxDepth ?? 3}
-              minHeadings={tocConfig?.minHeadings ?? 3}
-              sticky
-            />
-          </aside>
-        )}
-      </div>
-    </article>
-
-    {related.length > 0 && (
-      <section class="py-[var(--space-section-md)] bg-background-secondary border-t border-border" data-reveal>
-        <div class="mx-auto max-w-7xl px-6">
-          <h2 class="font-display text-2xl md:text-3xl font-bold text-foreground mb-8 text-center">{t('projects.moreProjects', locale)}</h2>
-          <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {related.map((project) => (
-              <Card
-                variant="elevated"
-                hover
-                padding="none"
-                href={project.data.placeholder ? undefined : getProjectUrl(project.id, locale)}
-                class="group flex flex-col"
-              >
-                <div class="flex flex-1 flex-col p-6">
-                  <div class="mb-3 flex items-start justify-between gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500/20 to-brand-500/5 flex items-center justify-center text-brand-500 shrink-0">
-                      <Icon name="layers" size="sm" />
-                    </div>
-                    <Icon name="arrow-up-right" size="sm" class="text-foreground-muted group-hover:text-brand-500 transition-colors shrink-0 ml-auto" />
-                  </div>
-                  <div class="mb-2 flex items-baseline gap-2">
-                    <h3 class="font-display text-lg font-bold text-foreground">{project.data.title}</h3>
-                    {project.data.year && (
-                      <span class="text-xs text-foreground-muted">{project.data.year}</span>
-                    )}
-                  </div>
-                  <p class="text-sm text-foreground-muted leading-relaxed mb-4 flex-1 line-clamp-3">{project.data.description}</p>
-                  {project.data.tags && project.data.tags.length > 0 && (
-                    <div class="flex flex-wrap gap-1.5">
-                      {project.data.tags.map((tag, i) => (
-                        <>
-                          {i === 3 && <div class="basis-full" aria-hidden="true"></div>}
-                          <span class="inline-flex items-center rounded-full bg-transparent px-2.5 py-0.5 text-xs font-medium text-brand-700 dark:text-brand-400 ring-1 ring-inset ring-brand-500/40 transition-colors group-hover:ring-brand-500/80">
-                            #{tag}
-                          </span>
-                        </>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+    {project.description && (
+      <p class="text-xl text-foreground-muted leading-relaxed max-w-3xl mb-[var(--space-stack-lg)]">
+        {project.description}
+      </p>
     )}
 
-    <!-- Closing CTA -->
-    <section class="relative z-10 py-[var(--space-section-md)] bg-background border-t border-border">
-      <!-- Mobile: flat section, no glitch band -->
-      <div class="glitch:hidden mx-auto max-w-2xl px-6 text-center" data-reveal>
-        <Badge variant="brand" pill class="mb-6">
-          <Icon name="message-circle" size="sm" />
-          {t('projects.ctaBadge', locale)}
-        </Badge>
-        <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">
-          {t('projects.closingHeading', locale)}
-        </h2>
-        <p class="text-lg text-foreground-muted mb-8 text-balance">
-          {t('projects.closingLead', locale)}
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" href={contactUrl} class="cta-btn-brand">
-            {t('projects.ctaPrimary', locale)}
-            <Icon name="arrow-right" size="sm" />
-          </Button>
-          <Button size="lg" variant="brand-outline" href={projectsHref}>
-            {t('projects.allProjects', locale)}
-            <Icon name="arrow-right" size="sm" />
-          </Button>
-        </div>
-      </div>
+    {tags.length > 0 && <TagList tags={tags} locale={locale} class="mb-[var(--space-stack-lg)]" />}
 
-      <!-- Desktop: LetterGlitch band with glass card -->
-      <LetterGlitchBand maxWidth="7xl">
-        <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">
-          {t('projects.closingHeading', locale)}
-        </h2>
-        <p class="text-lg text-foreground-muted mb-8 text-balance">
-          {t('projects.closingLead', locale)}
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" href={contactUrl} class="hero-btn-brand">
-            {t('projects.ctaPrimary', locale)}
-            <Icon name="arrow-right" size="sm" />
+    <div class="flex flex-wrap items-center gap-x-4 gap-y-3 text-sm text-foreground-muted mb-[var(--space-stack-lg)]">
+      {project.client && <span class="font-semibold text-foreground">{project.client}</span>}
+      {project.client && project.year && <span class="h-4 w-px bg-border" aria-hidden="true"></span>}
+      {project.year && <span>{project.year}</span>}
+    </div>
+
+    {(project.websiteUrl || project.sourceUrl) && (
+      <div class="flex flex-wrap items-center gap-3 mb-[var(--space-stack-lg)]">
+        {project.websiteUrl && (
+          <Button href={project.websiteUrl} variant="primary" size="md">
+            <Icon name="external-link" size="sm" />
+            {t('projects.viewLiveSite', locale)}
           </Button>
-          <Button size="lg" variant="outline" href={projectsHref}>
-            {t('projects.allProjects', locale)}
-            <Icon name="arrow-right" size="sm" />
+        )}
+        {project.sourceUrl && (
+          <Button href={project.sourceUrl} variant="brand-outline" size="md">
+            <Icon name="code" size="sm" />
+            {t('projects.viewSource', locale)}
           </Button>
-        </div>
-      </LetterGlitchBand>
-    </section>
+        )}
+      </div>
+    )}
   </div>
 
-  <Footer
-    slot="footer"
-    layout="centered"
-    background="secondary"
-    maxWidth="7xl"
-  />
-</BaseLayout>
+  {coverUrl && (
+    <div class="relative z-[1] mx-auto max-w-5xl px-6 mt-[var(--space-section-sm)]">
+      <div class="relative overflow-hidden rounded-xl media-shadow">
+        <img
+          src={coverUrl}
+          alt={coverAlt || project.title}
+          loading="eager"
+          class="aspect-video w-full object-cover"
+        />
+      </div>
+    </div>
+  )}
+</header>
+
+<article class="pt-8 pb-[var(--space-section-md)]">
+  <div
+    class:list={[
+      'mx-auto px-6 max-w-7xl',
+      sidebarActive &&
+        (sidebarOnLeft
+          ? 'xl:grid xl:grid-cols-[15rem_minmax(0,1fr)] xl:gap-10'
+          : 'xl:grid xl:grid-cols-[minmax(0,1fr)_15rem] xl:gap-10'),
+    ]}
+  >
+    {sidebarActive && sidebarOnLeft && (
+      <aside class="hidden xl:block" aria-label={t('blog.tableOfContents', locale)}>
+        <TableOfContents
+          headings={headings}
+          maxDepth={tocConfig?.maxDepth ?? 3}
+          minHeadings={tocConfig?.minHeadings ?? 3}
+          sticky
+        />
+      </aside>
+    )}
+
+    <div class:list={['min-w-0 max-w-4xl w-full mx-auto', sidebarActive && 'xl:mx-0']}>
+      <Breadcrumbs items={breadcrumbs} class="mb-8" />
+
+      {sidebarActive && (
+        <div class="xl:hidden mb-10">
+          <TableOfContents
+            headings={headings}
+            maxDepth={tocConfig?.maxDepth ?? 3}
+            minHeadings={tocConfig?.minHeadings ?? 3}
+            collapsible
+          />
+        </div>
+      )}
+
+      {inlineActive && (
+        <div class="mb-10 rounded-xl border border-border bg-background-secondary p-5">
+          <TableOfContents
+            headings={headings}
+            maxDepth={tocConfig?.maxDepth ?? 3}
+            minHeadings={tocConfig?.minHeadings ?? 3}
+          />
+        </div>
+      )}
+
+      {project.content && (
+        <div class="sm:rounded-xl sm:border sm:border-border sm:bg-card sm:p-8 lg:p-10">
+          <div class="prose prose-lg dark:prose-invert max-w-none">
+            <RichText content={project.content} />
+          </div>
+        </div>
+      )}
+
+      {project.gallery && project.gallery.length > 0 && (
+        <div class="grid gap-4 grid-cols-2 md:grid-cols-3 mt-10">
+          {project.gallery.map((img) =>
+            img.image && typeof img.image !== 'number' && img.image.url ? (
+              <div class="overflow-hidden rounded-xl aspect-square">
+                <img
+                  src={payload.resolveMediaUrl(img.image.url)}
+                  alt={img.alt || img.image.alt || ''}
+                  class="w-full h-full object-cover"
+                />
+              </div>
+            ) : null,
+          )}
+        </div>
+      )}
+
+      <footer class="border-border mt-12 border-t pt-8 flex justify-center">
+        <Button href={localizedPath('/projects', locale)} variant="brand-outline" size="sm">
+          <Icon name="arrow-left" size="sm" />
+          {t('projects.backToProjects', locale)}
+        </Button>
+      </footer>
+    </div>
+
+    {sidebarActive && !sidebarOnLeft && (
+      <aside class="hidden xl:block" aria-label={t('blog.tableOfContents', locale)}>
+        <TableOfContents
+          headings={headings}
+          maxDepth={tocConfig?.maxDepth ?? 3}
+          minHeadings={tocConfig?.minHeadings ?? 3}
+          sticky
+        />
+      </aside>
+    )}
+  </div>
+</article>
+
+{related.length > 0 && (
+  <section class="py-[var(--space-section-md)] bg-background-secondary border-t border-border">
+    <div class="mx-auto max-w-6xl px-6">
+      <h2 class="font-display text-2xl font-bold text-foreground mb-8 text-center">
+        {t('projects.moreProjects', locale)}
+      </h2>
+      <div class="grid gap-6 md:grid-cols-3">
+        {related.map((p) => (
+          <a
+            href={localizedPath(`/projects/${p.slug}`, locale)}
+            class="group bg-background rounded-xl border border-border p-6 hover:border-brand-500/40 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
+          >
+            {p.year && <span class="text-xs font-semibold text-foreground-muted">{p.year}</span>}
+            <h3 class="font-display font-bold text-foreground group-hover:text-brand-500 transition-colors mt-1">
+              {p.title}
+            </h3>
+            {p.description && <p class="text-sm text-foreground-muted mt-2">{p.description}</p>}
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
+<CTA variant="default" size="md" maxWidth="lg" glow={false} data-reveal>
+  <h2 slot="heading">{t('projects.ctaHeading', locale)}</h2>
+  <p slot="description" class="text-balance">{t('projects.ctaLead', locale)}</p>
+  <div slot="actions" class="flex flex-wrap items-center justify-center gap-3">
+    <Button href={localizedPath('/contact', locale)} variant="primary" size="md">
+      {t('projects.ctaPrimary', locale)}
+    </Button>
+    <Button href={localizedPath('/about', locale)} variant="brand-outline" size="md">
+      {t('projects.ctaSecondary', locale)}
+    </Button>
+  </div>
+</CTA>

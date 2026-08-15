@@ -1,0 +1,17 @@
+---
+import BlogPageView from '@/components/blog/views/BlogPageView.astro';
+import { defaultLocale } from '@/i18n';
+
+export const prerender = false
+
+// Default-locale paginated blog index (`/blog/page/N`, N >= 2). Page 1 lives
+// at `/blog`. Rendered on demand so new posts paginate without a rebuild.
+const locale = defaultLocale
+
+const page = Number(Astro.params.page)
+if (!Number.isInteger(page) || page < 2) {
+  return Astro.redirect('/404')
+}
+---
+
+<BlogPageView locale={locale} page={page} />

@@ -120,6 +120,7 @@
     "description": "Proyectos realizados",
     "viewProject": "Ver proyecto",
     "viewSource": "Ver código fuente",
+    "viewLiveSite": "Ver sitio en vivo",
     "noProjectsFound": "No se encontraron proyectos.",
     "metaTitle": "Portafolio",
     "metaDescription": "Trabajos seleccionados — sitios web, herramientas y proyectos realizados por Viptel.",
@@ -151,7 +152,7 @@
     "label": "Paginación",
     "previousPage": "Página anterior",
     "nextPage": "Página siguiente",
-    "showing": "Mostrando {{start}}-{{end}} de {{total}}"
+    "showing": "Mostrando {start}-{end} de {total}"
   },
   "errors": {
     "pageNotFound": "Página no encontrada",

@@ -18,6 +18,7 @@ import ProjectCard from '@/components/projects/ProjectCard.astro';
 import ProjectTagList from '@/components/projects/ProjectTagList.astro';
 import Pagination from '@/components/blog/Pagination.astro';
 import { t, defaultLocale, localizedPath } from '@/i18n';
+import { payload } from '@/lib/payload-client';
 import {
   collectTopProjectTags,
   getProjectsPageUrl,
@@ -33,12 +34,12 @@ interface Props {
 
 const { locale = defaultLocale } = Astro.props;
 
-const projects = await getVisibleProjects(locale);
-const topTags = collectTopProjectTags(projects, PROJECT_TAG_CLOUD_LIMIT);
+const { docs, totalDocs, totalPages } = await payload.projects().getPaginated(locale, 1, PROJECTS_PER_PAGE);
 
-// Page 1 lives here at /projects; /projects/page/2..N handle the rest.
-const totalPages = Math.max(1, Math.ceil(projects.length / PROJECTS_PER_PAGE));
-const pageProjects = projects.slice(0, PROJECTS_PER_PAGE);
+const allProjects = await getVisibleProjects(locale);
+const topTags = collectTopProjectTags(allProjects, PROJECT_TAG_CLOUD_LIMIT);
+
+const pageProjects = docs;
 
 const contactUrl = localizedPath('/contact', locale);
 const aboutUrl = localizedPath('/about', locale);
@@ -64,7 +65,7 @@ const aboutUrl = localizedPath('/about', locale);
   </Hero>
 
   <!-- All projects -->
-  {projects.length > 0 && (
+  {pageProjects.length > 0 && (
     <section class="py-[var(--space-section-md)] bg-background-secondary border-t border-border">
       <div class="mx-auto max-w-6xl px-6 flex flex-col gap-8">
 
@@ -84,6 +85,8 @@ const aboutUrl = localizedPath('/about', locale);
           currentPage={1}
           totalPages={totalPages}
           href={(p) => getProjectsPageUrl(p, locale)}
+          totalDocs={totalDocs}
+          pageSize={PROJECTS_PER_PAGE}
         />
       </div>
     </section>

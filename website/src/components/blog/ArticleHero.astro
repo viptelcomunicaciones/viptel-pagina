@@ -14,10 +14,13 @@ interface Props {
   description: string;
   publishedAt: Date;
   updatedAt?: Date;
+  /** Author name. When omitted (no author assigned in the CMS), the byline is hidden. */
   author?: string;
   tags?: string[];
   image?: ImageMetadata;
   imageAlt?: string;
+  /** Pre-resolved image URL (CMS-hosted media) — rendered as a plain <img>. */
+  imageUrl?: string;
   svgSlug?: string;
   /** Raw post body, used to estimate reading time (CJK-aware). */
   body?: string;
@@ -28,10 +31,11 @@ const {
   description,
   publishedAt,
   updatedAt,
-  author = 'Team',
+  author,
   tags = [],
   image,
   imageAlt,
+  imageUrl,
   svgSlug,
   body,
 } = Astro.props;
@@ -67,12 +71,16 @@ const readingTime = getReadingTime(body ?? description);
     <!-- Meta info -->
     <div class="flex flex-wrap items-center gap-[var(--space-stack-lg)] text-sm text-foreground-muted">
       <!-- Author -->
-      <div class="flex items-center gap-3">
-        <Logo size="sm" letter={author.charAt(0).toUpperCase()} />
-        <p class="font-semibold text-foreground">{author}</p>
-      </div>
+      {author && (
+        <>
+          <div class="flex items-center gap-3">
+            <Logo size="sm" letter={author.charAt(0).toUpperCase()} />
+            <p class="font-semibold text-foreground">{author}</p>
+          </div>
 
-      <div class="h-8 w-px bg-border hidden md:block"></div>
+          <div class="h-8 w-px bg-border hidden md:block"></div>
+        </>
+      )}
 
       <!-- Published date -->
       <div class="flex items-center gap-2">
@@ -110,7 +118,7 @@ const readingTime = getReadingTime(body ?? description);
     </div>
   </div>
 
-  {(svgSlug || image) && (
+  {(svgSlug || image || imageUrl) && (
     <div class="relative z-[1] mx-auto max-w-5xl px-6 mt-[var(--space-section)] animate-hero-slide-up [animation-delay:450ms]">
       {svgSlug ? (
         <div
@@ -129,6 +137,15 @@ const readingTime = getReadingTime(body ?? description);
             sizes="100vw"
             class="aspect-video w-full object-cover"
             loading="eager"
+          />
+        </div>
+      ) : imageUrl ? (
+        <div class="relative overflow-hidden rounded-xl media-shadow">
+          <img
+            src={imageUrl}
+            alt={imageAlt || title}
+            loading="eager"
+            class="aspect-video w-full object-cover"
           />
         </div>
       ) : null}
