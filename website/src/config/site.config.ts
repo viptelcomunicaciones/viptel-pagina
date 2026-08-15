@@ -193,14 +193,14 @@ export interface SiteConfig {
   blog?: {
     /** Regular (non-featured) posts shown per blog index page. Default 12. */
     postsPerPage?: number;
-    /** How many of the most-used tags to surface in the blog tag cloud. Default 10. */
+    /** How many of the most-used tags to surface in the blog tag cloud. 0 = show all. Default 10. */
     tagCloudLimit?: number;
   };
   /** Projects listing configuration. */
   projects?: {
     /** Projects shown per page on the projects listing. Default 12. */
     perPage?: number;
-    /** How many of the most-used tags to surface in the projects tag cloud. Default 10. */
+    /** How many of the most-used tags to surface in the projects tag cloud. 0 = show all. Default 10. */
     tagCloudLimit?: number;
   };
   /**
@@ -329,11 +329,11 @@ const siteConfig: SiteConfig = {
   },
   blog: {
     postsPerPage: 12,
-    tagCloudLimit: 10,
+    tagCloudLimit: 0,
   },
   projects: {
     perPage: 12,
-    tagCloudLimit: 10,
+    tagCloudLimit: 0,
   },
   i18n: i18nConfig,
   branding: {

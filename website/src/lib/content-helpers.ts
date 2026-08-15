@@ -42,14 +42,15 @@ export function collectTagsWithCounts<T extends { tags?: { tag?: string | null }
 
 /**
  * Collect only the top-N tags by frequency.
+ * A `limit` of 0 or less returns every tag (unlimited).
  */
 export function collectTopTags<T extends { tags?: { tag?: string | null }[] | null }>(
   items: T[],
   limit: number,
 ): string[] {
-  return collectTagsWithCounts(items)
-    .slice(0, limit)
-    .map((t) => t.tag ?? '')
+  const counts = collectTagsWithCounts(items)
+  const top = limit > 0 ? counts.slice(0, limit) : counts
+  return top.map((t) => t.tag ?? '')
 }
 
 /**

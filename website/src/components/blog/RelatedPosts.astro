@@ -46,6 +46,7 @@ const relatedPosts = allPosts
           publishedAt={((post.publishedAt ? new Date(post.publishedAt) : new Date()) as Date)}
           tags={(post.tags || []).map((t) => t.tag ?? '')}
           author={post.populatedAuthors?.[0]?.name || 'Viptel'}
+          imageUrl={post.heroImage && typeof post.heroImage !== 'number' ? payload.resolveMediaUrl(post.heroImage.url ?? '') : undefined}
         />
       ))}
     </div>
