@@ -3,16 +3,41 @@ import { rankRelatedPosts } from '@/lib/blog';
 import type { Post, Tag } from '@/lib/payload-types';
 
 function makeTag(id: number, name: string): Tag {
-  return { id, name, generateSlug: false, slug: name, updatedAt: '2026-01-01T00:00:00.000Z', createdAt: '2026-01-01T00:00:00.000Z' };
+  return {
+    id,
+    name,
+    generateSlug: false,
+    slug: name,
+    updatedAt: '2026-01-01T00:00:00.000Z',
+    createdAt: '2026-01-01T00:00:00.000Z',
+  };
 }
 
 function makePost(partial: Partial<Post> & { slug: string }): Post {
-  return { id: 1, title: partial.slug, publishedAt: '2026-01-01T00:00:00.000Z', tags: [], ...partial } as Post;
+  return {
+    id: 1,
+    title: partial.slug,
+    publishedAt: '2026-01-01T00:00:00.000Z',
+    tags: [],
+    ...partial,
+  } as Post;
 }
 
-const a = makePost({ slug: 'a', tags: [makeTag(1, 'voip')], publishedAt: '2026-01-02T00:00:00.000Z' });
-const b = makePost({ slug: 'b', tags: [makeTag(1, 'voip'), makeTag(2, 'redes')], publishedAt: '2026-01-03T00:00:00.000Z' });
-const c = makePost({ slug: 'c', tags: [makeTag(2, 'redes')], publishedAt: '2026-01-01T00:00:00.000Z' });
+const a = makePost({
+  slug: 'a',
+  tags: [makeTag(1, 'voip')],
+  publishedAt: '2026-01-02T00:00:00.000Z',
+});
+const b = makePost({
+  slug: 'b',
+  tags: [makeTag(1, 'voip'), makeTag(2, 'redes')],
+  publishedAt: '2026-01-03T00:00:00.000Z',
+});
+const c = makePost({
+  slug: 'c',
+  tags: [makeTag(2, 'redes')],
+  publishedAt: '2026-01-01T00:00:00.000Z',
+});
 const current = makePost({ slug: 'current', tags: [makeTag(1, 'voip')] });
 
 describe('rankRelatedPosts', () => {

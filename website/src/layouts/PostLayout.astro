@@ -73,8 +73,12 @@ const socialLinks = resolveSocialLinks(siteConfig.socialLinks)
 const manualRelated: Post[] = []
 for (const rel of post.relatedPosts ?? []) {
   if (typeof rel !== 'number' && rel?.slug) {
-    const full = await payload.posts().getBySlug(rel.slug, locale)
-    if (full) manualRelated.push(full)
+    try {
+      const full = await payload.posts().getBySlug(rel.slug, locale)
+      if (full) manualRelated.push(full)
+    } catch {
+      // Skip this relation if the fetch fails; fall back to tag-based picks.
+    }
   }
 }
 

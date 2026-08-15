@@ -47,6 +47,7 @@ export function rankRelatedPosts(posts: Post[], currentSlug: string, tags: strin
   return posts
     .filter((post) => post.slug !== currentSlug)
     .filter((post) => (post.tags ?? []).some((t) => tags.includes(getTagName(t))))
+    .slice()
     .sort((a, b) => {
       const aMatches = (a.tags ?? []).filter((t) => tags.includes(getTagName(t))).length
       const bMatches = (b.tags ?? []).filter((t) => tags.includes(getTagName(t))).length
@@ -66,7 +67,7 @@ export async function getRelatedByTags(
 ): Promise<Post[]> {
   if (!tags.length) return []
   try {
-    const allPosts = await payload.posts().getAll(locale)
+    const allPosts = await getPublishedPosts(locale)
     return rankRelatedPosts(allPosts, currentSlug, tags).slice(0, max)
   } catch {
     return []
