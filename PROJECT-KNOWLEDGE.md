@@ -400,11 +400,11 @@ El flujo de preview permite ver drafts del CMS en el website:
 
 | Variable | Ejemplo |
 |---|---|
-| `DATABASE_URL` | `postgres://postgres:viptel3562@127.0.0.1:5432/payload_viptel` |
+| `DATABASE_URL` | `postgres://postgres:CHANGE_ME@127.0.0.1:5432/payload_viptel` |
 | `PAYLOAD_SECRET` | Secreto de encriptación |
 | `PAYLOAD_PUBLIC_SERVER_URL` | `http://localhost:3000` |
 | `FRONTEND_URL` | `http://localhost:4321` |
-| `PREVIEW_SECRET` | `01798635fc2b4dae` |
+| `PREVIEW_SECRET` | `change-me-shared-with-website` |
 
 ### Website
 

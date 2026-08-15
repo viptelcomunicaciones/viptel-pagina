@@ -71,4 +71,4 @@ Agrega:
 
 Payload 3.x usa Drizzle ORM internamente. Las migraciones son archivos SQL generados por `drizzle-kit` que Payload ejecuta contra PostgreSQL.
 
-**Conexión**: `DATABASE_URL=postgres://postgres:viptel3562@127.0.0.1:5432/payload_viptel`
+**Conexión**: `DATABASE_URL=postgres://postgres:CHANGE_ME@127.0.0.1:5432/payload_viptel`

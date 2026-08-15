@@ -23,3 +23,15 @@ backend/public/media/
 # os
 .DS_Store
 Thumbs.db
+
+# secrets and private keys
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+
+# tooling output
+.playwright-mcp
+graphify-out/
+graphify/
