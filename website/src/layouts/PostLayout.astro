@@ -13,8 +13,8 @@ import siteConfig from '@/config/site.config'
 import type { Post } from '@/lib/payload-types'
 import { payload } from '@/lib/payload-client'
 import { t, localizedPath } from '@/i18n'
-import { getBlogBaseUrl, getTagName } from '@/lib/blog'
-import { formatDate, getReadingTime } from '@/lib/utils'
+import { getBlogBaseUrl, getTagName, getPostUrl, getRelatedByTags } from '@/lib/blog'
+import { formatDate, getReadingTime, resolveSocialLinks } from '@/lib/utils'
 import { extractHeadings, getPlainText } from '@/lib/headings'
 import Breadcrumbs from '@/components/seo/Breadcrumbs.astro'
 import ArticleHero from '@/components/blog/ArticleHero.astro'
@@ -22,6 +22,8 @@ import TableOfContents from '@/components/blog/TableOfContents.astro'
 import RichText from '@/components/blocks/RichText.astro'
 import Button from '@/components/ui/form/Button/Button.astro'
 import Icon from '@/components/ui/primitives/Icon/Icon.astro'
+import BlogCard from '@/components/blog/BlogCard.astro'
+import CTA from '@/components/ui/marketing/CTA/CTA.astro'
 
 interface Props {
   post: Post
@@ -64,6 +66,25 @@ const breadcrumbs = [
   { label: t('blog.title', locale), href: getBlogBaseUrl(locale) },
   { label: post.title },
 ]
+
+const socialLinks = resolveSocialLinks(siteConfig.socialLinks)
+
+// Resolve manual relatedPosts (backend field) to full posts by slug.
+const manualRelated: Post[] = []
+for (const rel of post.relatedPosts ?? []) {
+  if (typeof rel !== 'number' && rel?.slug) {
+    const full = await payload.posts().getBySlug(rel.slug, locale)
+    if (full) manualRelated.push(full)
+  }
+}
+
+// Fill remaining slots with tag-based fallback (excludes the post itself
+// and anything already picked manually).
+const tagRelated = (await getRelatedByTags(post.slug, tags, locale, 3)).filter(
+  (p) => !manualRelated.some((m) => m.slug === p.slug),
+)
+
+const relatedPosts = [...manualRelated, ...tagRelated].slice(0, 3)
 ---
 
 <ArticleHero
@@ -149,3 +170,60 @@ const breadcrumbs = [
     )}
   </div>
 </article>
+
+{relatedPosts.length > 0 && (
+  <section class="border-t border-border py-[var(--space-section-sm)]">
+    <h2 class="font-display text-2xl font-bold text-foreground mb-[var(--space-stack-lg)] text-center">
+      {t('blog.relatedPosts', locale)}
+    </h2>
+    <div class="mx-auto max-w-6xl px-6 grid gap-[var(--space-stack-lg)] md:grid-cols-2 lg:grid-cols-3">
+      {relatedPosts.map((rp) => (
+        <BlogCard
+          title={rp.title}
+          description={rp.excerpt || ''}
+          href={getPostUrl(rp, locale)}
+          publishedAt={rp.publishedAt ? new Date(rp.publishedAt) : new Date()}
+          tags={(rp.tags ?? []).map((t) => getTagName(t))}
+          author={rp.populatedAuthors?.[0]?.name || 'Viptel'}
+          imageUrl={
+            rp.heroImage && typeof rp.heroImage !== 'number'
+              ? payload.resolveMediaUrl(rp.heroImage.url ?? '')
+              : undefined
+          }
+        />
+      ))}
+    </div>
+  </section>
+)}
+
+<CTA variant="default" size="md" maxWidth="lg" glow={false} data-reveal>
+  <h2 slot="heading" class="!text-4xl">{t('blog.followAlong', locale)}</h2>
+  <p slot="description" class="!text-lg text-balance">{t('blog.followAlongLead', locale)}</p>
+  <div class="flex flex-wrap items-center justify-center gap-3">
+    <a
+      href="/rss.xml"
+      class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
+    >
+      <Icon name="rss" size="sm" />
+      {t('blog.rssFeed', locale)}
+    </a>
+    {socialLinks.map((link) => (
+      <a
+        href={link.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
+      >
+        <Icon name={link.icon} size="sm" />
+        {link.label}
+      </a>
+    ))}
+    <a
+      href={`mailto:${siteConfig.email}`}
+      class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
+    >
+      <Icon name="mail" size="sm" />
+      {t('blog.emailLabel', locale)}
+    </a>
+  </div>
+</CTA>
