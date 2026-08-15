@@ -1,8 +1,9 @@
 ---
-import type { ArchiveBlock as ArchiveBlockType, Post, Project } from '@/lib/payload-types'
+import type { ArchiveBlock as ArchiveBlockType, Post, Project, Service } from '@/lib/payload-types'
 import { payload } from '@/lib/payload-client'
 import { localizedPath } from '@/i18n'
 import RichText from './RichText.astro'
+import ServiceCard from '@/components/services/ServiceCard.astro'
 
 interface Props {
   block: ArchiveBlockType
@@ -39,13 +40,26 @@ function toCard(item: Post | Project): ArchiveCard {
   }
 }
 
-let items: ArchiveCard[] = []
 const isProjects = block.relationTo === 'projects'
+const isServices = block.relationTo === 'services'
 
-if (block.populateBy === 'selection' && block.selectedDocs?.length) {
-  const all: (Post | Project)[] = isProjects ? await payload.projects().getAll(locale) : await payload.posts().getAll(locale)
+let items: ArchiveCard[] = []
+let serviceItems: Service[] = []
+
+if (isServices) {
+  const all = await payload.services().getAll(locale)
+  let selected = all.filter((s) => s.parent != null)
+  if (block.limit) selected = selected.slice(0, block.limit)
+  serviceItems = selected
+} else if (block.populateBy === 'selection' && block.selectedDocs?.length) {
   const selectedIds = new Set(block.selectedDocs.map((d) => (typeof d === 'object' ? (d as any).id : d)))
-  items = all.filter((p) => selectedIds.has(p.id)).map(toCard)
+  const [posts, projects, services] = await Promise.all([
+    payload.posts().getAll(locale),
+    payload.projects().getAll(locale),
+    payload.services().getAll(locale),
+  ])
+  items = [...posts, ...projects].filter((p) => selectedIds.has(p.id)).map(toCard)
+  serviceItems = services.filter((s) => selectedIds.has(s.id))
 } else {
   const all: (Post | Project)[] = isProjects ? await payload.projects().getAll(locale) : await payload.posts().getAll(locale)
   let selected = all
@@ -59,7 +73,7 @@ if (block.populateBy === 'selection' && block.selectedDocs?.length) {
   items = selected.map(toCard)
 }
 
-const linkPrefix = isProjects ? '/projects' : '/blog'
+const linkPrefix = isServices ? '/services' : isProjects ? '/projects' : '/blog'
 ---
 
 <section class="py-[var(--space-section-md)] bg-background-secondary border-t border-border">
@@ -69,37 +83,48 @@ const linkPrefix = isProjects ? '/projects' : '/blog'
         <RichText content={block.introContent} />
       </div>
     )}
-    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {items.map((item) => (
-        <a
-          href={localizedPath(`${linkPrefix}/${item.slug}`, locale)}
-          class="group bg-background rounded-xl border border-border overflow-hidden hover:border-brand-500/40 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
-        >
-          {item.imageUrl && (
-            <img
-              src={payload.resolveMediaUrl(item.imageUrl)}
-              alt={item.imageAlt || item.title}
-              class="w-full aspect-video object-cover"
-            />
-          )}
-          <div class="p-5">
-            <h3 class="font-display font-bold text-foreground group-hover:text-brand-500 transition-colors">
-              {item.title}
-            </h3>
-            {item.description && (
-              <p class="text-sm text-foreground-muted mt-2">{item.description}</p>
+    {serviceItems.length > 0 ? (
+      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {serviceItems.map((service) => (
+          <ServiceCard
+            service={service}
+            href={localizedPath(`/services/${service.slug}`, locale)}
+          />
+        ))}
+      </div>
+    ) : (
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {items.map((item) => (
+          <a
+            href={localizedPath(`${linkPrefix}/${item.slug}`, locale)}
+            class="group bg-background rounded-xl border border-border overflow-hidden hover:border-brand-500/40 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
+          >
+            {item.imageUrl && (
+              <img
+                src={payload.resolveMediaUrl(item.imageUrl)}
+                alt={item.imageAlt || item.title}
+                class="w-full aspect-video object-cover"
+              />
             )}
-            {item.publishedAt && (
-              <time class="text-xs text-foreground-muted mt-3 block">
-                {new Date(item.publishedAt).toLocaleDateString(
-                  locale === 'en' ? 'en-US' : 'es-CO',
-                  { year: 'numeric', month: 'long', day: 'numeric' },
-                )}
-              </time>
-            )}
-          </div>
-        </a>
-      ))}
-    </div>
+            <div class="p-5">
+              <h3 class="font-display font-bold text-foreground group-hover:text-brand-500 transition-colors">
+                {item.title}
+              </h3>
+              {item.description && (
+                <p class="text-sm text-foreground-muted mt-2">{item.description}</p>
+              )}
+              {item.publishedAt && (
+                <time class="text-xs text-foreground-muted mt-3 block">
+                  {new Date(item.publishedAt).toLocaleDateString(
+                    locale === 'en' ? 'en-US' : 'es-CO',
+                    { year: 'numeric', month: 'long', day: 'numeric' },
+                  )}
+                </time>
+              )}
+            </div>
+          </a>
+        ))}
+      </div>
+    )}
   </div>
 </section>

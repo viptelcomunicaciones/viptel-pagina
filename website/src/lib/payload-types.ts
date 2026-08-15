@@ -237,6 +237,9 @@ export interface Page {
         | {
             heading?: string | null;
             cards: {
+              /**
+               * Selecciona un icono de la librería Lucide.
+               */
               icon?: string | null;
               title: string;
               description?: string | null;
@@ -593,7 +596,10 @@ export interface Service {
   generateSlug?: boolean | null;
   slug: string;
   shortDescription?: string | null;
-  icon?: (number | null) | Media;
+  /**
+   * Selecciona un icono de la librería Lucide.
+   */
+  icon?: string | null;
   description?: {
     root: {
       type: string;
@@ -613,7 +619,10 @@ export interface Service {
     | {
         title: string;
         description?: string | null;
-        icon?: (number | null) | Media;
+        /**
+         * Selecciona un icono de la librería Lucide.
+         */
+        icon?: string | null;
         id?: string | null;
       }[]
     | null;
@@ -724,6 +733,9 @@ export interface Service {
         | {
             heading?: string | null;
             cards: {
+              /**
+               * Selecciona un icono de la librería Lucide.
+               */
               icon?: string | null;
               title: string;
               description?: string | null;
@@ -909,7 +921,7 @@ export interface ArchiveBlock {
     [k: string]: unknown;
   } | null;
   populateBy?: ('collection' | 'selection') | null;
-  relationTo?: ('posts' | 'projects') | null;
+  relationTo?: ('posts' | 'projects' | 'services') | null;
   categories?: (number | Category)[] | null;
   limit?: number | null;
   selectedDocs?:
@@ -921,6 +933,10 @@ export interface ArchiveBlock {
         | {
             relationTo: 'projects';
             value: number | Project;
+          }
+        | {
+            relationTo: 'services';
+            value: number | Service;
           }
       )[]
     | null;

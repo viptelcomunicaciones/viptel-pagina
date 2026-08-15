@@ -20,6 +20,8 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
   },
   "dependencies": {
+    "@iconify-json/lucide": "^1.2.98",
+    "@iconify/react": "^6.0.2",
     "@payloadcms/db-postgres": "3.86.0",
     "@payloadcms/email-resend": "^3.86.0",
     "@payloadcms/next": "3.86.0",

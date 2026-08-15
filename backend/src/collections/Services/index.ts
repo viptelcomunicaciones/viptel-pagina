@@ -10,6 +10,7 @@ import { Gallery } from '../../blocks/Gallery/config'
 import { MediaContent } from '../../blocks/MediaContent/config'
 import { Pricing } from '../../blocks/Pricing/config'
 import { seoTab } from '../../fields/seoTab'
+import { iconField } from '../../fields/iconField'
 import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
@@ -67,11 +68,7 @@ export const Services: CollectionConfig = {
       type: 'textarea',
       localized: true,
     },
-    {
-      name: 'icon',
-      type: 'upload',
-      relationTo: 'media',
-    },
+    iconField(),
     {
       type: 'tabs',
       tabs: [
@@ -99,11 +96,7 @@ export const Services: CollectionConfig = {
                   type: 'textarea',
                   localized: true,
                 },
-                {
-                  name: 'icon',
-                  type: 'upload',
-                  relationTo: 'media',
-                },
+                iconField(),
               ],
             },
             {

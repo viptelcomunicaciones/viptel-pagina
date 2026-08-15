@@ -21,7 +21,7 @@ const { service, href, class: className } = Astro.props
   )}
 >
   <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-950 dark:text-brand-400">
-    <Icon name={service.icon ? 'image' : 'sparkles'} size="md" />
+    <Icon name={service.icon ?? 'sparkles'} size="md" />
   </div>
   <div class="flex flex-col gap-1">
     <h3 class="text-base font-semibold text-foreground group-hover:text-brand-600 transition-colors">

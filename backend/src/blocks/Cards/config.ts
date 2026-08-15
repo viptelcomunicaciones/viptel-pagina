@@ -1,5 +1,7 @@
 import type { Block } from 'payload'
 
+import { iconField } from '../../fields/iconField'
+
 export const Cards: Block = {
   slug: 'cards',
   fields: [
@@ -9,7 +11,7 @@ export const Cards: Block = {
       type: 'array',
       required: true,
       fields: [
-        { name: 'icon', type: 'text' },
+        iconField(),
         { name: 'title', type: 'text', localized: true, required: true },
         { name: 'description', type: 'textarea', localized: true },
         { name: 'linkUrl', type: 'text' },
