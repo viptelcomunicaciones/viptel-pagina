@@ -3,6 +3,7 @@ import type { CollectionSlug, File, GlobalSlug, Payload } from 'payload'
 import { getPayload } from 'payload'
 
 import config from '../payload.config'
+import { slugify } from '../collections/Tags'
 
 // Matches the richText field shape in the generated payload-types
 // (root node + index signature)
@@ -257,7 +258,7 @@ export const seed = async (payload: Payload): Promise<void> => {
     if (existing) return existing
     const doc = await payload.create({
       collection: 'tags',
-      data: { name: tag },
+      data: { name: tag, slug: slugify(tag) },
     })
     tagIdByName.set(tag, doc.id as number)
     return doc.id as number

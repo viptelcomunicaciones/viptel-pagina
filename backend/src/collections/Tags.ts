@@ -6,7 +6,7 @@ import { slugField } from 'payload'
 
 // Matches the website's `tagToSlug` (lowercase, strip accents, spaces → dashes)
 // so tag slugs are stable and identical across CMS and public site.
-const slugify = (value: string): string =>
+export const slugify = (value: string): string =>
   value
     .trim()
     .toLowerCase()
@@ -23,13 +23,13 @@ export const Tags: CollectionConfig = {
     read: anyone,
     update: authenticated,
   },
+  labels: {
+    singular: 'Etiqueta',
+    plural: 'Etiquetas',
+  },
   admin: {
     useAsTitle: 'name',
     group: 'Content',
-    labels: {
-      singular: 'Etiqueta',
-      plural: 'Etiquetas',
-    },
   },
   fields: [
     {
