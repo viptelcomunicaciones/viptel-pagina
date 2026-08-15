@@ -1,9 +1,8 @@
 ---
 import BlogCard from './BlogCard.astro';
 import { t, defaultLocale } from '@/i18n';
-import { getPostUrl, getTagName } from '@/lib/blog';
+import { getPostUrl, getTagName, getRelatedByTags } from '@/lib/blog';
 import { payload } from '@/lib/payload-client';
-import type { Post } from '@/lib/payload-types';
 
 interface Props {
   currentSlug: string;
@@ -14,21 +13,7 @@ interface Props {
 
 const { currentSlug, tags, locale = defaultLocale, maxPosts = 3 } = Astro.props;
 
-const allPosts = await payload.posts().getAll(locale).catch(() => [] as Post[]);
-
-const relatedPosts = allPosts
-  .filter((post) => {
-    if (post.slug === currentSlug) return false;
-    if (!tags.length) return false;
-    return (post.tags || []).some((t) => tags.includes(getTagName(t)));
-  })
-  .sort((a, b) => {
-    const aMatches = (a.tags || []).filter((t) => tags.includes(getTagName(t))).length;
-    const bMatches = (b.tags || []).filter((t) => tags.includes(getTagName(t))).length;
-    if (bMatches !== aMatches) return bMatches - aMatches;
-    return ((b.publishedAt ? new Date(b.publishedAt) : new Date()) as Date).getTime() - ((a.publishedAt ? new Date(a.publishedAt) : new Date()) as Date).getTime();
-  })
-  .slice(0, maxPosts);
+const relatedPosts = await getRelatedByTags(currentSlug, tags, locale, maxPosts);
 ---
 
 {relatedPosts.length > 0 && (
