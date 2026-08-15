@@ -13,7 +13,7 @@ import siteConfig from '@/config/site.config'
 import type { Post } from '@/lib/payload-types'
 import { payload } from '@/lib/payload-client'
 import { t, localizedPath } from '@/i18n'
-import { getBlogBaseUrl } from '@/lib/blog'
+import { getBlogBaseUrl, getTagName } from '@/lib/blog'
 import { formatDate, getReadingTime } from '@/lib/utils'
 import { extractHeadings, getPlainText } from '@/lib/headings'
 import Breadcrumbs from '@/components/seo/Breadcrumbs.astro'
@@ -31,7 +31,7 @@ interface Props {
 const { post, locale = 'es' } = Astro.props
 
 const author = post.populatedAuthors?.[0]?.name ?? undefined
-const tags = (post.tags ?? []).map((tag) => tag.tag ?? '').filter(Boolean)
+const tags = (post.tags ?? []).map((tag) => getTagName(tag)).filter(Boolean)
 
 const publishedAt = post.publishedAt
   ? new Date(post.publishedAt)

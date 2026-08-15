@@ -5,6 +5,7 @@ import {
   collectProjectTags,
   collectTopProjectTags,
   findTagBySlug,
+  getTagName,
   getVisibleProjects,
   PROJECT_TAG_CLOUD_LIMIT,
 } from '@/lib/projects';
@@ -27,7 +28,7 @@ if (!tag) {
   return Astro.redirect('/404')
 }
 
-const projects = allProjects.filter((p) => (p.tags ?? []).some((t) => t.tag === tag))
+const projects = allProjects.filter((p) => (p.tags ?? []).some((t) => getTagName(t) === tag))
 const topTags = collectTopProjectTags(allProjects, PROJECT_TAG_CLOUD_LIMIT)
 const visibleTags = topTags.includes(tag)
   ? topTags

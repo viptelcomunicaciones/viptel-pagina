@@ -7,6 +7,7 @@ import {
   collectTopTags,
   findTagBySlug,
   getPublishedPosts,
+  getTagName,
 } from '@/lib/blog';
 
 export const prerender = false
@@ -23,7 +24,7 @@ if (!tag) {
   return Astro.redirect('/404')
 }
 
-const posts = allPosts.filter((p) => (p.tags ?? []).some((t) => t.tag === tag))
+const posts = allPosts.filter((p) => (p.tags ?? []).some((t) => getTagName(t) === tag))
 const topTags = collectTopTags(allPosts, BLOG_TAG_CLOUD_LIMIT)
 const visibleTags = topTags.includes(tag)
   ? topTags

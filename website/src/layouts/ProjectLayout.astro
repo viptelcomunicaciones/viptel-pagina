@@ -14,6 +14,7 @@ import type { Project } from '@/lib/payload-types'
 import { payload } from '@/lib/payload-client'
 import { t, localizedPath } from '@/i18n'
 import { extractHeadings } from '@/lib/headings'
+import { getTagName } from '@/lib/content-helpers'
 import Breadcrumbs from '@/components/seo/Breadcrumbs.astro'
 import TableOfContents from '@/components/blog/TableOfContents.astro'
 import RichText from '@/components/blocks/RichText.astro'
@@ -30,7 +31,7 @@ interface Props {
 
 const { project, locale = 'es', related = [] } = Astro.props
 
-const tags = (project.tags ?? []).map((tag) => tag.tag ?? '').filter(Boolean)
+const tags = (project.tags ?? []).map((tag) => getTagName(tag)).filter(Boolean)
 
 const tocConfig = siteConfig.articleFeatures?.toc
 const showToc = project.toc === 'enabled' || (!!tocConfig?.enabled && project.toc !== 'disabled')

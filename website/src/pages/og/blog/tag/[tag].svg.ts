@@ -1,5 +1,5 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
-import { collectTags, getPublishedPosts, tagToSlug } from '@/lib/blog';
+import { collectTags, getPublishedPosts, getTagName, tagToSlug } from '@/lib/blog';
 import { renderOgSvg } from '@/lib/og';
 
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -7,7 +7,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const tags = collectTags(posts);
 
   return tags.map((tag) => {
-    const count = posts.filter((p) => (p.tags ?? []).some((t) => t.tag === tag)).length;
+    const count = posts.filter((p) => (p.tags ?? []).some((t) => getTagName(t) === tag)).length;
     return {
       params: { tag: tagToSlug(tag) },
       props: { tag, count },

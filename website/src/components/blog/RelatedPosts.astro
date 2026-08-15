@@ -1,7 +1,7 @@
 ---
 import BlogCard from './BlogCard.astro';
 import { t, defaultLocale } from '@/i18n';
-import { getPostUrl } from '@/lib/blog';
+import { getPostUrl, getTagName } from '@/lib/blog';
 import { payload } from '@/lib/payload-client';
 import type { Post } from '@/lib/payload-types';
 
@@ -20,11 +20,11 @@ const relatedPosts = allPosts
   .filter((post) => {
     if (post.slug === currentSlug) return false;
     if (!tags.length) return false;
-    return (post.tags || []).some((t) => tags.includes(t.tag ?? ""));
+    return (post.tags || []).some((t) => tags.includes(getTagName(t)));
   })
   .sort((a, b) => {
-    const aMatches = (a.tags || []).filter((t) => tags.includes(t.tag ?? "")).length;
-    const bMatches = (b.tags || []).filter((t) => tags.includes(t.tag ?? "")).length;
+    const aMatches = (a.tags || []).filter((t) => tags.includes(getTagName(t))).length;
+    const bMatches = (b.tags || []).filter((t) => tags.includes(getTagName(t))).length;
     if (bMatches !== aMatches) return bMatches - aMatches;
     return ((b.publishedAt ? new Date(b.publishedAt) : new Date()) as Date).getTime() - ((a.publishedAt ? new Date(a.publishedAt) : new Date()) as Date).getTime();
   })
@@ -44,7 +44,7 @@ const relatedPosts = allPosts
           description={post.excerpt || ''}
           href={getPostUrl(post, locale)}
           publishedAt={((post.publishedAt ? new Date(post.publishedAt) : new Date()) as Date)}
-          tags={(post.tags || []).map((t) => t.tag ?? '')}
+          tags={(post.tags || []).map((t) => getTagName(t))}
           author={post.populatedAuthors?.[0]?.name || 'Viptel'}
           imageUrl={post.heroImage && typeof post.heroImage !== 'number' ? payload.resolveMediaUrl(post.heroImage.url ?? '') : undefined}
         />

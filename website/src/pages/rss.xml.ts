@@ -3,6 +3,7 @@ import siteConfig from '@/config/site.config';
 import { payload } from '@/lib/payload-client';
 import { defaultLocale } from '@/i18n';
 import type { Post } from '@/lib/payload-types';
+import { getTagName } from '@/lib/blog';
 
 function escapeXml(text: string): string {
   return text
@@ -27,7 +28,7 @@ export async function GET(context: APIContext) {
     .map((post) => {
       const link = `${siteUrl}/blog/${post.slug}/`;
       const categories = (post.tags ?? [])
-        .map((t) => `<category>${escapeXml(t.tag ?? '')}</category>`)
+        .map((t) => `<category>${escapeXml(getTagName(t))}</category>`)
         .join('\n        ');
 
       return `    <item>

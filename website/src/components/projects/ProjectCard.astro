@@ -9,7 +9,7 @@ import Card from '@/components/ui/data-display/Card/Card.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import type { Project } from '@/lib/payload-types';
 import { defaultLocale } from '@/i18n';
-import { getProjectUrl } from '@/lib/projects';
+import { getProjectUrl, getTagName } from '@/lib/projects';
 import { payload } from '@/lib/payload-client';
 
 interface Props {
@@ -63,7 +63,7 @@ const { project, index = 0, locale = defaultLocale } = Astro.props;
       <div class="flex flex-wrap gap-1.5">
         {(project.tags ?? []).map((t) => (
           <span class="inline-flex items-center rounded-full bg-transparent px-2.5 py-0.5 text-xs font-medium text-brand-700 dark:text-brand-400 ring-1 ring-inset ring-brand-500/40 transition-colors group-hover:ring-brand-500/80">
-            #{t.tag}
+            #{getTagName(t)}
           </span>
         ))}
       </div>

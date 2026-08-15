@@ -16,23 +16,37 @@ export function getSecondaryLocales(): string[] {
 }
 
 /**
- * Collect unique tags from content items.
- * Items must have `tags?: { tag?: string | null }[]`.
+ * A tag as it appears on a content item: either a resolved Tag object
+ * (depth ≥ 1) or a raw relationship id (depth 0).
  */
-export function collectTags<T extends { tags?: { tag?: string | null }[] | null }>(items: T[]): string[] {
-  return [...new Set(items.flatMap((item) => (item.tags ?? []).map((t) => t.tag ?? '')))].sort()
+export type TagRef = number | { name?: string | null } | null
+
+/**
+ * Extract a tag's display name, tolerating an unresolved relationship id.
+ */
+export function getTagName(tag: TagRef): string {
+  if (tag && typeof tag === 'object') return tag.name ?? ''
+  return ''
+}
+
+/**
+ * Collect unique tags from content items.
+ * Items must have `tags?: TagRef[]`.
+ */
+export function collectTags<T extends { tags?: TagRef[] | null }>(items: T[]): string[] {
+  return [...new Set(items.flatMap((item) => (item.tags ?? []).map((t) => getTagName(t))))].sort()
 }
 
 /**
  * Collect tags with occurrence counts, sorted by count descending then alphabetically.
  */
-export function collectTagsWithCounts<T extends { tags?: { tag?: string | null }[] | null }>(
+export function collectTagsWithCounts<T extends { tags?: TagRef[] | null }>(
   items: T[],
 ): { tag: string; count: number }[] {
   const counts = new Map<string, number>()
   for (const item of items) {
     for (const t of item.tags ?? []) {
-      counts.set(t.tag ?? '', (counts.get(t.tag ?? '') ?? 0) + 1)
+      counts.set(getTagName(t), (counts.get(getTagName(t)) ?? 0) + 1)
     }
   }
   return [...counts.entries()]
@@ -44,7 +58,7 @@ export function collectTagsWithCounts<T extends { tags?: { tag?: string | null }
  * Collect only the top-N tags by frequency.
  * A `limit` of 0 or less returns every tag (unlimited).
  */
-export function collectTopTags<T extends { tags?: { tag?: string | null }[] | null }>(
+export function collectTopTags<T extends { tags?: TagRef[] | null }>(
   items: T[],
   limit: number,
 ): string[] {

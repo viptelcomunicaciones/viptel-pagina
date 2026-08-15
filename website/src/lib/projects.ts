@@ -6,12 +6,12 @@ import siteConfig from '@/config/site.config'
 import { defaultLocale, localizedPath } from '@/i18n'
 import { payload } from '@/lib/payload-client'
 import type { Project } from '@/lib/payload-types'
-import { collectTagsWithCounts, collectTopTags, getSecondaryLocales, tagToSlug, findTagBySlug } from '@/lib/content-helpers'
+import { collectTagsWithCounts, collectTopTags, getSecondaryLocales, getTagName, tagToSlug, findTagBySlug } from '@/lib/content-helpers'
 
 export const PROJECTS_PER_PAGE = siteConfig.projects?.perPage ?? 12
 export const PROJECT_TAG_CLOUD_LIMIT = siteConfig.projects?.tagCloudLimit ?? 10
 
-export { tagToSlug, findTagBySlug, collectTagsWithCounts as collectProjectTagsWithCounts, collectTopTags as collectTopProjectTags, getSecondaryLocales }
+export { tagToSlug, findTagBySlug, getTagName, collectTagsWithCounts as collectProjectTagsWithCounts, collectTopTags as collectTopProjectTags, getSecondaryLocales }
 
 export function getProjectSlug(project: Project): string {
   return project.slug
@@ -39,5 +39,5 @@ export async function getVisibleProjects(locale = defaultLocale): Promise<Projec
 }
 
 export function collectProjectTags(projects: Project[]): string[] {
-  return [...new Set(projects.flatMap((p) => (p.tags ?? []).map((t) => t.tag ?? '')))].sort()
+  return [...new Set(projects.flatMap((p) => (p.tags ?? []).map((t) => getTagName(t))))].sort()
 }

@@ -189,16 +189,12 @@ export const Posts: CollectionConfig<'posts'> = {
     },
     {
       name: 'tags',
-      type: 'array',
+      type: 'relationship',
       admin: {
         position: 'sidebar',
       },
-      fields: [
-        {
-          name: 'tag',
-          type: 'text',
-        },
-      ],
+      hasMany: true,
+      relationTo: 'tags',
     },
     slugField(),
   ],

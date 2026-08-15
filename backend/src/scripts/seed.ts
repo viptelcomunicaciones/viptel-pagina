@@ -26,6 +26,7 @@ const collections: CollectionSlug[] = [
   'projects',
   'redirects',
   'services',
+  'tags',
   'users',
 ]
 
@@ -243,6 +244,23 @@ export const seed = async (payload: Payload): Promise<void> => {
       data: { title: cat.en },
     })
     categoryDocs.push(doc)
+  }
+
+  payload.logger.info(`- Seeding tags...`)
+
+  // Tags are a dedicated collection now. `ensureTag` lazily creates a tag doc
+  // (cached by name) and returns its id, so posts and projects can reference
+  // the same tag doc instead of duplicated free-text arrays.
+  const tagIdByName = new Map<string, number>()
+  const ensureTag = async (tag: string): Promise<number> => {
+    const existing = tagIdByName.get(tag)
+    if (existing) return existing
+    const doc = await payload.create({
+      collection: 'tags',
+      data: { name: tag },
+    })
+    tagIdByName.set(tag, doc.id as number)
+    return doc.id as number
   }
 
   payload.logger.info(`- Seeding posts...`)
@@ -933,7 +951,7 @@ export const seed = async (payload: Payload): Promise<void> => {
         heroImage: post.heroImage,
         categories: [post.category],
         authors: [admin.id],
-        tags: post.tags.map((tag) => ({ tag })),
+        tags: await Promise.all(post.tags.map(ensureTag)),
         toc: post.toc ?? 'inherit',
         _status: 'published',
       },
@@ -1710,7 +1728,7 @@ export const seed = async (payload: Payload): Promise<void> => {
         client: project.client,
         year: project.year,
         coverImage: project.coverImage,
-        tags: project.tags.map((tag) => ({ tag })),
+        tags: await Promise.all(project.tags.map(ensureTag)),
         websiteUrl: project.websiteUrl,
         sourceUrl: project.sourceUrl,
         toc: project.toc ?? 'inherit',

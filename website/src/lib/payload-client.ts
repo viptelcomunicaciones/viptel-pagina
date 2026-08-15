@@ -167,7 +167,7 @@ class PostQueries extends QueryBase<Post> {
 
   async getByTag(tag: string, locale = defaultLocale, page = 1, limit = 20): Promise<DocsResponse<Post>> {
     return this.client.fetchAPI<DocsResponse<Post>>(
-      `posts?sort=-publishedAt&limit=${limit}&page=${page}&where[tags.tag][equals]=${encodeURIComponent(tag)}&where[_status][equals]=published`,
+      `posts?sort=-publishedAt&limit=${limit}&page=${page}&where[tags.name][equals]=${encodeURIComponent(tag)}&where[_status][equals]=published`,
       { locale },
     )
   }
@@ -195,7 +195,7 @@ class ProjectQueries extends QueryBase<Project> {
 
   async getByTag(tag: string, locale = defaultLocale, page = 1, limit = 20): Promise<DocsResponse<Project>> {
     return this.client.fetchAPI<DocsResponse<Project>>(
-      `projects?sort=-year&limit=${limit}&page=${page}&where[tags.tag][equals]=${encodeURIComponent(tag)}&where[_status][equals]=published`,
+      `projects?sort=-year&limit=${limit}&page=${page}&where[tags.name][equals]=${encodeURIComponent(tag)}&where[_status][equals]=published`,
       { locale },
     )
   }

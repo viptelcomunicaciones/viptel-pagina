@@ -128,16 +128,12 @@ export const Projects: CollectionConfig<'projects'> = {
             },
             {
               name: 'tags',
-              type: 'array',
+              type: 'relationship',
               admin: {
                 position: 'sidebar',
               },
-              fields: [
-                {
-                  name: 'tag',
-                  type: 'text',
-                },
-              ],
+              hasMany: true,
+              relationTo: 'tags',
             },
             {
               name: 'websiteUrl',
