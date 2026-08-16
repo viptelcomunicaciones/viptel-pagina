@@ -24,6 +24,7 @@ import Button from '@/components/ui/form/Button/Button.astro'
 import Icon from '@/components/ui/primitives/Icon/Icon.astro'
 import BlogCard from '@/components/blog/BlogCard.astro'
 import CTA from '@/components/ui/marketing/CTA/CTA.astro'
+import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro'
 
 interface Props {
   post: Post
@@ -200,7 +201,7 @@ const relatedPosts = [...manualRelated, ...tagRelated].slice(0, 3)
   </section>
 )}
 
-<CTA variant="default" size="md" maxWidth="lg" glow={false} data-reveal>
+<CTA variant="default" size="md" maxWidth="lg" glow={false} data-reveal class="glitch:hidden bg-background-secondary">
   <h2 slot="heading" class="!text-4xl">{t('blog.followAlong', locale)}</h2>
   <p slot="description" class="!text-lg text-balance">{t('blog.followAlongLead', locale)}</p>
   <div class="flex flex-wrap items-center justify-center gap-3">
@@ -231,3 +232,39 @@ const relatedPosts = [...manualRelated, ...tagRelated].slice(0, 3)
     </a>
   </div>
 </CTA>
+
+<!-- Desktop: contained LetterGlitch band with glass card -->
+<section class="hidden glitch:block relative z-10 py-[var(--space-section-md)] bg-background-secondary">
+  <LetterGlitchBand maxWidth="7xl">
+    <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">{t('blog.followAlong', locale)}</h2>
+    <p class="text-lg text-foreground-muted mb-8 text-balance">{t('blog.followAlongLead', locale)}</p>
+
+    <div class="flex flex-wrap items-center justify-center gap-3">
+      <a
+        href="/rss.xml"
+        class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
+      >
+        <Icon name="rss" size="sm" />
+        {t('blog.rssFeed', locale)}
+      </a>
+      {socialLinks.map((link) => (
+        <a
+          href={link.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
+        >
+          <Icon name={link.icon} size="sm" />
+          {link.label}
+        </a>
+      ))}
+      <a
+        href={`mailto:${siteConfig.email}`}
+        class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
+      >
+        <Icon name="mail" size="sm" />
+        {t('blog.emailLabel', locale)}
+      </a>
+    </div>
+  </LetterGlitchBand>
+</section>
