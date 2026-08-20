@@ -1,4 +1,4 @@
-import type { MarkdownHeading } from 'astro'
+import type { MarkdownHeading } from 'astro';
 
 /**
  * Slugify a heading's text into a stable anchor id. Mirrors GitHub-style
@@ -13,14 +13,14 @@ export function slugify(text: string): string {
     .trim()
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/[\s_-]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+    .replace(/^-+|-+$/g, '');
 }
 
 function nodeText(node: any): string {
-  if (!node) return ''
-  if (node.type === 'text') return node.text || ''
-  if (Array.isArray(node.children)) return node.children.map(nodeText).join('')
-  return ''
+  if (!node) return '';
+  if (node.type === 'text') return node.text || '';
+  if (Array.isArray(node.children)) return node.children.map(nodeText).join('');
+  return '';
 }
 
 /**
@@ -30,34 +30,34 @@ function nodeText(node: any): string {
  * up between the TOC links and the headings in the article body.
  */
 export function extractHeadings(content: any): MarkdownHeading[] {
-  const children = content?.root?.children
-  if (!Array.isArray(children)) return []
+  const children = content?.root?.children;
+  if (!Array.isArray(children)) return [];
 
-  const headings: MarkdownHeading[] = []
-  const used = new Set<string>()
+  const headings: MarkdownHeading[] = [];
+  const used = new Set<string>();
 
   for (const node of children) {
-    if (!node || node.type !== 'heading') continue
-    const tag = node.tag || 'h2'
-    const depth = Number.parseInt(tag.slice(1), 10)
-    if (![2, 3, 4].includes(depth)) continue
+    if (!node || node.type !== 'heading') continue;
+    const tag = node.tag || 'h2';
+    const depth = Number.parseInt(tag.slice(1), 10);
+    if (![2, 3, 4].includes(depth)) continue;
 
-    const text = nodeText(node).trim()
-    if (!text) continue
+    const text = nodeText(node).trim();
+    if (!text) continue;
 
-    const base = slugify(text)
-    let slug = base
-    let i = 2
+    const base = slugify(text);
+    let slug = base;
+    let i = 2;
     while (used.has(slug)) {
-      slug = `${base}-${i}`
-      i += 1
+      slug = `${base}-${i}`;
+      i += 1;
     }
-    used.add(slug)
+    used.add(slug);
 
-    headings.push({ depth: depth as MarkdownHeading['depth'], slug, text })
+    headings.push({ depth: depth as MarkdownHeading['depth'], slug, text });
   }
 
-  return headings
+  return headings;
 }
 
 /**
@@ -65,7 +65,7 @@ export function extractHeadings(content: any): MarkdownHeading[] {
  * time without markup noise.
  */
 export function getPlainText(content: any): string {
-  const children = content?.root?.children
-  if (!Array.isArray(children)) return ''
-  return children.map(nodeText).join('\n')
+  const children = content?.root?.children;
+  if (!Array.isArray(children)) return '';
+  return children.map(nodeText).join('\n');
 }

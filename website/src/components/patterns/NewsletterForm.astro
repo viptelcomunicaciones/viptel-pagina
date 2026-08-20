@@ -32,22 +32,16 @@ const {
   data-generic-error={t('newsletter.genericError', locale)}
   data-error-message={t('newsletter.error', locale)}
 >
-  <div class="flex flex-col sm:flex-row gap-3">
+  <div class="flex flex-col gap-3 sm:flex-row">
     <div class="flex-1">
-      <Input
-        name="email"
-        type="email"
-        placeholder={placeholder}
-        required
-        autocomplete="email"
-      />
+      <Input name="email" type="email" placeholder={placeholder} required autocomplete="email" />
     </div>
     <Button type="submit" class="newsletter-submit">
       {buttonText}
     </Button>
   </div>
 
-  <p class="newsletter-message hidden mt-3 text-sm"></p>
+  <p class="newsletter-message mt-3 hidden text-sm"></p>
 </form>
 
 <script>
@@ -88,7 +82,8 @@ const {
             message.className = 'newsletter-message mt-3 text-sm text-destructive';
           }
         } catch {
-          message.textContent = form.dataset.errorMessage || 'Subscription failed. Please try again.';
+          message.textContent =
+            form.dataset.errorMessage || 'Subscription failed. Please try again.';
           message.className = 'newsletter-message mt-3 text-sm text-destructive';
         } finally {
           button.disabled = false;

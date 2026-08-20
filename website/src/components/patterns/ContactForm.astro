@@ -32,14 +32,8 @@ const {
   data-error-message={t('contact.error', locale)}
 >
   <!-- Name + Email side by side on sm+ -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    <Input
-      label={t('contact.name', locale)}
-      name="name"
-      type="text"
-      required
-      autocomplete="name"
-    />
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <Input label={t('contact.name', locale)} name="name" type="text" required autocomplete="name" />
     <Input
       label={t('contact.email', locale)}
       name="email"
@@ -49,18 +43,9 @@ const {
     />
   </div>
 
-  <Input
-    label={t('contact.subject', locale)}
-    name="subject"
-    type="text"
-  />
+  <Input label={t('contact.subject', locale)} name="subject" type="text" />
 
-  <Textarea
-    label={t('contact.message', locale)}
-    name="message"
-    required
-    rows={5}
-  />
+  <Textarea label={t('contact.message', locale)} name="message" required rows={5} />
 
   <!-- Honeypot field for spam protection -->
   <div class="hidden" aria-hidden="true">
@@ -70,7 +55,7 @@ const {
   <div id="form-message" class="hidden text-sm"></div>
 
   <div class="flex justify-center">
-    <Button type="submit" id="submit-button" class="gap-2 cta-btn-brand">
+    <Button type="submit" id="submit-button" class="cta-btn-brand gap-2">
       {t('contact.send', locale)}
       <Icon name="arrow-right" size="sm" />
     </Button>
@@ -111,12 +96,13 @@ const {
         } else {
           const errors = data.errors
             ? Object.values(data.errors).flat().join(', ')
-            : (form.dataset.genericError || 'Something went wrong');
+            : form.dataset.genericError || 'Something went wrong';
           message.textContent = errors as string;
           message.className = 'text-sm text-destructive';
         }
       } catch {
-        message.textContent = form.dataset.errorMessage || 'Failed to send message. Please try again.';
+        message.textContent =
+          form.dataset.errorMessage || 'Failed to send message. Please try again.';
         message.className = 'text-sm text-destructive';
       } finally {
         button.disabled = false;

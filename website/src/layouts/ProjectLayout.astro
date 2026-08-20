@@ -9,173 +9,195 @@
  *
  * The route wraps this in `PageLayout` so <head> SEO/meta stay on the page.
  */
-import siteConfig from '@/config/site.config'
-import type { Project } from '@/lib/payload-types'
-import { payload } from '@/lib/payload-client'
-import { t, localizedPath } from '@/i18n'
-import { extractHeadings } from '@/lib/headings'
-import { getTagName } from '@/lib/content-helpers'
-import Breadcrumbs from '@/components/seo/Breadcrumbs.astro'
-import TableOfContents from '@/components/blog/TableOfContents.astro'
-import RichText from '@/components/blocks/RichText.astro'
-import Button from '@/components/ui/form/Button/Button.astro'
-import Icon from '@/components/ui/primitives/Icon/Icon.astro'
-import TagList from '@/components/blog/TagList.astro'
-import CTA from '@/components/ui/marketing/CTA/CTA.astro'
+import siteConfig from '@/config/site.config';
+import type { Project } from '@/lib/payload-types';
+import { payload } from '@/lib/payload-client';
+import { t, localizedPath } from '@/i18n';
+import { extractHeadings } from '@/lib/headings';
+import { getTagName } from '@/lib/content-helpers';
+import Breadcrumbs from '@/components/seo/Breadcrumbs.astro';
+import TableOfContents from '@/components/blog/TableOfContents.astro';
+import RichText from '@/components/blocks/RichText.astro';
+import Button from '@/components/ui/form/Button/Button.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import TagList from '@/components/blog/TagList.astro';
+import CTA from '@/components/ui/marketing/CTA/CTA.astro';
 
 interface Props {
-  project: Project
-  locale?: string
-  related?: Project[]
+  project: Project;
+  locale?: string;
+  related?: Project[];
 }
 
-const { project, locale = 'es', related = [] } = Astro.props
+const { project, locale = 'es', related = [] } = Astro.props;
 
-const tags = (project.tags ?? []).map((tag) => getTagName(tag)).filter(Boolean)
+const tags = (project.tags ?? []).map((tag) => getTagName(tag)).filter(Boolean);
 
-const tocConfig = siteConfig.articleFeatures?.toc
-const showToc = project.toc === 'enabled' || (!!tocConfig?.enabled && project.toc !== 'disabled')
-const tocLayout = tocConfig?.layout ?? 'auto'
-const sidebarActive = showToc && (tocLayout === 'sidebar' || tocLayout === 'auto')
-const inlineActive = showToc && tocLayout === 'inline'
-const sidebarOnLeft = (tocConfig?.sidebarPosition ?? 'right') === 'left'
+const tocConfig = siteConfig.articleFeatures?.toc;
+const showToc = project.toc === 'enabled' || (!!tocConfig?.enabled && project.toc !== 'disabled');
+const tocLayout = tocConfig?.layout ?? 'auto';
+const sidebarActive = showToc && (tocLayout === 'sidebar' || tocLayout === 'auto');
+const inlineActive = showToc && tocLayout === 'inline';
+const sidebarOnLeft = (tocConfig?.sidebarPosition ?? 'right') === 'left';
 
-const headings = extractHeadings(project.content)
+const headings = extractHeadings(project.content);
 
 const coverImage =
-  project.coverImage && typeof project.coverImage !== 'number' ? project.coverImage : null
-const coverUrl = coverImage?.url ? payload.resolveMediaUrl(coverImage.url) : undefined
-const coverAlt = coverImage?.alt ?? undefined
+  project.coverImage && typeof project.coverImage !== 'number' ? project.coverImage : null;
+const coverUrl = coverImage?.url ? payload.resolveMediaUrl(coverImage.url) : undefined;
+const coverAlt = coverImage?.alt ?? undefined;
 
 const breadcrumbs = [
   { label: t('common.home', locale), href: localizedPath('/', locale) },
   { label: t('projects.title', locale), href: localizedPath('/projects', locale) },
   { label: project.title },
-]
+];
 ---
 
-<header class="relative isolate overflow-hidden pt-[var(--space-page-top-sm)] pb-[var(--space-section-sm)]">
+<header
+  class="relative isolate overflow-hidden pt-[var(--space-page-top-sm)] pb-[var(--space-section-sm)]"
+>
   <div class="relative z-[1] mx-auto max-w-4xl px-6">
-    <h1 class="font-display text-4xl font-bold tracking-tight text-foreground md:text-5xl lg:text-6xl mb-[var(--space-heading-gap)]">
+    <h1
+      class="font-display text-foreground mb-[var(--space-heading-gap)] text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl"
+    >
       {project.title}
     </h1>
 
-    {project.description && (
-      <p class="text-xl text-foreground-muted leading-relaxed max-w-3xl mb-[var(--space-stack-lg)]">
-        {project.description}
-      </p>
-    )}
+    {
+      project.description && (
+        <p class="text-foreground-muted mb-[var(--space-stack-lg)] max-w-3xl text-xl leading-relaxed">
+          {project.description}
+        </p>
+      )
+    }
 
     {tags.length > 0 && <TagList tags={tags} locale={locale} class="mb-[var(--space-stack-lg)]" />}
 
-    <div class="flex flex-wrap items-center gap-x-4 gap-y-3 text-sm text-foreground-muted mb-[var(--space-stack-lg)]">
-      {project.client && <span class="font-semibold text-foreground">{project.client}</span>}
-      {project.client && project.year && <span class="h-4 w-px bg-border" aria-hidden="true"></span>}
+    <div
+      class="text-foreground-muted mb-[var(--space-stack-lg)] flex flex-wrap items-center gap-x-4 gap-y-3 text-sm"
+    >
+      {project.client && <span class="text-foreground font-semibold">{project.client}</span>}
+      {project.client && project.year && <span class="bg-border h-4 w-px" aria-hidden="true" />}
       {project.year && <span>{project.year}</span>}
     </div>
 
-    {(project.websiteUrl || project.sourceUrl) && (
-      <div class="flex flex-wrap items-center gap-3 mb-[var(--space-stack-lg)]">
-        {project.websiteUrl && (
-          <Button href={project.websiteUrl} variant="primary" size="md">
-            <Icon name="external-link" size="sm" />
-            {t('projects.viewLiveSite', locale)}
-          </Button>
-        )}
-        {project.sourceUrl && (
-          <Button href={project.sourceUrl} variant="brand-outline" size="md">
-            <Icon name="code" size="sm" />
-            {t('projects.viewSource', locale)}
-          </Button>
-        )}
-      </div>
-    )}
+    {
+      (project.websiteUrl || project.sourceUrl) && (
+        <div class="mb-[var(--space-stack-lg)] flex flex-wrap items-center gap-3">
+          {project.websiteUrl && (
+            <Button href={project.websiteUrl} variant="primary" size="md">
+              <Icon name="external-link" size="sm" />
+              {t('projects.viewLiveSite', locale)}
+            </Button>
+          )}
+          {project.sourceUrl && (
+            <Button href={project.sourceUrl} variant="brand-outline" size="md">
+              <Icon name="code" size="sm" />
+              {t('projects.viewSource', locale)}
+            </Button>
+          )}
+        </div>
+      )
+    }
   </div>
 
-  {coverUrl && (
-    <div class="relative z-[1] mx-auto max-w-5xl px-6 mt-[var(--space-section-sm)]">
-      <div class="relative overflow-hidden rounded-xl media-shadow">
-        <img
-          src={coverUrl}
-          alt={coverAlt || project.title}
-          loading="eager"
-          class="aspect-video w-full object-cover"
-        />
+  {
+    coverUrl && (
+      <div class="relative z-[1] mx-auto mt-[var(--space-section-sm)] max-w-5xl px-6">
+        <div class="media-shadow relative overflow-hidden rounded-xl">
+          <img
+            src={coverUrl}
+            alt={coverAlt || project.title}
+            loading="eager"
+            class="aspect-video w-full object-cover"
+          />
+        </div>
       </div>
-    </div>
-  )}
+    )
+  }
 </header>
 
 <article class="pt-8 pb-[var(--space-section-md)]">
   <div
     class:list={[
-      'mx-auto px-6 max-w-7xl',
+      'mx-auto max-w-7xl px-6',
       sidebarActive &&
         (sidebarOnLeft
           ? 'xl:grid xl:grid-cols-[15rem_minmax(0,1fr)] xl:gap-10'
           : 'xl:grid xl:grid-cols-[minmax(0,1fr)_15rem] xl:gap-10'),
     ]}
   >
-    {sidebarActive && sidebarOnLeft && (
-      <aside class="hidden xl:block" aria-label={t('blog.tableOfContents', locale)}>
-        <TableOfContents
-          headings={headings}
-          maxDepth={tocConfig?.maxDepth ?? 3}
-          minHeadings={tocConfig?.minHeadings ?? 3}
-          sticky
-        />
-      </aside>
-    )}
+    {
+      sidebarActive && sidebarOnLeft && (
+        <aside class="hidden xl:block" aria-label={t('blog.tableOfContents', locale)}>
+          <TableOfContents
+            headings={headings}
+            maxDepth={tocConfig?.maxDepth ?? 3}
+            minHeadings={tocConfig?.minHeadings ?? 3}
+            sticky
+          />
+        </aside>
+      )
+    }
 
-    <div class:list={['min-w-0 max-w-4xl w-full mx-auto', sidebarActive && 'xl:mx-0']}>
+    <div class:list={['mx-auto w-full max-w-4xl min-w-0', sidebarActive && 'xl:mx-0']}>
       <Breadcrumbs items={breadcrumbs} class="mb-8" />
 
-      {sidebarActive && (
-        <div class="xl:hidden mb-10">
-          <TableOfContents
-            headings={headings}
-            maxDepth={tocConfig?.maxDepth ?? 3}
-            minHeadings={tocConfig?.minHeadings ?? 3}
-            collapsible
-          />
-        </div>
-      )}
-
-      {inlineActive && (
-        <div class="mb-10 rounded-xl border border-border bg-background-secondary p-5">
-          <TableOfContents
-            headings={headings}
-            maxDepth={tocConfig?.maxDepth ?? 3}
-            minHeadings={tocConfig?.minHeadings ?? 3}
-          />
-        </div>
-      )}
-
-      {project.content && (
-        <div class="sm:rounded-xl sm:border sm:border-border sm:bg-card sm:p-8 lg:p-10">
-          <div class="prose prose-lg dark:prose-invert max-w-none">
-            <RichText content={project.content} />
+      {
+        sidebarActive && (
+          <div class="mb-10 xl:hidden">
+            <TableOfContents
+              headings={headings}
+              maxDepth={tocConfig?.maxDepth ?? 3}
+              minHeadings={tocConfig?.minHeadings ?? 3}
+              collapsible
+            />
           </div>
-        </div>
-      )}
+        )
+      }
 
-      {project.gallery && project.gallery.length > 0 && (
-        <div class="grid gap-4 grid-cols-2 md:grid-cols-3 mt-10">
-          {project.gallery.map((img) =>
-            img.image && typeof img.image !== 'number' && img.image.url ? (
-              <div class="overflow-hidden rounded-xl aspect-square">
-                <img
-                  src={payload.resolveMediaUrl(img.image.url)}
-                  alt={img.alt || img.image.alt || ''}
-                  class="w-full h-full object-cover"
-                />
-              </div>
-            ) : null,
-          )}
-        </div>
-      )}
+      {
+        inlineActive && (
+          <div class="border-border bg-background-secondary mb-10 rounded-xl border p-5">
+            <TableOfContents
+              headings={headings}
+              maxDepth={tocConfig?.maxDepth ?? 3}
+              minHeadings={tocConfig?.minHeadings ?? 3}
+            />
+          </div>
+        )
+      }
 
-      <footer class="border-border mt-12 border-t pt-8 flex justify-center">
+      {
+        project.content && (
+          <div class="sm:border-border sm:bg-card sm:rounded-xl sm:border sm:p-8 lg:p-10">
+            <div class="prose prose-lg dark:prose-invert max-w-none">
+              <RichText content={project.content} />
+            </div>
+          </div>
+        )
+      }
+
+      {
+        project.gallery && project.gallery.length > 0 && (
+          <div class="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3">
+            {project.gallery.map((img) =>
+              img.image && typeof img.image !== 'number' && img.image.url ? (
+                <div class="aspect-square overflow-hidden rounded-xl">
+                  <img
+                    src={payload.resolveMediaUrl(img.image.url)}
+                    alt={img.alt || img.image.alt || ''}
+                    class="h-full w-full object-cover"
+                  />
+                </div>
+              ) : null
+            )}
+          </div>
+        )
+      }
+
+      <footer class="border-border mt-12 flex justify-center border-t pt-8">
         <Button href={localizedPath('/projects', locale)} variant="brand-outline" size="sm">
           <Icon name="arrow-left" size="sm" />
           {t('projects.backToProjects', locale)}
@@ -183,42 +205,46 @@ const breadcrumbs = [
       </footer>
     </div>
 
-    {sidebarActive && !sidebarOnLeft && (
-      <aside class="hidden xl:block" aria-label={t('blog.tableOfContents', locale)}>
-        <TableOfContents
-          headings={headings}
-          maxDepth={tocConfig?.maxDepth ?? 3}
-          minHeadings={tocConfig?.minHeadings ?? 3}
-          sticky
-        />
-      </aside>
-    )}
+    {
+      sidebarActive && !sidebarOnLeft && (
+        <aside class="hidden xl:block" aria-label={t('blog.tableOfContents', locale)}>
+          <TableOfContents
+            headings={headings}
+            maxDepth={tocConfig?.maxDepth ?? 3}
+            minHeadings={tocConfig?.minHeadings ?? 3}
+            sticky
+          />
+        </aside>
+      )
+    }
   </div>
 </article>
 
-{related.length > 0 && (
-  <section class="py-[var(--space-section-md)] bg-background-secondary border-t border-border">
-    <div class="mx-auto max-w-6xl px-6">
-      <h2 class="font-display text-2xl font-bold text-foreground mb-8 text-center">
-        {t('projects.moreProjects', locale)}
-      </h2>
-      <div class="grid gap-6 md:grid-cols-3">
-        {related.map((p) => (
-          <a
-            href={localizedPath(`/projects/${p.slug}`, locale)}
-            class="group bg-background rounded-xl border border-border p-6 hover:border-brand-500/40 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
-          >
-            {p.year && <span class="text-xs font-semibold text-foreground-muted">{p.year}</span>}
-            <h3 class="font-display font-bold text-foreground group-hover:text-brand-500 transition-colors mt-1">
-              {p.title}
-            </h3>
-            {p.description && <p class="text-sm text-foreground-muted mt-2">{p.description}</p>}
-          </a>
-        ))}
+{
+  related.length > 0 && (
+    <section class="bg-background-secondary border-border border-t py-[var(--space-section-md)]">
+      <div class="mx-auto max-w-6xl px-6">
+        <h2 class="font-display text-foreground mb-8 text-center text-2xl font-bold">
+          {t('projects.moreProjects', locale)}
+        </h2>
+        <div class="grid gap-6 md:grid-cols-3">
+          {related.map((p) => (
+            <a
+              href={localizedPath(`/projects/${p.slug}`, locale)}
+              class="group bg-background border-border hover:border-brand-500/40 rounded-xl border p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+            >
+              {p.year && <span class="text-foreground-muted text-xs font-semibold">{p.year}</span>}
+              <h3 class="font-display text-foreground group-hover:text-brand-500 mt-1 font-bold transition-colors">
+                {p.title}
+              </h3>
+              {p.description && <p class="text-foreground-muted mt-2 text-sm">{p.description}</p>}
+            </a>
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
-)}
+    </section>
+  )
+}
 
 <CTA variant="default" size="md" maxWidth="lg" glow={false} data-reveal>
   <h2 slot="heading">{t('projects.ctaHeading', locale)}</h2>

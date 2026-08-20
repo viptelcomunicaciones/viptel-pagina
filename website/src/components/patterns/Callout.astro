@@ -24,40 +24,42 @@ interface Props {
 const { variant = 'quote', title, class: className } = Astro.props;
 ---
 
-{variant === 'quote' ? (
-  <figure
-    class:list={[
-      'not-prose my-10 rounded-2xl border-l-4 border-brand-500 bg-background-secondary/60 px-6 py-6 md:px-8 md:py-8 shadow-sm',
-      className,
-    ]}
-  >
-    <svg
-      class="mb-3 h-7 w-7 text-brand-500/80"
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      aria-hidden="true"
+{
+  variant === 'quote' ? (
+    <figure
+      class:list={[
+        'not-prose border-brand-500 bg-background-secondary/60 my-10 rounded-2xl border-l-4 px-6 py-6 shadow-sm md:px-8 md:py-8',
+        className,
+      ]}
     >
-      <path d="M7.17 6A5.17 5.17 0 0 0 2 11.17V18h6v-6.83H4.83A2.34 2.34 0 0 1 7.17 8.83V6Zm10 0A5.17 5.17 0 0 0 12 11.17V18h6v-6.83h-3.17a2.34 2.34 0 0 1 2.34-2.34V6Z" />
-    </svg>
-    <blockquote class="font-display text-xl md:text-2xl font-semibold leading-snug text-foreground text-balance">
-      <slot />
-    </blockquote>
-  </figure>
-) : (
-  <aside
-    class:list={[
-      'not-prose my-8 rounded-xl border border-brand-200 dark:border-brand-900/60 bg-brand-50/60 dark:bg-brand-900/20 px-5 py-4',
-      className,
-    ]}
-    role="note"
-  >
-    {title && (
-      <p class="font-display text-sm font-semibold text-brand-700 dark:text-brand-300 mb-1">
-        {title}
-      </p>
-    )}
-    <div class="text-sm leading-relaxed text-foreground">
-      <slot />
-    </div>
-  </aside>
-)}
+      <svg
+        class="text-brand-500/80 mb-3 h-7 w-7"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+      >
+        <path d="M7.17 6A5.17 5.17 0 0 0 2 11.17V18h6v-6.83H4.83A2.34 2.34 0 0 1 7.17 8.83V6Zm10 0A5.17 5.17 0 0 0 12 11.17V18h6v-6.83h-3.17a2.34 2.34 0 0 1 2.34-2.34V6Z" />
+      </svg>
+      <blockquote class="font-display text-foreground text-xl leading-snug font-semibold text-balance md:text-2xl">
+        <slot />
+      </blockquote>
+    </figure>
+  ) : (
+    <aside
+      class:list={[
+        'not-prose border-brand-200 dark:border-brand-900/60 bg-brand-50/60 dark:bg-brand-900/20 my-8 rounded-xl border px-5 py-4',
+        className,
+      ]}
+      role="note"
+    >
+      {title && (
+        <p class="font-display text-brand-700 dark:text-brand-300 mb-1 text-sm font-semibold">
+          {title}
+        </p>
+      )}
+      <div class="text-foreground text-sm leading-relaxed">
+        <slot />
+      </div>
+    </aside>
+  )
+}

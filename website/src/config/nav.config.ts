@@ -72,7 +72,10 @@ export interface ResolvedNavItem {
 export const navItems: NavItem[] = [
   { label: 'Inicio', href: '/', order: 0, labelKey: 'nav.items.home' },
   {
-    label: 'Servicios', href: '/services', order: 1, labelKey: 'nav.items.services',
+    label: 'Servicios',
+    href: '/services',
+    order: 1,
+    labelKey: 'nav.items.services',
     children: [
       { label: 'Viptel-PBX', href: '/services/viptel-pbx', order: 0 },
       { label: 'Viptel-VoIP', href: '/services/viptel-voip', order: 1 },
@@ -85,7 +88,13 @@ export const navItems: NavItem[] = [
   { label: 'Blog', href: '/blog', order: 3, labelKey: 'nav.items.blog' },
   { label: 'Nosotros', href: '/about', order: 4, labelKey: 'nav.items.about' },
   { label: 'Contacto', href: '/contact', order: 5, labelKey: 'nav.items.contact' },
-  { label: 'Tienda', href: 'https://tienda.viptelcomunicaciones.com', external: true, order: 6, labelKey: 'nav.items.shop' },
+  {
+    label: 'Tienda',
+    href: 'https://tienda.viptelcomunicaciones.com',
+    external: true,
+    order: 6,
+    labelKey: 'nav.items.shop',
+  },
 ];
 
 export const footerNavItems: NavItem[] = navItems;

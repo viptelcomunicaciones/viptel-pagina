@@ -65,8 +65,8 @@ export function createProfessionalServiceSchema(): WithContext<LocalBusiness> {
           address: {
             '@type': 'PostalAddress',
             addressLocality: siteConfig.address.city,
-    addressRegion: 'Bogotá, D.C.',
-    addressCountry: 'CO',
+            addressRegion: 'Bogotá, D.C.',
+            addressCountry: 'CO',
           },
         }
       : {}),

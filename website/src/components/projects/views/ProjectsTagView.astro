@@ -48,50 +48,61 @@ const countKey = projects.length === 1 ? 'projects.tagCountOne' : 'projects.tagC
 
     <h1
       slot="title"
-      class="!text-4xl sm:!text-5xl md:!text-6xl lg:!text-7xl break-words [overflow-wrap:anywhere]"
-    >#{tag}</h1>
+      class="!text-4xl [overflow-wrap:anywhere] break-words sm:!text-5xl md:!text-6xl lg:!text-7xl"
+    >
+      #{tag}
+    </h1>
 
     <p slot="description">
       {t(countKey, locale, { count: projects.length, tag })}
     </p>
   </Hero>
 
-  <section class="bg-background-secondary py-[var(--space-section-md)] border-t border-border">
-    <div class="mx-auto max-w-6xl px-6 flex flex-col gap-8">
+  <section class="bg-background-secondary border-border border-t py-[var(--space-section-md)]">
+    <div class="mx-auto flex max-w-6xl flex-col gap-8 px-6">
       <div class="flex flex-col items-center gap-4" data-reveal>
         <a
           href={projectsHref}
-          class="group inline-flex items-center gap-2 rounded-lg border border-brand-500/40 bg-transparent px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 hover:border-brand-500/80 hover:bg-brand-500/10 transition-colors"
+          class="group border-brand-500/40 text-brand-700 dark:text-brand-400 hover:border-brand-500/80 hover:bg-brand-500/10 inline-flex items-center gap-2 rounded-lg border bg-transparent px-4 py-2 text-sm font-medium transition-colors"
         >
           <Icon name="arrow-left" size="sm" />
           {t('projects.allProjects', locale)}
         </a>
 
-        {visibleTags.length > 0 && (
-          <ProjectTagList tags={visibleTags} active={tag} locale={locale} class="justify-center" />
-        )}
+        {
+          visibleTags.length > 0 && (
+            <ProjectTagList
+              tags={visibleTags}
+              active={tag}
+              locale={locale}
+              class="justify-center"
+            />
+          )
+        }
       </div>
 
-      {projects.length > 0 ? (
-        <div class="grid gap-6 md:grid-cols-2">
-          {projects.map((project, i) => (
-            <ProjectCard project={project} index={i} locale={locale} />
-          ))}
-        </div>
-      ) : (
-        <div class="py-16 text-center">
-          <div class="bg-background mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-            <Icon name="layers" size="lg" class="text-foreground-muted" />
+      {
+        projects.length > 0 ? (
+          <div class="grid gap-6 md:grid-cols-2">
+            {projects.map((project, i) => (
+              <ProjectCard project={project} index={i} locale={locale} />
+            ))}
           </div>
-          <p class="text-foreground-muted text-lg">{t('projects.tagEmpty', locale)}</p>
-          <div class="mt-6">
-            <Button href={projectsHref} variant="brand-outline" size="sm">
-              <Icon name="arrow-left" size="sm" />
-              {t('projects.tagBackToAll', locale)}
-            </Button>
+        ) : (
+          <div class="py-16 text-center">
+            <div class="bg-background mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+              <Icon name="layers" size="lg" class="text-foreground-muted" />
+            </div>
+            <p class="text-foreground-muted text-lg">{t('projects.tagEmpty', locale)}</p>
+            <div class="mt-6">
+              <Button href={projectsHref} variant="brand-outline" size="sm">
+                <Icon name="arrow-left" size="sm" />
+                {t('projects.tagBackToAll', locale)}
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
     </div>
   </section>
 </PageLayout>

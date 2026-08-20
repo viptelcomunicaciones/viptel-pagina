@@ -2,19 +2,19 @@
 import ProjectsPageView from '@/components/projects/views/ProjectsPageView.astro';
 import { defaultLocale, isValidLocale } from '@/i18n';
 
-export const prerender = false
+export const prerender = false;
 
 // Locale-prefixed paginated projects index (`/<locale>/projects/page/N`, N >= 2).
 // Page 1 lives at `/<locale>/projects`. Rendered on demand.
-const { locale = defaultLocale } = Astro.params
+const { locale = defaultLocale } = Astro.params;
 
 if (!isValidLocale(locale)) {
-  return Astro.redirect('/404')
+  return Astro.redirect('/404');
 }
 
-const page = Number(Astro.params.page)
+const page = Number(Astro.params.page);
 if (!Number.isInteger(page) || page < 2) {
-  return Astro.redirect('/404')
+  return Astro.redirect('/404');
 }
 ---
 

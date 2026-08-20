@@ -54,22 +54,28 @@ const hasBody = Astro.slots.has('default');
   href={href}
   {...attrs}
 >
-  {icon && <Icon name={icon} class="w-10 h-10 text-brand-500" />}
-  {number !== undefined && (
-    <span class="font-display text-3xl font-bold text-brand-500 leading-none">{number}</span>
-  )}
-  {(title || hasBody) && (
-    <div>
-      {title && (
-        <TitleTag class={cn('font-semibold text-foreground', size === 'sm' ? 'text-sm' : 'text-base')}>
-          {title}
-        </TitleTag>
-      )}
-      {hasBody && (
-        <p class={cn('text-sm text-foreground-muted leading-relaxed', title && 'mt-1.5')}>
-          <slot />
-        </p>
-      )}
-    </div>
-  )}
+  {icon && <Icon name={icon} class="text-brand-500 h-10 w-10" />}
+  {
+    number !== undefined && (
+      <span class="font-display text-brand-500 text-3xl leading-none font-bold">{number}</span>
+    )
+  }
+  {
+    (title || hasBody) && (
+      <div>
+        {title && (
+          <TitleTag
+            class={cn('text-foreground font-semibold', size === 'sm' ? 'text-sm' : 'text-base')}
+          >
+            {title}
+          </TitleTag>
+        )}
+        {hasBody && (
+          <p class={cn('text-foreground-muted text-sm leading-relaxed', title && 'mt-1.5')}>
+            <slot />
+          </p>
+        )}
+      </div>
+    )
+  }
 </Element>

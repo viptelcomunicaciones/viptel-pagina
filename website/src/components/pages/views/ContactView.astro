@@ -28,69 +28,114 @@ function extractRichText(richText: any): string {
       .filter((c: any) => c.type === 'paragraph' || c.type === 'heading')
       .map((c: any) => c.children?.map((t: any) => t.text || '').join('') || '')
       .join(' ');
-  } catch { return '' }
+  } catch {
+    return '';
+  }
 }
 
 const heroTitle = extractRichText(contact?.hero?.richText);
 ---
 
-<PageLayout title={t('pages.contact.meta.title', locale)} description={t('pages.contact.meta.description', locale)}>
+<PageLayout
+  title={t('pages.contact.meta.title', locale)}
+  description={t('pages.contact.meta.description', locale)}
+>
   <Hero layout="centered" size="sm" class="isolate" showHeroHalo>
-    <Badge slot="badge" variant="brand" pill><Icon name="mail" size="sm" />{t('pages.contact.hero.badge', locale)}</Badge>
+    <Badge slot="badge" variant="brand" pill
+      ><Icon name="mail" size="sm" />{t('pages.contact.hero.badge', locale)}</Badge
+    >
     <h1 slot="title">
-      {heroTitle || <><span class="text-foreground">{t('pages.contact.hero.titleLead', locale)}</span> <span class="text-brand-500">{t('pages.contact.hero.titleHighlight', locale)}</span></>}
+      {
+        heroTitle || (
+          <>
+            <span class="text-foreground">{t('pages.contact.hero.titleLead', locale)}</span>{' '}
+            <span class="text-brand-500">{t('pages.contact.hero.titleHighlight', locale)}</span>
+          </>
+        )
+      }
     </h1>
     <p slot="description" class="text-balance!">{t('pages.contact.hero.description', locale)}</p>
   </Hero>
 
   <!-- CMS Layout Blocks -->
-  {contact?.layout && contact.layout.length > 0 ? (
-    <BlockRenderer layout={contact.layout as PageBlock[]} locale={locale} />
-  ) : null}
+  {
+    contact?.layout && contact.layout.length > 0 ? (
+      <BlockRenderer layout={contact.layout as PageBlock[]} locale={locale} />
+    ) : null
+  }
 
   <!-- Contact Form + Channels (Astro design, always present) -->
-  <section class="bg-background-secondary py-[var(--space-section-md)] border-t border-border">
-    <div class="mx-auto max-w-6xl px-6 grid gap-10 lg:grid-cols-2">
+  <section class="bg-background-secondary border-border border-t py-[var(--space-section-md)]">
+    <div class="mx-auto grid max-w-6xl gap-10 px-6 lg:grid-cols-2">
       <div>
-        <h2 class="font-display text-2xl font-bold text-foreground mb-6">{t('pages.contact.formTitle', locale)}</h2>
+        <h2 class="font-display text-foreground mb-6 text-2xl font-bold">
+          {t('pages.contact.formTitle', locale)}
+        </h2>
         <Card variant="elevated" padding="lg">
           <ContactForm />
         </Card>
       </div>
       <div class="flex flex-col gap-6">
-        <h2 class="font-display text-2xl font-bold text-foreground">{t('pages.contact.channelsTitle', locale)}</h2>
+        <h2 class="font-display text-foreground text-2xl font-bold">
+          {t('pages.contact.channelsTitle', locale)}
+        </h2>
         <p class="text-foreground-muted">{t('pages.contact.channelsSubtitle', locale)}</p>
         <Card variant="elevated" padding="lg">
           <div class="flex flex-col gap-4">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-500/20 to-brand-500/5 flex items-center justify-center text-brand-500 shrink-0"><Icon name="mail" size="sm" /></div>
-              <div><p class="text-sm font-medium text-foreground">{t('pages.contact.emailLabel', locale)}</p><a href={`mailto:${siteConfig.email}`} class="text-sm text-brand-500 hover:underline">{siteConfig.email}</a></div>
-            </div>
-            <p class="text-xs text-foreground-muted">{t('pages.contact.emailNote', locale)}</p>
-          </div>
-        </Card>
-        {socialLinks.length > 0 && (
-          <Card variant="elevated" padding="lg">
-            <div class="flex flex-col gap-3">
-              <p class="text-sm text-foreground-muted">{t('pages.contact.socialNote', locale)}</p>
-              <div class="flex gap-3">
-                {socialLinks.map((link) => (
-                  <a href={link.href} target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 rounded-lg border border-border px-4 py-2 text-sm text-foreground-muted hover:border-brand-500 hover:text-brand-500 transition-colors">
-                    <Icon name={link.icon} size="sm" />{link.label}
-                  </a>
-                ))}
+              <div
+                class="from-brand-500/20 to-brand-500/5 text-brand-500 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br"
+              >
+                <Icon name="mail" size="sm" />
+              </div>
+              <div>
+                <p class="text-foreground text-sm font-medium">
+                  {t('pages.contact.emailLabel', locale)}
+                </p><a
+                  href={`mailto:${siteConfig.email}`}
+                  class="text-brand-500 text-sm hover:underline">{siteConfig.email}</a>
               </div>
             </div>
-          </Card>
-        )}
-        {siteConfig.address?.city && (
-          <Card variant="elevated" padding="lg">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-brand-500/20 to-brand-500/5 flex items-center justify-center text-brand-500 shrink-0"><Icon name="map-pin" size="sm" /></div>
-              <p class="text-sm text-foreground">{t('pages.contact.basedIn', locale)} {siteConfig.address.city}{siteConfig.address.country ? ', ' + siteConfig.address.country : ''}</p>
-            </div>
-          </Card>
-        )}
+            <p class="text-foreground-muted text-xs">{t('pages.contact.emailNote', locale)}</p>
+          </div>
+        </Card>
+        {
+          socialLinks.length > 0 && (
+            <Card variant="elevated" padding="lg">
+              <div class="flex flex-col gap-3">
+                <p class="text-foreground-muted text-sm">{t('pages.contact.socialNote', locale)}</p>
+                <div class="flex gap-3">
+                  {socialLinks.map((link) => (
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="border-border text-foreground-muted hover:border-brand-500 hover:text-brand-500 flex items-center gap-2 rounded-lg border px-4 py-2 text-sm transition-colors"
+                    >
+                      <Icon name={link.icon} size="sm" />
+                      {link.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          )
+        }
+        {
+          siteConfig.address?.city && (
+            <Card variant="elevated" padding="lg">
+              <div class="flex items-center gap-3">
+                <div class="from-brand-500/20 to-brand-500/5 text-brand-500 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br">
+                  <Icon name="map-pin" size="sm" />
+                </div>
+                <p class="text-foreground text-sm">
+                  {t('pages.contact.basedIn', locale)} {siteConfig.address.city}
+                  {siteConfig.address.country ? ', ' + siteConfig.address.country : ''}
+                </p>
+              </div>
+            </Card>
+          )
+        }
       </div>
     </div>
   </section>

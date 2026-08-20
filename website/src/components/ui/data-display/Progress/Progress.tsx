@@ -1,6 +1,10 @@
 import { type HTMLAttributes, type Ref, type ReactNode } from 'react';
 import { cn } from '@/lib/cn';
-import { progressTrackVariants, progressBarVariants, type ProgressVariants } from './progress.variants';
+import {
+  progressTrackVariants,
+  progressBarVariants,
+  type ProgressVariants,
+} from './progress.variants';
 
 interface ProgressProps extends Omit<HTMLAttributes<HTMLDivElement>, 'ref'> {
   ref?: Ref<HTMLDivElement>;
@@ -12,16 +16,29 @@ interface ProgressProps extends Omit<HTMLAttributes<HTMLDivElement>, 'ref'> {
   children?: ReactNode;
 }
 
-export function Progress({ ref, value, max = 100, variant = 'default', size = 'md', showLabel = false, className, children, ...rest }: ProgressProps) {
+export function Progress({
+  ref,
+  value,
+  max = 100,
+  variant = 'default',
+  size = 'md',
+  showLabel = false,
+  className,
+  children,
+  ...rest
+}: ProgressProps) {
   const isIndeterminate = value === undefined;
-  const percentage = isIndeterminate || max <= 0 ? 0 : Math.min(100, Math.max(0, (value / max) * 100));
+  const percentage =
+    isIndeterminate || max <= 0 ? 0 : Math.min(100, Math.max(0, (value / max) * 100));
 
   return (
     <div ref={ref} className={cn('w-full', className)} {...rest}>
       {showLabel && !isIndeterminate && (
-        <div className="flex justify-between mb-1.5">
+        <div className="mb-1.5 flex justify-between">
           {children}
-          <span className="text-xs font-medium text-foreground-muted">{Math.round(percentage)}%</span>
+          <span className="text-foreground-muted text-xs font-medium">
+            {Math.round(percentage)}%
+          </span>
         </div>
       )}
       <div

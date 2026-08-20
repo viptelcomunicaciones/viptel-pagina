@@ -42,7 +42,7 @@ const selectStyles = cn(
 <div class={cn('space-y-1.5', className)}>
   {
     label && (
-      <label for={selectId} class="text-sm font-medium leading-none">
+      <label for={selectId} class="text-sm leading-none font-medium">
         {label}
       </label>
     )
@@ -56,17 +56,25 @@ const selectStyles = cn(
       aria-describedby={error ? `${selectId}-error` : hint ? `${selectId}-hint` : undefined}
       {...attrs}
     >
-      {placeholder && <option value="" disabled selected>{placeholder}</option>}
-      {options.map((option) => (
-        <option value={option.value} disabled={option.disabled}>
-          {option.label}
-        </option>
-      ))}
+      {
+        placeholder && (
+          <option value="" disabled selected>
+            {placeholder}
+          </option>
+        )
+      }
+      {
+        options.map((option) => (
+          <option value={option.value} disabled={option.disabled}>
+            {option.label}
+          </option>
+        ))
+      }
     </select>
 
     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
       <svg
-        class="h-4 w-4 text-muted-foreground"
+        class="text-muted-foreground h-4 w-4"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
         fill="currentColor"
@@ -75,15 +83,14 @@ const selectStyles = cn(
         <path
           fill-rule="evenodd"
           d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
-          clip-rule="evenodd"
-        />
+          clip-rule="evenodd"></path>
       </svg>
     </div>
   </div>
 
   {
     error && (
-      <p id={`${selectId}-error`} class="text-sm text-destructive">
+      <p id={`${selectId}-error`} class="text-destructive text-sm">
         {error}
       </p>
     )
@@ -91,7 +98,7 @@ const selectStyles = cn(
 
   {
     hint && !error && (
-      <p id={`${selectId}-hint`} class="text-sm text-muted-foreground">
+      <p id={`${selectId}-hint`} class="text-muted-foreground text-sm">
         {hint}
       </p>
     )

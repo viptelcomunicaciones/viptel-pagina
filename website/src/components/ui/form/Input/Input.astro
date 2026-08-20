@@ -15,7 +15,17 @@ interface Props extends HTMLAttributes<'input'> {
   trailingIcon?: string;
 }
 
-const { label, error, hint, size = 'md', leadingIcon, trailingIcon, class: className, id, ...attrs } = Astro.props;
+const {
+  label,
+  error,
+  hint,
+  size = 'md',
+  leadingIcon,
+  trailingIcon,
+  class: className,
+  id,
+  ...attrs
+} = Astro.props;
 
 const inputId = id || generateId('input');
 const config = inputSizeConfig[size];
@@ -40,7 +50,7 @@ import Icon from '../../primitives/Icon/Icon.astro';
 <div class={cn('space-y-1.5', className)}>
   {
     label && (
-      <label for={inputId} class="text-sm font-medium leading-none">
+      <label for={inputId} class="text-sm leading-none font-medium">
         {label}
       </label>
     )
@@ -74,7 +84,7 @@ import Icon from '../../primitives/Icon/Icon.astro';
 
   {
     error && (
-      <p id={`${inputId}-error`} class="text-sm text-destructive">
+      <p id={`${inputId}-error`} class="text-destructive text-sm">
         {error}
       </p>
     )
@@ -82,7 +92,7 @@ import Icon from '../../primitives/Icon/Icon.astro';
 
   {
     hint && !error && (
-      <p id={`${inputId}-hint`} class="text-sm text-muted-foreground">
+      <p id={`${inputId}-hint`} class="text-muted-foreground text-sm">
         {hint}
       </p>
     )

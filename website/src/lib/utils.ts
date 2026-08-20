@@ -45,11 +45,7 @@ export function getReadingTime(content: string): number {
     .replace(/[#>*_~]/g, ' '); // common Markdown markers
 
   const cjkChars = (text.match(CJK_PATTERN) || []).length;
-  const words = text
-    .replace(CJK_PATTERN, ' ')
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean).length;
+  const words = text.replace(CJK_PATTERN, ' ').trim().split(/\s+/).filter(Boolean).length;
 
   const minutes = words / WORDS_PER_MINUTE + cjkChars / CJK_CHARS_PER_MINUTE;
   return Math.max(1, Math.ceil(minutes));
@@ -74,12 +70,12 @@ export function isExternalUrl(url: string): boolean {
  * Matches each URL against known platforms to derive icon name and label.
  */
 const SOCIAL_PLATFORMS = [
-  { key: 'github',    match: /github\.com/i,                  label: 'GitHub',      icon: 'github'    },
-  { key: 'twitter',   match: /x\.com|twitter\.com/i,          label: 'X / Twitter', icon: 'x-twitter' },
-  { key: 'linkedin',  match: /linkedin\.com/i,                label: 'LinkedIn',    icon: 'linkedin'  },
-  { key: 'instagram', match: /instagram\.com/i,               label: 'Instagram',   icon: 'instagram' },
-  { key: 'bluesky',   match: /bsky\.app|bluesky\.social/i,    label: 'Bluesky',     icon: 'bluesky'   },
-  { key: 'youtube',   match: /youtube\.com/i,                 label: 'YouTube',     icon: 'youtube'   },
+  { key: 'github', match: /github\.com/i, label: 'GitHub', icon: 'github' },
+  { key: 'twitter', match: /x\.com|twitter\.com/i, label: 'X / Twitter', icon: 'x-twitter' },
+  { key: 'linkedin', match: /linkedin\.com/i, label: 'LinkedIn', icon: 'linkedin' },
+  { key: 'instagram', match: /instagram\.com/i, label: 'Instagram', icon: 'instagram' },
+  { key: 'bluesky', match: /bsky\.app|bluesky\.social/i, label: 'Bluesky', icon: 'bluesky' },
+  { key: 'youtube', match: /youtube\.com/i, label: 'YouTube', icon: 'youtube' },
 ] as const;
 
 export interface ResolvedSocialLink {

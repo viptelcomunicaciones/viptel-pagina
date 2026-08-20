@@ -1,28 +1,23 @@
 ---
 import BlogTagView from '@/components/blog/views/BlogTagView.astro';
 import { defaultLocale } from '@/i18n';
-import {
-  collectTags,
-  findTagBySlug,
-  getPublishedPosts,
-  getTagName,
-} from '@/lib/blog';
+import { collectTags, findTagBySlug, getPublishedPosts, getTagName } from '@/lib/blog';
 
-export const prerender = false
+export const prerender = false;
 
 // Default-locale tag archive (`/blog/tag/<slug>`). Resolved on demand.
-const locale = defaultLocale
+const locale = defaultLocale;
 
-const slug = Astro.params.tag ?? ''
-const allPosts = await getPublishedPosts(locale)
-const tags = collectTags(allPosts)
-const tag = findTagBySlug(slug, tags)
+const slug = Astro.params.tag ?? '';
+const allPosts = await getPublishedPosts(locale);
+const tags = collectTags(allPosts);
+const tag = findTagBySlug(slug, tags);
 
 if (!tag) {
-  return Astro.redirect('/404')
+  return Astro.redirect('/404');
 }
 
-const posts = allPosts.filter((p) => (p.tags ?? []).some((t) => getTagName(t) === tag))
+const posts = allPosts.filter((p) => (p.tags ?? []).some((t) => getTagName(t) === tag));
 ---
 
 <BlogTagView locale={locale} tag={tag} posts={posts} />

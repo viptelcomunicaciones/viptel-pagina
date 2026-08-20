@@ -23,42 +23,47 @@ interface Props {
 const { postTypes, activeSlug = '', locale = defaultLocale, class: extraClass } = Astro.props;
 ---
 
-{postTypes.length > 0 && (
-  <ul class:list={['flex flex-wrap items-center justify-center gap-2', extraClass]} aria-label="Browse by post type">
-    <li>
-      <a
-        href={getBlogBaseUrl(locale)}
-        class:list={[
-          'inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors',
-          activeSlug === ''
-            ? 'border-brand-500 bg-brand-500 text-white'
-            : 'border-brand-500/40 bg-transparent text-brand-700 dark:text-brand-400 hover:border-brand-500/80',
-        ]}
-        aria-current={activeSlug === '' ? 'page' : undefined}
-      >
-        {t('blog.allPosts', locale)}
-      </a>
-    </li>
+{
+  postTypes.length > 0 && (
+    <ul
+      class:list={['flex flex-wrap items-center justify-center gap-2', extraClass]}
+      aria-label="Browse by post type"
+    >
+      <li>
+        <a
+          href={getBlogBaseUrl(locale)}
+          class:list={[
+            'inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+            activeSlug === ''
+              ? 'border-brand-500 bg-brand-500 text-white'
+              : 'border-brand-500/40 text-brand-700 dark:text-brand-400 hover:border-brand-500/80 bg-transparent',
+          ]}
+          aria-current={activeSlug === '' ? 'page' : undefined}
+        >
+          {t('blog.allPosts', locale)}
+        </a>
+      </li>
 
-    {postTypes.map((type) => {
-      const isActive = activeSlug === type.slug;
-      return (
-        <li>
-          <a
-            href={getPostTypeUrl(type.slug, locale)}
-            class:list={[
-              'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors',
-              isActive
-                ? 'border-brand-500 bg-brand-500 text-white'
-                : 'border-brand-500/40 bg-transparent text-brand-700 dark:text-brand-400 hover:border-brand-500/80',
-            ]}
-            aria-current={isActive ? 'page' : undefined}
-          >
-            <Icon name={type.icon || 'file-text'} size="xs" />
-            {type.title}
-          </a>
-        </li>
-      );
-    })}
-  </ul>
-)}
+      {postTypes.map((type) => {
+        const isActive = activeSlug === type.slug;
+        return (
+          <li>
+            <a
+              href={getPostTypeUrl(type.slug, locale)}
+              class:list={[
+                'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+                isActive
+                  ? 'border-brand-500 bg-brand-500 text-white'
+                  : 'border-brand-500/40 text-brand-700 dark:text-brand-400 hover:border-brand-500/80 bg-transparent',
+              ]}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              <Icon name={type.icon || 'file-text'} size="xs" />
+              {type.title}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  )
+}

@@ -36,13 +36,19 @@ export const GET: APIRoute = async ({ site }) => {
 
   const postLines = [...posts]
     .sort((a, b) => new Date(b.publishedAt ?? 0).getTime() - new Date(a.publishedAt ?? 0).getTime())
-    .map((post) => line(post.title, `${base}${getPostUrl(post, defaultLocale)}`, post.excerpt || ""))
+    .map((post) =>
+      line(post.title, `${base}${getPostUrl(post, defaultLocale)}`, post.excerpt || '')
+    )
     .join('\n');
 
   const projectLines = [...projects]
-    .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""))
+    .sort((a, b) => (b.publishedAt ?? '').localeCompare(a.publishedAt ?? ''))
     .map((project) =>
-      line(project.title, `${base}${getProjectUrl(project, defaultLocale)}`, project.description || "")
+      line(
+        project.title,
+        `${base}${getProjectUrl(project, defaultLocale)}`,
+        project.description || ''
+      )
     )
     .join('\n');
 

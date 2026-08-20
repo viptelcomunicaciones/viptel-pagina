@@ -1,38 +1,60 @@
 ---
-import RichText from './RichText.astro'
-import { payload } from '@/lib/payload-client'
-import type { MediaContentBlock as MediaContentBlockType } from '@/lib/block-types'
+import RichText from './RichText.astro';
+import { payload } from '@/lib/payload-client';
+import type { MediaContentBlock as MediaContentBlockType } from '@/lib/block-types';
 
 interface Props {
-  block: MediaContentBlockType
-  locale?: string
+  block: MediaContentBlockType;
+  locale?: string;
 }
 
-const { block } = Astro.props
-const isLeft = block.imagePosition === 'left'
-const image = typeof block.image === 'object' && block.image !== null ? block.image : undefined
-const mediaUrl = image?.url
+const { block } = Astro.props;
+const isLeft = block.imagePosition === 'left';
+const image = typeof block.image === 'object' && block.image !== null ? block.image : undefined;
+const mediaUrl = image?.url;
 ---
 
-<section class="relative z-10 py-[var(--space-section-md)] bg-background-secondary border-t border-border">
+<section
+  class="bg-background-secondary border-border relative z-10 border-t py-[var(--space-section-md)]"
+>
   <div class="mx-auto max-w-6xl px-6">
     <div class={`grid gap-10 md:grid-cols-2 md:gap-12 items-center`}>
-      {isLeft && mediaUrl && (
-        <div data-reveal>
-          <img src={payload.resolveMediaUrl(mediaUrl)} alt={image?.alt || ''} class="w-full h-auto rounded-xl shadow-lg" />
-        </div>
-      )}
+      {
+        isLeft && mediaUrl && (
+          <div data-reveal>
+            <img
+              src={payload.resolveMediaUrl(mediaUrl)}
+              alt={image?.alt || ''}
+              class="h-auto w-full rounded-xl shadow-lg"
+            />
+          </div>
+        )
+      }
       <div data-reveal data-reveal-delay={isLeft ? '1' : '0'}>
-        {block.heading && (
-          <h2 class="font-display text-3xl md:text-4xl font-bold text-foreground mb-6">{block.heading}</h2>
-        )}
-        {block.body && <RichText content={block.body} class="text-lg text-foreground-muted leading-relaxed" />}
+        {
+          block.heading && (
+            <h2 class="font-display text-foreground mb-6 text-3xl font-bold md:text-4xl">
+              {block.heading}
+            </h2>
+          )
+        }
+        {
+          block.body && (
+            <RichText content={block.body} class="text-foreground-muted text-lg leading-relaxed" />
+          )
+        }
       </div>
-      {!isLeft && mediaUrl && (
-        <div data-reveal data-reveal-delay="1">
-          <img src={payload.resolveMediaUrl(mediaUrl)} alt={image?.alt || ''} class="w-full h-auto rounded-xl shadow-lg" />
-        </div>
-      )}
+      {
+        !isLeft && mediaUrl && (
+          <div data-reveal data-reveal-delay="1">
+            <img
+              src={payload.resolveMediaUrl(mediaUrl)}
+              alt={image?.alt || ''}
+              class="h-auto w-full rounded-xl shadow-lg"
+            />
+          </div>
+        )
+      }
     </div>
   </div>
 </section>

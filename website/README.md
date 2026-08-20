@@ -23,7 +23,6 @@
   <em>Perfect Lighthouse scores.</em>
 </p>
 
-
 ---
 
 ## Overview
@@ -40,32 +39,32 @@ Built on Astro 7 and Tailwind CSS v4.
 
 ## What Astro Rocket has to offer
 
-| Feature | Description |
-|---------|-------------|
-| **Astro 7** | Latest version with the Rust compiler, Vite 8, Content Layer API, and performance optimizations |
-| **Tailwind CSS v4** | CSS-first configuration with OKLCH color system and fluid typography |
-| **12 Colour Themes** | All 12 colour swatches are shown in the header dropdown — click one and the logo badge, blog image gradients, and every brand color update live instantly. No file edits, no rebuilds. The selector can be removed from the header once you've settled on a color. |
-| **Scroll Progress Bar** | A thin 2px brand-coloured bar on the header edge that fills as you scroll. Enabled on the homepage (above the floating header), blog index, and post pages (below the solid header). Controlled via `showScrollProgress` and `scrollProgressPosition` props on the Header component. |
-| **Design Tokens** | Three-tier token architecture (reference → semantic → component) |
-| **57 Components** | 33 UI, 7 patterns, 1 hero, 4 layout, 4 blog, 7 landing, 3 SEO — all accessible with TypeScript |
-| **Auto Logo & Favicon** | First letter of your site name on brand color — generated automatically from `site.config.ts`, no design tools needed. Prefer your own logo? Set `branding.logo.image` to a file in `public/`. |
-| **Icon System** | Unified `Icon` component (Astro + React) — 350+ [Lucide](https://lucide.dev) UI icons and 3000+ [Simple Icons](https://simpleicons.org) brand icons via Iconify |
-| **Typing Effect** | Animated typing effect in the hero section |
-| **Page Animations** | Smooth page transitions via Astro View Transitions, scroll-triggered counter and score animations, scroll-reactive header, card hover effects, and a full suite of UI micro-animations — all with reduced-motion support |
-| **SEO Toolkit** | Meta tags, JSON-LD structured data, sitemap, and robots.txt |
-| **Static OG Image** | A polished default Open Graph image serves as social preview for all pages — no build-time generation required |
-| **Colour Mode** | 3-state picker — **System / Light / Dark** with `localStorage` persistence and live OS-preference tracking under 'System'; surfaced as a pill dropdown in the header (and inside the mobile menu) |
-| **Content Collections** | Type-safe blog, pages, authors, and FAQs with Zod validation |
-| **API Routes** | Contact form and newsletter endpoints with validation |
-| **Table of Contents** | Optional table of contents on blog posts, auto-generated from MDX headings, with three layouts: inline card, sticky desktop sidebar, or `auto` (sidebar on `xl+`, inline card below). Includes `IntersectionObserver` scroll-spy. Off by default; per-post `toc: false` in frontmatter hides on a single post |
+| Feature                                      | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Astro 7**                                  | Latest version with the Rust compiler, Vite 8, Content Layer API, and performance optimizations                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **Tailwind CSS v4**                          | CSS-first configuration with OKLCH color system and fluid typography                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **12 Colour Themes**                         | All 12 colour swatches are shown in the header dropdown — click one and the logo badge, blog image gradients, and every brand color update live instantly. No file edits, no rebuilds. The selector can be removed from the header once you've settled on a color.                                                                                                                                                                                                                                                                                                                                                          |
+| **Scroll Progress Bar**                      | A thin 2px brand-coloured bar on the header edge that fills as you scroll. Enabled on the homepage (above the floating header), blog index, and post pages (below the solid header). Controlled via `showScrollProgress` and `scrollProgressPosition` props on the Header component.                                                                                                                                                                                                                                                                                                                                        |
+| **Design Tokens**                            | Three-tier token architecture (reference → semantic → component)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **57 Components**                            | 33 UI, 7 patterns, 1 hero, 4 layout, 4 blog, 7 landing, 3 SEO — all accessible with TypeScript                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **Auto Logo & Favicon**                      | First letter of your site name on brand color — generated automatically from `site.config.ts`, no design tools needed. Prefer your own logo? Set `branding.logo.image` to a file in `public/`.                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **Icon System**                              | Unified `Icon` component (Astro + React) — 350+ [Lucide](https://lucide.dev) UI icons and 3000+ [Simple Icons](https://simpleicons.org) brand icons via Iconify                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **Typing Effect**                            | Animated typing effect in the hero section                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| **Page Animations**                          | Smooth page transitions via Astro View Transitions, scroll-triggered counter and score animations, scroll-reactive header, card hover effects, and a full suite of UI micro-animations — all with reduced-motion support                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **SEO Toolkit**                              | Meta tags, JSON-LD structured data, sitemap, and robots.txt                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **Static OG Image**                          | A polished default Open Graph image serves as social preview for all pages — no build-time generation required                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **Colour Mode**                              | 3-state picker — **System / Light / Dark** with `localStorage` persistence and live OS-preference tracking under 'System'; surfaced as a pill dropdown in the header (and inside the mobile menu)                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| **Content Collections**                      | Type-safe blog, pages, authors, and FAQs with Zod validation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| **API Routes**                               | Contact form and newsletter endpoints with validation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **Table of Contents**                        | Optional table of contents on blog posts, auto-generated from MDX headings, with three layouts: inline card, sticky desktop sidebar, or `auto` (sidebar on `xl+`, inline card below). Includes `IntersectionObserver` scroll-spy. Off by default; per-post `toc: false` in frontmatter hides on a single post                                                                                                                                                                                                                                                                                                               |
 | **Blog Comments (Giscus / Cusdis / Artalk)** | Optional comments at the bottom of blog posts via a pluggable provider — [Giscus](https://giscus.app) (GitHub Discussions), the privacy-friendly [Cusdis](https://cusdis.com) (hosted or self-hosted), or self-hosted [Artalk](https://artalk.js.org) (point `comments.artalk.server` at your own instance — use an `https://` URL in production). Choose with `comments.provider`. **Lazy-loaded** so readers who don't scroll to comments pay zero network cost; reserved `min-height` prevents CLS. Theme and language follow the site. Off by default; per-post `comments: false` in frontmatter hides on a single post |
-| **Durable Internal Links** | Link between posts by a stable canonical id with `<PostLink uid="…">` instead of a slug, so renaming a post never breaks inbound links. Ids resolve to the correct locale-aware URL at build time, and a broken reference **fails the build** rather than shipping a 404. Add an optional `uid` to a post's frontmatter to make it linkable |
-| **Build-Time Content Validation** | The build fails with a clear error if two pieces of content resolve to the same URL within a locale (duplicate slugs across posts, projects, and pages), or if two posts claim the same canonical id — catching silent content mistakes before they ship |
-| **Independent Footer Menu** | Header and footer navigation configured separately in `nav.config.ts` (`navItems`, `footerNavItems`, `legalLinks`) — add a Privacy or Imprint link to the footer without cluttering the main nav |
-| **Static Search (Pagefind)** | Site-wide search in the header — a ⌘K / Ctrl+K modal powered by a [Pagefind](https://pagefind.app) index generated at build time. Zero JS until the modal opens; works on every deploy target. Hide it with `showSearch={false}` on the Header |
-| **Project Galleries** | Multiple images per project: a `gallery` array in frontmatter swaps the hero image for a swipeable carousel, and the `<ProjectGallery>` MDX component renders an in-body carousel with a click-to-zoom lightbox. See [Project Galleries](#project-galleries) |
-| **YouTube Embeds (Click-to-Play)** | `<YouTube id="…" title="…" />` in any MDX post or page renders a lightweight thumbnail facade — **zero YouTube JavaScript and no third-party cookies until the reader presses play**, then the player loads from privacy-friendly `youtube-nocookie.com`. Keeps article pages at Lighthouse 100; self-hosted files just use a native `<video>` tag |
-| **React Islands** | Optional client-side interactivity where needed |
+| **Durable Internal Links**                   | Link between posts by a stable canonical id with `<PostLink uid="…">` instead of a slug, so renaming a post never breaks inbound links. Ids resolve to the correct locale-aware URL at build time, and a broken reference **fails the build** rather than shipping a 404. Add an optional `uid` to a post's frontmatter to make it linkable                                                                                                                                                                                                                                                                                 |
+| **Build-Time Content Validation**            | The build fails with a clear error if two pieces of content resolve to the same URL within a locale (duplicate slugs across posts, projects, and pages), or if two posts claim the same canonical id — catching silent content mistakes before they ship                                                                                                                                                                                                                                                                                                                                                                    |
+| **Independent Footer Menu**                  | Header and footer navigation configured separately in `nav.config.ts` (`navItems`, `footerNavItems`, `legalLinks`) — add a Privacy or Imprint link to the footer without cluttering the main nav                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| **Static Search (Pagefind)**                 | Site-wide search in the header — a ⌘K / Ctrl+K modal powered by a [Pagefind](https://pagefind.app) index generated at build time. Zero JS until the modal opens; works on every deploy target. Hide it with `showSearch={false}` on the Header                                                                                                                                                                                                                                                                                                                                                                              |
+| **Project Galleries**                        | Multiple images per project: a `gallery` array in frontmatter swaps the hero image for a swipeable carousel, and the `<ProjectGallery>` MDX component renders an in-body carousel with a click-to-zoom lightbox. See [Project Galleries](#project-galleries)                                                                                                                                                                                                                                                                                                                                                                |
+| **YouTube Embeds (Click-to-Play)**           | `<YouTube id="…" title="…" />` in any MDX post or page renders a lightweight thumbnail facade — **zero YouTube JavaScript and no third-party cookies until the reader presses play**, then the player loads from privacy-friendly `youtube-nocookie.com`. Keeps article pages at Lighthouse 100; self-hosted files just use a native `<video>` tag                                                                                                                                                                                                                                                                          |
+| **React Islands**                            | Optional client-side interactivity where needed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 ### Internationalization (i18n)
 
@@ -77,9 +76,9 @@ Open `src/config/i18n.config.ts` and flip the flag:
 
 ```ts
 const i18nConfig: I18nConfig = {
-  enabled: true,                     // master switch
-  defaultLocale: 'en',               // stays at the site root (/about)
-  locales: ['en', 'nl'],             // additional locales live at /nl/about
+  enabled: true, // master switch
+  defaultLocale: 'en', // stays at the site root (/about)
+  locales: ['en', 'nl'], // additional locales live at /nl/about
   localeNames: {
     en: 'English',
     nl: 'Nederlands',
@@ -103,9 +102,12 @@ Adding your **own** new page follows the same three-file pattern — a view hold
 ---
 // src/components/pages/views/PricingView.astro — the design; copy comes from the dictionary
 import { t, defaultLocale } from '@/i18n';
-interface Props { locale?: string }
+interface Props {
+  locale?: string;
+}
 const { locale = defaultLocale } = Astro.props;
 ---
+
 <h1>{t('pages.pricing.heading', locale)}</h1>
 ```
 
@@ -115,6 +117,7 @@ const { locale = defaultLocale } = Astro.props;
 import PricingView from '@/components/pages/views/PricingView.astro';
 import { defaultLocale } from '@/i18n';
 ---
+
 <PricingView locale={defaultLocale} />
 ```
 
@@ -128,6 +131,7 @@ export function getStaticPaths() {
 }
 const { locale } = Astro.params;
 ---
+
 <PricingView locale={locale} />
 ```
 
@@ -177,7 +181,7 @@ src/content/projects/nl/studio-portfolio.mdx
 
 > **Switching the default locale.** Changing `defaultLocale` in `i18n.config.ts` is a routing label — it controls which locale serves at the site root, not which content folder gets read. To make a different language the default, also rename the matching content folder (e.g. `src/content/blog/en/` → `src/content/blog/zh-CN/`) so the root URL resolves to the right posts. The locale code in `i18n.config.ts` and the folder name under `src/content/blog/` must match.
 
-> **Localized blog routing is automatic.** Enable a locale in `i18n.config.ts`, drop posts under its folder (e.g. `src/content/blog/nl/`), and the whole blog is served at that locale's prefix with no extra wiring: the index (`/nl/blog`), individual posts (`/nl/blog/<slug>`), pagination (`/nl/blog/page/N`) and tag archives (`/nl/blog/tag/<tag>`) are all generated, and every in-locale link — cards, tag chips, pagination, breadcrumbs, related posts — stays inside that locale. The `defaultLocale` keeps its prefix-free URLs (`/blog`). A locale with no posts yet still gets a `/<locale>/blog` index that shows the empty state, so the `LanguageSwitcher` never lands on a 404. You do **not** create `src/pages/<locale>/blog*` files yourself — remove any you added previously, as they would collide with the generated routes. (The bundled static pages — home, About, Services and Contact — are generated for every locale the same way; you translate their text in `src/i18n/<locale>.json`, as shown in *Pages in another language* above.)
+> **Localized blog routing is automatic.** Enable a locale in `i18n.config.ts`, drop posts under its folder (e.g. `src/content/blog/nl/`), and the whole blog is served at that locale's prefix with no extra wiring: the index (`/nl/blog`), individual posts (`/nl/blog/<slug>`), pagination (`/nl/blog/page/N`) and tag archives (`/nl/blog/tag/<tag>`) are all generated, and every in-locale link — cards, tag chips, pagination, breadcrumbs, related posts — stays inside that locale. The `defaultLocale` keeps its prefix-free URLs (`/blog`). A locale with no posts yet still gets a `/<locale>/blog` index that shows the empty state, so the `LanguageSwitcher` never lands on a 404. You do **not** create `src/pages/<locale>/blog*` files yourself — remove any you added previously, as they would collide with the generated routes. (The bundled static pages — home, About, Services and Contact — are generated for every locale the same way; you translate their text in `src/i18n/<locale>.json`, as shown in _Pages in another language_ above.)
 >
 > On blog posts, the `LanguageSwitcher` and the `hreflang` tags link to each translation's **real** URL — paired by canonical `uid` when the posts declare one (so a translation can live at a different slug, `/blog/hello` ↔ `/nl/blog/hallo`), otherwise by an identical slug. A locale with no translation of the current post is dropped from `hreflang`, and the switcher falls back to that locale's blog index instead of a dead URL. (Other page types resolve alternates by swapping the locale segment, which is correct when slugs match across locales.)
 >
@@ -262,18 +266,18 @@ astro-rocket/
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start development server with hot reload |
-| `pnpm build` | Build for production |
-| `pnpm preview` | Preview production build locally |
-| `pnpm check` | Run Astro type checker |
-| `pnpm lint` | Run ESLint |
-| `pnpm lint:fix` | Fix ESLint issues |
-| `pnpm format` | Format code with Prettier |
-| `pnpm format:check` | Check code formatting |
-| `pnpm test` | Run Vitest tests |
-| `pnpm test:e2e` | Run Playwright E2E tests |
+| Command             | Description                              |
+| ------------------- | ---------------------------------------- |
+| `pnpm dev`          | Start development server with hot reload |
+| `pnpm build`        | Build for production                     |
+| `pnpm preview`      | Preview production build locally         |
+| `pnpm check`        | Run Astro type checker                   |
+| `pnpm lint`         | Run ESLint                               |
+| `pnpm lint:fix`     | Fix ESLint issues                        |
+| `pnpm format`       | Format code with Prettier                |
+| `pnpm format:check` | Check code formatting                    |
+| `pnpm test`         | Run Vitest tests                         |
+| `pnpm test:e2e`     | Run Playwright E2E tests                 |
 
 ---
 
@@ -367,12 +371,12 @@ Edit `src/styles/tokens/primitives.css` and update the `--brand-*` OKLCH values:
 
 ```css
 :root {
-  --brand-50:  oklch(97.5% 0.02 45);  /* lightest tint */
+  --brand-50: oklch(97.5% 0.02 45); /* lightest tint */
   --brand-100: oklch(94.8% 0.04 45);
   --brand-200: oklch(87.5% 0.08 45);
   --brand-300: oklch(77.8% 0.14 45);
   --brand-400: oklch(68.5% 0.19 40);
-  --brand-500: oklch(62.5% 0.22 38);  /* primary brand color */
+  --brand-500: oklch(62.5% 0.22 38); /* primary brand color */
   --brand-600: oklch(53.2% 0.19 38);
   --brand-700: oklch(45.5% 0.16 38);
   --brand-800: oklch(37.2% 0.13 38);
@@ -411,16 +415,16 @@ Astro Rocket ships a 3-state colour-mode system — **System / Light / Dark** �
 
 State contract:
 
-| Storage / DOM | Values | Role |
-|---|---|---|
-| `localStorage.theme` | `'system' \| 'light' \| 'dark'` | The user's saved choice (default `'system'`) |
-| `<html data-theme-mode="…">` | mirrors the saved mode | Drives the trigger icon (monitor / sun / moon) via CSS |
-| `<html>.dark` | present or absent | Resolved appearance — Tailwind dark variant keys off this |
+| Storage / DOM                | Values                          | Role                                                      |
+| ---------------------------- | ------------------------------- | --------------------------------------------------------- |
+| `localStorage.theme`         | `'system' \| 'light' \| 'dark'` | The user's saved choice (default `'system'`)              |
+| `<html data-theme-mode="…">` | mirrors the saved mode          | Drives the trigger icon (monitor / sun / moon) via CSS    |
+| `<html>.dark`                | present or absent               | Resolved appearance — Tailwind dark variant keys off this |
 
 Defaults are seeded directly on the `<html>` element in `src/layouts/BaseLayout.astro` so JS-disabled visitors still see a sensible state:
 
 ```html
-<html lang="en" class="scroll-smooth dark" data-theme="blue" data-theme-mode="system">
+<html lang="en" class="dark scroll-smooth" data-theme="blue" data-theme-mode="system"></html>
 ```
 
 Flash-of-wrong-theme is prevented by an inline `<script>` in `<head>` that runs synchronously before body paint, reads `localStorage.theme`, and reconciles `data-theme-mode` + `.dark`. The same script also re-applies on `astro:before-swap` / `astro:after-swap` to handle view transitions, and subscribes once to the OS-preference media query.
@@ -443,13 +447,13 @@ The full design — bootstrap script, dropdown anatomy, the live "Currently dark
 
 Foreground tokens are documented with their contrast ratios inline. When customizing, maintain these minimums:
 
-| Token | Minimum ratio | Standard |
-|-------|:---:|:---:|
-| `--foreground` | 7:1 | WCAG AAA |
-| `--foreground-secondary` | 7:1 | WCAG AAA |
-| `--foreground-muted` | 4.5:1 | WCAG AA |
-| `--foreground-subtle` | 4.5:1 | WCAG AA |
-| Status `-foreground` tokens | 4.5:1 | WCAG AA (on their `-light` bg) |
+| Token                       | Minimum ratio |            Standard            |
+| --------------------------- | :-----------: | :----------------------------: |
+| `--foreground`              |      7:1      |            WCAG AAA            |
+| `--foreground-secondary`    |      7:1      |            WCAG AAA            |
+| `--foreground-muted`        |     4.5:1     |            WCAG AA             |
+| `--foreground-subtle`       |     4.5:1     |            WCAG AA             |
+| Status `-foreground` tokens |     4.5:1     | WCAG AA (on their `-light` bg) |
 
 ### Using Design Tokens
 
@@ -478,97 +482,97 @@ Astro Rocket includes 57 components across 7 categories. All UI components use [
 
 #### Form (`ui/form/`)
 
-| Component | Description |
-|-----------|-------------|
-| Button | Interactive button with primary, secondary, outline, ghost, destructive variants and loading state |
-| Input | Text input with label, hint, and error states |
-| Textarea | Multi-line text input |
-| Select | Dropdown selection |
-| Checkbox | Boolean toggle with indeterminate state |
-| Radio | Single selection from group |
-| Switch | Toggle switch input |
+| Component | Description                                                                                        |
+| --------- | -------------------------------------------------------------------------------------------------- |
+| Button    | Interactive button with primary, secondary, outline, ghost, destructive variants and loading state |
+| Input     | Text input with label, hint, and error states                                                      |
+| Textarea  | Multi-line text input                                                                              |
+| Select    | Dropdown selection                                                                                 |
+| Checkbox  | Boolean toggle with indeterminate state                                                            |
+| Radio     | Single selection from group                                                                        |
+| Switch    | Toggle switch input                                                                                |
 
 #### Data Display (`ui/data-display/`)
 
-| Component | Description |
-|-----------|-------------|
-| Card | Content container with variant, padding, and hover options |
-| Badge | Status labels and tags with contextual variants |
-| Avatar | User images with fallback |
-| AvatarGroup | Grouped avatar display with overlap |
-| Table | Styled data table |
-| Pagination | Page navigation controls |
-| Progress | Progress bar indicator |
-| Skeleton | Loading placeholders |
+| Component   | Description                                                |
+| ----------- | ---------------------------------------------------------- |
+| Card        | Content container with variant, padding, and hover options |
+| Badge       | Status labels and tags with contextual variants            |
+| Avatar      | User images with fallback                                  |
+| AvatarGroup | Grouped avatar display with overlap                        |
+| Table       | Styled data table                                          |
+| Pagination  | Page navigation controls                                   |
+| Progress    | Progress bar indicator                                     |
+| Skeleton    | Loading placeholders                                       |
 
 #### Feedback (`ui/feedback/`)
 
-| Component | Description |
-|-----------|-------------|
-| Alert | Contextual feedback messages (info, success, warning, error) |
-| Toast | Temporary notification messages |
-| Tooltip | Hover tooltips with positioning |
+| Component | Description                                                  |
+| --------- | ------------------------------------------------------------ |
+| Alert     | Contextual feedback messages (info, success, warning, error) |
+| Toast     | Temporary notification messages                              |
+| Tooltip   | Hover tooltips with positioning                              |
 
 #### Overlay (`ui/overlay/`)
 
-| Component | Description |
-|-----------|-------------|
-| Dialog | Modal overlay |
-| Dropdown | Menu with trigger |
-| Tabs | Horizontal tabbed content panels |
-| VerticalTabs | Vertical tab navigation |
-| Accordion | Collapsible content sections |
+| Component    | Description                      |
+| ------------ | -------------------------------- |
+| Dialog       | Modal overlay                    |
+| Dropdown     | Menu with trigger                |
+| Tabs         | Horizontal tabbed content panels |
+| VerticalTabs | Vertical tab navigation          |
+| Accordion    | Collapsible content sections     |
 
 #### Layout (`ui/layout/`)
 
-| Component | Description |
-|-----------|-------------|
+| Component | Description                     |
+| --------- | ------------------------------- |
 | Separator | Visual divider between sections |
 
 #### Primitives (`ui/primitives/`)
 
-| Component | Description |
-|-----------|-------------|
-| Icon | Unified icon component (Astro + React) powered by Iconify. Supports all [Lucide](https://lucide.dev) icons (`lucide:*`) and all [Simple Icons](https://simpleicons.org) brand icons (`simple-icons:*`). Includes shorthand names for common social and brand icons. Five size variants: `xs`, `sm`, `md`, `lg`, `xl`. |
+| Component | Description                                                                                                                                                                                                                                                                                                           |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Icon      | Unified icon component (Astro + React) powered by Iconify. Supports all [Lucide](https://lucide.dev) icons (`lucide:*`) and all [Simple Icons](https://simpleicons.org) brand icons (`simple-icons:*`). Includes shorthand names for common social and brand icons. Five size variants: `xs`, `sm`, `md`, `lg`, `xl`. |
 
 #### Content (`ui/content/`)
 
-| Component | Description |
-|-----------|-------------|
+| Component | Description                     |
+| --------- | ------------------------------- |
 | CodeBlock | Syntax-highlighted code display |
 
 #### Marketing (`ui/marketing/`)
 
-| Component | Description |
-|-----------|-------------|
-| Logo | Auto-generated monogram badge — renders the first letter of `siteConfig.name` on the active brand color. Five sizes: `sm`, `md`, `lg`, `xl`, `2xl`. No logo file required — or set `branding.logo.image` in `site.config.ts` to use a custom image instead. |
-| CTA | Call-to-action sections with slot-based composition |
-| NpmCopyButton | NPM install command with copy-to-clipboard |
-| SocialProof | Testimonial and trust indicator cards |
-| TerminalDemo | Animated terminal demonstration (React) |
+| Component     | Description                                                                                                                                                                                                                                                 |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Logo          | Auto-generated monogram badge — renders the first letter of `siteConfig.name` on the active brand color. Five sizes: `sm`, `md`, `lg`, `xl`, `2xl`. No logo file required — or set `branding.logo.image` in `site.config.ts` to use a custom image instead. |
+| CTA           | Call-to-action sections with slot-based composition                                                                                                                                                                                                         |
+| NpmCopyButton | NPM install command with copy-to-clipboard                                                                                                                                                                                                                  |
+| SocialProof   | Testimonial and trust indicator cards                                                                                                                                                                                                                       |
+| TerminalDemo  | Animated terminal demonstration (React)                                                                                                                                                                                                                     |
 
 ### Pattern Components (8)
 
-| Component | Description |
-|-----------|-------------|
-| ContactForm | Complete contact form with validation |
-| NewsletterForm | Email subscription form |
-| FormField | Reusable form field wrapper |
-| SearchInput | Search input with icon |
-| PasswordInput | Password input with visibility toggle |
-| StatCard | Statistics display card |
-| EmptyState | Empty state placeholder with icon and action |
-| YouTube | Privacy-friendly click-to-play video embed for MDX posts and pages |
+| Component      | Description                                                        |
+| -------------- | ------------------------------------------------------------------ |
+| ContactForm    | Complete contact form with validation                              |
+| NewsletterForm | Email subscription form                                            |
+| FormField      | Reusable form field wrapper                                        |
+| SearchInput    | Search input with icon                                             |
+| PasswordInput  | Password input with visibility toggle                              |
+| StatCard       | Statistics display card                                            |
+| EmptyState     | Empty state placeholder with icon and action                       |
+| YouTube        | Privacy-friendly click-to-play video embed for MDX posts and pages |
 
 ### Other Categories
 
-| Category | Count | Components |
-|----------|-------|------------|
-| Hero | 1 | Hero section with centered/split layouts, grid pattern, and typing effect |
-| Layout | 6 | Header (with scroll progress bar), Footer, ThemeModeDropdown, ThemeSelector, ThemeSelectorDropdown, Analytics |
-| Blog | 4 | ArticleHero, BlogCard, ShareButtons, RelatedPosts |
-| Landing | 5 | Credibility, LighthouseScores, TechStack, FeatureTabs, and more |
-| SEO | 3 | SEO, JsonLd, Breadcrumbs |
+| Category | Count | Components                                                                                                    |
+| -------- | ----- | ------------------------------------------------------------------------------------------------------------- |
+| Hero     | 1     | Hero section with centered/split layouts, grid pattern, and typing effect                                     |
+| Layout   | 6     | Header (with scroll progress bar), Footer, ThemeModeDropdown, ThemeSelector, ThemeSelectorDropdown, Analytics |
+| Blog     | 4     | ArticleHero, BlogCard, ShareButtons, RelatedPosts                                                             |
+| Landing  | 5     | Credibility, LighthouseScores, TechStack, FeatureTabs, and more                                               |
+| SEO      | 3     | SEO, JsonLd, Breadcrumbs                                                                                      |
 
 ### Usage Example
 
@@ -618,12 +622,12 @@ Create posts in `src/content/blog/[locale]/`:
 
 ```markdown
 ---
-title: "Your Post Title"
-description: "Brief description for SEO"
+title: 'Your Post Title'
+description: 'Brief description for SEO'
 publishedAt: 2026-01-30
-author: "Author Name"
-tags: ["astro", "tutorial"]
-uid: "your-post-id"        # optional — stable id used by <PostLink> for internal links
+author: 'Author Name'
+tags: ['astro', 'tutorial']
+uid: 'your-post-id' # optional — stable id used by <PostLink> for internal links
 locale: en
 ---
 
@@ -640,13 +644,13 @@ Projects live in `src/content/projects/<locale>/` (the bundled ones in `src/cont
 
 ```yaml
 ---
-title: "My Product"
-description: "..."
+title: 'My Product'
+description: '...'
 gallery:
-  - src: "../../assets/projects/shot-1.jpg"
-    alt: "Dashboard view"
-  - src: "../../assets/projects/shot-2.jpg"
-    alt: "Settings page"
+  - src: '../../assets/projects/shot-1.jpg'
+    alt: 'Dashboard view'
+  - src: '../../assets/projects/shot-2.jpg'
+    alt: 'Settings page'
 ---
 ```
 
@@ -671,11 +675,11 @@ import shot2 from '@/assets/projects/shot-2.jpg';
 
 ```yaml
 gallery:
-  - video: "/videos/demo.mp4"
-    poster: "../../assets/projects/demo-poster.jpg"
-    alt: "30-second product demo"
-  - src: "../../assets/projects/shot-1.jpg"
-    alt: "Dashboard view"
+  - video: '/videos/demo.mp4'
+    poster: '../../assets/projects/demo-poster.jpg'
+    alt: '30-second product demo'
+  - src: '../../assets/projects/shot-1.jpg'
+    alt: 'Dashboard view'
 ```
 
 The same shape works in `<ProjectGallery>` (`{ video, poster, alt, caption? }`). Video slides render the poster with `preload="none"`, so **zero video bytes are downloaded until the visitor presses play** — the poster goes through the regular image pipeline and the Lighthouse scores stay intact. Swiping away from a playing video pauses it. YouTube/Vimeo embeds are deliberately not supported: third-party iframes drag in scripts, cookies, and consent requirements that this theme avoids.
@@ -716,10 +720,7 @@ import SEO from '@/components/seo/SEO.astro';
 ---
 
 <head>
-  <SEO
-    title="Page Title"
-    description="Page description"
-  />
+  <SEO title="Page Title" description="Page description" />
 </head>
 ```
 
@@ -872,9 +873,9 @@ The floating header changes its appearance as the user scrolls. When the page is
 
 A thin 2px brand-coloured bar on the header edge that grows from left to right as the user scrolls, showing reading progress at a glance. Enable it with two props on the `<Header>` component:
 
-| Prop | Type | Default | What it does |
-|------|------|:-------:|--------------|
-| `showScrollProgress` | `boolean` | `false` | Renders the progress bar |
+| Prop                     | Type                  |  Default   | What it does                          |
+| ------------------------ | --------------------- | :--------: | ------------------------------------- |
+| `showScrollProgress`     | `boolean`             |  `false`   | Renders the progress bar              |
 | `scrollProgressPosition` | `'top'` \| `'bottom'` | `'bottom'` | Edge of the header where the bar sits |
 
 The bar is enabled by default on three page types: the **homepage** (above the floating header), the **blog index**, and **individual blog posts** (both below the solid bar header). Use `scrollProgressPosition="top"` on a floating capsule header and `'bottom'` on a solid bar header. The bar colour always matches `--color-brand-500` and updates instantly when the visitor switches themes.
@@ -887,21 +888,21 @@ Cards throughout the site lift slightly on hover (`-translate-y-1`) and gain a s
 
 The full animation library is defined in `src/styles/global.css`. These classes are used by components throughout the site:
 
-| Class | What it does |
-|-------|-------------|
-| `animate-fade-in` | Fades an element from transparent to visible (0.5s ease-out) |
-| `animate-slide-up` | Slides an element up from 12px below while fading in (0.5s ease-out) |
-| `animate-slide-down` | Slides an element down from 12px above while fading in (0.5s ease-out) |
-| `animate-dropdown-in` | Slides and scales a dropdown menu into view (0.2s spring) |
-| `animate-dropdown-out` | Collapses a dropdown menu out of view (0.15s) |
-| `animate-sheet-up` | Slides a bottom sheet up from off-screen (0.25s spring) |
-| `animate-menu-down` | Slides the mobile navigation drawer open (0.25s spring) |
-| `animate-tab-enter` | Crossfades tab panel content when switching tabs |
-| `animate-toast-in` | Slides a toast notification in from the right (350ms spring) |
-| `animate-tooltip-in` | Fades and scales a tooltip into view |
-| `animate-pulse` | Breathing pulse for skeleton loading states |
-| `animate-spin` | Continuous rotation for loading spinners |
-| `animate-shake` | Brief shake for error feedback (400ms) |
+| Class                  | What it does                                                           |
+| ---------------------- | ---------------------------------------------------------------------- |
+| `animate-fade-in`      | Fades an element from transparent to visible (0.5s ease-out)           |
+| `animate-slide-up`     | Slides an element up from 12px below while fading in (0.5s ease-out)   |
+| `animate-slide-down`   | Slides an element down from 12px above while fading in (0.5s ease-out) |
+| `animate-dropdown-in`  | Slides and scales a dropdown menu into view (0.2s spring)              |
+| `animate-dropdown-out` | Collapses a dropdown menu out of view (0.15s)                          |
+| `animate-sheet-up`     | Slides a bottom sheet up from off-screen (0.25s spring)                |
+| `animate-menu-down`    | Slides the mobile navigation drawer open (0.25s spring)                |
+| `animate-tab-enter`    | Crossfades tab panel content when switching tabs                       |
+| `animate-toast-in`     | Slides a toast notification in from the right (350ms spring)           |
+| `animate-tooltip-in`   | Fades and scales a tooltip into view                                   |
+| `animate-pulse`        | Breathing pulse for skeleton loading states                            |
+| `animate-spin`         | Continuous rotation for loading spinners                               |
+| `animate-shake`        | Brief shake for error feedback (400ms)                                 |
 
 Animation delay utilities (`.delay-0` through `.delay-5`, in 50ms steps) let you stagger multiple elements into view.
 

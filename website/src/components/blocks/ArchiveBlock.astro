@@ -1,39 +1,40 @@
 ---
-import type { ArchiveBlock as ArchiveBlockType, Post, Project, Service } from '@/lib/payload-types'
-import { payload } from '@/lib/payload-client'
-import { localizedPath, t } from '@/i18n'
-import RichText from './RichText.astro'
-import ServiceCard from '@/components/services/ServiceCard.astro'
-import BlogCard from '@/components/blog/BlogCard.astro'
-import Button from '@/components/ui/form/Button/Button.astro'
-import Icon from '@/components/ui/primitives/Icon/Icon.astro'
-import { getPostUrl, getTagName, getPostTypeName, getPostTypeIcon } from '@/lib/blog'
+import type { ArchiveBlock as ArchiveBlockType, Post, Project, Service } from '@/lib/payload-types';
+import { payload } from '@/lib/payload-client';
+import { localizedPath, t } from '@/i18n';
+import RichText from './RichText.astro';
+import ServiceCard from '@/components/services/ServiceCard.astro';
+import BlogCard from '@/components/blog/BlogCard.astro';
+import Button from '@/components/ui/form/Button/Button.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import { getPostUrl, getTagName, getPostTypeName, getPostTypeIcon } from '@/lib/blog';
 
 interface Props {
-  block: ArchiveBlockType
-  locale?: string
+  block: ArchiveBlockType;
+  locale?: string;
 }
 
-const { block, locale = 'es' } = Astro.props
+const { block, locale = 'es' } = Astro.props;
 
 interface ArchiveCard {
-  slug: string
-  title: string
-  imageUrl?: string
-  imageAlt?: string
-  description?: string
-  publishedAt?: string | null
+  slug: string;
+  title: string;
+  imageUrl?: string;
+  imageAlt?: string;
+  description?: string;
+  publishedAt?: string | null;
 }
 
 function toCard(item: Post | Project): ArchiveCard {
-  const heroImage = 'heroImage' in item ? item.heroImage : undefined
-  const coverImage = 'coverImage' in item ? item.coverImage : undefined
-  const image = typeof heroImage === 'object' && heroImage !== null ? heroImage
-    : typeof coverImage === 'object' && coverImage !== null ? coverImage
-    : undefined
-  const description = 'excerpt' in item
-    ? item.excerpt
-    : (item as Project).description
+  const heroImage = 'heroImage' in item ? item.heroImage : undefined;
+  const coverImage = 'coverImage' in item ? item.coverImage : undefined;
+  const image =
+    typeof heroImage === 'object' && heroImage !== null
+      ? heroImage
+      : typeof coverImage === 'object' && coverImage !== null
+        ? coverImage
+        : undefined;
+  const description = 'excerpt' in item ? item.excerpt : (item as Project).description;
   return {
     slug: item.slug,
     title: item.title,
@@ -41,135 +42,147 @@ function toCard(item: Post | Project): ArchiveCard {
     imageAlt: image?.alt ?? undefined,
     description: description ?? undefined,
     publishedAt: item.publishedAt,
-  }
+  };
 }
 
-const isProjects = block.relationTo === 'projects'
-const isServices = block.relationTo === 'services'
-const isPosts = block.relationTo === 'posts'
+const isProjects = block.relationTo === 'projects';
+const isServices = block.relationTo === 'services';
+const isPosts = block.relationTo === 'posts';
 
-let items: ArchiveCard[] = []
-let postItems: Post[] = []
-let serviceItems: Service[] = []
+let items: ArchiveCard[] = [];
+let postItems: Post[] = [];
+let serviceItems: Service[] = [];
 
 if (isServices) {
-  const all = await payload.services().getAll(locale)
-  let selected = all.filter((s) => s.parent != null)
-  if (block.limit) selected = selected.slice(0, block.limit)
-  serviceItems = selected
+  const all = await payload.services().getAll(locale);
+  let selected = all.filter((s) => s.parent != null);
+  if (block.limit) selected = selected.slice(0, block.limit);
+  serviceItems = selected;
 } else if (block.populateBy === 'selection' && block.selectedDocs?.length) {
-  const selectedIds = new Set(block.selectedDocs.map((d) => (typeof d === 'object' ? (d as any).id : d)))
+  const selectedIds = new Set(
+    block.selectedDocs.map((d) => (typeof d === 'object' ? (d as any).id : d))
+  );
   const [posts, projects, services] = await Promise.all([
     payload.posts().getAll(locale),
     payload.projects().getAll(locale),
     payload.services().getAll(locale),
-  ])
+  ]);
   if (isPosts) {
-    postItems = posts.filter((p) => selectedIds.has(p.id))
+    postItems = posts.filter((p) => selectedIds.has(p.id));
   } else {
-    items = projects.filter((p) => selectedIds.has(p.id)).map(toCard)
+    items = projects.filter((p) => selectedIds.has(p.id)).map(toCard);
   }
-  serviceItems = services.filter((s) => selectedIds.has(s.id))
+  serviceItems = services.filter((s) => selectedIds.has(s.id));
 } else {
-  const all = isProjects ? await payload.projects().getAll(locale) : await payload.posts().getAll(locale)
-  let selected = all
+  const all = isProjects
+    ? await payload.projects().getAll(locale)
+    : await payload.posts().getAll(locale);
+  let selected = all;
   if (block.categories?.length) {
     const selectedCategoryIds = new Set(
-      block.categories.map((c) => (typeof c === 'object' && c ? (c as any).id : c)),
-    )
+      block.categories.map((c) => (typeof c === 'object' && c ? (c as any).id : c))
+    );
     selected = selected.filter((p) => {
-      if (!('categories' in p)) return false
-      const cat = p.categories
-      const catId = typeof cat === 'object' && cat !== null ? (cat as any).id : cat
-      return catId != null && selectedCategoryIds.has(catId)
-    })
+      if (!('categories' in p)) return false;
+      const cat = p.categories;
+      const catId = typeof cat === 'object' && cat !== null ? (cat as any).id : cat;
+      return catId != null && selectedCategoryIds.has(catId);
+    });
   }
-  if (block.limit) selected = selected.slice(0, block.limit)
+  if (block.limit) selected = selected.slice(0, block.limit);
   if (isPosts) {
-    postItems = selected as Post[]
+    postItems = selected as Post[];
   } else {
-    items = selected.map(toCard)
+    items = selected.map(toCard);
   }
 }
 
-const linkPrefix = isServices ? '/services' : isProjects ? '/projects' : '/blog'
+const linkPrefix = isServices ? '/services' : isProjects ? '/projects' : '/blog';
 ---
 
-<section class="py-[var(--space-section-md)] bg-background-secondary border-t border-border">
+<section class="bg-background-secondary border-border border-t py-[var(--space-section-md)]">
   <div class="mx-auto max-w-6xl px-6">
-    {block.introContent && (
-      <div class="text-center mb-12">
-        <RichText content={block.introContent} />
-      </div>
-    )}
-    {serviceItems.length > 0 ? (
-      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {serviceItems.map((service) => (
-          <ServiceCard
-            service={service}
-            href={localizedPath(`/services/${service.slug}`, locale)}
-          />
-        ))}
-      </div>
-    ) : isPosts ? (
-      <div>
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {postItems.map((post, index) => (
-            <BlogCard
-              title={post.title}
-              description={post.excerpt || ''}
-              href={getPostUrl(post, locale)}
-              publishedAt={new Date(post.publishedAt ?? '')}
-              tags={(post.tags ?? []).map((tag) => getTagName(tag))}
-              author={post.populatedAuthors?.[0]?.name || 'Viptel'}
-              imageUrl={post.heroImage && typeof post.heroImage !== 'number' ? payload.resolveMediaUrl(post.heroImage.url ?? '') : undefined}
-              postTypeName={getPostTypeName(post)}
-              postTypeIcon={getPostTypeIcon(post)}
-              revealDelay={index % 3}
-              eager={index === 0}
+    {
+      block.introContent && (
+        <div class="mb-12 text-center">
+          <RichText content={block.introContent} />
+        </div>
+      )
+    }
+    {
+      serviceItems.length > 0 ? (
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {serviceItems.map((service) => (
+            <ServiceCard
+              service={service}
+              href={localizedPath(`/services/${service.slug}`, locale)}
             />
           ))}
         </div>
-        <div class="mt-10 flex justify-center">
-          <Button href={localizedPath('/blog', locale)} variant="brand-outline" size="sm">
-            <Icon name="arrow-right" size="sm" />
-            {t('pages.home.blog.viewAll', locale)}
-          </Button>
-        </div>
-      </div>
-    ) : (
-      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {items.map((item) => (
-          <a
-            href={localizedPath(`${linkPrefix}/${item.slug}`, locale)}
-            class="group bg-background rounded-xl border border-border overflow-hidden hover:border-brand-500/40 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
-          >
-            {item.imageUrl && (
-              <img
-                src={payload.resolveMediaUrl(item.imageUrl)}
-                alt={item.imageAlt || item.title}
-                class="w-full aspect-video object-cover"
+      ) : isPosts ? (
+        <div>
+          <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {postItems.map((post, index) => (
+              <BlogCard
+                title={post.title}
+                description={post.excerpt || ''}
+                href={getPostUrl(post, locale)}
+                publishedAt={new Date(post.publishedAt ?? '')}
+                tags={(post.tags ?? []).map((tag) => getTagName(tag))}
+                author={post.populatedAuthors?.[0]?.name || 'Viptel'}
+                imageUrl={
+                  post.heroImage && typeof post.heroImage !== 'number'
+                    ? payload.resolveMediaUrl(post.heroImage.url ?? '')
+                    : undefined
+                }
+                postTypeName={getPostTypeName(post)}
+                postTypeIcon={getPostTypeIcon(post)}
+                revealDelay={index % 3}
+                eager={index === 0}
               />
-            )}
-            <div class="p-5">
-              <h3 class="font-display font-bold text-foreground group-hover:text-brand-500 transition-colors">
-                {item.title}
-              </h3>
-              {item.description && (
-                <p class="text-sm text-foreground-muted mt-2">{item.description}</p>
+            ))}
+          </div>
+          <div class="mt-10 flex justify-center">
+            <Button href={localizedPath('/blog', locale)} variant="brand-outline" size="sm">
+              <Icon name="arrow-right" size="sm" />
+              {t('pages.home.blog.viewAll', locale)}
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {items.map((item) => (
+            <a
+              href={localizedPath(`${linkPrefix}/${item.slug}`, locale)}
+              class="group bg-background border-border hover:border-brand-500/40 overflow-hidden rounded-xl border transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+            >
+              {item.imageUrl && (
+                <img
+                  src={payload.resolveMediaUrl(item.imageUrl)}
+                  alt={item.imageAlt || item.title}
+                  class="aspect-video w-full object-cover"
+                />
               )}
-              {item.publishedAt && (
-                <time class="text-xs text-foreground-muted mt-3 block">
-                  {new Date(item.publishedAt).toLocaleDateString(
-                    locale === 'en' ? 'en-US' : 'es-CO',
-                    { year: 'numeric', month: 'long', day: 'numeric' },
-                  )}
-                </time>
-              )}
-            </div>
-          </a>
-        ))}
-      </div>
-    )}
+              <div class="p-5">
+                <h3 class="font-display text-foreground group-hover:text-brand-500 font-bold transition-colors">
+                  {item.title}
+                </h3>
+                {item.description && (
+                  <p class="text-foreground-muted mt-2 text-sm">{item.description}</p>
+                )}
+                {item.publishedAt && (
+                  <time class="text-foreground-muted mt-3 block text-xs">
+                    {new Date(item.publishedAt).toLocaleDateString(
+                      locale === 'en' ? 'en-US' : 'es-CO',
+                      { year: 'numeric', month: 'long', day: 'numeric' }
+                    )}
+                  </time>
+                )}
+              </div>
+            </a>
+          ))}
+        </div>
+      )
+    }
   </div>
 </section>

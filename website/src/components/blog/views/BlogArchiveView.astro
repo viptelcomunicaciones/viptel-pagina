@@ -47,7 +47,7 @@ interface Props {
 const { locale = defaultLocale, archive, currentPage = 1 } = Astro.props;
 
 if (archive.kind === 'not-found' || archive.kind === 'post' || !archive.postType) {
-  throw new Error('BlogArchiveView requires a type/category/subcategory archive')
+  throw new Error('BlogArchiveView requires a type/category/subcategory archive');
 }
 
 const { postType, category, subcategory } = archive;
@@ -81,7 +81,10 @@ const countKey = totalDocs === 1 ? 'blog.archiveCountOne' : 'blog.archiveCountOt
         {postType.title}
       </Badge>
 
-      <h1 slot="title" class="!text-4xl sm:!text-5xl md:!text-6xl lg:!text-7xl break-words [overflow-wrap:anywhere]">
+      <h1
+        slot="title"
+        class="!text-4xl [overflow-wrap:anywhere] break-words sm:!text-5xl md:!text-6xl lg:!text-7xl"
+      >
         {heading}
       </h1>
 
@@ -89,72 +92,98 @@ const countKey = totalDocs === 1 ? 'blog.archiveCountOne' : 'blog.archiveCountOt
     </Hero>
   </Fragment>
 
-  <nav aria-label="Breadcrumb" class="flex flex-wrap items-center gap-1.5 text-sm text-foreground-muted">
-    <a href={getBlogBaseUrl(locale)} class="font-medium text-brand-700 dark:text-brand-400 hover:underline">
+  <nav
+    aria-label="Breadcrumb"
+    class="text-foreground-muted flex flex-wrap items-center gap-1.5 text-sm"
+  >
+    <a
+      href={getBlogBaseUrl(locale)}
+      class="text-brand-700 dark:text-brand-400 font-medium hover:underline"
+    >
       {t('blog.title', locale)}
     </a>
     <Icon name="chevron-right" size="xs" class="text-foreground-subtle" />
-    <a href={getPostTypeUrl(postType.slug, locale)} class="font-medium text-brand-700 dark:text-brand-400 hover:underline">
+    <a
+      href={getPostTypeUrl(postType.slug, locale)}
+      class="text-brand-700 dark:text-brand-400 font-medium hover:underline"
+    >
       {postType.title}
     </a>
-    {category && (
-      <>
-        <Icon name="chevron-right" size="xs" class="text-foreground-subtle" />
-        <a href={getCategoryArchiveUrl(postType.slug, category, locale)} class="font-medium text-brand-700 dark:text-brand-400 hover:underline">
-          {category.title}
-        </a>
-      </>
-    )}
-    {subcategory && (
-      <>
-        <Icon name="chevron-right" size="xs" class="text-foreground-subtle" />
-        <span class="font-medium text-foreground" aria-current="page">{subcategory.title}</span>
-      </>
-    )}
+    {
+      category && (
+        <>
+          <Icon name="chevron-right" size="xs" class="text-foreground-subtle" />
+          <a
+            href={getCategoryArchiveUrl(postType.slug, category, locale)}
+            class="text-brand-700 dark:text-brand-400 font-medium hover:underline"
+          >
+            {category.title}
+          </a>
+        </>
+      )
+    }
+    {
+      subcategory && (
+        <>
+          <Icon name="chevron-right" size="xs" class="text-foreground-subtle" />
+          <span class="text-foreground font-medium" aria-current="page">
+            {subcategory.title}
+          </span>
+        </>
+      )
+    }
   </nav>
 
-  {posts.length > 0 ? (
-    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {posts.map((post, index) => (
-        <BlogCard
-          title={post.title}
-          description={post.excerpt || ''}
-          href={getPostUrl(post, locale)}
-          publishedAt={new Date(post.publishedAt ?? '')}
-          tags={(post.tags ?? []).map(tag => getTagName(tag))}
-          author={post.populatedAuthors?.[0]?.name || 'Viptel'}
-          imageUrl={post.heroImage && typeof post.heroImage !== 'number' ? payload.resolveMediaUrl(post.heroImage.url ?? '') : undefined}
-          postTypeName={getPostTypeName(post)}
-          postTypeIcon={getPostTypeIcon(post)}
-          revealDelay={index % 3}
-          eager={index === 0}
-        />
-      ))}
-    </div>
-  ) : (
-    <div class="py-16 text-center">
-      <div class="bg-background mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-        <Icon name="file-text" size="lg" class="text-foreground-muted" />
+  {
+    posts.length > 0 ? (
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {posts.map((post, index) => (
+          <BlogCard
+            title={post.title}
+            description={post.excerpt || ''}
+            href={getPostUrl(post, locale)}
+            publishedAt={new Date(post.publishedAt ?? '')}
+            tags={(post.tags ?? []).map((tag) => getTagName(tag))}
+            author={post.populatedAuthors?.[0]?.name || 'Viptel'}
+            imageUrl={
+              post.heroImage && typeof post.heroImage !== 'number'
+                ? payload.resolveMediaUrl(post.heroImage.url ?? '')
+                : undefined
+            }
+            postTypeName={getPostTypeName(post)}
+            postTypeIcon={getPostTypeIcon(post)}
+            revealDelay={index % 3}
+            eager={index === 0}
+          />
+        ))}
       </div>
-      <p class="text-foreground-muted text-lg">{t('blog.archiveEmpty', locale)}</p>
-      <div class="mt-6">
-        <Button href={getBlogBaseUrl(locale)} variant="brand-outline" size="sm">
-          <Icon name="arrow-left" size="sm" />
-          {t('blog.allPosts', locale)}
-        </Button>
+    ) : (
+      <div class="py-16 text-center">
+        <div class="bg-background mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+          <Icon name="file-text" size="lg" class="text-foreground-muted" />
+        </div>
+        <p class="text-foreground-muted text-lg">{t('blog.archiveEmpty', locale)}</p>
+        <div class="mt-6">
+          <Button href={getBlogBaseUrl(locale)} variant="brand-outline" size="sm">
+            <Icon name="arrow-left" size="sm" />
+            {t('blog.allPosts', locale)}
+          </Button>
+        </div>
       </div>
-    </div>
-  )}
+    )
+  }
 
-  {posts.length > 0 && totalPages > 1 && (
-    <Pagination
-      currentPage={currentPage}
-      totalPages={totalPages}
-      href={(page) => (page <= 1 ? archiveBaseUrl : `${archiveBaseUrl}?page=${page}`)}
-      totalDocs={totalDocs}
-      pageSize={BLOG_POSTS_PER_PAGE}
-    />
-  )}
+  {
+    posts.length > 0 && totalPages > 1 && (
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        href={(page) => (page <= 1 ? archiveBaseUrl : `${archiveBaseUrl}?page=${page}`)}
+        totalDocs={totalDocs}
+        pageSize={BLOG_POSTS_PER_PAGE}
+      />
+    )
+  }
 
   <Fragment slot="footer">
     <CTA variant="default" size="md" maxWidth="lg" glow={false} data-reveal class="glitch:hidden">
@@ -164,64 +193,72 @@ const countKey = totalDocs === 1 ? 'blog.archiveCountOne' : 'blog.archiveCountOt
       <div class="flex flex-wrap items-center justify-center gap-3">
         <a
           href="/rss.xml"
-          class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
+          class="border-brand-500/40 bg-background text-brand-700 dark:text-brand-400 hover:border-brand-500/80 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors"
         >
           <Icon name="rss" size="sm" />
           {t('blog.rssFeed', locale)}
         </a>
-        {socialLinks.map((link) => (
-          <a
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
-          >
-            <Icon name={link.icon} size="sm" />
-            {link.label}
-          </a>
-        ))}
-<a
-            href={`mailto:${siteConfig.email}`}
-            class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
-          >
-            <Icon name="mail" size="sm" />
-            {t('blog.emailLabel', locale)}
-          </a>
-        </div>
-
-        <div class="mx-auto mt-8 w-full max-w-md">
-          <p class="mb-3 text-sm text-foreground-muted">{t('newsletter.description', locale)}</p>
-          <NewsletterForm />
-        </div>
-      </CTA>
-
-    <section class="hidden glitch:block relative z-10 py-[var(--space-section-md)] bg-background">
-      <LetterGlitchBand>
-        <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">{t('blog.followAlong', locale)}</h2>
-        <p class="text-lg text-foreground-muted mb-8 text-balance">{t('blog.followAlongLead', locale)}</p>
-
-        <div class="flex flex-wrap items-center justify-center gap-3">
-          <a
-            href="/rss.xml"
-            class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
-          >
-            <Icon name="rss" size="sm" />
-            {t('blog.rssFeed', locale)}
-          </a>
-          {socialLinks.map((link) => (
+        {
+          socialLinks.map((link) => (
             <a
               href={link.href}
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
+              class="border-brand-500/40 bg-background text-brand-700 dark:text-brand-400 hover:border-brand-500/80 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors"
             >
               <Icon name={link.icon} size="sm" />
               {link.label}
             </a>
-          ))}
+          ))
+        }
+        <a
+          href={`mailto:${siteConfig.email}`}
+          class="border-brand-500/40 bg-background text-brand-700 dark:text-brand-400 hover:border-brand-500/80 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors"
+        >
+          <Icon name="mail" size="sm" />
+          {t('blog.emailLabel', locale)}
+        </a>
+      </div>
+
+      <div class="mx-auto mt-8 w-full max-w-md">
+        <p class="text-foreground-muted mb-3 text-sm">{t('newsletter.description', locale)}</p>
+        <NewsletterForm />
+      </div>
+    </CTA>
+
+    <section class="glitch:block bg-background relative z-10 hidden py-[var(--space-section-md)]">
+      <LetterGlitchBand>
+        <h2 class="font-display text-foreground mb-4 text-4xl font-bold text-balance">
+          {t('blog.followAlong', locale)}
+        </h2>
+        <p class="text-foreground-muted mb-8 text-lg text-balance">
+          {t('blog.followAlongLead', locale)}
+        </p>
+
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <a
+            href="/rss.xml"
+            class="text-foreground hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium transition-colors"
+          >
+            <Icon name="rss" size="sm" />
+            {t('blog.rssFeed', locale)}
+          </a>
+          {
+            socialLinks.map((link) => (
+              <a
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-foreground hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium transition-colors"
+              >
+                <Icon name={link.icon} size="sm" />
+                {link.label}
+              </a>
+            ))
+          }
           <a
             href={`mailto:${siteConfig.email}`}
-            class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
+            class="text-foreground hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium transition-colors"
           >
             <Icon name="mail" size="sm" />
             {t('blog.emailLabel', locale)}

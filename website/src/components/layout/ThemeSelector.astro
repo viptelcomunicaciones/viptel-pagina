@@ -16,7 +16,6 @@ interface Props {
 
 const { class: className } = Astro.props;
 const locale = getLocaleFromPath(Astro.url.pathname);
-
 ---
 
 <div
@@ -24,16 +23,18 @@ const locale = getLocaleFromPath(Astro.url.pathname);
   role="group"
   aria-label={t('theme.selectColourTheme', locale)}
 >
-  {themes.map((theme) => (
-    <button
-      type="button"
-      class="theme-swatch relative h-3.5 w-3.5 rounded-full transition-transform duration-150 focus-visible:outline-none"
-      data-theme-id={theme.id}
-      style={`background-color:${theme.color};--swatch:${theme.color}`}
-      title={theme.name}
-      aria-label={t('theme.swatchLabel', locale, { name: theme.name })}
-    />
-  ))}
+  {
+    themes.map((theme) => (
+      <button
+        type="button"
+        class="theme-swatch relative h-3.5 w-3.5 rounded-full transition-transform duration-150 focus-visible:outline-none"
+        data-theme-id={theme.id}
+        style={`background-color:${theme.color};--swatch:${theme.color}`}
+        title={theme.name}
+        aria-label={t('theme.swatchLabel', locale, { name: theme.name })}
+      />
+    ))
+  }
 </div>
 
 <style>
@@ -85,7 +86,11 @@ const locale = getLocaleFromPath(Astro.url.pathname);
 
   function setTheme(id: string) {
     document.documentElement.setAttribute('data-theme', id);
-    try { sessionStorage.setItem(STORAGE_KEY, id); } catch { /* private mode */ }
+    try {
+      sessionStorage.setItem(STORAGE_KEY, id);
+    } catch {
+      /* private mode */
+    }
 
     // Update every swatch on the page (handles multiple selector instances)
     const swatches = document.querySelectorAll<HTMLButtonElement>('.theme-swatch');

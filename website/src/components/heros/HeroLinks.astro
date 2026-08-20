@@ -4,29 +4,31 @@
  * The surrounding layout (flex row, centering) is provided by the Hero
  * component's `actions` slot, so this only renders the buttons themselves.
  */
-import Button from '@/components/ui/form/Button/Button.astro'
-import { resolveHeroLink } from './hero-helpers'
-import type { HeroLinkItem } from './hero-helpers'
+import Button from '@/components/ui/form/Button/Button.astro';
+import { resolveHeroLink } from './hero-helpers';
+import type { HeroLinkItem } from './hero-helpers';
 
 interface Props {
-  links: HeroLinkItem[]
-  locale?: string
+  links: HeroLinkItem[];
+  locale?: string;
 }
 
-const { links, locale } = Astro.props
+const { links, locale } = Astro.props;
 ---
 
-{links.map((item) => {
-  const { href, label, newTab, appearance } = resolveHeroLink(item, locale)
-  return (
-    <Button
-      size="lg"
-      href={href}
-      variant={appearance === 'outline' ? 'outline' : 'primary'}
-      target={newTab ? '_blank' : undefined}
-      rel={newTab ? 'noopener noreferrer' : undefined}
-    >
-      {label}
-    </Button>
-  )
-})}
+{
+  links.map((item) => {
+    const { href, label, newTab, appearance } = resolveHeroLink(item, locale);
+    return (
+      <Button
+        size="lg"
+        href={href}
+        variant={appearance === 'outline' ? 'outline' : 'primary'}
+        target={newTab ? '_blank' : undefined}
+        rel={newTab ? 'noopener noreferrer' : undefined}
+      >
+        {label}
+      </Button>
+    );
+  })
+}

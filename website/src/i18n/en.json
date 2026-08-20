@@ -76,6 +76,9 @@
     "tagsLabel": "Tags",
     "sidebarTypes": "Content types",
     "sidebarToggle": "Browse categories",
+    "filterTypes": "Browse by content type",
+    "filterCategories": "Browse by category",
+    "filterSubcategories": "Subcategories",
     "featured": "Featured",
     "draft": "Draft",
     "noPostsFound": "No posts found.",
@@ -238,7 +241,12 @@
       "hero": {
         "badge": "About us",
         "titleLead": "Viptel Comunicaciones —",
-        "typingWords": ["Telecommunications", "Web Development", "Digital Marketing", "Digital Transformation"],
+        "typingWords": [
+          "Telecommunications",
+          "Web Development",
+          "Digital Marketing",
+          "Digital Transformation"
+        ],
         "typingWordsMobile": ["Telecommunications", "Web Development", "Digital Marketing"],
         "description": "Comprehensive telecommunications solutions for businesses."
       },
@@ -274,9 +282,21 @@
         "heading": "Built with purpose",
         "lead": "Every decision at Viptel is guided by the same principles.",
         "items": [
-          { "icon": "zap", "title": "Quality First", "description": "Robust and reliable solutions that meet the highest standards." },
-          { "icon": "award", "title": "Experience", "description": "Years of experience in telecommunications and enterprise technology." },
-          { "icon": "rocket", "title": "Constant Innovation", "description": "Always at the forefront of technology and industry trends." }
+          {
+            "icon": "zap",
+            "title": "Quality First",
+            "description": "Robust and reliable solutions that meet the highest standards."
+          },
+          {
+            "icon": "award",
+            "title": "Experience",
+            "description": "Years of experience in telecommunications and enterprise technology."
+          },
+          {
+            "icon": "rocket",
+            "title": "Constant Innovation",
+            "description": "Always at the forefront of technology and industry trends."
+          }
         ]
       },
       "stack": {
@@ -293,17 +313,32 @@
             "icon": "phone",
             "title": "Services",
             "items": [
-              { "question": "What services does Viptel offer?", "answer": "We offer telecommunications solutions (PBX, VoIP), web development, digital marketing, enterprise software and technology consulting." },
-              { "question": "Do you work with companies of all sizes?", "answer": "Yes, from small businesses to large corporations. Each solution is tailored to your specific business needs." },
-              { "question": "Do you offer technical support?", "answer": "Yes, we have specialized technical support to ensure the continuous operation of your services." }
+              {
+                "question": "What services does Viptel offer?",
+                "answer": "We offer telecommunications solutions (PBX, VoIP), web development, digital marketing, enterprise software and technology consulting."
+              },
+              {
+                "question": "Do you work with companies of all sizes?",
+                "answer": "Yes, from small businesses to large corporations. Each solution is tailored to your specific business needs."
+              },
+              {
+                "question": "Do you offer technical support?",
+                "answer": "Yes, we have specialized technical support to ensure the continuous operation of your services."
+              }
             ]
           },
           {
             "icon": "code-2",
             "title": "Projects",
             "items": [
-              { "question": "How long does a project take?", "answer": "It depends on the scope. We will give you a clear timeline before starting." },
-              { "question": "What does web development include?", "answer": "Design, development, hosting, domain and support. Everything needed to get your website running." }
+              {
+                "question": "How long does a project take?",
+                "answer": "It depends on the scope. We will give you a clear timeline before starting."
+              },
+              {
+                "question": "What does web development include?",
+                "answer": "Design, development, hosting, domain and support. Everything needed to get your website running."
+              }
             ]
           }
         ]
@@ -347,10 +382,22 @@
           "We implement modern and reliable communication systems that keep your company connected."
         ],
         "included": [
-          { "lead": "IP Phone Systems", "text": "Virtual and physical PBX for businesses of all sizes." },
-          { "lead": "Enterprise VoIP", "text": "Voice over IP communication with quality and reliability." },
-          { "lead": "Networking", "text": "Structured cabling, WiFi networks and connectivity solutions." },
-          { "lead": "Technical Support", "text": "Maintenance and support to ensure continuous operation." }
+          {
+            "lead": "IP Phone Systems",
+            "text": "Virtual and physical PBX for businesses of all sizes."
+          },
+          {
+            "lead": "Enterprise VoIP",
+            "text": "Voice over IP communication with quality and reliability."
+          },
+          {
+            "lead": "Networking",
+            "text": "Structured cabling, WiFi networks and connectivity solutions."
+          },
+          {
+            "lead": "Technical Support",
+            "text": "Maintenance and support to ensure continuous operation."
+          }
         ],
         "ctaLabel": "Request a quote"
       },
@@ -362,10 +409,16 @@
           "We use modern technologies to ensure performance, security and scalability."
         ],
         "included": [
-          { "lead": "Corporate Websites", "text": "Professional digital presence for your business." },
+          {
+            "lead": "Corporate Websites",
+            "text": "Professional digital presence for your business."
+          },
           { "lead": "Web Applications", "text": "Custom platforms for your business processes." },
           { "lead": "E-commerce", "text": "Online stores integrated with payment systems." },
-          { "lead": "Maintenance & Hosting", "text": "Your site always updated, secure and online." }
+          {
+            "lead": "Maintenance & Hosting",
+            "text": "Your site always updated, secure and online."
+          }
         ],
         "ctaLabel": "View recent projects"
       },
@@ -389,10 +442,22 @@
         "heading": "Our process",
         "lead": "From your first message to final delivery.",
         "steps": [
-          { "title": "Initial contact", "description": "Tell us about your project and we'll give you a free consultation." },
-          { "title": "Proposal", "description": "You receive a clear proposal with scope, timeline and budget." },
-          { "title": "Execution", "description": "We work on your project with partial deliverables and constant communication." },
-          { "title": "Delivery & support", "description": "We implement, train and provide ongoing support." }
+          {
+            "title": "Initial contact",
+            "description": "Tell us about your project and we'll give you a free consultation."
+          },
+          {
+            "title": "Proposal",
+            "description": "You receive a clear proposal with scope, timeline and budget."
+          },
+          {
+            "title": "Execution",
+            "description": "We work on your project with partial deliverables and constant communication."
+          },
+          {
+            "title": "Delivery & support",
+            "description": "We implement, train and provide ongoing support."
+          }
         ]
       },
       "faq": {
@@ -404,17 +469,32 @@
             "icon": "tag",
             "title": "Before starting",
             "items": [
-              { "question": "How much does a project cost?", "answer": "Each project receives a custom budget. We give you a clear quote before starting." },
-              { "question": "How long does it take?", "answer": "It depends on the project scope. We will give you a clear timeline in the proposal." },
-              { "question": "Do you offer warranty?", "answer": "Yes, all our services include warranty and technical support." }
+              {
+                "question": "How much does a project cost?",
+                "answer": "Each project receives a custom budget. We give you a clear quote before starting."
+              },
+              {
+                "question": "How long does it take?",
+                "answer": "It depends on the project scope. We will give you a clear timeline in the proposal."
+              },
+              {
+                "question": "Do you offer warranty?",
+                "answer": "Yes, all our services include warranty and technical support."
+              }
             ]
           },
           {
             "icon": "user",
             "title": "Working with us",
             "items": [
-              { "question": "Do you provide support after delivery?", "answer": "Yes, we offer ongoing support and maintenance plans." },
-              { "question": "Do you work with companies outside Colombia?", "answer": "Yes, we work with clients throughout Latin America." }
+              {
+                "question": "Do you provide support after delivery?",
+                "answer": "Yes, we offer ongoing support and maintenance plans."
+              },
+              {
+                "question": "Do you work with companies outside Colombia?",
+                "answer": "Yes, we work with clients throughout Latin America."
+              }
             ]
           }
         ]
@@ -467,9 +547,21 @@
         "lead": "Everything your business needs in one place.",
         "learnMore": "View services",
         "cards": [
-          { "icon": "phone", "title": "Telecommunications", "description": "PBX, VoIP, networks and enterprise connectivity." },
-          { "icon": "code", "title": "Web Development", "description": "Websites, applications and digital platforms." },
-          { "icon": "trending-up", "title": "Digital Marketing", "description": "SEO, digital advertising and social media." }
+          {
+            "icon": "phone",
+            "title": "Telecommunications",
+            "description": "PBX, VoIP, networks and enterprise connectivity."
+          },
+          {
+            "icon": "code",
+            "title": "Web Development",
+            "description": "Websites, applications and digital platforms."
+          },
+          {
+            "icon": "trending-up",
+            "title": "Digital Marketing",
+            "description": "SEO, digital advertising and social media."
+          }
         ]
       },
       "workWithMe": {
@@ -477,10 +569,26 @@
         "heading": "Transform your business",
         "lead": "What you get when we work together.",
         "cards": [
-          { "icon": "phone", "title": "Unified communications", "description": "Modern communication systems for your business." },
-          { "icon": "zap", "title": "Cutting-edge technology", "description": "Solutions based on the best technologies." },
-          { "icon": "search", "title": "Digital presence", "description": "Your business visible where your customers look." },
-          { "icon": "shield-check", "title": "Continuous support", "description": "Ongoing accompaniment and technical support." }
+          {
+            "icon": "phone",
+            "title": "Unified communications",
+            "description": "Modern communication systems for your business."
+          },
+          {
+            "icon": "zap",
+            "title": "Cutting-edge technology",
+            "description": "Solutions based on the best technologies."
+          },
+          {
+            "icon": "search",
+            "title": "Digital presence",
+            "description": "Your business visible where your customers look."
+          },
+          {
+            "icon": "shield-check",
+            "title": "Continuous support",
+            "description": "Ongoing accompaniment and technical support."
+          }
         ],
         "cta": "View our services"
       },
@@ -495,8 +603,16 @@
         "heading": "What our clients say",
         "lead": "Real words from finished projects.",
         "items": [
-          { "quote": "Viptel transformed our communications. The IP phone system implementation was flawless and the support has been exceptional.", "name": "Carlos Mendoza", "role": "Manager, TechSolutions" },
-          { "quote": "The development of our website exceeded all expectations. Professional, on time, with measurable results.", "name": "María Fernández", "role": "Director, Grupo Nova" }
+          {
+            "quote": "Viptel transformed our communications. The IP phone system implementation was flawless and the support has been exceptional.",
+            "name": "Carlos Mendoza",
+            "role": "Manager, TechSolutions"
+          },
+          {
+            "quote": "The development of our website exceeded all expectations. Professional, on time, with measurable results.",
+            "name": "María Fernández",
+            "role": "Director, Grupo Nova"
+          }
         ]
       },
       "aboutTeaser": {

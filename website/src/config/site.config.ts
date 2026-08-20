@@ -262,9 +262,7 @@ const siteConfig: SiteConfig = {
     zip: '',
     country: 'Colombia',
   },
-  socialLinks: [
-    'https://www.linkedin.com/company/viptel',
-  ],
+  socialLinks: ['https://www.linkedin.com/company/viptel'],
   header: {
     showSocialLinks: false,
   },

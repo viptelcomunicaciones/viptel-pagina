@@ -1,31 +1,28 @@
 ---
-import { payload } from '@/lib/payload-client'
-import type { MediaBlock as MediaBlockType } from '@/lib/payload-types'
-import BlockSection from './BlockSection.astro'
+import { payload } from '@/lib/payload-client';
+import type { MediaBlock as MediaBlockType } from '@/lib/payload-types';
+import BlockSection from './BlockSection.astro';
 
 interface Props {
-  block: MediaBlockType
-  locale?: string
+  block: MediaBlockType;
+  locale?: string;
 }
 
-const { block } = Astro.props
-const url = block.media && typeof block.media !== 'number' && block.media.url
-  ? payload.resolveMediaUrl(block.media.url)
-  : null
-const alt = block.media && typeof block.media !== 'number' && block.media.alt
-  ? block.media.alt
-  : ''
+const { block } = Astro.props;
+const url =
+  block.media && typeof block.media !== 'number' && block.media.url
+    ? payload.resolveMediaUrl(block.media.url)
+    : null;
+const alt =
+  block.media && typeof block.media !== 'number' && block.media.alt ? block.media.alt : '';
 ---
 
-{url && (
-  <BlockSection background="secondary">
-    <div class="mx-auto max-w-6xl px-6">
-      <img
-        src={url}
-        alt={alt}
-        class="w-full rounded-xl shadow-lg"
-        loading="lazy"
-      />
-    </div>
-  </BlockSection>
-)}
+{
+  url && (
+    <BlockSection background="secondary">
+      <div class="mx-auto max-w-6xl px-6">
+        <img src={url} alt={alt} class="w-full rounded-xl shadow-lg" loading="lazy" />
+      </div>
+    </BlockSection>
+  )
+}

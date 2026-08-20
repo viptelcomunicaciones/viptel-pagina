@@ -14,11 +14,9 @@ export const badgeVariants = cva(
           'bg-[var(--success-light)] text-[var(--success-foreground)] border-[var(--success)]/20',
         warning:
           'bg-[var(--warning-light)] text-[var(--warning-foreground)] border-[var(--warning)]/20',
-        error:
-          'bg-[var(--error-light)] text-[var(--error-foreground)] border-[var(--error)]/20',
+        error: 'bg-[var(--error-light)] text-[var(--error-foreground)] border-[var(--error)]/20',
         info: 'bg-[var(--info-light)] text-[var(--info-foreground)] border-[var(--info)]/20',
-        brand:
-          'bg-brand-500/10 text-brand-600 border-brand-500/20 dark:text-brand-400',
+        brand: 'bg-brand-500/10 text-brand-600 border-brand-500/20 dark:text-brand-400',
       },
       size: {
         sm: 'text-[10px] px-2 py-0.5 gap-1',

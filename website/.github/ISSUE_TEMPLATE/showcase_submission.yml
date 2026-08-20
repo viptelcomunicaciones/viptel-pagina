@@ -1,7 +1,7 @@
 name: Showcase submission
 description: Built a site with Astro Rocket? Submit it for the showcase.
-title: "[Showcase] "
-labels: ["showcase"]
+title: '[Showcase] '
+labels: ['showcase']
 body:
   - type: markdown
     attributes:
@@ -39,7 +39,7 @@ body:
     attributes:
       label: How should you be credited?
       description: Your name as it should appear on the card, optionally with a link (personal site, LinkedIn, GitHub…).
-      placeholder: "Jane Doe — https://janedoe.dev"
+      placeholder: 'Jane Doe — https://janedoe.dev'
     validations:
       required: true
   - type: checkboxes

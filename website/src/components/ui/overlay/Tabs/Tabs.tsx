@@ -44,14 +44,7 @@ interface TabsProps {
  *   <div data-tab-content="tab2">Content for tab 2</div>
  * </Tabs>
  */
-export function Tabs({
-  tabs,
-  defaultValue,
-  value,
-  onChange,
-  className,
-  children,
-}: TabsProps) {
+export function Tabs({ tabs, defaultValue, value, onChange, className, children }: TabsProps) {
   const generatedId = useId();
   const isControlled = value !== undefined;
   const [internalValue, setInternalValue] = useState(defaultValue ?? tabs[0]?.id ?? '');
@@ -66,7 +59,7 @@ export function Tabs({
       }
       onChange?.(id);
     },
-    [isControlled, onChange],
+    [isControlled, onChange]
   );
 
   const handleKeyDown = useCallback(
@@ -99,7 +92,7 @@ export function Tabs({
         tabButton?.focus();
       }
     },
-    [tabs, generatedId, handleTabChange],
+    [tabs, generatedId, handleTabChange]
   );
 
   // Process children to add panel attributes and visibility control
@@ -107,8 +100,7 @@ export function Tabs({
     if (!isValidElement(child)) return null;
 
     const tabContentId = (child.props as Record<string, unknown>)?.['data-tab-content'] as
-      | string
-      | undefined;
+      string | undefined;
     if (!tabContentId) return child;
 
     const isActive = tabContentId === activeTabId;
@@ -122,7 +114,7 @@ export function Tabs({
       className: cn(
         (child.props as Record<string, string | undefined>)?.className,
         'outline-none rounded-md',
-        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
       ),
     });
   });
@@ -132,7 +124,7 @@ export function Tabs({
       {/* Tab List */}
       <div
         ref={tablistRef}
-        className="flex border-b border-border"
+        className="border-border flex border-b"
         role="tablist"
         aria-label="Tabs"
       >
@@ -151,11 +143,11 @@ export function Tabs({
               onClick={() => handleTabChange(tab.id)}
               onKeyDown={(e) => handleKeyDown(e, index)}
               className={cn(
-                'px-4 py-2.5 text-sm font-medium -mb-px border-b-2 transition-colors',
-                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                '-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
+                'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
                 isActive
                   ? 'border-foreground text-foreground'
-                  : 'border-transparent text-foreground-muted hover:text-foreground hover:border-border',
+                  : 'text-foreground-muted hover:text-foreground hover:border-border border-transparent'
               )}
             >
               {tab.label}

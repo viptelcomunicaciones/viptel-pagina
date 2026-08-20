@@ -4,18 +4,24 @@
  * If the service is a category (parent=null), shows its children.
  * If it's a sub-service (has parent), shows full detail with breadcrumb.
  */
-import ServiceDetailLayout from '@/components/services/ServiceDetailLayout.astro'
-import type { Service } from '@/lib/payload-types'
+import ServiceDetailLayout from '@/components/services/ServiceDetailLayout.astro';
+import type { Service } from '@/lib/payload-types';
 
 interface Props {
-  service: Service
-  parentService?: Service | null
-  childrenServices?: Service[]
-  hrefPrefix?: string
-  locale?: string
+  service: Service;
+  parentService?: Service | null;
+  childrenServices?: Service[];
+  hrefPrefix?: string;
+  locale?: string;
 }
 
-const { service, parentService, childrenServices = [], hrefPrefix = '/services', locale = 'es' } = Astro.props
+const {
+  service,
+  parentService,
+  childrenServices = [],
+  hrefPrefix = '/services',
+  locale = 'es',
+} = Astro.props;
 ---
 
 <ServiceDetailLayout

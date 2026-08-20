@@ -21,8 +21,8 @@ const {
 ---
 
 <div class="not-prose my-12 space-y-6">
-  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-    <div class="rounded-xl border border-border shadow-xl overflow-hidden">
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div class="border-border overflow-hidden rounded-xl border shadow-xl">
       <img
         src={lightImage.src}
         alt={lightAlt}
@@ -32,10 +32,12 @@ const {
         loading="lazy"
         decoding="async"
       />
-      <p class="text-xs text-foreground-subtle text-center py-2 bg-background-secondary">Light mode</p>
+      <p class="text-foreground-subtle bg-background-secondary py-2 text-center text-xs">
+        Light mode
+      </p>
     </div>
 
-    <div class="rounded-xl border border-border shadow-xl overflow-hidden">
+    <div class="border-border overflow-hidden rounded-xl border shadow-xl">
       <img
         src={darkImage.src}
         alt={darkAlt}
@@ -45,14 +47,17 @@ const {
         loading="lazy"
         decoding="async"
       />
-      <p class="text-xs text-foreground-subtle text-center py-2 bg-background-secondary">Dark mode</p>
+      <p class="text-foreground-subtle bg-background-secondary py-2 text-center text-xs">
+        Dark mode
+      </p>
     </div>
   </div>
 
-  <div class="bg-background-secondary border border-border rounded-xl px-8 py-10 text-center">
-    <p class="font-display text-xl font-bold text-foreground mb-3">See it live</p>
-    <p class="text-foreground-muted mb-6 max-w-md mx-auto">
-      The best way to experience Astro Rocket is to open it. Switch themes, toggle dark mode, read a blog post.
+  <div class="bg-background-secondary border-border rounded-xl border px-8 py-10 text-center">
+    <p class="font-display text-foreground mb-3 text-xl font-bold">See it live</p>
+    <p class="text-foreground-muted mx-auto mb-6 max-w-md">
+      The best way to experience Astro Rocket is to open it. Switch themes, toggle dark mode, read a
+      blog post.
     </p>
     <Button href={demoUrl} target="_blank" rel="noopener noreferrer" size="md">
       <Icon name="external-link" size="sm" />

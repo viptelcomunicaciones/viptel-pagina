@@ -1,206 +1,218 @@
 ---
-import { payload } from '@/lib/payload-client'
-import { slugify } from '@/lib/headings'
+import { payload } from '@/lib/payload-client';
+import { slugify } from '@/lib/headings';
 
 interface Props {
-  content: any
-  class?: string
+  content: any;
+  class?: string;
   /** Skip the first heading node (used by heros where the heading renders in its own slot) */
-  excludeFirstHeading?: boolean
+  excludeFirstHeading?: boolean;
 }
 
-const { content, excludeFirstHeading = false } = Astro.props
+const { content, excludeFirstHeading = false } = Astro.props;
 
 interface RenderCtx {
-  usedSlugs: Set<string>
+  usedSlugs: Set<string>;
 }
 
 function textContent(nodes: any[]): string {
-  if (!Array.isArray(nodes)) return ''
+  if (!Array.isArray(nodes)) return '';
   return nodes
     .map((n) => {
-      if (!n) return ''
-      if (n.type === 'text') return n.text || ''
-      if (Array.isArray(n.children)) return textContent(n.children)
-      return ''
+      if (!n) return '';
+      if (n.type === 'text') return n.text || '';
+      if (Array.isArray(n.children)) return textContent(n.children);
+      return '';
     })
-    .join('')
+    .join('');
 }
 
-const FORMAT_BOLD = 1
-const FORMAT_ITALIC = 2
-const FORMAT_STRIKETHROUGH = 4
-const FORMAT_UNDERLINE = 8
-const FORMAT_CODE = 16
+const FORMAT_BOLD = 1;
+const FORMAT_ITALIC = 2;
+const FORMAT_STRIKETHROUGH = 4;
+const FORMAT_UNDERLINE = 8;
+const FORMAT_CODE = 16;
 
 function escapeHtml(str: string): string {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 function wrapFormat(text: string, format: number): string {
-  let result = text
-  if (format & FORMAT_BOLD) result = `<strong>${result}</strong>`
-  if (format & FORMAT_ITALIC) result = `<em>${result}</em>`
-  if (format & FORMAT_STRIKETHROUGH) result = `<s>${result}</s>`
-  if (format & FORMAT_UNDERLINE) result = `<u>${result}</u>`
-  if (format & FORMAT_CODE) result = `<code>${result}</code>`
-  return result
+  let result = text;
+  if (format & FORMAT_BOLD) result = `<strong>${result}</strong>`;
+  if (format & FORMAT_ITALIC) result = `<em>${result}</em>`;
+  if (format & FORMAT_STRIKETHROUGH) result = `<s>${result}</s>`;
+  if (format & FORMAT_UNDERLINE) result = `<u>${result}</u>`;
+  if (format & FORMAT_CODE) result = `<code>${result}</code>`;
+  return result;
 }
 
 function resolveLinkUrl(fields: any): { href: string; isExternal: boolean } {
-  if (!fields) return { href: '#', isExternal: false }
+  if (!fields) return { href: '#', isExternal: false };
 
-  const linkType = fields.linkType || 'custom'
+  const linkType = fields.linkType || 'custom';
 
   if (linkType === 'custom' || linkType === undefined) {
-    return { href: fields.url || '#', isExternal: Boolean(fields.newTab) }
+    return { href: fields.url || '#', isExternal: Boolean(fields.newTab) };
   }
 
   if (linkType === 'internal' && fields.doc?.value) {
-    const doc = fields.doc.value
-    const relationTo = fields.doc.relationTo || 'posts'
-    const prefix = relationTo === 'projects' ? '/projects' : '/blog'
-    return { href: `${prefix}/${doc.slug}`, isExternal: false }
+    const doc = fields.doc.value;
+    const relationTo = fields.doc.relationTo || 'posts';
+    const prefix = relationTo === 'projects' ? '/projects' : '/blog';
+    return { href: `${prefix}/${doc.slug}`, isExternal: false };
   }
 
-  return { href: fields.url || '#', isExternal: Boolean(fields.newTab) }
+  return { href: fields.url || '#', isExternal: Boolean(fields.newTab) };
 }
 
 function renderChildren(nodes: any[], ctx: RenderCtx): string {
-  if (!nodes || !Array.isArray(nodes)) return ''
-  return nodes.map((n) => renderNode(n, ctx)).join('')
+  if (!nodes || !Array.isArray(nodes)) return '';
+  return nodes.map((n) => renderNode(n, ctx)).join('');
 }
 
 function renderNode(node: any, ctx: RenderCtx): string {
-  if (!node) return ''
+  if (!node) return '';
 
   // Text node — apply Lexical bit-flag formatting
   if (node.type === 'text') {
-    const raw = node.text || ''
-    const escaped = escapeHtml(raw)
-    return wrapFormat(escaped, node.format || 0)
+    const raw = node.text || '';
+    const escaped = escapeHtml(raw);
+    return wrapFormat(escaped, node.format || 0);
   }
 
   // Heading — Lexical uses type=heading + tag property. Emits a stable `id`
   // (same slugify as src/lib/headings.ts) so the blog's "On this page" TOC
   // can link to the headings.
   if (node.type === 'heading') {
-    const tag = node.tag || 'h2'
-    const children = renderChildren(node.children, ctx)
-    const base = slugify(textContent(node.children))
-    let slug = base
-    let i = 2
+    const tag = node.tag || 'h2';
+    const children = renderChildren(node.children, ctx);
+    const base = slugify(textContent(node.children));
+    let slug = base;
+    let i = 2;
     while (ctx.usedSlugs.has(slug)) {
-      slug = `${base}-${i}`
-      i += 1
+      slug = `${base}-${i}`;
+      i += 1;
     }
-    ctx.usedSlugs.add(slug)
-    return `<${tag} id="${slug}">${children}</${tag}>`
+    ctx.usedSlugs.add(slug);
+    return `<${tag} id="${slug}">${children}</${tag}>`;
   }
 
   // Paragraph — Lexical type is 'paragraph' (not 'p')
   if (node.type === 'paragraph') {
-    const children = renderChildren(node.children, ctx)
-    const align = node.format ? ` style="text-align:${node.format}"` : ''
-    if (!children.trim()) return ''
-    return `<p${align}>${children}</p>`
+    const children = renderChildren(node.children, ctx);
+    const align = node.format ? ` style="text-align:${node.format}"` : '';
+    if (!children.trim()) return '';
+    return `<p${align}>${children}</p>`;
   }
 
   // Link — Lexical embeds link in children, fields contain URL info
   if (node.type === 'link' || node.type === 'autolink') {
-    const children = renderChildren(node.children, ctx)
-    const { href, isExternal } = resolveLinkUrl(node.fields)
+    const children = renderChildren(node.children, ctx);
+    const { href, isExternal } = resolveLinkUrl(node.fields);
     const attrs = [
       `href="${href}"`,
       isExternal ? 'target="_blank"' : '',
       isExternal ? 'rel="noopener noreferrer"' : '',
-    ].filter(Boolean).join(' ')
-    return `<a ${attrs}>${children}</a>`
+    ]
+      .filter(Boolean)
+      .join(' ');
+    return `<a ${attrs}>${children}</a>`;
   }
 
   // Lists
   if (node.type === 'list') {
-    const children = renderChildren(node.children, ctx)
-    if (node.listType === 'number') return `<ol>${children}</ol>`
-    return `<ul>${children}</ul>`
+    const children = renderChildren(node.children, ctx);
+    if (node.listType === 'number') return `<ol>${children}</ol>`;
+    return `<ul>${children}</ul>`;
   }
   if (node.type === 'listitem') {
-    const children = renderChildren(node.children, ctx)
-    return `<li>${children}</li>`
+    const children = renderChildren(node.children, ctx);
+    return `<li>${children}</li>`;
   }
 
   // Blockquote
   if (node.type === 'quote') {
-    const children = renderChildren(node.children, ctx)
-    return `<blockquote>${children}</blockquote>`
+    const children = renderChildren(node.children, ctx);
+    return `<blockquote>${children}</blockquote>`;
   }
 
   // Line break
   if (node.type === 'linebreak') {
-    return '<br />'
+    return '<br />';
   }
 
   // Horizontal rule
   if (node.type === 'horizontalrule') {
-    return '<hr />'
+    return '<hr />';
   }
 
   // Image upload
   if (node.type === 'upload' && node.value) {
-    const url = node.value.url ? payload.resolveMediaUrl(node.value.url) : ''
-    const alt = node.value.alt || ''
-    return `<img src="${url}" alt="${alt}" class="rounded-lg max-w-full" />`
+    const url = node.value.url ? payload.resolveMediaUrl(node.value.url) : '';
+    const alt = node.value.alt || '';
+    return `<img src="${url}" alt="${alt}" class="rounded-lg max-w-full" />`;
   }
 
   // Nested Payload blocks (banner, code)
   if (node.type === 'block' && node.fields) {
-    return renderBlock(node.fields, ctx)
+    return renderBlock(node.fields, ctx);
   }
 
   // Root or generic container — recurse children
   if (node.children && Array.isArray(node.children)) {
-    return renderChildren(node.children, ctx)
+    return renderChildren(node.children, ctx);
   }
 
   // Fallback for unknown types
-  return ''
+  return '';
 }
 
 function renderBlock(fields: any, ctx: RenderCtx): string {
   switch (fields.blockType) {
     case 'banner': {
-      const style = fields.style || 'info'
-      const blockContent = fields.content?.root ? renderNode(fields.content.root, ctx) : ''
+      const style = fields.style || 'info';
+      const blockContent = fields.content?.root ? renderNode(fields.content.root, ctx) : '';
       const styles: Record<string, string> = {
         info: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200',
-        warning: 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200',
-        error: 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200',
-        success: 'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200',
-      }
-      return `<div class="rounded-lg border p-4 my-4 ${styles[style] || styles.info}">${blockContent}</div>`
+        warning:
+          'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-200',
+        error:
+          'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 text-red-800 dark:text-red-200',
+        success:
+          'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200',
+      };
+      return `<div class="rounded-lg border p-4 my-4 ${styles[style] || styles.info}">${blockContent}</div>`;
     }
     case 'code': {
-      const lang = fields.language || ''
-      const code = fields.code || ''
-      return `<pre class="rounded-lg bg-gray-900 dark:bg-gray-950 text-gray-100 p-4 my-4 overflow-x-auto text-sm"><code${lang ? ` class="language-${lang}"` : ''}>${escapeHtml(code)}</code></pre>`
+      const lang = fields.language || '';
+      const code = fields.code || '';
+      return `<pre class="rounded-lg bg-gray-900 dark:bg-gray-950 text-gray-100 p-4 my-4 overflow-x-auto text-sm"><code${lang ? ` class="language-${lang}"` : ''}>${escapeHtml(code)}</code></pre>`;
     }
     default:
-      return ''
+      return '';
   }
 }
 
-let rootChildren = content?.root?.children ?? []
+let rootChildren = content?.root?.children ?? [];
 
 if (excludeFirstHeading && Array.isArray(rootChildren)) {
-  const firstHeadingIndex = rootChildren.findIndex((node: any) => node?.type === 'heading')
+  const firstHeadingIndex = rootChildren.findIndex((node: any) => node?.type === 'heading');
   if (firstHeadingIndex > -1) {
-    rootChildren = [...rootChildren.slice(0, firstHeadingIndex), ...rootChildren.slice(firstHeadingIndex + 1)]
+    rootChildren = [
+      ...rootChildren.slice(0, firstHeadingIndex),
+      ...rootChildren.slice(firstHeadingIndex + 1),
+    ];
   }
 }
 
-const ctx: RenderCtx = { usedSlugs: new Set() }
+const ctx: RenderCtx = { usedSlugs: new Set() };
 
-const html = content?.root ? renderNode({ ...content.root, children: rootChildren }, ctx) : ''
+const html = content?.root ? renderNode({ ...content.root, children: rootChildren }, ctx) : '';
 ---
 
 {html ? <div set:html={html} class={Astro.props.class} /> : null}

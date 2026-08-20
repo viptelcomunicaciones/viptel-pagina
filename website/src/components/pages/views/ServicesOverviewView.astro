@@ -3,34 +3,34 @@
  * ServicesOverviewView — the /services listing page.
  * Shows all service categories with their sub-services as cards.
  */
-import PageLayout from '@/layouts/PageLayout.astro'
-import Button from '@/components/ui/form/Button/Button.astro'
-import Badge from '@/components/ui/data-display/Badge/Badge.astro'
-import ServiceCard from '@/components/services/ServiceCard.astro'
-import { t, localizedPath } from '@/i18n'
-import type { Service } from '@/lib/payload-types'
+import PageLayout from '@/layouts/PageLayout.astro';
+import Button from '@/components/ui/form/Button/Button.astro';
+import Badge from '@/components/ui/data-display/Badge/Badge.astro';
+import ServiceCard from '@/components/services/ServiceCard.astro';
+import { t, localizedPath } from '@/i18n';
+import type { Service } from '@/lib/payload-types';
 
 interface Props {
-  categories: Service[]
-  childrenMap: Record<string, Service[]>
-  hrefPrefix?: string
-  locale?: string
+  categories: Service[];
+  childrenMap: Record<string, Service[]>;
+  hrefPrefix?: string;
+  locale?: string;
 }
 
-const { categories, childrenMap, hrefPrefix = '/services', locale = 'es' } = Astro.props
+const { categories, childrenMap, hrefPrefix = '/services', locale = 'es' } = Astro.props;
 ---
 
 <PageLayout
   title={t('services.overview.hero.title', locale)}
   description={t('services.overview.hero.description', locale)}
 >
-  <section class="pb-12 pt-28">
+  <section class="pt-28 pb-12">
     <div class="mx-auto max-w-4xl px-4 text-center">
       <Badge>{t('services.overview.hero.badge', locale)}</Badge>
-      <h1 class="mt-4 text-3xl font-bold text-foreground sm:text-4xl">
+      <h1 class="text-foreground mt-4 text-3xl font-bold sm:text-4xl">
         {t('services.overview.hero.title', locale)}
       </h1>
-      <p class="mt-4 text-lg text-foreground-muted">
+      <p class="text-foreground-muted mt-4 text-lg">
         {t('services.overview.hero.description', locale)}
       </p>
     </div>
@@ -39,36 +39,40 @@ const { categories, childrenMap, hrefPrefix = '/services', locale = 'es' } = Ast
   <section class="py-16">
     <div class="mx-auto max-w-6xl px-4">
       <div class="flex flex-col gap-16">
-        {categories.map((category) => {
-          const subs = childrenMap[category.id] || []
-          return (
-            <div>
-              <div class="mb-6 flex items-center gap-4">
-                <h2 class="text-xl font-bold text-foreground">{category.title}</h2>
-                <span class="text-sm text-foreground-muted">({subs.length} {locale === 'es' ? 'servicios' : 'services'})</span>
+        {
+          categories.map((category) => {
+            const subs = childrenMap[category.id] || [];
+            return (
+              <div>
+                <div class="mb-6 flex items-center gap-4">
+                  <h2 class="text-foreground text-xl font-bold">{category.title}</h2>
+                  <span class="text-foreground-muted text-sm">
+                    ({subs.length} {locale === 'es' ? 'servicios' : 'services'})
+                  </span>
+                </div>
+                {category.shortDescription && (
+                  <p class="text-foreground-muted mb-6">{category.shortDescription}</p>
+                )}
+                <div class="grid gap-4 sm:grid-cols-2">
+                  {subs.map((sub) => (
+                    <ServiceCard
+                      service={sub}
+                      href={`${hrefPrefix}/${category.slug}${sub.slug ? '/' + sub.slug : ''}`}
+                    />
+                  ))}
+                </div>
               </div>
-              {category.shortDescription && (
-                <p class="mb-6 text-foreground-muted">{category.shortDescription}</p>
-              )}
-              <div class="grid gap-4 sm:grid-cols-2">
-                {subs.map((sub) => (
-                  <ServiceCard
-                    service={sub}
-                    href={`${hrefPrefix}/${category.slug}${sub.slug ? '/' + sub.slug : ''}`}
-                  />
-                ))}
-              </div>
-            </div>
-          )
-        })}
+            );
+          })
+        }
       </div>
     </div>
   </section>
 
   <section class="bg-background-secondary py-16">
     <div class="mx-auto max-w-2xl px-4 text-center">
-      <h2 class="text-2xl font-bold text-foreground">{t('services.overview.cta.title', locale)}</h2>
-      <p class="mt-3 text-foreground-muted">{t('services.overview.cta.description', locale)}</p>
+      <h2 class="text-foreground text-2xl font-bold">{t('services.overview.cta.title', locale)}</h2>
+      <p class="text-foreground-muted mt-3">{t('services.overview.cta.description', locale)}</p>
       <div class="mt-6">
         <Button href={localizedPath('/contact', locale)} size="lg">
           {t('services.overview.cta.button', locale)}

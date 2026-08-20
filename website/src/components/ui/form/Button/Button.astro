@@ -6,7 +6,8 @@ import { buttonVariants } from './button.variants';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 
 interface Props extends HTMLAttributes<'button'> {
-  variant?: 'primary' | 'secondary' | 'brand-outline' | 'outline' | 'ghost' | 'link' | 'destructive';
+  variant?:
+    'primary' | 'secondary' | 'brand-outline' | 'outline' | 'ghost' | 'link' | 'destructive';
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;
   fullWidth?: boolean;
@@ -55,9 +56,7 @@ const classes = cn(
   tabindex={isDisabledLink ? '-1' : undefined}
   {...attrs}
 >
-  {
-    loading ? <Icon name="loader" size="sm" class="animate-spin" /> : null
-  }
+  {loading ? <Icon name="loader" size="sm" class="animate-spin" /> : null}
   <slot />
 </Element>
 
@@ -73,16 +72,16 @@ const classes = cn(
   /* The four cooler hues sit below 4.5:1 with white text at brand-600
      (cyan 4.27, emerald 4.40, sky 4.45, teal 4.18), so they keep the
      original brand-700/800 pair to stay WCAG AA. */
-  html:not(.dark)[data-theme="cyan"] .btn-primary,
-  html:not(.dark)[data-theme="emerald"] .btn-primary,
-  html:not(.dark)[data-theme="sky"] .btn-primary,
-  html:not(.dark)[data-theme="teal"] .btn-primary {
+  html:not(.dark)[data-theme='cyan'] .btn-primary,
+  html:not(.dark)[data-theme='emerald'] .btn-primary,
+  html:not(.dark)[data-theme='sky'] .btn-primary,
+  html:not(.dark)[data-theme='teal'] .btn-primary {
     background-color: var(--color-brand-700);
   }
-  html:not(.dark)[data-theme="cyan"] .btn-primary:hover,
-  html:not(.dark)[data-theme="emerald"] .btn-primary:hover,
-  html:not(.dark)[data-theme="sky"] .btn-primary:hover,
-  html:not(.dark)[data-theme="teal"] .btn-primary:hover {
+  html:not(.dark)[data-theme='cyan'] .btn-primary:hover,
+  html:not(.dark)[data-theme='emerald'] .btn-primary:hover,
+  html:not(.dark)[data-theme='sky'] .btn-primary:hover,
+  html:not(.dark)[data-theme='teal'] .btn-primary:hover {
     background-color: var(--color-brand-800);
   }
 

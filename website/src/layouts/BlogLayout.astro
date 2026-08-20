@@ -170,68 +170,78 @@ const translationByLocale = new Map(postTranslations.map((tr) => [tr.locale, tr.
     showCta={false}
     showScrollProgress
     maxWidth="7xl"
-    languageAlternates={{} as Record<string,string>} />
-
-  <div class="min-h-screen pt-16">
-  <!-- Article Hero -->
-  <ArticleHero
-    title={title}
-    description={description}
-    publishedAt={publishedAt}
-    updatedAt={updatedAt}
-    author={author}
-    tags={tags}
-    image={image}
-    imageAlt={imageAlt}
-    svgSlug={svgSlug}
-    body={body}
+    languageAlternates={{} as Record<string, string>}
   />
 
-  <article class="pt-8 pb-[var(--space-section-md)]">
-    <div class:list={[
-      'mx-auto px-6 max-w-7xl',
-      sidebarActive && (sidebarOnLeft
-        ? 'xl:grid xl:grid-cols-[15rem_minmax(0,1fr)] xl:gap-10'
-        : 'xl:grid xl:grid-cols-[minmax(0,1fr)_15rem] xl:gap-10'),
-    ]}>
-      {sidebarActive && sidebarOnLeft && (
-        <aside class="hidden xl:block" aria-label={t('blog.tableOfContents', locale)}>
-          <TableOfContents
-            headings={headings}
-            maxDepth={tocConfig?.maxDepth ?? 3}
-            minHeadings={tocConfig?.minHeadings ?? 3}
-            sticky
-          />
-        </aside>
-      )}
+  <div class="min-h-screen pt-16">
+    <!-- Article Hero -->
+    <ArticleHero
+      title={title}
+      description={description}
+      publishedAt={publishedAt}
+      updatedAt={updatedAt}
+      author={author}
+      tags={tags}
+      image={image}
+      imageAlt={imageAlt}
+      svgSlug={svgSlug}
+      body={body}
+    />
 
-      <div class:list={['min-w-0 max-w-4xl w-full mx-auto', sidebarActive && 'xl:mx-0']}>
-      <!-- Breadcrumbs -->
-      <Breadcrumbs items={breadcrumbs} class="mb-8" />
+    <article class="pt-8 pb-[var(--space-section-md)]">
+      <div
+        class:list={[
+          'mx-auto max-w-7xl px-6',
+          sidebarActive &&
+            (sidebarOnLeft
+              ? 'xl:grid xl:grid-cols-[15rem_minmax(0,1fr)] xl:gap-10'
+              : 'xl:grid xl:grid-cols-[minmax(0,1fr)_15rem] xl:gap-10'),
+        ]}
+      >
+        {
+          sidebarActive && sidebarOnLeft && (
+            <aside class="hidden xl:block" aria-label={t('blog.tableOfContents', locale)}>
+              <TableOfContents
+                headings={headings}
+                maxDepth={tocConfig?.maxDepth ?? 3}
+                minHeadings={tocConfig?.minHeadings ?? 3}
+                sticky
+              />
+            </aside>
+          )
+        }
 
-      {sidebarActive && (
-        <div class="xl:hidden mb-10">
-          <TableOfContents
-            headings={headings}
-            maxDepth={tocConfig?.maxDepth ?? 3}
-            minHeadings={tocConfig?.minHeadings ?? 3}
-            collapsible
-          />
-        </div>
-      )}
+        <div class:list={['mx-auto w-full max-w-4xl min-w-0', sidebarActive && 'xl:mx-0']}>
+          <!-- Breadcrumbs -->
+          <Breadcrumbs items={breadcrumbs} class="mb-8" />
 
-      {inlineActive && (
-        <div class="mb-10 rounded-xl border border-border bg-background-secondary p-5">
-          <TableOfContents
-            headings={headings}
-            maxDepth={tocConfig?.maxDepth ?? 3}
-            minHeadings={tocConfig?.minHeadings ?? 3}
-          />
-        </div>
-      )}
+          {
+            sidebarActive && (
+              <div class="mb-10 xl:hidden">
+                <TableOfContents
+                  headings={headings}
+                  maxDepth={tocConfig?.maxDepth ?? 3}
+                  minHeadings={tocConfig?.minHeadings ?? 3}
+                  collapsible
+                />
+              </div>
+            )
+          }
 
-      <!-- Article Content -->
-      <!--
+          {
+            inlineActive && (
+              <div class="border-border bg-background-secondary mb-10 rounded-xl border p-5">
+                <TableOfContents
+                  headings={headings}
+                  maxDepth={tocConfig?.maxDepth ?? 3}
+                  minHeadings={tocConfig?.minHeadings ?? 3}
+                />
+              </div>
+            )
+          }
+
+          <!-- Article Content -->
+          <!--
         The reading surface is framed like the TOC card beside it: same
         corner radius, same surface. The border stays neutral rather than
         brand-tinted — an accent suits a small card, but reads as
@@ -240,123 +250,139 @@ const translationByLocale = new Map(postTranslations.map((tr) => [tr.locale, tr.
         starts at `sm` so a phone held upright keeps the full screen
         width for the text.
       -->
-      <div class="sm:rounded-xl sm:border sm:border-border sm:bg-card sm:p-8 lg:p-10">
-        <div
-          class="prose prose-lg max-w-none"
-          data-reveal-content
-        >
-          <slot />
+          <div class="sm:border-border sm:bg-card sm:rounded-xl sm:border sm:p-8 lg:p-10">
+            <div class="prose prose-lg max-w-none" data-reveal-content>
+              <slot />
+            </div>
+          </div>
+
+          <!-- Share buttons (centered, above the divider) -->
+          <div class="mt-12 flex justify-center" data-reveal>
+            <ShareButtons title={title} url={fullUrl} />
+          </div>
+
+          <!-- Article Footer -->
+          <footer class="border-border mt-12 flex justify-center border-t pt-8" data-reveal>
+            <Button href={getBlogBaseUrl(locale)} variant="brand-outline" size="sm">
+              <Icon name="arrow-left" size="sm" />
+              {t('blog.backToBlog', locale)}
+            </Button>
+          </footer>
         </div>
+
+        {
+          sidebarActive && !sidebarOnLeft && (
+            <aside class="hidden xl:block" aria-label={t('blog.tableOfContents', locale)}>
+              <TableOfContents
+                headings={headings}
+                maxDepth={tocConfig?.maxDepth ?? 3}
+                minHeadings={tocConfig?.minHeadings ?? 3}
+                sticky
+              />
+            </aside>
+          )
+        }
       </div>
+    </article>
 
-      <!-- Share buttons (centered, above the divider) -->
-      <div class="mt-12 flex justify-center" data-reveal>
-        <ShareButtons title={title} url={fullUrl} />
-      </div>
+    {showComments && <Comments />}
 
-      <!-- Article Footer -->
-      <footer class="border-border mt-12 border-t pt-8 flex justify-center" data-reveal>
-        <Button href={getBlogBaseUrl(locale)} variant="brand-outline" size="sm">
-          <Icon name="arrow-left" size="sm" />
-          {t('blog.backToBlog', locale)}
-        </Button>
-      </footer>
-      </div>
+    <!-- Related Posts -->
+    {
+      tags.length > 0 && (
+        <div class="mx-auto max-w-7xl px-6" data-reveal>
+          <RelatedPosts currentSlug={slug} tags={tags} locale={locale} maxPosts={3} />
+        </div>
+      )
+    }
 
-      {sidebarActive && !sidebarOnLeft && (
-        <aside class="hidden xl:block" aria-label={t('blog.tableOfContents', locale)}>
-          <TableOfContents
-            headings={headings}
-            maxDepth={tocConfig?.maxDepth ?? 3}
-            minHeadings={tocConfig?.minHeadings ?? 3}
-            sticky
-          />
-        </aside>
-      )}
-    </div>
-  </article>
-
-  {showComments && (
-    <Comments />
-  )}
-
-  <!-- Related Posts -->
-  {tags.length > 0 && (
-    <div class="mx-auto max-w-7xl px-6" data-reveal>
-      <RelatedPosts currentSlug={slug} tags={tags} locale={locale} maxPosts={3} />
-    </div>
-  )}
-
-  <!-- Follow Along -->
-  <!-- Mobile: standard CTA, no LetterGlitch -->
-  <CTA variant="default" size="md" maxWidth="lg" glow={false} data-reveal class="glitch:hidden bg-background-secondary">
-    <h2 slot="heading" class="!text-4xl">{t('blog.followAlong', locale)}</h2>
-    <p slot="description" class="!text-lg text-balance">{t('blog.followAlongLead', locale)}</p>
-
-    <div class="flex flex-wrap items-center justify-center gap-3">
-      <a
-        href="/rss.xml"
-        class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
-      >
-        <Icon name="rss" size="sm" />
-        {t('blog.rssFeed', locale)}
-      </a>
-      {socialLinks.map((link) => (
-        <a
-          href={link.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
-        >
-          <Icon name={link.icon} size="sm" />
-          {link.label}
-        </a>
-      ))}
-      <a
-        href={`mailto:${siteConfig.email}`}
-        class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
-      >
-        <Icon name="mail" size="sm" />
-        {t('blog.emailLabel', locale)}
-      </a>
-    </div>
-  </CTA>
-
-  <!-- Desktop: contained LetterGlitch band with glass card -->
-  <section class="hidden glitch:block relative z-10 py-[var(--space-section-md)] bg-background-secondary">
-    <LetterGlitchBand maxWidth="7xl">
-      <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">{t('blog.followAlong', locale)}</h2>
-      <p class="text-lg text-foreground-muted mb-8 text-balance">{t('blog.followAlongLead', locale)}</p>
+    <!-- Follow Along -->
+    <!-- Mobile: standard CTA, no LetterGlitch -->
+    <CTA
+      variant="default"
+      size="md"
+      maxWidth="lg"
+      glow={false}
+      data-reveal
+      class="glitch:hidden bg-background-secondary"
+    >
+      <h2 slot="heading" class="!text-4xl">{t('blog.followAlong', locale)}</h2>
+      <p slot="description" class="!text-lg text-balance">{t('blog.followAlongLead', locale)}</p>
 
       <div class="flex flex-wrap items-center justify-center gap-3">
         <a
           href="/rss.xml"
-          class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
+          class="border-brand-500/40 bg-background text-brand-700 dark:text-brand-400 hover:border-brand-500/80 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors"
         >
           <Icon name="rss" size="sm" />
           {t('blog.rssFeed', locale)}
         </a>
-        {socialLinks.map((link) => (
-          <a
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
-          >
-            <Icon name={link.icon} size="sm" />
-            {link.label}
-          </a>
-        ))}
+        {
+          socialLinks.map((link) => (
+            <a
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="border-brand-500/40 bg-background text-brand-700 dark:text-brand-400 hover:border-brand-500/80 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors"
+            >
+              <Icon name={link.icon} size="sm" />
+              {link.label}
+            </a>
+          ))
+        }
         <a
           href={`mailto:${siteConfig.email}`}
-          class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
+          class="border-brand-500/40 bg-background text-brand-700 dark:text-brand-400 hover:border-brand-500/80 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors"
         >
           <Icon name="mail" size="sm" />
           {t('blog.emailLabel', locale)}
         </a>
       </div>
-    </LetterGlitchBand>
-  </section>
+    </CTA>
+
+    <!-- Desktop: contained LetterGlitch band with glass card -->
+    <section
+      class="glitch:block bg-background-secondary relative z-10 hidden py-[var(--space-section-md)]"
+    >
+      <LetterGlitchBand maxWidth="7xl">
+        <h2 class="font-display text-foreground mb-4 text-4xl font-bold text-balance">
+          {t('blog.followAlong', locale)}
+        </h2>
+        <p class="text-foreground-muted mb-8 text-lg text-balance">
+          {t('blog.followAlongLead', locale)}
+        </p>
+
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <a
+            href="/rss.xml"
+            class="text-foreground hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium transition-colors"
+          >
+            <Icon name="rss" size="sm" />
+            {t('blog.rssFeed', locale)}
+          </a>
+          {
+            socialLinks.map((link) => (
+              <a
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-foreground hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium transition-colors"
+              >
+                <Icon name={link.icon} size="sm" />
+                {link.label}
+              </a>
+            ))
+          }
+          <a
+            href={`mailto:${siteConfig.email}`}
+            class="text-foreground hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium transition-colors"
+          >
+            <Icon name="mail" size="sm" />
+            {t('blog.emailLabel', locale)}
+          </a>
+        </div>
+      </LetterGlitchBand>
+    </section>
   </div>
 
   <Footer slot="footer" layout="centered" background="default" maxWidth="7xl" />

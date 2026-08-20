@@ -36,18 +36,16 @@ const {
 // Prefer gallery when provided; fall back to the single hero image; build a
 // 1-slide carousel out of the image so the visual frame stays consistent.
 const slides: GallerySlide[] =
-  gallery.length > 0
-    ? gallery
-    : image
-      ? [{ src: image, alt: imageAlt || title }]
-      : [];
+  gallery.length > 0 ? gallery : image ? [{ src: image, alt: imageAlt || title }] : [];
 const hasMedia = slides.length > 0;
 
 // Tag links must stay inside the active locale (`/<locale>/projects/tag/…`).
 const locale = getLocaleFromPath(Astro.url.pathname);
 ---
 
-<header class="relative isolate overflow-hidden pt-[var(--space-page-top-sm)] pb-[var(--space-section-md)]">
+<header
+  class="relative isolate overflow-hidden pt-[var(--space-page-top-sm)] pb-[var(--space-section-md)]"
+>
   <HeroGrid />
   <HeroBeam />
 
@@ -60,61 +58,87 @@ const locale = getLocaleFromPath(Astro.url.pathname);
     >
       <!-- Text column -->
       <div class="animate-hero-stagger min-w-0">
-        <h1 class="font-display text-4xl font-bold tracking-tight text-foreground md:text-5xl lg:text-6xl mb-[var(--space-heading-gap)] text-balance">
+        <h1
+          class="font-display text-foreground mb-[var(--space-heading-gap)] text-4xl font-bold tracking-tight text-balance md:text-5xl lg:text-6xl"
+        >
           {title}
         </h1>
 
-        <p class="text-lg md:text-xl text-foreground-muted leading-relaxed mb-[var(--space-stack-lg)]">
+        <p
+          class="text-foreground-muted mb-[var(--space-stack-lg)] text-lg leading-relaxed md:text-xl"
+        >
           {description}
         </p>
 
-        {tags.length > 0 && (
-          <ProjectTagList tags={tags} locale={locale} class="mb-[var(--space-stack-lg)]" />
-        )}
+        {
+          tags.length > 0 && (
+            <ProjectTagList tags={tags} locale={locale} class="mb-[var(--space-stack-lg)]" />
+          )
+        }
 
-        {meta.length > 0 && (
-          <p class="mb-[var(--space-stack-lg)] flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-foreground-muted">
-            {meta.map((item, i) => (
-              <>
-                {i > 0 && (
-                  <span class="text-brand-500" aria-hidden="true">·</span>
-                )}
-                <span>{item}</span>
-              </>
-            ))}
-          </p>
-        )}
+        {
+          meta.length > 0 && (
+            <p class="text-foreground-muted mb-[var(--space-stack-lg)] flex flex-wrap items-center gap-x-2 gap-y-1 text-sm">
+              {meta.map((item, i) => (
+                <>
+                  {i > 0 && (
+                    <span class="text-brand-500" aria-hidden="true">
+                      ·
+                    </span>
+                  )}
+                  <span>{item}</span>
+                </>
+              ))}
+            </p>
+          )
+        }
 
-        {(url || repo) && (
-          <div class="flex flex-wrap gap-3 mb-[var(--space-stack-lg)]">
-            {url && (
-              <Button href={url} target="_blank" rel="noopener noreferrer" size="md" class="project-live-btn">
-                <Icon name="external-link" size="sm" />
-                View live site
-              </Button>
-            )}
-            {repo && (
-              <Button href={repo} target="_blank" rel="noopener noreferrer" variant="brand-outline" size="md">
-                <Icon name="github" size="sm" />
-                View source
-              </Button>
-            )}
-          </div>
-        )}
+        {
+          (url || repo) && (
+            <div class="mb-[var(--space-stack-lg)] flex flex-wrap gap-3">
+              {url && (
+                <Button
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  size="md"
+                  class="project-live-btn"
+                >
+                  <Icon name="external-link" size="sm" />
+                  View live site
+                </Button>
+              )}
+              {repo && (
+                <Button
+                  href={repo}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="brand-outline"
+                  size="md"
+                >
+                  <Icon name="github" size="sm" />
+                  View source
+                </Button>
+              )}
+            </div>
+          )
+        }
       </div>
 
       <!-- Media column (carousel, single image, or branded placeholder) -->
       <div class="animate-hero-slide-up [animation-delay:300ms]">
-        {hasMedia ? (
-          <ProjectCarousel slides={slides} label={`${title} screenshots`} />
-        ) : (
-          <div
-            class="aspect-video w-full rounded-xl border border-border bg-gradient-to-br from-brand-500/20 via-brand-500/5 to-transparent flex items-center justify-center shadow-lg"
-            aria-hidden="true"
-          >
-            <Icon name="layers" size="lg" class="text-brand-500/60" />
-          </div>
-        )}
+        {
+          hasMedia ? (
+            <ProjectCarousel slides={slides} label={`${title} screenshots`} />
+          ) : (
+            <div
+              class="border-border from-brand-500/20 via-brand-500/5 flex aspect-video w-full items-center justify-center rounded-xl border bg-gradient-to-br to-transparent shadow-lg"
+              aria-hidden="true"
+            >
+              <Icon name="layers" size="lg" class="text-brand-500/60" />
+            </div>
+          )
+        }
       </div>
     </div>
   </div>

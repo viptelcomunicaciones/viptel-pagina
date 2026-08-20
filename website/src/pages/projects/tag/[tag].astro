@@ -10,25 +10,25 @@ import {
   PROJECT_TAG_CLOUD_LIMIT,
 } from '@/lib/projects';
 
-export const prerender = false
+export const prerender = false;
 
 // Default-locale tag archive (`/projects/tag/<slug>`). Resolved on demand.
-const locale = defaultLocale
+const locale = defaultLocale;
 
-const slug = Astro.params.tag ?? ''
-const allProjects = await getVisibleProjects(locale)
-const tags = collectProjectTags(allProjects)
-const tag = findTagBySlug(slug, tags)
+const slug = Astro.params.tag ?? '';
+const allProjects = await getVisibleProjects(locale);
+const tags = collectProjectTags(allProjects);
+const tag = findTagBySlug(slug, tags);
 
 if (!tag) {
-  return Astro.redirect('/404')
+  return Astro.redirect('/404');
 }
 
-const projects = allProjects.filter((p) => (p.tags ?? []).some((t) => getTagName(t) === tag))
-const topTags = collectTopProjectTags(allProjects, PROJECT_TAG_CLOUD_LIMIT)
+const projects = allProjects.filter((p) => (p.tags ?? []).some((t) => getTagName(t) === tag));
+const topTags = collectTopProjectTags(allProjects, PROJECT_TAG_CLOUD_LIMIT);
 const visibleTags = topTags.includes(tag)
   ? topTags
-  : [tag, ...topTags.slice(0, PROJECT_TAG_CLOUD_LIMIT - 1)]
+  : [tag, ...topTags.slice(0, PROJECT_TAG_CLOUD_LIMIT - 1)];
 ---
 
 <ProjectsTagView locale={locale} tag={tag} projects={projects} visibleTags={visibleTags} />

@@ -1,34 +1,58 @@
 ---
-import RichText from './RichText.astro'
-import type { FAQBlock as FAQBlockType } from '@/lib/block-types'
+import RichText from './RichText.astro';
+import type { FAQBlock as FAQBlockType } from '@/lib/block-types';
 
 interface Props {
-  block: FAQBlockType
-  locale?: string
+  block: FAQBlockType;
+  locale?: string;
 }
 
-const { block } = Astro.props
+const { block } = Astro.props;
 ---
 
-<section class="relative z-10 py-[var(--space-section-md)] bg-background-secondary border-t border-border">
+<section
+  class="bg-background-secondary border-border relative z-10 border-t py-[var(--space-section-md)]"
+>
   <div class="mx-auto max-w-3xl px-6">
-    {block.heading && (
-      <h2 class="font-display text-3xl md:text-4xl font-bold text-foreground text-center mb-12" data-reveal>{block.heading}</h2>
-    )}
+    {
+      block.heading && (
+        <h2
+          class="font-display text-foreground mb-12 text-center text-3xl font-bold md:text-4xl"
+          data-reveal
+        >
+          {block.heading}
+        </h2>
+      )
+    }
     <div class="space-y-4">
-      {block.items.map((item, i) => (
-        <details class="group bg-background rounded-xl border border-border overflow-hidden" data-reveal data-reveal-delay={i || undefined}>
-          <summary class="flex cursor-pointer items-center justify-between p-5 text-lg font-semibold text-foreground list-none">
-            {item.question}
-            <svg class="h-5 w-5 shrink-0 text-foreground-muted transition-transform duration-200 group-open:rotate-180" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-            </svg>
-          </summary>
-          <div class="px-5 pb-5">
-            <RichText content={item.answer} class="text-foreground-muted leading-relaxed" />
-          </div>
-        </details>
-      ))}
+      {
+        block.items.map((item, i) => (
+          <details
+            class="group bg-background border-border overflow-hidden rounded-xl border"
+            data-reveal
+            data-reveal-delay={i || undefined}
+          >
+            <summary class="text-foreground flex cursor-pointer list-none items-center justify-between p-5 text-lg font-semibold">
+              {item.question}
+              <svg
+                class="text-foreground-muted h-5 w-5 shrink-0 transition-transform duration-200 group-open:rotate-180"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </summary>
+            <div class="px-5 pb-5">
+              <RichText content={item.answer} class="text-foreground-muted leading-relaxed" />
+            </div>
+          </details>
+        ))
+      }
     </div>
   </div>
 </section>

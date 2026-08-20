@@ -18,35 +18,43 @@ const PARTICLE_COUNT = 16;
 <div
   id="cursor-dot"
   aria-hidden="true"
-  class="cursor-fx fixed top-0 left-0 z-[9999] h-2.5 w-2.5 rounded-full bg-brand-500 opacity-0 will-change-transform pointer-events-none"
-></div>
+  class="cursor-fx bg-brand-500 pointer-events-none fixed top-0 left-0 z-[9999] h-2.5 w-2.5 rounded-full opacity-0 will-change-transform"
+>
+</div>
 
 <div
   id="cursor-ring-wrap"
   aria-hidden="true"
-  class="cursor-fx fixed top-0 left-0 z-[9999] opacity-0 will-change-transform pointer-events-none"
+  class="cursor-fx pointer-events-none fixed top-0 left-0 z-[9999] opacity-0 will-change-transform"
 >
   <div
     id="cursor-ring"
-    class="h-10 w-10 rounded-full border-2 border-brand-500/80 origin-center transition-[transform,background-color] duration-200 ease-out"
-  ></div>
+    class="border-brand-500/80 h-10 w-10 origin-center rounded-full border-2 transition-[transform,background-color] duration-200 ease-out"
+  >
+  </div>
 </div>
 
-{Array.from({ length: PARTICLE_COUNT }).map(() => (
-  <div
-    aria-hidden="true"
-    class="cursor-trail-particle cursor-fx fixed top-0 left-0 z-[9998] h-1.5 w-1.5 rounded-full bg-brand-500 opacity-0 will-change-transform pointer-events-none"
-  ></div>
-))}
+{
+  Array.from({ length: PARTICLE_COUNT }).map(() => (
+    <div
+      aria-hidden="true"
+      class="cursor-trail-particle cursor-fx bg-brand-500 pointer-events-none fixed top-0 left-0 z-[9998] h-1.5 w-1.5 rounded-full opacity-0 will-change-transform"
+    />
+  ))
+}
 
 <style>
   /* Don't render the trail on devices without a precise pointer */
   @media (hover: none), (pointer: coarse) {
-    .cursor-fx { display: none !important; }
+    .cursor-fx {
+      display: none !important;
+    }
   }
   /* Or for users who prefer reduced motion */
   @media (prefers-reduced-motion: reduce) {
-    .cursor-fx { display: none !important; }
+    .cursor-fx {
+      display: none !important;
+    }
   }
 
   /* Hover state: ring grows and gains a brand fill */
@@ -75,11 +83,14 @@ const PARTICLE_COUNT = 16;
     let particleIdx = 0;
     let lastSpawn = 0;
     const SPAWN_INTERVAL = 22; // ms between particle spawns
-    const FADE_RATE = 0.025;   // life lost per frame (60fps → ~0.66s lifespan)
+    const FADE_RATE = 0.025; // life lost per frame (60fps → ~0.66s lifespan)
 
-    const INTERACTIVE = 'a, button, [role="button"], input:not([type="hidden"]), textarea, select, summary, label[for]';
-    let mouseX = -100, mouseY = -100;
-    let ringX = -100, ringY = -100;
+    const INTERACTIVE =
+      'a, button, [role="button"], input:not([type="hidden"]), textarea, select, summary, label[for]';
+    let mouseX = -100,
+      mouseY = -100;
+    let ringX = -100,
+      ringY = -100;
     let visible = false;
     let hovering = null;
 

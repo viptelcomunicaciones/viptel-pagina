@@ -4,25 +4,25 @@
  * The registry mirrors the Payload template's `RenderHero` pattern: adding a
  * new hero type means adding a variant file and one registry entry here.
  */
-import type { PageHero } from '@/lib/block-types'
-import HighImpact from './high-impact.astro'
-import MediumImpact from './medium-impact.astro'
-import LowImpact from './low-impact.astro'
+import type { PageHero } from '@/lib/block-types';
+import HighImpact from './high-impact.astro';
+import MediumImpact from './medium-impact.astro';
+import LowImpact from './low-impact.astro';
 
 interface Props {
-  hero: PageHero
-  locale?: string
+  hero: PageHero;
+  locale?: string;
 }
 
-const { hero, locale } = Astro.props
+const { hero, locale } = Astro.props;
 
 const heroes = {
   highImpact: HighImpact,
   mediumImpact: MediumImpact,
   lowImpact: LowImpact,
-} as const
+} as const;
 
-const Variant = hero.type === 'none' ? null : heroes[hero.type]
+const Variant = hero.type === 'none' ? null : heroes[hero.type];
 ---
 
 {Variant && <Variant hero={hero} locale={locale} />}

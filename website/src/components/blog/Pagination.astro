@@ -20,8 +20,8 @@ interface Props {
 const { currentPage, totalPages, href, totalDocs, pageSize = 12 } = Astro.props;
 const locale = getLocaleFromPath(Astro.url.pathname);
 
-const startItem = (currentPage - 1) * pageSize + 1
-const endItem = Math.min(currentPage * pageSize, totalDocs ?? Infinity)
+const startItem = (currentPage - 1) * pageSize + 1;
+const endItem = Math.min(currentPage * pageSize, totalDocs ?? Infinity);
 
 if (totalPages <= 1) {
   // Render nothing — pagination has no purpose with one page.
@@ -45,90 +45,107 @@ const prevHref = currentPage > 1 ? href(currentPage - 1) : null;
 const nextHref = currentPage < totalPages ? href(currentPage + 1) : null;
 ---
 
-{totalPages > 1 && (
-  <div class="flex flex-col items-center gap-4 mt-12">
-    {totalDocs !== undefined && (
-      <p class="text-sm text-foreground-muted">
-        {t('pagination.showing', locale, { start: String(startItem), end: String(endItem), total: String(totalDocs) })}
-      </p>
-    )}
-    <nav class="flex items-center justify-center gap-2" aria-label={t('pagination.label', locale)}>
-    <a
-      href={prevHref ?? undefined}
-      class:list={[
-        'inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background text-foreground-muted transition-colors',
-        prevHref ? 'hover:border-brand-500 hover:text-brand-500' : 'cursor-not-allowed opacity-40 pointer-events-none',
-      ]}
-      aria-label={t('pagination.previousPage', locale)}
-      aria-disabled={prevHref ? undefined : 'true'}
-      rel={prevHref ? 'prev' : undefined}
-    >
-      <Icon name="arrow-left" size="sm" />
-    </a>
-
-    <ol class="flex items-center gap-1">
-      {pages[0] > 1 && (
-        <>
-          <li>
-            <a
-              href={href(1)}
-              class="inline-flex h-10 min-w-10 items-center justify-center rounded-full border border-border bg-background px-3 text-sm font-medium text-foreground transition-colors hover:border-brand-500 hover:text-brand-500"
-            >
-              1
-            </a>
-          </li>
-          {pages[0] > 2 && (
-            <li aria-hidden="true" class="px-1 text-sm text-foreground-subtle">…</li>
-          )}
-        </>
+{
+  totalPages > 1 && (
+    <div class="mt-12 flex flex-col items-center gap-4">
+      {totalDocs !== undefined && (
+        <p class="text-foreground-muted text-sm">
+          {t('pagination.showing', locale, {
+            start: String(startItem),
+            end: String(endItem),
+            total: String(totalDocs),
+          })}
+        </p>
       )}
+      <nav
+        class="flex items-center justify-center gap-2"
+        aria-label={t('pagination.label', locale)}
+      >
+        <a
+          href={prevHref ?? undefined}
+          class:list={[
+            'border-border bg-background text-foreground-muted inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors',
+            prevHref
+              ? 'hover:border-brand-500 hover:text-brand-500'
+              : 'pointer-events-none cursor-not-allowed opacity-40',
+          ]}
+          aria-label={t('pagination.previousPage', locale)}
+          aria-disabled={prevHref ? undefined : 'true'}
+          rel={prevHref ? 'prev' : undefined}
+        >
+          <Icon name="arrow-left" size="sm" />
+        </a>
 
-      {pages.map((page) => (
-        <li>
-          <a
-            href={href(page)}
-            class:list={[
-              'inline-flex h-10 min-w-10 items-center justify-center rounded-full border px-3 text-sm font-medium transition-colors',
-              page === currentPage
-                ? 'border-brand-500 bg-brand-500 text-white pointer-events-none'
-                : 'border-border bg-background text-foreground hover:border-brand-500 hover:text-brand-500',
-            ]}
-            aria-current={page === currentPage ? 'page' : undefined}
-          >
-            {page}
-          </a>
-        </li>
-      ))}
-
-      {pages[pages.length - 1] < totalPages && (
-        <>
-          {pages[pages.length - 1] < totalPages - 1 && (
-            <li aria-hidden="true" class="px-1 text-sm text-foreground-subtle">…</li>
+        <ol class="flex items-center gap-1">
+          {pages[0] > 1 && (
+            <>
+              <li>
+                <a
+                  href={href(1)}
+                  class="border-border bg-background text-foreground hover:border-brand-500 hover:text-brand-500 inline-flex h-10 min-w-10 items-center justify-center rounded-full border px-3 text-sm font-medium transition-colors"
+                >
+                  1
+                </a>
+              </li>
+              {pages[0] > 2 && (
+                <li aria-hidden="true" class="text-foreground-subtle px-1 text-sm">
+                  …
+                </li>
+              )}
+            </>
           )}
-          <li>
-            <a
-              href={href(totalPages)}
-              class="inline-flex h-10 min-w-10 items-center justify-center rounded-full border border-border bg-background px-3 text-sm font-medium text-foreground transition-colors hover:border-brand-500 hover:text-brand-500"
-            >
-              {totalPages}
-            </a>
-          </li>
-        </>
-      )}
-    </ol>
 
-    <a
-      href={nextHref ?? undefined}
-      class:list={[
-        'inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background text-foreground-muted transition-colors',
-        nextHref ? 'hover:border-brand-500 hover:text-brand-500' : 'cursor-not-allowed opacity-40 pointer-events-none',
-      ]}
-      aria-label={t('pagination.nextPage', locale)}
-      aria-disabled={nextHref ? undefined : 'true'}
-      rel={nextHref ? 'next' : undefined}
-    >
-      <Icon name="arrow-right" size="sm" />
-    </a>
-  </nav>
-  </div>
-)}
+          {pages.map((page) => (
+            <li>
+              <a
+                href={href(page)}
+                class:list={[
+                  'inline-flex h-10 min-w-10 items-center justify-center rounded-full border px-3 text-sm font-medium transition-colors',
+                  page === currentPage
+                    ? 'border-brand-500 bg-brand-500 pointer-events-none text-white'
+                    : 'border-border bg-background text-foreground hover:border-brand-500 hover:text-brand-500',
+                ]}
+                aria-current={page === currentPage ? 'page' : undefined}
+              >
+                {page}
+              </a>
+            </li>
+          ))}
+
+          {pages[pages.length - 1] < totalPages && (
+            <>
+              {pages[pages.length - 1] < totalPages - 1 && (
+                <li aria-hidden="true" class="text-foreground-subtle px-1 text-sm">
+                  …
+                </li>
+              )}
+              <li>
+                <a
+                  href={href(totalPages)}
+                  class="border-border bg-background text-foreground hover:border-brand-500 hover:text-brand-500 inline-flex h-10 min-w-10 items-center justify-center rounded-full border px-3 text-sm font-medium transition-colors"
+                >
+                  {totalPages}
+                </a>
+              </li>
+            </>
+          )}
+        </ol>
+
+        <a
+          href={nextHref ?? undefined}
+          class:list={[
+            'border-border bg-background text-foreground-muted inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors',
+            nextHref
+              ? 'hover:border-brand-500 hover:text-brand-500'
+              : 'pointer-events-none cursor-not-allowed opacity-40',
+          ]}
+          aria-label={t('pagination.nextPage', locale)}
+          aria-disabled={nextHref ? undefined : 'true'}
+          rel={nextHref ? 'next' : undefined}
+        >
+          <Icon name="arrow-right" size="sm" />
+        </a>
+      </nav>
+    </div>
+  )
+}

@@ -38,7 +38,9 @@ interface Props {
 
 const { locale = defaultLocale, page } = Astro.props;
 
-const { docs, totalDocs, totalPages } = await payload.posts().getPaginated(locale, page, BLOG_POSTS_PER_PAGE);
+const { docs, totalDocs, totalPages } = await payload
+  .posts()
+  .getPaginated(locale, page, BLOG_POSTS_PER_PAGE);
 
 const pagePosts = docs;
 
@@ -69,28 +71,34 @@ const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
 
   <a
     href={getBlogBaseUrl(locale)}
-    class="group inline-flex w-fit items-center gap-2 rounded-lg border border-brand-500/40 bg-transparent px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 hover:border-brand-500/80 hover:bg-brand-500/10 transition-colors"
+    class="group border-brand-500/40 text-brand-700 dark:text-brand-400 hover:border-brand-500/80 hover:bg-brand-500/10 inline-flex w-fit items-center gap-2 rounded-lg border bg-transparent px-4 py-2 text-sm font-medium transition-colors"
   >
     <Icon name="arrow-left" size="sm" />
     {t('blog.newestPosts', locale)}
   </a>
 
   <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-    {pagePosts.map((post, index) => (
-      <BlogCard
-        title={post.title}
-        description={post.excerpt || ''}
-        href={getPostUrl(post, locale)}
-        publishedAt={new Date(post.publishedAt ?? '')}
-        tags={(post.tags ?? []).map(t => getTagName(t))}
-        author={post.populatedAuthors?.[0]?.name || 'Viptel'}
-        imageUrl={post.heroImage && typeof post.heroImage !== 'number' ? payload.resolveMediaUrl(post.heroImage.url ?? '') : undefined}
-        postTypeName={getPostTypeName(post)}
-        postTypeIcon={getPostTypeIcon(post)}
-        revealDelay={index % 3}
-        eager={index === 0}
-      />
-    ))}
+    {
+      pagePosts.map((post, index) => (
+        <BlogCard
+          title={post.title}
+          description={post.excerpt || ''}
+          href={getPostUrl(post, locale)}
+          publishedAt={new Date(post.publishedAt ?? '')}
+          tags={(post.tags ?? []).map((t) => getTagName(t))}
+          author={post.populatedAuthors?.[0]?.name || 'Viptel'}
+          imageUrl={
+            post.heroImage && typeof post.heroImage !== 'number'
+              ? payload.resolveMediaUrl(post.heroImage.url ?? '')
+              : undefined
+          }
+          postTypeName={getPostTypeName(post)}
+          postTypeIcon={getPostTypeIcon(post)}
+          revealDelay={index % 3}
+          eager={index === 0}
+        />
+      ))
+    }
   </div>
 
   <Pagination
@@ -109,64 +117,72 @@ const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
       <div class="flex flex-wrap items-center justify-center gap-3">
         <a
           href="/rss.xml"
-          class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
+          class="border-brand-500/40 bg-background text-brand-700 dark:text-brand-400 hover:border-brand-500/80 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors"
         >
           <Icon name="rss" size="sm" />
           {t('blog.rssFeed', locale)}
         </a>
-        {socialLinks.map((link) => (
-          <a
-            href={link.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
-          >
-            <Icon name={link.icon} size="sm" />
-            {link.label}
-          </a>
-        ))}
-<a
-            href={`mailto:${siteConfig.email}`}
-            class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
-          >
-            <Icon name="mail" size="sm" />
-            {t('blog.emailLabel', locale)}
-          </a>
-        </div>
-
-        <div class="mx-auto mt-8 w-full max-w-md">
-          <p class="mb-3 text-sm text-foreground-muted">{t('newsletter.description', locale)}</p>
-          <NewsletterForm />
-        </div>
-      </CTA>
-
-    <section class="hidden glitch:block relative z-10 py-[var(--space-section-md)] bg-background">
-      <LetterGlitchBand>
-        <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">{t('blog.followAlong', locale)}</h2>
-        <p class="text-lg text-foreground-muted mb-8 text-balance">{t('blog.followAlongLead', locale)}</p>
-
-        <div class="flex flex-wrap items-center justify-center gap-3">
-          <a
-            href="/rss.xml"
-            class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
-          >
-            <Icon name="rss" size="sm" />
-            {t('blog.rssFeed', locale)}
-          </a>
-          {socialLinks.map((link) => (
+        {
+          socialLinks.map((link) => (
             <a
               href={link.href}
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
+              class="border-brand-500/40 bg-background text-brand-700 dark:text-brand-400 hover:border-brand-500/80 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors"
             >
               <Icon name={link.icon} size="sm" />
               {link.label}
             </a>
-          ))}
+          ))
+        }
+        <a
+          href={`mailto:${siteConfig.email}`}
+          class="border-brand-500/40 bg-background text-brand-700 dark:text-brand-400 hover:border-brand-500/80 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors"
+        >
+          <Icon name="mail" size="sm" />
+          {t('blog.emailLabel', locale)}
+        </a>
+      </div>
+
+      <div class="mx-auto mt-8 w-full max-w-md">
+        <p class="text-foreground-muted mb-3 text-sm">{t('newsletter.description', locale)}</p>
+        <NewsletterForm />
+      </div>
+    </CTA>
+
+    <section class="glitch:block bg-background relative z-10 hidden py-[var(--space-section-md)]">
+      <LetterGlitchBand>
+        <h2 class="font-display text-foreground mb-4 text-4xl font-bold text-balance">
+          {t('blog.followAlong', locale)}
+        </h2>
+        <p class="text-foreground-muted mb-8 text-lg text-balance">
+          {t('blog.followAlongLead', locale)}
+        </p>
+
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <a
+            href="/rss.xml"
+            class="text-foreground hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium transition-colors"
+          >
+            <Icon name="rss" size="sm" />
+            {t('blog.rssFeed', locale)}
+          </a>
+          {
+            socialLinks.map((link) => (
+              <a
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-foreground hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium transition-colors"
+              >
+                <Icon name={link.icon} size="sm" />
+                {link.label}
+              </a>
+            ))
+          }
           <a
             href={`mailto:${siteConfig.email}`}
-            class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
+            class="text-foreground hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium transition-colors"
           >
             <Icon name="mail" size="sm" />
             {t('blog.emailLabel', locale)}

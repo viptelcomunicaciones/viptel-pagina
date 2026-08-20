@@ -76,6 +76,9 @@
     "tagsLabel": "Etiquetas",
     "sidebarTypes": "Tipos de contenido",
     "sidebarToggle": "Explorar categorías",
+    "filterTypes": "Explorar por tipo de contenido",
+    "filterCategories": "Explorar por categoría",
+    "filterSubcategories": "Subcategorías",
     "featured": "Destacado",
     "draft": "Borrador",
     "noPostsFound": "No se encontraron artículos.",
@@ -223,7 +226,9 @@
     "playLabel": "Reproducir video: {title}",
     "watchOn": "Ver en YouTube"
   },
-  "footer": { "credit": "Desarrollado por Viptel Comunicaciones", "builtWith": "Tecnología propia",
+  "footer": {
+    "credit": "Desarrollado por Viptel Comunicaciones",
+    "builtWith": "Tecnología propia",
     "copyright": "© {year} {siteName}",
     "credit": "Tema por <a href=\"https://hansmartens.dev\" class=\"transition-colors hover:text-foreground\" target=\"_blank\" rel=\"noopener noreferrer\">Hans Martens Dev</a>",
     "builtWith": "Construido con Astro Rocket",
@@ -238,7 +243,12 @@
       "hero": {
         "badge": "Nosotros",
         "titleLead": "Viptel Comunicaciones —",
-        "typingWords": ["Telecomunicaciones", "Desarrollo Web", "Marketing Digital", "Transformación Digital"],
+        "typingWords": [
+          "Telecomunicaciones",
+          "Desarrollo Web",
+          "Marketing Digital",
+          "Transformación Digital"
+        ],
         "typingWordsMobile": ["Telecomunicaciones", "Desarrollo Web", "Marketing Digital"],
         "description": "Soluciones integrales de telecomunicaciones para empresas."
       },
@@ -274,9 +284,21 @@
         "heading": "Construimos con propósito",
         "lead": "Cada decisión en Viptel está guiada por los mismos principios.",
         "items": [
-          { "icon": "zap", "title": "Calidad Primero", "description": "Soluciones robustas y confiables que cumplen con los más altos estándares." },
-          { "icon": "award", "title": "Experiencia", "description": "Años de experiencia en telecomunicaciones y tecnología empresarial." },
-          { "icon": "rocket", "title": "Innovación Constante", "description": "Siempre a la vanguardia en tecnología y tendencias del sector." }
+          {
+            "icon": "zap",
+            "title": "Calidad Primero",
+            "description": "Soluciones robustas y confiables que cumplen con los más altos estándares."
+          },
+          {
+            "icon": "award",
+            "title": "Experiencia",
+            "description": "Años de experiencia en telecomunicaciones y tecnología empresarial."
+          },
+          {
+            "icon": "rocket",
+            "title": "Innovación Constante",
+            "description": "Siempre a la vanguardia en tecnología y tendencias del sector."
+          }
         ]
       },
       "stack": {
@@ -293,17 +315,32 @@
             "icon": "phone",
             "title": "Servicios",
             "items": [
-              { "question": "¿Qué servicios ofrece Viptel?", "answer": "Ofrecemos soluciones de telecomunicaciones (PBX, VoIP), desarrollo web, marketing digital, software empresarial y consultoría tecnológica." },
-              { "question": "¿Trabajan con empresas de todos los tamaños?", "answer": "Sí, desde pequeñas empresas hasta grandes corporaciones. Cada solución se adapta a las necesidades específicas de tu negocio." },
-              { "question": "¿Ofrecen soporte técnico?", "answer": "Sí, contamos con soporte técnico especializado para garantizar el funcionamiento continuo de tus servicios." }
+              {
+                "question": "¿Qué servicios ofrece Viptel?",
+                "answer": "Ofrecemos soluciones de telecomunicaciones (PBX, VoIP), desarrollo web, marketing digital, software empresarial y consultoría tecnológica."
+              },
+              {
+                "question": "¿Trabajan con empresas de todos los tamaños?",
+                "answer": "Sí, desde pequeñas empresas hasta grandes corporaciones. Cada solución se adapta a las necesidades específicas de tu negocio."
+              },
+              {
+                "question": "¿Ofrecen soporte técnico?",
+                "answer": "Sí, contamos con soporte técnico especializado para garantizar el funcionamiento continuo de tus servicios."
+              }
             ]
           },
           {
             "icon": "code-2",
             "title": "Proyectos",
             "items": [
-              { "question": "¿Cuánto tiempo toma un proyecto?", "answer": "Depende del alcance. Te daremos un cronograma claro antes de empezar." },
-              { "question": "¿Qué incluye el desarrollo web?", "answer": "Diseño, desarrollo, hospedaje, dominio y soporte. Todo lo necesario para tener tu sitio web funcionando." }
+              {
+                "question": "¿Cuánto tiempo toma un proyecto?",
+                "answer": "Depende del alcance. Te daremos un cronograma claro antes de empezar."
+              },
+              {
+                "question": "¿Qué incluye el desarrollo web?",
+                "answer": "Diseño, desarrollo, hospedaje, dominio y soporte. Todo lo necesario para tener tu sitio web funcionando."
+              }
             ]
           }
         ]
@@ -314,9 +351,18 @@
         "description": "Este sitio está construido con tecnologías open source. Nos apasiona la transparencia y la innovación.",
         "button": "Ver en GitHub",
         "cards": [
-          { "title": "Hecho por Viptel", "text": "Diseñado y construido por el equipo de Viptel Comunicaciones." },
-          { "title": "Tecnología moderna", "text": "Construido con Astro, Payload CMS y PostgreSQL." },
-          { "title": "En evolución", "text": "Mejoramos constantemente para ofrecer el mejor servicio." }
+          {
+            "title": "Hecho por Viptel",
+            "text": "Diseñado y construido por el equipo de Viptel Comunicaciones."
+          },
+          {
+            "title": "Tecnología moderna",
+            "text": "Construido con Astro, Payload CMS y PostgreSQL."
+          },
+          {
+            "title": "En evolución",
+            "text": "Mejoramos constantemente para ofrecer el mejor servicio."
+          }
         ]
       },
       "cta": {
@@ -425,10 +471,22 @@
         "heading": "Nuestro proceso",
         "lead": "Desde tu primer mensaje hasta la entrega final.",
         "steps": [
-          { "title": "Contacto inicial", "description": "Nos cuentas tu proyecto y te damos una asesoría sin compromiso." },
-          { "title": "Propuesta", "description": "Recibes una propuesta clara con alcance, tiempos y presupuesto." },
-          { "title": "Ejecución", "description": "Trabajamos en tu proyecto con entregables parciales y comunicación constante." },
-          { "title": "Entrega y soporte", "description": "Implementamos, capacitamos y damos soporte continuo." }
+          {
+            "title": "Contacto inicial",
+            "description": "Nos cuentas tu proyecto y te damos una asesoría sin compromiso."
+          },
+          {
+            "title": "Propuesta",
+            "description": "Recibes una propuesta clara con alcance, tiempos y presupuesto."
+          },
+          {
+            "title": "Ejecución",
+            "description": "Trabajamos en tu proyecto con entregables parciales y comunicación constante."
+          },
+          {
+            "title": "Entrega y soporte",
+            "description": "Implementamos, capacitamos y damos soporte continuo."
+          }
         ]
       },
       "faq": {
@@ -440,17 +498,32 @@
             "icon": "tag",
             "title": "Antes de empezar",
             "items": [
-              { "question": "¿Cuánto cuesta un proyecto?", "answer": "Cada proyecto recibe un presupuesto personalizado. Te damos una cotización clara antes de empezar." },
-              { "question": "¿Cuánto tiempo toma?", "answer": "Depende del alcance del proyecto. Te daremos un cronograma claro en la propuesta." },
-              { "question": "¿Ofrecen garantía?", "answer": "Sí, todos nuestros servicios incluyen garantía y soporte técnico." }
+              {
+                "question": "¿Cuánto cuesta un proyecto?",
+                "answer": "Cada proyecto recibe un presupuesto personalizado. Te damos una cotización clara antes de empezar."
+              },
+              {
+                "question": "¿Cuánto tiempo toma?",
+                "answer": "Depende del alcance del proyecto. Te daremos un cronograma claro en la propuesta."
+              },
+              {
+                "question": "¿Ofrecen garantía?",
+                "answer": "Sí, todos nuestros servicios incluyen garantía y soporte técnico."
+              }
             ]
           },
           {
             "icon": "user",
             "title": "Trabajando con nosotros",
             "items": [
-              { "question": "¿Dan soporte después de la entrega?", "answer": "Sí, ofrecemos planes de soporte y mantenimiento continuo." },
-              { "question": "¿Trabajan con empresas fuera de Colombia?", "answer": "Sí, trabajamos con clientes en toda Latinoamérica." }
+              {
+                "question": "¿Dan soporte después de la entrega?",
+                "answer": "Sí, ofrecemos planes de soporte y mantenimiento continuo."
+              },
+              {
+                "question": "¿Trabajan con empresas fuera de Colombia?",
+                "answer": "Sí, trabajamos con clientes en toda Latinoamérica."
+              }
             ]
           }
         ]
@@ -503,9 +576,21 @@
         "lead": "Todo lo que tu empresa necesita en un solo lugar.",
         "learnMore": "Ver servicios",
         "cards": [
-          { "icon": "phone", "title": "Telecomunicaciones", "description": "PBX, VoIP, redes y conectividad empresarial." },
-          { "icon": "code", "title": "Desarrollo Web", "description": "Sitios web, aplicaciones y plataformas digitales." },
-          { "icon": "trending-up", "title": "Marketing Digital", "description": "SEO, publicidad digital y redes sociales." }
+          {
+            "icon": "phone",
+            "title": "Telecomunicaciones",
+            "description": "PBX, VoIP, redes y conectividad empresarial."
+          },
+          {
+            "icon": "code",
+            "title": "Desarrollo Web",
+            "description": "Sitios web, aplicaciones y plataformas digitales."
+          },
+          {
+            "icon": "trending-up",
+            "title": "Marketing Digital",
+            "description": "SEO, publicidad digital y redes sociales."
+          }
         ]
       },
       "workWithMe": {
@@ -513,10 +598,26 @@
         "heading": "Transforma tu negocio",
         "lead": "Lo que obtienes cuando trabajamos juntos.",
         "cards": [
-          { "icon": "phone", "title": "Comunicación unificada", "description": "Sistemas de comunicación modernos para tu empresa." },
-          { "icon": "zap", "title": "Tecnología de punta", "description": "Soluciones basadas en las mejores tecnologías del mercado." },
-          { "icon": "search", "title": "Presencia digital", "description": "Tu negocio visible donde tus clientes te buscan." },
-          { "icon": "shield-check", "title": "Soporte continuo", "description": "Acompañamiento y soporte técnico permanente." }
+          {
+            "icon": "phone",
+            "title": "Comunicación unificada",
+            "description": "Sistemas de comunicación modernos para tu empresa."
+          },
+          {
+            "icon": "zap",
+            "title": "Tecnología de punta",
+            "description": "Soluciones basadas en las mejores tecnologías del mercado."
+          },
+          {
+            "icon": "search",
+            "title": "Presencia digital",
+            "description": "Tu negocio visible donde tus clientes te buscan."
+          },
+          {
+            "icon": "shield-check",
+            "title": "Soporte continuo",
+            "description": "Acompañamiento y soporte técnico permanente."
+          }
         ],
         "cta": "Ver nuestros servicios"
       },
@@ -531,8 +632,16 @@
         "heading": "Lo que dicen nuestros clientes",
         "lead": "Palabras reales de proyectos terminados.",
         "items": [
-          { "quote": "Viptel transformó nuestras comunicaciones. La implementación de la central IP fue impecable y el soporte ha sido excepcional.", "name": "Carlos Mendoza", "role": "Gerente, TechSolutions" },
-          { "quote": "El desarrollo de nuestro sitio web superó todas las expectativas. profesionales, cumplidos y con resultados medibles.", "name": "María Fernández", "role": "Directora, Grupo Nova" }
+          {
+            "quote": "Viptel transformó nuestras comunicaciones. La implementación de la central IP fue impecable y el soporte ha sido excepcional.",
+            "name": "Carlos Mendoza",
+            "role": "Gerente, TechSolutions"
+          },
+          {
+            "quote": "El desarrollo de nuestro sitio web superó todas las expectativas. profesionales, cumplidos y con resultados medibles.",
+            "name": "María Fernández",
+            "role": "Directora, Grupo Nova"
+          }
         ]
       },
       "aboutTeaser": {

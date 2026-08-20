@@ -1,7 +1,14 @@
 ---
 import BlogCard from './BlogCard.astro';
 import { t, defaultLocale } from '@/i18n';
-import { getPostUrl, getTagName, getRelatedByTags, getPostTypeName, getPostTypeIcon, getPostCategory } from '@/lib/blog';
+import {
+  getPostUrl,
+  getTagName,
+  getRelatedByTags,
+  getPostTypeName,
+  getPostTypeIcon,
+  getPostCategory,
+} from '@/lib/blog';
 import { payload } from '@/lib/payload-client';
 
 interface Props {
@@ -16,27 +23,33 @@ const { currentSlug, tags, locale = defaultLocale, maxPosts = 3 } = Astro.props;
 const relatedPosts = await getRelatedByTags(currentSlug, tags, locale, maxPosts);
 ---
 
-{relatedPosts.length > 0 && (
-  <section class="border-t border-border py-[var(--space-section-sm)]">
-    <h2 class="font-display text-2xl font-bold text-foreground mb-[var(--space-stack-lg)] text-center">
-      {t('blog.relatedPosts', locale)}
-    </h2>
+{
+  relatedPosts.length > 0 && (
+    <section class="border-border border-t py-[var(--space-section-sm)]">
+      <h2 class="font-display text-foreground mb-[var(--space-stack-lg)] text-center text-2xl font-bold">
+        {t('blog.relatedPosts', locale)}
+      </h2>
 
-    <div class="grid gap-[var(--space-stack-lg)] md:grid-cols-2 lg:grid-cols-3">
-      {relatedPosts.map((post) => (
-        <BlogCard
-          title={post.title}
-          description={post.excerpt || ''}
-          href={getPostUrl(post, locale)}
-          publishedAt={((post.publishedAt ? new Date(post.publishedAt) : new Date()) as Date)}
-          tags={(post.tags || []).map((t) => getTagName(t))}
-          author={post.populatedAuthors?.[0]?.name || 'Viptel'}
-          imageUrl={post.heroImage && typeof post.heroImage !== 'number' ? payload.resolveMediaUrl(post.heroImage.url ?? '') : undefined}
-          postTypeName={getPostTypeName(post)}
-          postTypeIcon={getPostTypeIcon(post)}
-          postCategoryName={getPostCategory(post)?.title}
-        />
-      ))}
-    </div>
-  </section>
-)}
+      <div class="grid gap-[var(--space-stack-lg)] md:grid-cols-2 lg:grid-cols-3">
+        {relatedPosts.map((post) => (
+          <BlogCard
+            title={post.title}
+            description={post.excerpt || ''}
+            href={getPostUrl(post, locale)}
+            publishedAt={(post.publishedAt ? new Date(post.publishedAt) : new Date()) as Date}
+            tags={(post.tags || []).map((t) => getTagName(t))}
+            author={post.populatedAuthors?.[0]?.name || 'Viptel'}
+            imageUrl={
+              post.heroImage && typeof post.heroImage !== 'number'
+                ? payload.resolveMediaUrl(post.heroImage.url ?? '')
+                : undefined
+            }
+            postTypeName={getPostTypeName(post)}
+            postTypeIcon={getPostTypeIcon(post)}
+            postCategoryName={getPostCategory(post)?.title}
+          />
+        ))}
+      </div>
+    </section>
+  )
+}

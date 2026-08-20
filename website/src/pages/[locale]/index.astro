@@ -21,24 +21,29 @@ const { locale } = Astro.params;
 
 // En SSR esta ruta también intercepta URLs de un segmento (`/home`, `/terminos`).
 // Los redirects de Payload se guardan con el path completo.
-const redirect = await payload.redirects().get(`/${locale}`)
+const redirect = await payload.redirects().get(`/${locale}`);
 if (redirect) {
-  const { target, status } = redirectTarget(redirect)
-  return Astro.redirect(target, status)
+  const { target, status } = redirectTarget(redirect);
+  return Astro.redirect(target, status);
 }
 
-let rootPage = null
+let rootPage = null;
 if (!isValidLocale(locale)) {
-  rootPage = await payload.pages().getBySlug(locale ?? '', defaultLocale)
-  if (!rootPage) return Astro.redirect('/404')
+  rootPage = await payload.pages().getBySlug(locale ?? '', defaultLocale);
+  if (!rootPage) return Astro.redirect('/404');
 }
 ---
 
-{rootPage ? (
-  <PageLayout title={rootPage.meta?.title || rootPage.title} description={rootPage.meta?.description || rootPage.title}>
-    {rootPage.hero && <RenderHero hero={rootPage.hero} locale={defaultLocale} />}
-    <BlockRenderer layout={rootPage.layout} locale={defaultLocale} />
-  </PageLayout>
-) : (
-  <HomeView locale={locale} />
-)}
+{
+  rootPage ? (
+    <PageLayout
+      title={rootPage.meta?.title || rootPage.title}
+      description={rootPage.meta?.description || rootPage.title}
+    >
+      {rootPage.hero && <RenderHero hero={rootPage.hero} locale={defaultLocale} />}
+      <BlockRenderer layout={rootPage.layout} locale={defaultLocale} />
+    </PageLayout>
+  ) : (
+    <HomeView locale={locale} />
+  )
+}

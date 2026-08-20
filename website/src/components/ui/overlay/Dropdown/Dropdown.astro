@@ -54,39 +54,41 @@ const iconMap: Record<string, string> = {
     role="menu"
     aria-orientation="vertical"
   >
-    {items.map((item, index) =>
-      item.separator ? (
-        <div class="my-1.5 h-px bg-border" role="separator" />
-      ) : (
-        <a
-          href={item.href || '#'}
-          class={cn(
-            'flex items-center gap-2.5 px-3 py-2 text-sm rounded-md',
-            'transition-colors outline-none',
-            'focus-visible:ring-2 focus-visible:ring-ring',
-            item.disabled
-              ? 'opacity-50 cursor-not-allowed pointer-events-none text-foreground-muted'
-              : 'hover:bg-secondary focus:bg-secondary text-foreground-secondary hover:text-foreground'
-          )}
-          role="menuitem"
-          tabindex={item.disabled ? -1 : 0}
-          aria-disabled={item.disabled}
-          data-dropdown-item={index}
-        >
-          {item.icon && (
-            <Icon
-              name={iconMap[item.icon] || item.icon}
-              size="sm"
-              class={cn(
-                'shrink-0',
-                item.disabled ? 'text-foreground-subtle' : 'text-foreground-muted'
-              )}
-            />
-          )}
-          <span>{item.label}</span>
-        </a>
+    {
+      items.map((item, index) =>
+        item.separator ? (
+          <div class="bg-border my-1.5 h-px" role="separator" />
+        ) : (
+          <a
+            href={item.href || '#'}
+            class={cn(
+              'flex items-center gap-2.5 rounded-md px-3 py-2 text-sm',
+              'transition-colors outline-none',
+              'focus-visible:ring-ring focus-visible:ring-2',
+              item.disabled
+                ? 'text-foreground-muted pointer-events-none cursor-not-allowed opacity-50'
+                : 'hover:bg-secondary focus:bg-secondary text-foreground-secondary hover:text-foreground'
+            )}
+            role="menuitem"
+            tabindex={item.disabled ? -1 : 0}
+            aria-disabled={item.disabled}
+            data-dropdown-item={index}
+          >
+            {item.icon && (
+              <Icon
+                name={iconMap[item.icon] || item.icon}
+                size="sm"
+                class={cn(
+                  'shrink-0',
+                  item.disabled ? 'text-foreground-subtle' : 'text-foreground-muted'
+                )}
+              />
+            )}
+            <span>{item.label}</span>
+          </a>
+        )
       )
-    )}
+    }
   </div>
 </div>
 

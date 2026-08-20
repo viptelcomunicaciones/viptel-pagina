@@ -8,13 +8,13 @@ telecomunicaciones. Está construido sobre el tema Astro Rocket.
 
 ## Contexto Viptel
 
-| Aspecto | Detalle |
-|---|---|
-| Empresa | Telecomunicaciones, desarrollo web, marketing digital |
-| Ubicación | Bogotá, Colombia — atiende Latinoamérica |
-| i18n | `es` (default) y `en` activos; `nl` inactivo |
-| CMS | Backend Payload CMS en `http://localhost:3000` |
-| API | Se consume REST API vía `src/lib/payload.ts` |
+| Aspecto   | Detalle                                               |
+| --------- | ----------------------------------------------------- |
+| Empresa   | Telecomunicaciones, desarrollo web, marketing digital |
+| Ubicación | Bogotá, Colombia — atiende Latinoamérica              |
+| i18n      | `es` (default) y `en` activos; `nl` inactivo          |
+| CMS       | Backend Payload CMS en `http://localhost:3000`        |
+| API       | Se consume REST API vía `src/lib/payload.ts`          |
 
 ### Configuraciones personalizadas para Viptel
 
@@ -52,16 +52,16 @@ thing you are about to build already exists — it usually does.
 
 ## Where to make a change
 
-| The request | The file |
-|---|---|
-| Site name, logo, social links, contact details | `src/config/site.config.ts` |
-| Navigation menus | `src/config/nav.config.ts` |
-| Languages | `src/config/i18n.config.ts` |
-| Cookie-consent behaviour | `src/config/consent.config.ts` |
-| Any visible interface text | `src/i18n/en.json` (and other locales) |
-| A blog post | a new `.mdx` file in `src/content/blog/<locale>/` |
-| A project | a new `.mdx` file in `src/content/projects/<locale>/` |
-| Colours | `src/styles/themes/*.css` — twelve themes, tokens only |
+| The request                                    | The file                                               |
+| ---------------------------------------------- | ------------------------------------------------------ |
+| Site name, logo, social links, contact details | `src/config/site.config.ts`                            |
+| Navigation menus                               | `src/config/nav.config.ts`                             |
+| Languages                                      | `src/config/i18n.config.ts`                            |
+| Cookie-consent behaviour                       | `src/config/consent.config.ts`                         |
+| Any visible interface text                     | `src/i18n/en.json` (and other locales)                 |
+| A blog post                                    | a new `.mdx` file in `src/content/blog/<locale>/`      |
+| A project                                      | a new `.mdx` file in `src/content/projects/<locale>/`  |
+| Colours                                        | `src/styles/themes/*.css` — twelve themes, tokens only |
 
 **Page copy is not in the page files.** Text lives in `src/i18n/en.json` and is
 read through `t()`. Editing a heading usually means editing JSON, not `.astro`.

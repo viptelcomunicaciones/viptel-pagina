@@ -4,34 +4,40 @@
  * Composes breadcrumb, hero, features, pricing, FAQ, gallery, layout blocks,
  * and child services grid in a consistent order.
  */
-import PageLayout from '@/layouts/PageLayout.astro'
-import BlockRenderer from '@/components/blocks/BlockRenderer.astro'
-import Button from '@/components/ui/form/Button/Button.astro'
-import ServiceBreadcrumb from './ServiceBreadcrumb.astro'
-import ServiceFeatures from './ServiceFeatures.astro'
-import ServicePricing from './ServicePricing.astro'
-import ServiceFAQ from './ServiceFAQ.astro'
-import ServiceGallery from './ServiceGallery.astro'
-import ServiceGrid from './ServiceGrid.astro'
-import { t, localizedPath } from '@/i18n'
-import type { Service } from '@/lib/payload-types'
-import type { PageBlock } from '@/lib/block-types'
+import PageLayout from '@/layouts/PageLayout.astro';
+import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
+import Button from '@/components/ui/form/Button/Button.astro';
+import ServiceBreadcrumb from './ServiceBreadcrumb.astro';
+import ServiceFeatures from './ServiceFeatures.astro';
+import ServicePricing from './ServicePricing.astro';
+import ServiceFAQ from './ServiceFAQ.astro';
+import ServiceGallery from './ServiceGallery.astro';
+import ServiceGrid from './ServiceGrid.astro';
+import { t, localizedPath } from '@/i18n';
+import type { Service } from '@/lib/payload-types';
+import type { PageBlock } from '@/lib/block-types';
 
 interface Props {
-  service: Service
-  parentService?: Service | null
-  childrenServices?: Service[]
-  hrefPrefix?: string
-  locale?: string
+  service: Service;
+  parentService?: Service | null;
+  childrenServices?: Service[];
+  hrefPrefix?: string;
+  locale?: string;
 }
 
-const { service, parentService, childrenServices = [], hrefPrefix = '/services', locale = 'es' } = Astro.props
-const title = service.meta?.title || service.title
-const description = service.meta?.description || service.shortDescription || service.title
+const {
+  service,
+  parentService,
+  childrenServices = [],
+  hrefPrefix = '/services',
+  locale = 'es',
+} = Astro.props;
+const title = service.meta?.title || service.title;
+const description = service.meta?.description || service.shortDescription || service.title;
 ---
 
 <PageLayout title={title} description={description}>
-  <section class="pb-12 pt-28">
+  <section class="pt-28 pb-12">
     <div class="mx-auto max-w-6xl px-4">
       <ServiceBreadcrumb
         locale={locale}
@@ -42,49 +48,59 @@ const description = service.meta?.description || service.shortDescription || ser
       />
 
       <div class="mx-auto max-w-3xl text-center">
-        <h1 class="text-3xl font-bold text-foreground sm:text-4xl">{service.title}</h1>
-        {service.shortDescription && (
-          <p class="mt-4 text-lg text-foreground-muted">{service.shortDescription}</p>
-        )}
+        <h1 class="text-foreground text-3xl font-bold sm:text-4xl">{service.title}</h1>
+        {
+          service.shortDescription && (
+            <p class="text-foreground-muted mt-4 text-lg">{service.shortDescription}</p>
+          )
+        }
       </div>
     </div>
   </section>
 
-  {service.features && service.features.length > 0 && (
-    <ServiceFeatures features={service.features} locale={locale} />
-  )}
+  {
+    service.features && service.features.length > 0 && (
+      <ServiceFeatures features={service.features} locale={locale} />
+    )
+  }
 
-  {service.pricing && service.pricing.length > 0 && (
-    <ServicePricing plans={service.pricing} locale={locale} />
-  )}
+  {
+    service.pricing && service.pricing.length > 0 && (
+      <ServicePricing plans={service.pricing} locale={locale} />
+    )
+  }
 
-  {service.faq && service.faq.length > 0 && (
-    <ServiceFAQ faq={service.faq} locale={locale} />
-  )}
+  {service.faq && service.faq.length > 0 && <ServiceFAQ faq={service.faq} locale={locale} />}
 
-  {service.gallery && service.gallery.length > 0 && (
-    <ServiceGallery gallery={service.gallery} locale={locale} />
-  )}
+  {
+    service.gallery && service.gallery.length > 0 && (
+      <ServiceGallery gallery={service.gallery} locale={locale} />
+    )
+  }
 
-  {service.layout && service.layout.length > 0 && (
-    <BlockRenderer layout={service.layout as PageBlock[]} locale={locale} />
-  )}
+  {
+    service.layout && service.layout.length > 0 && (
+      <BlockRenderer layout={service.layout as PageBlock[]} locale={locale} />
+    )
+  }
 
-  {childrenServices.length > 0 && (
-    <section class="py-16">
-      <div class="mx-auto max-w-6xl px-4">
-        <h2 class="mb-10 text-center text-2xl font-bold text-foreground">
-          {t('services.detail.subServices', locale)}
-        </h2>
-        <ServiceGrid services={childrenServices} hrefPrefix={hrefPrefix} />
-      </div>
-    </section>
-  )}
+  {
+    childrenServices.length > 0 && (
+      <section class="py-16">
+        <div class="mx-auto max-w-6xl px-4">
+          <h2 class="text-foreground mb-10 text-center text-2xl font-bold">
+            {t('services.detail.subServices', locale)}
+          </h2>
+          <ServiceGrid services={childrenServices} hrefPrefix={hrefPrefix} />
+        </div>
+      </section>
+    )
+  }
 
   <section class="bg-background-secondary py-16">
     <div class="mx-auto max-w-2xl px-4 text-center">
-      <h2 class="text-2xl font-bold text-foreground">{t('services.overview.cta.title', locale)}</h2>
-      <p class="mt-3 text-foreground-muted">{t('services.overview.cta.description', locale)}</p>
+      <h2 class="text-foreground text-2xl font-bold">{t('services.overview.cta.title', locale)}</h2>
+      <p class="text-foreground-muted mt-3">{t('services.overview.cta.description', locale)}</p>
       <div class="mt-6">
         <Button href={localizedPath('/contact', locale)} size="lg">
           {t('services.detail.cta', locale)}

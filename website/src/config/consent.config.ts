@@ -15,14 +15,16 @@ const consentConfig: ConsentConfig = {
     },
     analytics: {
       label: 'Analíticas',
-      description: 'Nos ayudan a entender cómo los visitantes interactúan con el sitio mediante datos anónimos de uso.',
+      description:
+        'Nos ayudan a entender cómo los visitantes interactúan con el sitio mediante datos anónimos de uso.',
       required: false,
       defaultEnabled: false,
       gcmTypes: ['analytics_storage'],
     },
     marketing: {
       label: 'Marketing',
-      description: 'Utilizadas para mostrar anuncios relevantes y medir el rendimiento de campañas.',
+      description:
+        'Utilizadas para mostrar anuncios relevantes y medir el rendimiento de campañas.',
       required: false,
       defaultEnabled: false,
       gcmTypes: ['ad_storage', 'ad_user_data', 'ad_personalization'],
@@ -38,7 +40,8 @@ const consentConfig: ConsentConfig = {
 
   ui: {
     heading: 'Preferencias de cookies',
-    description: 'Usamos cookies para mejorar tu experiencia de navegación y analizar nuestro tráfico.',
+    description:
+      'Usamos cookies para mejorar tu experiencia de navegación y analizar nuestro tráfico.',
     acceptAll: 'Aceptar todas',
     declineAll: 'Rechazar todas',
     customize: 'Personalizar',

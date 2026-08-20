@@ -1,26 +1,29 @@
 ---
-import PageLayout from '@/layouts/PageLayout.astro'
-import ProjectLayout from '@/layouts/ProjectLayout.astro'
-import { payload } from '@/lib/payload-client'
+import PageLayout from '@/layouts/PageLayout.astro';
+import ProjectLayout from '@/layouts/ProjectLayout.astro';
+import { payload } from '@/lib/payload-client';
 
-export const prerender = false
+export const prerender = false;
 
-const { slug } = Astro.params
+const { slug } = Astro.params;
 
 if (!slug) {
-  return Astro.redirect('/404')
+  return Astro.redirect('/404');
 }
 
-const project = await payload.projects().getBySlug(slug)
+const project = await payload.projects().getBySlug(slug);
 
 if (!project) {
-  return Astro.redirect('/404')
+  return Astro.redirect('/404');
 }
 
-const allProjects = await payload.projects().getAll()
-const related = allProjects.filter((p) => p.slug !== slug).slice(0, 3)
+const allProjects = await payload.projects().getAll();
+const related = allProjects.filter((p) => p.slug !== slug).slice(0, 3);
 ---
 
-<PageLayout title={project.meta?.title || project.title} description={project.meta?.description || project.description || project.title}>
+<PageLayout
+  title={project.meta?.title || project.title}
+  description={project.meta?.description || project.description || project.title}
+>
   <ProjectLayout project={project} related={related} />
 </PageLayout>

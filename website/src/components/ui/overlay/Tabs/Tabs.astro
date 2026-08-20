@@ -27,31 +27,33 @@ const { tabs, defaultValue = tabs[0]?.id, class: className } = Astro.props;
 
 <div class={cn('w-full', className)} data-tabs data-default={defaultValue}>
   <!-- Tab List -->
-  <div class="flex border-b border-border" role="tablist" aria-label="Tabs">
-    {tabs.map((tab) => (
-      <button
-        type="button"
-        role="tab"
-        id={`tab-${tab.id}`}
-        aria-selected={tab.id === defaultValue ? 'true' : 'false'}
-        aria-controls={`panel-${tab.id}`}
-        tabindex={tab.id === defaultValue ? 0 : -1}
-        class={cn(
-          'px-4 py-2.5 text-sm font-medium -mb-px border-b-2 transition-colors',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-          tab.id === defaultValue
-            ? 'border-foreground text-foreground'
-            : 'border-transparent text-foreground-muted hover:text-foreground hover:border-border'
-        )}
-        data-tab-trigger={tab.id}
-      >
-        {tab.label}
-      </button>
-    ))}
+  <div class="border-border flex border-b" role="tablist" aria-label="Tabs">
+    {
+      tabs.map((tab) => (
+        <button
+          type="button"
+          role="tab"
+          id={`tab-${tab.id}`}
+          aria-selected={tab.id === defaultValue ? 'true' : 'false'}
+          aria-controls={`panel-${tab.id}`}
+          tabindex={tab.id === defaultValue ? 0 : -1}
+          class={cn(
+            '-mb-px border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
+            'focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none',
+            tab.id === defaultValue
+              ? 'border-foreground text-foreground'
+              : 'text-foreground-muted hover:text-foreground hover:border-border border-transparent'
+          )}
+          data-tab-trigger={tab.id}
+        >
+          {tab.label}
+        </button>
+      ))
+    }
   </div>
 
   <!-- Tab Panels Container -->
-  <div class="mt-4 tabs-content">
+  <div class="tabs-content mt-4">
     <slot />
   </div>
 </div>
@@ -98,9 +100,13 @@ const { tabs, defaultValue = tabs[0]?.id, class: className } = Astro.props;
           if (isActive) {
             el.classList.remove('hidden');
             el.classList.add('animate-tab-enter');
-            el.addEventListener('animationend', () => {
-              el.classList.remove('animate-tab-enter');
-            }, { once: true });
+            el.addEventListener(
+              'animationend',
+              () => {
+                el.classList.remove('animate-tab-enter');
+              },
+              { once: true }
+            );
           } else {
             el.classList.add('hidden');
             el.classList.remove('animate-tab-enter');

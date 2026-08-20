@@ -12,17 +12,7 @@ interface Props {
   class?: string;
 }
 
-const {
-  placeholder = 'Search...',
-  size = 'md',
-  class: className,
-} = Astro.props;
+const { placeholder = 'Search...', size = 'md', class: className } = Astro.props;
 ---
 
-<Input
-  type="search"
-  placeholder={placeholder}
-  size={size}
-  leadingIcon="search"
-  class={className}
-/>
+<Input type="search" placeholder={placeholder} size={size} leadingIcon="search" class={className} />

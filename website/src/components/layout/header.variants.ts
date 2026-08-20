@@ -19,17 +19,34 @@ export const headerVariants = cva('z-50', {
   },
   compoundVariants: [
     // Floating + fixed: centered with gap
-    { shape: 'floating', position: 'fixed', class: '!left-1/2 !right-auto -translate-x-1/2 w-[calc(100%-3rem)] max-w-6xl mt-4 animate-header-drop' },
+    {
+      shape: 'floating',
+      position: 'fixed',
+      class:
+        '!left-1/2 !right-auto -translate-x-1/2 w-[calc(100%-3rem)] max-w-6xl mt-4 animate-header-drop',
+    },
     // Floating + sticky: centered with gap
     { shape: 'floating', position: 'sticky', class: '!top-4 mx-auto max-w-6xl' },
     // Floating + static: centered
     { shape: 'floating', position: 'static', class: 'mx-auto max-w-6xl' },
     // Floating + transparent: glass effect
-    { shape: 'floating', variant: 'transparent', class: 'bg-white/[0.08] border border-white/[0.1]' },
+    {
+      shape: 'floating',
+      variant: 'transparent',
+      class: 'bg-white/[0.08] border border-white/[0.1]',
+    },
     // Floating + default: semi-transparent with blur
-    { shape: 'floating', variant: 'default', class: '!bg-background/90 backdrop-blur-xl !border border-border/50 !border-b-border/50' },
+    {
+      shape: 'floating',
+      variant: 'default',
+      class: '!bg-background/90 backdrop-blur-xl !border border-border/50 !border-b-border/50',
+    },
     // Floating + solid: opaque
-    { shape: 'floating', variant: 'solid', class: '!bg-background !border border-border !border-b-border' },
+    {
+      shape: 'floating',
+      variant: 'solid',
+      class: '!bg-background !border border-border !border-b-border',
+    },
   ],
   defaultVariants: {
     position: 'sticky',

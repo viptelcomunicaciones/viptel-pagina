@@ -16,15 +16,24 @@ interface Props extends HTMLAttributes<'span'> {
   pill?: boolean;
 }
 
-const { variant = 'default', size = 'md', pulse = false, pill = false, class: className, ...attrs } = Astro.props;
+const {
+  variant = 'default',
+  size = 'md',
+  pulse = false,
+  pill = false,
+  class: className,
+  ...attrs
+} = Astro.props;
 ---
 
 <span class={cn(badgeVariants({ variant, size, pill }), className)} {...attrs}>
-  {pulse && (
-    <span class="relative flex h-2 w-2 shrink-0" aria-hidden="true">
-      <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-500 opacity-75" />
-      <span class="relative inline-flex h-2 w-2 rounded-full bg-brand-500" />
-    </span>
-  )}
+  {
+    pulse && (
+      <span class="relative flex h-2 w-2 shrink-0" aria-hidden="true">
+        <span class="bg-brand-500 absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" />
+        <span class="bg-brand-500 relative inline-flex h-2 w-2 rounded-full" />
+      </span>
+    )
+  }
   <slot />
 </span>

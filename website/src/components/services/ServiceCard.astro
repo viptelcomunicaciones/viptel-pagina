@@ -1,15 +1,15 @@
 ---
-import type { Service } from '@/lib/payload-types'
-import Icon from '@/components/ui/primitives/Icon/Icon.astro'
-import { cn } from '@/lib/cn'
+import type { Service } from '@/lib/payload-types';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import { cn } from '@/lib/cn';
 
 interface Props {
-  service: Service
-  href: string
-  class?: string
+  service: Service;
+  href: string;
+  class?: string;
 }
 
-const { service, href, class: className } = Astro.props
+const { service, href, class: className } = Astro.props;
 ---
 
 <a
@@ -17,20 +17,24 @@ const { service, href, class: className } = Astro.props
   class={cn(
     'group flex flex-col gap-3 rounded-xl border border-border bg-background p-6 transition-all',
     'hover:border-brand-500 hover:shadow-md',
-    className,
+    className
   )}
 >
-  <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-950 dark:text-brand-400">
+  <div
+    class="bg-brand-50 text-brand-600 dark:bg-brand-950 dark:text-brand-400 flex h-10 w-10 items-center justify-center rounded-lg"
+  >
     <Icon name={service.icon ?? 'sparkles'} size="md" />
   </div>
   <div class="flex flex-col gap-1">
-    <h3 class="text-base font-semibold text-foreground group-hover:text-brand-600 transition-colors">
+    <h3
+      class="text-foreground group-hover:text-brand-600 text-base font-semibold transition-colors"
+    >
       {service.title}
     </h3>
-    {service.shortDescription && (
-      <p class="text-sm text-foreground-muted line-clamp-2">
-        {service.shortDescription}
-      </p>
-    )}
+    {
+      service.shortDescription && (
+        <p class="text-foreground-muted line-clamp-2 text-sm">{service.shortDescription}</p>
+      )
+    }
   </div>
 </a>

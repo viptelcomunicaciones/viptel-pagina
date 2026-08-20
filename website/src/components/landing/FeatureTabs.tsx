@@ -436,7 +436,10 @@ export function FeatureTabs() {
   const [activeTab, setActiveTab] = useState('theming');
 
   return (
-    <section id="features" className="bg-background relative overflow-hidden py-[var(--space-section-md)]">
+    <section
+      id="features"
+      className="bg-background relative overflow-hidden py-[var(--space-section-md)]"
+    >
       {/* Decorative logomark watermark */}
       <div
         className="pointer-events-none absolute -top-8 right-8 hidden h-[28rem] w-[28rem] opacity-[0.04] grayscale md:block lg:top-10 lg:right-24 lg:h-[44rem] lg:w-[44rem] dark:opacity-[0.06]"
@@ -477,7 +480,9 @@ export function FeatureTabs() {
           {tabs.map((tab) => (
             <div key={tab.id} data-tab-content={tab.id}>
               <div className="mb-[var(--space-heading-gap)]">
-                <h3 className="text-foreground text-xl font-semibold">{tabContent[tab.id].title}</h3>
+                <h3 className="text-foreground text-xl font-semibold">
+                  {tabContent[tab.id].title}
+                </h3>
                 <p className="text-foreground-muted mt-2">{tabContent[tab.id].content}</p>
               </div>
               <CodeBlock

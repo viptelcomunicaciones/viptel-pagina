@@ -1,9 +1,4 @@
-import {
-  useEffect,
-  useRef,
-  useCallback,
-  type ReactNode,
-} from 'react';
+import { useEffect, useRef, useCallback, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/cn';
 
@@ -43,9 +38,9 @@ export function Dialog({
 
   const getFocusableElements = useCallback((): HTMLElement[] => {
     if (!panelRef.current) return [];
-    return Array.from(
-      panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
-    ).filter((el) => !el.hasAttribute('disabled'));
+    return Array.from(panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+      (el) => !el.hasAttribute('disabled')
+    );
   }, []);
 
   // Body scroll lock and focus management on open/close
@@ -122,19 +117,19 @@ export function Dialog({
     >
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-foreground/50 backdrop-blur-sm opacity-100 transition-opacity duration-200"
+        className="bg-foreground/50 fixed inset-0 opacity-100 backdrop-blur-sm transition-opacity duration-200"
         aria-hidden="true"
         onClick={onClose}
       />
 
       {/* Dialog Panel */}
-      <div className="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto">
+      <div className="fixed inset-0 flex items-center justify-center overflow-y-auto p-4">
         <div
           ref={panelRef}
           className={cn(
             'relative w-full',
             sizes[size],
-            'bg-background rounded-xl border border-border shadow-xl',
+            'bg-background border-border rounded-xl border shadow-xl',
             'scale-100 opacity-100 transition-all duration-200',
             className
           )}
@@ -146,13 +141,13 @@ export function Dialog({
               'absolute top-4 right-4',
               'text-foreground-muted hover:text-foreground',
               'transition-colors',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md'
+              'focus-visible:ring-ring rounded-md focus-visible:ring-2 focus-visible:outline-none'
             )}
             onClick={onClose}
             aria-label="Close dialog"
           >
             <svg
-              className="w-5 h-5"
+              className="h-5 w-5"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -168,18 +163,12 @@ export function Dialog({
           {(title || description) && (
             <div className="p-6 pb-0">
               {title && (
-                <h2
-                  id={titleId}
-                  className="text-lg font-semibold text-foreground pr-8"
-                >
+                <h2 id={titleId} className="text-foreground pr-8 text-lg font-semibold">
                   {title}
                 </h2>
               )}
               {description && (
-                <p
-                  id={descriptionId}
-                  className="mt-1 text-sm text-foreground-muted"
-                >
+                <p id={descriptionId} className="text-foreground-muted mt-1 text-sm">
                   {description}
                 </p>
               )}

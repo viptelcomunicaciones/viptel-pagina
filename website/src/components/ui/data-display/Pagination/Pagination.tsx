@@ -130,7 +130,7 @@ export function Pagination({
             key={`ellipsis-${index}`}
             className={cn(
               paginationItemVariants({ variant: 'default', size }),
-              'cursor-default hover:bg-transparent',
+              'cursor-default hover:bg-transparent'
             )}
             role="separator"
             aria-label="More pages"
@@ -154,7 +154,7 @@ export function Pagination({
           >
             {page}
           </button>
-        ),
+        )
       )}
 
       {/* Next */}

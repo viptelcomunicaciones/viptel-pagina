@@ -1,24 +1,24 @@
 ---
-import type { PageBlock } from '@/lib/block-types'
-import type { AstroComponentFactory } from 'astro/runtime/server/index.js'
-import ContentBlock from './ContentBlock.astro'
-import MediaContentBlock from './MediaContentBlock.astro'
-import CardsBlock from './CardsBlock.astro'
-import PricingBlock from './PricingBlock.astro'
-import CTABlock from './CTABlock.astro'
-import FAQBlock from './FAQBlock.astro'
-import GalleryBlock from './GalleryBlock.astro'
-import MediaBlockRenderer from './MediaBlockRenderer.astro'
-import ArchiveBlock from './ArchiveBlock.astro'
-import FormBlockRenderer from './FormBlock.astro'
+import type { PageBlock } from '@/lib/block-types';
+import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
+import ContentBlock from './ContentBlock.astro';
+import MediaContentBlock from './MediaContentBlock.astro';
+import CardsBlock from './CardsBlock.astro';
+import PricingBlock from './PricingBlock.astro';
+import CTABlock from './CTABlock.astro';
+import FAQBlock from './FAQBlock.astro';
+import GalleryBlock from './GalleryBlock.astro';
+import MediaBlockRenderer from './MediaBlockRenderer.astro';
+import ArchiveBlock from './ArchiveBlock.astro';
+import FormBlockRenderer from './FormBlock.astro';
 
 interface Props {
-  layout?: PageBlock[] | null
-  locale?: string
+  layout?: PageBlock[] | null;
+  locale?: string;
 }
 
-const { layout: rawLayout, locale = 'es' } = Astro.props
-const layout = rawLayout ?? []
+const { layout: rawLayout, locale = 'es' } = Astro.props;
+const layout = rawLayout ?? [];
 
 // Single registration point for page blocks: adding a new block type means
 // creating its component and adding one entry here (open/closed principle).
@@ -33,11 +33,13 @@ const renderers: Record<string, AstroComponentFactory> = {
   gallery: GalleryBlock,
   archive: ArchiveBlock,
   formBlock: FormBlockRenderer,
-}
+};
 ---
 
-{layout.map((block) => {
-  const Renderer = renderers[block.blockType]
-  if (!Renderer) return null
-  return <Renderer block={block} locale={locale} />
-})}
+{
+  layout.map((block) => {
+    const Renderer = renderers[block.blockType];
+    if (!Renderer) return null;
+    return <Renderer block={block} locale={locale} />;
+  })
+}

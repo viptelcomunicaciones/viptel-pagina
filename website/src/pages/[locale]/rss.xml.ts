@@ -12,7 +12,10 @@ export async function GET(context: APIContext) {
     return new Response('Not Found', { status: 404 });
   }
 
-  const posts = await payload.posts().getAll(locale).catch(() => [] as Post[]);
+  const posts = await payload
+    .posts()
+    .getAll(locale)
+    .catch(() => [] as Post[]);
 
   const site = context.site?.toString() ?? siteConfig.url;
   const siteUrl = site.endsWith('/') ? site.slice(0, -1) : site;

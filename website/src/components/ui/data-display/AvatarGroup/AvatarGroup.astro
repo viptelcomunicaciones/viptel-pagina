@@ -20,13 +20,7 @@ interface Props extends HTMLAttributes<'div'> {
   size?: 'xs' | 'sm' | 'md' | 'lg';
 }
 
-const {
-  avatars,
-  max = 4,
-  size = 'md',
-  class: className,
-  ...attrs
-} = Astro.props;
+const { avatars, max = 4, size = 'md', class: className, ...attrs } = Astro.props;
 
 const visibleAvatars = avatars.slice(0, max);
 const overflowCount = Math.max(0, avatars.length - max);
@@ -40,27 +34,31 @@ const overflowSizes = {
 ---
 
 <div class={cn('flex -space-x-2', className)} {...attrs}>
-  {visibleAvatars.map((avatar) => (
-    <Avatar
-      src={avatar.src}
-      alt={avatar.alt || ''}
-      fallback={avatar.fallback}
-      size={size}
-      class="ring-2 ring-background"
-    />
-  ))}
-  {overflowCount > 0 && (
-    <div
-      class={cn(
-        'relative inline-flex items-center justify-center',
-        'rounded-full overflow-hidden',
-        'bg-secondary text-foreground-muted font-semibold',
-        'ring-2 ring-background',
-        overflowSizes[size]
-      )}
-      aria-label={`${overflowCount} more`}
-    >
-      +{overflowCount}
-    </div>
-  )}
+  {
+    visibleAvatars.map((avatar) => (
+      <Avatar
+        src={avatar.src}
+        alt={avatar.alt || ''}
+        fallback={avatar.fallback}
+        size={size}
+        class="ring-background ring-2"
+      />
+    ))
+  }
+  {
+    overflowCount > 0 && (
+      <div
+        class={cn(
+          'relative inline-flex items-center justify-center',
+          'overflow-hidden rounded-full',
+          'bg-secondary text-foreground-muted font-semibold',
+          'ring-background ring-2',
+          overflowSizes[size]
+        )}
+        aria-label={`${overflowCount} more`}
+      >
+        +{overflowCount}
+      </div>
+    )
+  }
 </div>

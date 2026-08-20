@@ -34,7 +34,9 @@ interface Props {
 
 const { locale = defaultLocale } = Astro.props;
 
-const { docs, totalDocs, totalPages } = await payload.projects().getPaginated(locale, 1, PROJECTS_PER_PAGE);
+const { docs, totalDocs, totalPages } = await payload
+  .projects()
+  .getPaginated(locale, 1, PROJECTS_PER_PAGE);
 
 const allProjects = await getVisibleProjects(locale);
 const topTags = collectTopProjectTags(allProjects, PROJECT_TAG_CLOUD_LIMIT);
@@ -65,48 +67,49 @@ const aboutUrl = localizedPath('/about', locale);
   </Hero>
 
   <!-- All projects -->
-  {pageProjects.length > 0 && (
-    <section class="py-[var(--space-section-md)] bg-background-secondary border-t border-border">
-      <div class="mx-auto max-w-6xl px-6 flex flex-col gap-8">
+  {
+    pageProjects.length > 0 && (
+      <section class="bg-background-secondary border-border border-t py-[var(--space-section-md)]">
+        <div class="mx-auto flex max-w-6xl flex-col gap-8 px-6">
+          {topTags.length > 0 && (
+            <div class="flex flex-col items-center gap-4" data-reveal>
+              <ProjectTagList tags={topTags} locale={locale} class="justify-center" />
+            </div>
+          )}
 
-        {topTags.length > 0 && (
-          <div class="flex flex-col items-center gap-4" data-reveal>
-            <ProjectTagList tags={topTags} locale={locale} class="justify-center" />
+          <div class="grid gap-6 md:grid-cols-2">
+            {pageProjects.map((project, i) => (
+              <ProjectCard project={project} index={i} locale={locale} />
+            ))}
           </div>
-        )}
 
-        <div class="grid gap-6 md:grid-cols-2">
-          {pageProjects.map((project, i) => (
-            <ProjectCard project={project} index={i} locale={locale} />
-          ))}
+          <Pagination
+            currentPage={1}
+            totalPages={totalPages}
+            href={(p) => getProjectsPageUrl(p, locale)}
+            totalDocs={totalDocs}
+            pageSize={PROJECTS_PER_PAGE}
+          />
         </div>
+      </section>
+    )
+  }
 
-        <Pagination
-          currentPage={1}
-          totalPages={totalPages}
-          href={(p) => getProjectsPageUrl(p, locale)}
-          totalDocs={totalDocs}
-          pageSize={PROJECTS_PER_PAGE}
-        />
-      </div>
-    </section>
-  )}
-
- <!-- CTA -->
-  <section class="relative z-10 py-[var(--space-section-md)] bg-background">
+  <!-- CTA -->
+  <section class="bg-background relative z-10 py-[var(--space-section-md)]">
     <!-- Mobile: flat section, no card -->
     <div class="glitch:hidden mx-auto max-w-2xl px-6 text-center" data-reveal>
       <Badge variant="brand" pill class="mb-6">
         <Icon name="message-circle" size="sm" />
         {t('projects.ctaBadge', locale)}
       </Badge>
-      <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">
+      <h2 class="font-display text-foreground mb-4 text-4xl font-bold text-balance">
         {t('projects.ctaHeading', locale)}
       </h2>
-      <p class="text-lg text-foreground-muted mb-8 text-balance">
+      <p class="text-foreground-muted mb-8 text-lg text-balance">
         {t('projects.ctaLead', locale)}
       </p>
-      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <div class="flex flex-col justify-center gap-4 sm:flex-row">
         <Button size="lg" href={contactUrl} class="cta-btn-brand">
           {t('projects.ctaPrimary', locale)}
           <Icon name="arrow-right" size="sm" />
@@ -120,13 +123,13 @@ const aboutUrl = localizedPath('/about', locale);
 
     <!-- Desktop: contained LetterGlitch band with glass card -->
     <LetterGlitchBand>
-      <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">
+      <h2 class="font-display text-foreground mb-4 text-4xl font-bold text-balance">
         {t('projects.ctaHeading', locale)}
       </h2>
-      <p class="text-lg text-foreground-muted mb-8 text-balance">
+      <p class="text-foreground-muted mb-8 text-lg text-balance">
         {t('projects.ctaLead', locale)}
       </p>
-      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <div class="flex flex-col justify-center gap-4 sm:flex-row">
         <Button size="lg" href={contactUrl} class="hero-btn-brand">
           {t('projects.ctaPrimary', locale)}
           <Icon name="arrow-right" size="sm" />

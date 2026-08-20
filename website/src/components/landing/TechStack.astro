@@ -28,52 +28,60 @@ const { title, description, badge, badgeIcon, background = 'secondary' } = Astro
 
 const cardNames = ['Astro', 'Tailwind CSS', 'TypeScript', 'React'];
 const items = viptelStack;
-const cards = items
-  .filter((item) => cardNames.includes(item.name))
-  .slice(0, 4);
+const cards = items.filter((item) => cardNames.includes(item.name)).slice(0, 4);
 
 const bgClass = background === 'primary' ? 'bg-background' : 'bg-background-secondary';
 ---
 
 <section class={`border-y border-border ${bgClass} py-[var(--space-section-md)]`}>
-  <div class="mx-auto max-w-6xl px-6 flex flex-col gap-8">
-    {(badge || title || description) && (
-      <div class="flex flex-col items-center gap-4 text-center" data-reveal>
-        {(badge || title) && (
-          <div class="flex flex-col items-center gap-6">
-            {badge && (
-              <Badge variant="brand" pill>
-                {badgeIcon && <Icon name={badgeIcon} size="sm" />}
-                {badge}
-              </Badge>
-            )}
-            {title && (
-              <h2 class="font-display text-4xl font-bold text-foreground">{title}</h2>
-            )}
-          </div>
-        )}
-        {description && (
-          <p class="text-lg text-foreground-muted max-w-2xl mx-auto">{description}</p>
-        )}
-      </div>
-    )}
+  <div class="mx-auto flex max-w-6xl flex-col gap-8 px-6">
+    {
+      (badge || title || description) && (
+        <div class="flex flex-col items-center gap-4 text-center" data-reveal>
+          {(badge || title) && (
+            <div class="flex flex-col items-center gap-6">
+              {badge && (
+                <Badge variant="brand" pill>
+                  {badgeIcon && <Icon name={badgeIcon} size="sm" />}
+                  {badge}
+                </Badge>
+              )}
+              {title && <h2 class="font-display text-foreground text-4xl font-bold">{title}</h2>}
+            </div>
+          )}
+          {description && (
+            <p class="text-foreground-muted mx-auto max-w-2xl text-lg">{description}</p>
+          )}
+        </div>
+      )
+    }
 
     {/* Phones: a static 2×2 grid of the four core-stack cards. */}
     <div class="tech-cards" data-reveal-children>
-      {cards.map((item) => (
-        <div
-          style={`--tech-color: oklch(${item.colorOklch}); --tech-bg: oklch(${item.colorOklch} / 0.1);`}
-        >
-          <Card variant="elevated" padding="md" hover={true} href={item.url} target="_blank" rel="noopener noreferrer" class="h-full text-center">
-            <div class="flex flex-col items-center gap-[var(--space-stack-sm)]">
-              <div class="tech-icon-wrap">
-                <Icon name={item.icon} size="lg" />
+      {
+        cards.map((item) => (
+          <div
+            style={`--tech-color: oklch(${item.colorOklch}); --tech-bg: oklch(${item.colorOklch} / 0.1);`}
+          >
+            <Card
+              variant="elevated"
+              padding="md"
+              hover={true}
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="h-full text-center"
+            >
+              <div class="flex flex-col items-center gap-[var(--space-stack-sm)]">
+                <div class="tech-icon-wrap">
+                  <Icon name={item.icon} size="lg" />
+                </div>
+                <span class="font-display text-foreground text-lg font-bold">{item.name}</span>
               </div>
-              <span class="font-display text-lg font-bold text-foreground">{item.name}</span>
-            </div>
-          </Card>
-        </div>
-      ))}
+            </Card>
+          </div>
+        ))
+      }
     </div>
 
     {/* Tablet & up: the full double-row marquee — the same one the homepage uses. */}
@@ -101,7 +109,9 @@ const bgClass = background === 'primary' ? 'bg-background' : 'bg-background-seco
      portrait by width, and landscape phones by short height + a coarse pointer
      (which excludes tablets and laptops) — so both pages agree on what a phone
      is. Default (tablet/desktop) shows the marquee. ────────────────────────── */
-  .tech-marquee { display: block; }
+  .tech-marquee {
+    display: block;
+  }
   .tech-cards {
     display: none;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -109,11 +119,19 @@ const bgClass = background === 'primary' ? 'bg-background' : 'bg-background-seco
   }
 
   @media (max-width: 767px) {
-    .tech-marquee { display: none; }
-    .tech-cards { display: grid; }
+    .tech-marquee {
+      display: none;
+    }
+    .tech-cards {
+      display: grid;
+    }
   }
   @media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
-    .tech-marquee { display: none; }
-    .tech-cards { display: grid; }
+    .tech-marquee {
+      display: none;
+    }
+    .tech-cards {
+      display: grid;
+    }
   }
 </style>

@@ -42,9 +42,17 @@ const modalId = `search-modal-${Math.random().toString(36).slice(2, 9)}`;
     aria-controls={modalId}
     aria-label={t('common.search', locale)}
   >
-    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-      <circle cx="11" cy="11" r="7" />
-      <path stroke-linecap="round" d="m20 20-3.5-3.5" />
+    <svg
+      class="h-4 w-4"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      stroke-width="2"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="7"></circle>
+      <path stroke-linecap="round" d="m20 20-3.5-3.5"></path>
     </svg>
   </button>
 
@@ -57,18 +65,29 @@ const modalId = `search-modal-${Math.random().toString(36).slice(2, 9)}`;
     aria-label={t('common.search', locale)}
     data-pagefind-ignore
   >
-    <div class="search-backdrop absolute inset-0 bg-black/60 backdrop-blur-sm" data-search-close></div>
+    <div class="search-backdrop absolute inset-0 bg-black/60 backdrop-blur-sm" data-search-close>
+    </div>
 
-    <div class="relative mx-auto mt-[12vh] w-[calc(100%-2rem)] max-w-xl overflow-hidden rounded-xl border border-border bg-background shadow-2xl">
+    <div
+      class="border-border bg-background relative mx-auto mt-[12vh] w-[calc(100%-2rem)] max-w-xl overflow-hidden rounded-xl border shadow-2xl"
+    >
       <!-- Input row -->
-      <div class="flex items-center gap-3 border-b border-border px-4">
-        <svg class="h-5 w-5 shrink-0 text-foreground-muted" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <circle cx="11" cy="11" r="7" />
-          <path stroke-linecap="round" d="m20 20-3.5-3.5" />
+      <div class="border-border flex items-center gap-3 border-b px-4">
+        <svg
+          class="text-foreground-muted h-5 w-5 shrink-0"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="7"></circle>
+          <path stroke-linecap="round" d="m20 20-3.5-3.5"></path>
         </svg>
         <input
           type="search"
-          class="search-input w-full bg-transparent py-4 text-base text-foreground placeholder:text-foreground-subtle focus:outline-none"
+          class="search-input text-foreground placeholder:text-foreground-subtle w-full bg-transparent py-4 text-base focus:outline-none"
           placeholder={t('search.placeholder', locale)}
           autocomplete="off"
           autocorrect="off"
@@ -78,7 +97,7 @@ const modalId = `search-modal-${Math.random().toString(36).slice(2, 9)}`;
         />
         <button
           type="button"
-          class="shrink-0 rounded-md border border-border-strong px-1.5 py-0.5 text-[10px] font-medium text-foreground-muted hover:bg-secondary hover:text-foreground transition-colors"
+          class="border-border-strong text-foreground-muted hover:bg-secondary hover:text-foreground shrink-0 rounded-md border px-1.5 py-0.5 text-[10px] font-medium transition-colors"
           data-search-close
         >
           ESC
@@ -94,7 +113,7 @@ const modalId = `search-modal-${Math.random().toString(36).slice(2, 9)}`;
         data-i18n-empty={t('search.noResults', locale)}
         data-i18n-unavailable={t('search.unavailable', locale)}
       >
-        <p class="search-hint px-3 py-8 text-center text-sm text-foreground-muted">
+        <p class="search-hint text-foreground-muted px-3 py-8 text-center text-sm">
           {t('search.hint', locale)}
         </p>
       </div>
@@ -154,10 +173,7 @@ const modalId = `search-modal-${Math.random().toString(36).slice(2, 9)}`;
   }
 
   function escapeHtml(text: string): string {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
+    return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
   function initSearchModals() {
@@ -230,9 +246,7 @@ const modalId = `search-modal-${Math.random().toString(36).slice(2, 9)}`;
           return;
         }
 
-        const items = await Promise.all(
-          search.results.slice(0, MAX_RESULTS).map((r) => r.data())
-        );
+        const items = await Promise.all(search.results.slice(0, MAX_RESULTS).map((r) => r.data()));
 
         results.innerHTML = items
           .map(
@@ -286,7 +300,6 @@ const modalId = `search-modal-${Math.random().toString(36).slice(2, 9)}`;
           links[index - 1].focus();
         }
       });
-
     });
 
     // Cmd/Ctrl+K toggles the first search modal on the page. Bound once per

@@ -11,9 +11,15 @@
  */
 import PageLayout from '@/layouts/PageLayout.astro';
 import BlogSidebar from '@/components/blog/BlogSidebar.astro';
+import BlogFilterRow, { type BlogFilterItem } from '@/components/blog/BlogFilterRow.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import { t, defaultLocale } from '@/i18n';
-import { getBlogSidebarData } from '@/lib/blog';
+import {
+  getBlogSidebarData,
+  getCategoryArchiveUrl,
+  getPostTypeUrl,
+  getSubcategoryArchiveUrl,
+} from '@/lib/blog';
 
 interface Props {
   locale?: string;
@@ -42,6 +48,58 @@ const {
 } = Astro.props;
 
 const sidebarData = await getBlogSidebarData(locale);
+
+// Fila de navegación jerárquica:
+//  índice → chips de tipos; tipo → chips de categorías; categoría → chips de
+//  subcategorías (también en subcategoría, para saltar entre hermanas).
+let filterItems: BlogFilterItem[] = [];
+let filterActiveHref: string | undefined;
+let filterLabel = '';
+
+if (activeCategorySlug && activeTypeSlug) {
+  const category = sidebarData.types
+    .find((t) => t.type.slug === activeTypeSlug)
+    ?.categories.find((c) => c.category.slug === activeCategorySlug);
+  if (category && category.subcategories.length > 0) {
+    filterItems = category.subcategories.map((sub) => ({
+      label: sub.category.title,
+      href: getSubcategoryArchiveUrl(activeTypeSlug, category.category.slug, sub.category, locale),
+      count: sub.count,
+    }));
+    filterLabel = t('blog.filterSubcategories', locale);
+    if (activeSubcategorySlug) {
+      const activeSub = category.subcategories.find(
+        (s) => s.category.slug === activeSubcategorySlug
+      );
+      if (activeSub) {
+        filterActiveHref = getSubcategoryArchiveUrl(
+          activeTypeSlug,
+          category.category.slug,
+          activeSub.category,
+          locale
+        );
+      }
+    }
+  }
+} else if (activeTypeSlug) {
+  const type = sidebarData.types.find((t) => t.type.slug === activeTypeSlug);
+  if (type && type.categories.length > 0) {
+    filterItems = type.categories.map((c) => ({
+      label: c.category.title,
+      href: getCategoryArchiveUrl(activeTypeSlug, c.category, locale),
+      count: c.count,
+    }));
+    filterLabel = t('blog.filterCategories', locale);
+  }
+} else if (!activeTag) {
+  filterItems = sidebarData.types.map((t) => ({
+    label: t.type.title,
+    href: getPostTypeUrl(t.type.slug, locale),
+    icon: t.type.icon || undefined,
+    count: t.count,
+  }));
+  filterLabel = t('blog.filterTypes', locale);
+}
 ---
 
 <PageLayout
@@ -53,20 +111,23 @@ const sidebarData = await getBlogSidebarData(locale);
 >
   <slot name="hero" />
 
-  <section class="bg-background-secondary py-[var(--space-section-md)] border-t border-border">
+  <section class="bg-background-secondary border-border border-t py-[var(--space-section-md)]">
     <div class="mx-auto max-w-7xl px-6">
       <div class="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-start">
         <input type="checkbox" id="blog-sidebar-toggle" class="peer sr-only" />
 
         <label
           for="blog-sidebar-toggle"
-          class="lg:hidden inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
+          class="border-brand-500/40 bg-background text-brand-700 dark:text-brand-400 hover:border-brand-500/80 inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors lg:hidden"
         >
           <Icon name="menu" size="sm" />
           {t('blog.sidebarToggle', locale)}
         </label>
 
-        <div class="hidden peer-checked:block lg:block lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
+        <div
+          data-sidebar-scroll
+          class="hidden [scrollbar-gutter:stable] peer-checked:block lg:sticky lg:top-24 lg:block lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto"
+        >
           <BlogSidebar
             locale={locale}
             types={sidebarData.types}
@@ -78,7 +139,16 @@ const sidebarData = await getBlogSidebarData(locale);
           />
         </div>
 
-        <div class="min-w-0 flex flex-col gap-8">
+        <div class="flex min-w-0 flex-col gap-8">
+          {
+            filterItems.length > 0 && (
+              <BlogFilterRow
+                label={filterLabel}
+                items={filterItems}
+                activeHref={filterActiveHref}
+              />
+            )
+          }
           <slot />
         </div>
       </div>
@@ -87,3 +157,24 @@ const sidebarData = await getBlogSidebarData(locale);
 
   <slot name="footer" />
 </PageLayout>
+
+<script>
+  const sidebarContainer = document.querySelector('[data-sidebar-scroll]');
+  if (sidebarContainer) {
+    const activeNodes = sidebarContainer.querySelectorAll('[aria-current="page"]');
+    const active = activeNodes.length > 0 ? activeNodes[activeNodes.length - 1] : null;
+    const toggle = document.getElementById('blog-sidebar-toggle') as HTMLInputElement | null;
+    const scrollToActive = () => {
+      active?.scrollIntoView({ block: 'nearest' });
+    };
+
+    if (active) {
+      if (window.matchMedia('(min-width: 1024px)').matches) {
+        scrollToActive();
+      }
+      toggle?.addEventListener('change', () => {
+        if (toggle.checked) scrollToActive();
+      });
+    }
+  }
+</script>

@@ -36,7 +36,7 @@ const watchUrl = `https://www.youtube.com/watch?v=${id}`;
 
 <div
   class:list={[
-    'yt-embed not-prose relative my-8 aspect-video overflow-hidden rounded-xl border border-border bg-background-secondary',
+    'yt-embed not-prose border-border bg-background-secondary relative my-8 aspect-video overflow-hidden rounded-xl border',
     className,
   ]}
   data-yt-id={id}
@@ -51,15 +51,17 @@ const watchUrl = `https://www.youtube.com/watch?v=${id}`;
   />
   <button
     type="button"
-    class="yt-play group absolute inset-0 flex cursor-pointer items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+    class="yt-play group focus-visible:ring-ring absolute inset-0 flex cursor-pointer items-center justify-center focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
     aria-label={t('video.playLabel', locale, { title })}
   >
     <span
-      class="flex h-16 w-16 items-center justify-center rounded-full border border-border-strong bg-background/90 text-brand-500 shadow-lg backdrop-blur-sm transition-transform duration-(--transition-normal) group-hover:scale-110"
+      class="border-border-strong bg-background/90 text-brand-500 flex h-16 w-16 items-center justify-center rounded-full border shadow-lg backdrop-blur-sm transition-transform duration-(--transition-normal) group-hover:scale-110"
       aria-hidden="true"
     >
       <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-        <path d="M8 5.14v13.72c0 .82.9 1.32 1.6.89l10.98-6.86a1.05 1.05 0 0 0 0-1.78L9.6 4.25c-.7-.43-1.6.07-1.6.89Z" />
+        <path
+          d="M8 5.14v13.72c0 .82.9 1.32 1.6.89l10.98-6.86a1.05 1.05 0 0 0 0-1.78L9.6 4.25c-.7-.43-1.6.07-1.6.89Z"
+        ></path>
       </svg>
     </span>
   </button>
@@ -68,7 +70,7 @@ const watchUrl = `https://www.youtube.com/watch?v=${id}`;
       href={watchUrl}
       target="_blank"
       rel="noopener noreferrer"
-      class="absolute bottom-3 right-3 rounded-full border border-border-strong bg-background/90 px-3 py-1.5 text-sm font-medium text-foreground"
+      class="border-border-strong bg-background/90 text-foreground absolute right-3 bottom-3 rounded-full border px-3 py-1.5 text-sm font-medium"
     >
       {t('video.watchOn', locale)}
     </a>

@@ -34,21 +34,32 @@ const schema = createBreadcrumbSchema(schemaItems);
         <li class="flex items-center gap-2">
           {index > 0 && (
             <svg
-              class="h-4 w-4 text-muted-foreground"
+              class="text-muted-foreground h-4 w-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
               aria-hidden="true"
             >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           )}
           {item.href && index !== items.length - 1 ? (
-            <a href={item.href} class="text-muted-foreground hover:text-foreground transition-colors">
+            <a
+              href={item.href}
+              class="text-muted-foreground hover:text-foreground transition-colors"
+            >
               {item.label}
             </a>
           ) : (
-            <span class="text-foreground font-medium" aria-current={index === items.length - 1 ? 'page' : undefined}>
+            <span
+              class="text-foreground font-medium"
+              aria-current={index === items.length - 1 ? 'page' : undefined}
+            >
               {item.label}
             </span>
           )}

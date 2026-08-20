@@ -139,7 +139,11 @@ const rowConfigs = Array.from({ length: rowCount }, (_, r) => {
             return (
               <div
                 class="stack-marquee-item"
-                style={logoColor === 'tool' && item.colorOklch ? `--tech-color: oklch(${item.colorOklch});` : undefined}
+                style={
+                  logoColor === 'tool' && item.colorOklch
+                    ? `--tech-color: oklch(${item.colorOklch});`
+                    : undefined
+                }
               >
                 <Card
                   variant="elevated"

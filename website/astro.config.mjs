@@ -73,11 +73,19 @@ export default defineConfig({
   env: {
     schema: {
       SITE_URL: envField.string({ context: 'server', access: 'public', optional: true }),
-      PUBLIC_GA_MEASUREMENT_ID: envField.string({ context: 'client', access: 'public', optional: true }),
+      PUBLIC_GA_MEASUREMENT_ID: envField.string({
+        context: 'client',
+        access: 'public',
+        optional: true,
+      }),
       PUBLIC_GTM_ID: envField.string({ context: 'client', access: 'public', optional: true }),
       // Umami — privacy-friendly, cookieless analytics. Set the website ID to
       // enable it; the src defaults to Umami Cloud, override it when self-hosting.
-      PUBLIC_UMAMI_WEBSITE_ID: envField.string({ context: 'client', access: 'public', optional: true }),
+      PUBLIC_UMAMI_WEBSITE_ID: envField.string({
+        context: 'client',
+        access: 'public',
+        optional: true,
+      }),
       PUBLIC_UMAMI_SRC: envField.string({
         context: 'client',
         access: 'public',
@@ -88,12 +96,40 @@ export default defineConfig({
       RESEND_FROM_EMAIL: envField.string({ context: 'server', access: 'secret', optional: true }),
       RESEND_AUDIENCE_ID: envField.string({ context: 'server', access: 'secret', optional: true }),
       NEWSLETTER_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
-      GOOGLE_SITE_VERIFICATION: envField.string({ context: 'server', access: 'public', optional: true }),
-      BING_SITE_VERIFICATION: envField.string({ context: 'server', access: 'public', optional: true }),
-      PAYLOAD_URL: envField.string({ context: 'server', access: 'public', optional: true, default: 'http://localhost:3000' }),
-      PUBLIC_GOOGLE_MAPS_API_KEY: envField.string({ context: 'client', access: 'public', optional: true, default: '' }),
-      PUBLIC_CONSENT_ENABLED: envField.boolean({ context: 'client', access: 'public', optional: true, default: false }),
-      PUBLIC_PRIVACY_POLICY_URL: envField.string({ context: 'client', access: 'public', optional: true, default: '' }),
+      GOOGLE_SITE_VERIFICATION: envField.string({
+        context: 'server',
+        access: 'public',
+        optional: true,
+      }),
+      BING_SITE_VERIFICATION: envField.string({
+        context: 'server',
+        access: 'public',
+        optional: true,
+      }),
+      PAYLOAD_URL: envField.string({
+        context: 'server',
+        access: 'public',
+        optional: true,
+        default: 'http://localhost:3000',
+      }),
+      PUBLIC_GOOGLE_MAPS_API_KEY: envField.string({
+        context: 'client',
+        access: 'public',
+        optional: true,
+        default: '',
+      }),
+      PUBLIC_CONSENT_ENABLED: envField.boolean({
+        context: 'client',
+        access: 'public',
+        optional: true,
+        default: false,
+      }),
+      PUBLIC_PRIVACY_POLICY_URL: envField.string({
+        context: 'client',
+        access: 'public',
+        optional: true,
+        default: '',
+      }),
       PAYLOAD_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
       PREVIEW_SECRET: envField.string({ context: 'server', access: 'secret', optional: true }),
     },
@@ -103,13 +139,7 @@ export default defineConfig({
     layout: 'constrained',
   },
 
-  integrations: [
-    react(),
-    mdx(),
-    sitemap(),
-    icon(),
-    pagefind(),
-  ],
+  integrations: [react(), mdx(), sitemap(), icon(), pagefind()],
 
   vite: {
     plugins: [tailwindcss()],
@@ -125,5 +155,4 @@ export default defineConfig({
       wrap: true,
     },
   },
-
 });

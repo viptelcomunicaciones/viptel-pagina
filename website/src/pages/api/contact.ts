@@ -29,7 +29,10 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   const ip = clientAddress || 'unknown';
   if (rateLimit(ip)) {
     return new Response(
-      JSON.stringify({ success: false, errors: { form: ['Too many requests. Please try again later.'] } }),
+      JSON.stringify({
+        success: false,
+        errors: { form: ['Too many requests. Please try again later.'] },
+      }),
       { status: 429, headers: { 'Content-Type': 'application/json' } }
     );
   }
@@ -57,10 +60,10 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
         fieldErrors[field].push(error.message);
       }
 
-      return new Response(
-        JSON.stringify({ success: false, errors: fieldErrors }),
-        { status: 400, headers: { 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ success: false, errors: fieldErrors }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     // Honeypot check (bot detection)
@@ -107,7 +110,10 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
     if (error) {
       console.error('Resend error:', error);
       return new Response(
-        JSON.stringify({ success: false, errors: { form: [error.message || 'Failed to send email'] } }),
+        JSON.stringify({
+          success: false,
+          errors: { form: [error.message || 'Failed to send email'] },
+        }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }

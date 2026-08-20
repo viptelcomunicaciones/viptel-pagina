@@ -1,36 +1,41 @@
 ---
-import { t, localizedPath } from '@/i18n'
-import { cn } from '@/lib/cn'
+import { t, localizedPath } from '@/i18n';
+import { cn } from '@/lib/cn';
 
 interface Props {
-  locale?: string
-  parentTitle?: string | null
-  parentSlug?: string | null
-  currentTitle: string
-  class?: string
+  locale?: string;
+  parentTitle?: string | null;
+  parentSlug?: string | null;
+  currentTitle: string;
+  class?: string;
 }
 
-const { locale = 'es', parentTitle, parentSlug, currentTitle, class: className } = Astro.props
+const { locale = 'es', parentTitle, parentSlug, currentTitle, class: className } = Astro.props;
 
-const servicesPath = localizedPath('/services', locale)
+const servicesPath = localizedPath('/services', locale);
 ---
 
-<nav class={cn('flex items-center gap-1 text-sm text-foreground-muted', className)} aria-label="Breadcrumb">
-  <a href={localizedPath('/', locale)} class="transition-colors hover:text-foreground">
+<nav
+  class={cn('flex items-center gap-1 text-sm text-foreground-muted', className)}
+  aria-label="Breadcrumb"
+>
+  <a href={localizedPath('/', locale)} class="hover:text-foreground transition-colors">
     {t('services.breadcrumb.home', locale)}
   </a>
   <span class="select-none">/</span>
-  <a href={servicesPath} class="transition-colors hover:text-foreground">
+  <a href={servicesPath} class="hover:text-foreground transition-colors">
     {t('services.breadcrumb.services', locale)}
   </a>
-  {parentTitle && parentSlug && (
-    <>
-      <span class="select-none">/</span>
-      <a href={`${servicesPath}/${parentSlug}`} class="transition-colors hover:text-foreground">
-        {parentTitle}
-      </a>
-    </>
-  )}
+  {
+    parentTitle && parentSlug && (
+      <>
+        <span class="select-none">/</span>
+        <a href={`${servicesPath}/${parentSlug}`} class="hover:text-foreground transition-colors">
+          {parentTitle}
+        </a>
+      </>
+    )
+  }
   <span class="select-none">/</span>
   <span class="text-foreground font-medium">{currentTitle}</span>
 </nav>

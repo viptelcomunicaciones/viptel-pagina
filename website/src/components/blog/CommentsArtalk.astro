@@ -235,7 +235,9 @@ const artalkLocale = artalk?.locale?.trim() ? artalk.locale.trim() : locale;
         }
       } catch (error) {
         delete mount.dataset.loaded;
-        renderError(mount.dataset.i18nError ?? 'Comments failed to load. Please refresh and try again.');
+        renderError(
+          mount.dataset.i18nError ?? 'Comments failed to load. Please refresh and try again.'
+        );
         console.error(error);
       }
     };

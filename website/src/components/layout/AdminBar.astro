@@ -3,29 +3,35 @@
 ---
 
 <script>
-  (async function() {
-    const PAYLOAD_URL = 'http://localhost:3000'
-    if (window.location.pathname.startsWith('/admin')) return
+  (async function () {
+    const PAYLOAD_URL = 'http://localhost:3000';
+    if (window.location.pathname.startsWith('/admin')) return;
 
     async function checkAuth() {
       try {
-        const res = await fetch(`${PAYLOAD_URL}/api/users/me`, { credentials: 'include' })
-        if (!res.ok) return false
-        const data = await res.json()
-        return !!(data && data.user)
-      } catch { return false }
+        const res = await fetch(`${PAYLOAD_URL}/api/users/me`, { credentials: 'include' });
+        if (!res.ok) return false;
+        const data = await res.json();
+        return !!(data && data.user);
+      } catch {
+        return false;
+      }
     }
 
     async function render() {
-      const existing = document.getElementById('payload-admin-bar')
-      const loggedIn = await checkAuth()
+      const existing = document.getElementById('payload-admin-bar');
+      const loggedIn = await checkAuth();
 
-      if (!loggedIn) { existing?.remove(); return }
-      if (existing) return
+      if (!loggedIn) {
+        existing?.remove();
+        return;
+      }
+      if (existing) return;
 
-      const bar = document.createElement('div')
-      bar.id = 'payload-admin-bar'
-      bar.style.cssText = 'position:static;width:100%;background:#111;color:#fff;font-family:system-ui;font-size:12px;display:flex;align-items:center;justify-content:space-between;padding:4px 16px;height:28px'
+      const bar = document.createElement('div');
+      bar.id = 'payload-admin-bar';
+      bar.style.cssText =
+        'position:static;width:100%;background:#111;color:#fff;font-family:system-ui;font-size:12px;display:flex;align-items:center;justify-content:space-between;padding:4px 16px;height:28px';
       bar.innerHTML = `<span style="font-weight:600">Viptel CMS</span>
         <nav style="display:flex;align-items:center;gap:2px">
           <a href="${PAYLOAD_URL}/admin/collections/pages" target="_blank" style="color:#ccc;text-decoration:none;padding:2px 6px;border-radius:4px;font-size:12px">Pages</a>
@@ -34,17 +40,17 @@
           <a href="${PAYLOAD_URL}/admin/collections/services" target="_blank" style="color:#ccc;text-decoration:none;padding:2px 6px;border-radius:4px;font-size:12px">Services</a>
           <a href="${PAYLOAD_URL}/admin" target="_blank" style="color:#ccc;text-decoration:none;padding:2px 6px;border-radius:4px;font-size:12px">Admin</a>
           <button style="background:none;border:1px solid #555;color:#aaa;cursor:pointer;padding:1px 6px;border-radius:3px;font-size:11px;margin-left:2px">Salir</button>
-        </nav>`
-      document.querySelector('header')?.prepend(bar)
+        </nav>`;
+      document.querySelector('header')?.prepend(bar);
 
       bar.querySelector('button')?.addEventListener('click', async (e) => {
-        e.preventDefault()
-        await fetch(`${PAYLOAD_URL}/api/users/logout`, { method: 'POST', credentials: 'include' })
-        bar.remove()
-      })
+        e.preventDefault();
+        await fetch(`${PAYLOAD_URL}/api/users/logout`, { method: 'POST', credentials: 'include' });
+        bar.remove();
+      });
     }
 
-    await render()
-    setInterval(render, 30000)
-  })()
+    await render();
+    setInterval(render, 30000);
+  })();
 </script>

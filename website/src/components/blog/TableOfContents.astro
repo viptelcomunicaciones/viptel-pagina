@@ -44,8 +44,7 @@ const {
 const locale = getLocaleFromPath(Astro.url.pathname);
 // A closed card must name its contents; an always-visible list only needs
 // a label. An explicit `title` prop still overrides either default.
-const tocTitle =
-  title ?? t(collapsible ? 'blog.tableOfContents' : 'blog.onThisPage', locale);
+const tocTitle = title ?? t(collapsible ? 'blog.tableOfContents' : 'blog.onThisPage', locale);
 const showLabel = t('blog.tocShow', locale);
 const hideLabel = t('blog.tocHide', locale);
 
@@ -58,73 +57,73 @@ const shouldRender = items.length >= minHeadings;
 const headingId = `toc-heading-${Math.random().toString(36).slice(2, 9)}`;
 ---
 
-{shouldRender && (() => {
-  // The theme's card frame (rounded-xl + brand border + card surface),
-  // deliberately without shadow or hover: the TOC is a reading aid —
-  // its links are interactive, the box itself is not.
-  const Wrapper = collapsible ? 'details' : 'nav';
-  return (
-    <Wrapper
-      class:list={[
-        'toc not-prose rounded-xl border border-brand-500/40 bg-card',
-        !collapsible && 'p-5',
-        sticky && 'toc-sticky',
-      ]}
-      aria-labelledby={collapsible ? undefined : headingId}
-      data-toc
-    >
-      {collapsible ? (
-        <summary class="flex cursor-pointer list-none items-center gap-2 p-5 text-sm font-semibold text-foreground [&::-webkit-details-marker]:hidden">
-          <Icon name="list" size="sm" class="text-brand-500" />
-          {tocTitle}
-          <span class="toc-hint ml-auto flex shrink-0 items-center gap-1 text-xs font-medium text-foreground-muted">
-            <span class="toc-hint-show">{showLabel}</span>
-            <span class="toc-hint-hide">{hideLabel}</span>
-            <Icon
-              name="chevron-down"
-              size="sm"
-              class="toc-chevron transition-transform duration-200"
-            />
-          </span>
-        </summary>
-      ) : (
-        <p
-          id={headingId}
-          class="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground"
+{
+  shouldRender &&
+    (() => {
+      // The theme's card frame (rounded-xl + brand border + card surface),
+      // deliberately without shadow or hover: the TOC is a reading aid —
+      // its links are interactive, the box itself is not.
+      const Wrapper = collapsible ? 'details' : 'nav';
+      return (
+        <Wrapper
+          class:list={[
+            'toc not-prose border-brand-500/40 bg-card rounded-xl border',
+            !collapsible && 'p-5',
+            sticky && 'toc-sticky',
+          ]}
+          aria-labelledby={collapsible ? undefined : headingId}
+          data-toc
         >
-          <Icon name="list" size="sm" class="text-brand-500" />
-          {tocTitle}
-        </p>
-      )}
-      <ul
-        class:list={[
-          'space-y-1.5 text-sm border-l border-border',
-          collapsible && 'mx-5 mb-5',
-        ]}
-      >
-        {items.map((h) => (
-          <li
-            class="toc-item"
-            data-depth={h.depth}
-            style={`padding-left: ${(h.depth - 2) * 0.875}rem`}
-          >
-            <a
-              href={`#${h.slug}`}
-              data-toc-link={h.slug}
-              class:list={[
-                'toc-link block pl-3 -ml-px border-l border-transparent text-foreground-muted hover:text-foreground hover:border-brand-500 transition-colors',
-                // Roomier tap targets on the touch-first collapsed variant.
-                collapsible ? 'py-1.5' : 'py-1',
-              ]}
+          {collapsible ? (
+            <summary class="text-foreground flex cursor-pointer list-none items-center gap-2 p-5 text-sm font-semibold [&::-webkit-details-marker]:hidden">
+              <Icon name="list" size="sm" class="text-brand-500" />
+              {tocTitle}
+              <span class="toc-hint text-foreground-muted ml-auto flex shrink-0 items-center gap-1 text-xs font-medium">
+                <span class="toc-hint-show">{showLabel}</span>
+                <span class="toc-hint-hide">{hideLabel}</span>
+                <Icon
+                  name="chevron-down"
+                  size="sm"
+                  class="toc-chevron transition-transform duration-200"
+                />
+              </span>
+            </summary>
+          ) : (
+            <p
+              id={headingId}
+              class="text-foreground mb-3 flex items-center gap-2 text-sm font-semibold"
             >
-              {h.text}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </Wrapper>
-  );
-})()}
+              <Icon name="list" size="sm" class="text-brand-500" />
+              {tocTitle}
+            </p>
+          )}
+          <ul
+            class:list={['border-border space-y-1.5 border-l text-sm', collapsible && 'mx-5 mb-5']}
+          >
+            {items.map((h) => (
+              <li
+                class="toc-item"
+                data-depth={h.depth}
+                style={`padding-left: ${(h.depth - 2) * 0.875}rem`}
+              >
+                <a
+                  href={`#${h.slug}`}
+                  data-toc-link={h.slug}
+                  class:list={[
+                    'toc-link text-foreground-muted hover:text-foreground hover:border-brand-500 -ml-px block border-l border-transparent pl-3 transition-colors',
+                    // Roomier tap targets on the touch-first collapsed variant.
+                    collapsible ? 'py-1.5' : 'py-1',
+                  ]}
+                >
+                  {h.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </Wrapper>
+      );
+    })()
+}
 
 <style>
   /* Sticky positioning is opt-in (sidebar layout). The 6rem offset clears
@@ -173,9 +172,7 @@ const headingId = `toc-heading-${Math.random().toString(36).slice(2, 9)}`;
   // currently visible.
   const tocs = document.querySelectorAll<HTMLElement>('[data-toc]');
   for (const toc of tocs) {
-    const links = Array.from(
-      toc.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'),
-    );
+    const links = Array.from(toc.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'));
     const slugs = links.map((a) => a.getAttribute('data-toc-link')!);
     const headings = slugs
       .map((s) => document.getElementById(s))
@@ -282,7 +279,7 @@ const headingId = `toc-heading-${Math.random().toString(36).slice(2, 9)}`;
           setActive(visible[0].target.id);
         }
       },
-      { rootMargin: '-80px 0px -70% 0px', threshold: 0 },
+      { rootMargin: '-80px 0px -70% 0px', threshold: 0 }
     );
 
     for (const h of headings) io.observe(h);

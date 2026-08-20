@@ -57,23 +57,34 @@ function extractRichText(richText: any): string {
 
 const heroTitle = extractRichText(home?.hero?.richText);
 const heroLinks: HeroLink[] = home?.hero?.links ?? [];
-const heroImageUrl = home?.hero?.media && typeof home.hero.media !== 'number' && home.hero.media.url ? payload.resolveMediaUrl(home.hero.media.url) : null;
+const heroImageUrl =
+  home?.hero?.media && typeof home.hero.media !== 'number' && home.hero.media.url
+    ? payload.resolveMediaUrl(home.hero.media.url)
+    : null;
 
-const heroType = home?.hero?.type || 'none'
-const isHighImpact = heroType === 'highImpact'
-const isMediumImpact = heroType === 'mediumImpact'
+const heroType = home?.hero?.type || 'none';
+const isHighImpact = heroType === 'highImpact';
+const isMediumImpact = heroType === 'mediumImpact';
 
 // Helper to get a Payload link URL (handles custom URLs and references)
 function getLinkUrl(link: HeroLink['link']): string {
-  if (!link) return '#'
-  if (link.type === 'custom' || link.type === undefined) return link.url || '#'
+  if (!link) return '#';
+  if (link.type === 'custom' || link.type === undefined) return link.url || '#';
   if (link.reference && typeof link.reference === 'object' && 'slug' in link.reference) {
-    return `/${link.reference.slug}`
+    return `/${link.reference.slug}`;
   }
-  return link.url || '#'
+  return link.url || '#';
 }
 
-const heroStackOrder = ['Astro', 'Tailwind CSS', 'TypeScript', 'React', 'GitHub', 'Vercel', 'Claude'];
+const heroStackOrder = [
+  'Astro',
+  'Tailwind CSS',
+  'TypeScript',
+  'React',
+  'GitHub',
+  'Vercel',
+  'Claude',
+];
 const heroStackItems = viptelStack
   .filter((e: StackItem) => heroStackOrder.includes(e.name))
   .sort((a, b) => heroStackOrder.indexOf(a.name) - heroStackOrder.indexOf(b.name));
@@ -87,77 +98,188 @@ const heroStackItems = viptelStack
   includeProfessionalServiceSchema={true}
 >
   <!-- Hero: type-dependent rendering matching Payload template -->
-  {isHighImpact && (
-    <Hero layout="centered" size="xl" class="hero-dark-gradient" fullHeight
-      style={heroImageUrl ? `background-image: linear-gradient(rgba(0,0,0,0.55),rgba(0,0,0,0.3)), url(${heroImageUrl}); background-size: cover; background-position: center;` : ''}
-    >
-      <Badge slot="badge" variant="brand" pill pulse class="dark:text-brand-200">{t('pages.home.hero.badge', locale)}</Badge>
-      <h1 slot="title" class="text-[clamp(2rem,12.6vw,3rem)]! sm:text-5xl! md:text-6xl! lg:text-7xl!">
-        {heroTitle ? (
-          <span class={heroImageUrl ? 'text-white [-webkit-text-fill-color:currentColor]' : 'text-brand-600 dark:text-foreground [-webkit-text-fill-color:currentColor]'}>{heroTitle}</span>
-        ) : (
-          <><span class="text-brand-600 dark:text-foreground [-webkit-text-fill-color:currentColor] whitespace-nowrap">{t('pages.home.hero.titleLine1', locale)}</span><br />
-          <span class="text-brand-600 dark:text-foreground [-webkit-text-fill-color:currentColor]">{t('pages.home.hero.titleLine2', locale)}</span><br class="md:hidden" /><span class="text-brand-600 dark:text-foreground [-webkit-text-fill-color:currentColor]">{' '}{t('pages.home.hero.titleLine3', locale)}</span></>
-        )}
-      </h1>
-      <p slot="description" class="text-balance!">
-        <span class={heroImageUrl ? 'text-white/80' : ''}>
-          <span class="sm:hidden">{t('pages.home.hero.descriptionMobile', locale)}</span>
-          <span class="hidden sm:inline">{t('pages.home.hero.description', locale)}</span>
-        </span>
-      </p>
-      <Fragment slot="actions">
-        {heroLinks.length > 0 ? heroLinks.map((item) => { const link = item.link; if (!link) return null; return <Button size="lg" href={getLinkUrl(link)} variant={link.appearance === 'outline' ? 'outline' : 'primary'} target={link.newTab ? '_blank' : undefined}>{link.label}<Icon name="arrow-right" size="sm" /></Button> }) : (
-          <><Button size="lg" href={localizedPath('/services', locale)}>{t('pages.home.cta.primary', locale)}<Icon name="arrow-right" size="sm" /></Button>
-          <Button size="lg" variant="outline" href={localizedPath('/contact', locale)}>{t('pages.home.cta.secondary', locale)}<Icon name="arrow-right" size="sm" /></Button></>
-        )}
-      </Fragment>
-      <div slot="bottom" class="mx-auto w-full max-w-6xl px-6">
-        <div class="hp-hero-marquee" aria-hidden="true"><StackMarquee items={heroStackItems} rows={1} duration={55} pauseOnHover={false} linked={false} cardWidth="auto" gap="1rem" /></div>
-        <div class="hp-hero-logos" aria-hidden="true">{heroStackItems.slice(0, 4).map((item) => (<span class="hp-hero-logo"><Icon name={item.icon} size="lg" /></span>))}</div>
-      </div>
-    </Hero>
-  )}
-
-  {isMediumImpact && (
-    <section class="relative z-10 pt-[var(--space-section-md)]">
-      <div class="mx-auto max-w-6xl px-6">
-        <div class="mx-auto max-w-[48rem] text-center">
-          {heroTitle && <h1 class="font-display text-3xl md:text-4xl font-bold text-foreground mb-6">{heroTitle}</h1>}
-          {heroLinks.length > 0 && (
-            <div class="flex justify-center gap-4 mb-8">
-              {heroLinks.map((item) => { const link = item.link; if (!link) return null; return <Button size="lg" href={getLinkUrl(link)} variant={link.appearance === 'outline' ? 'outline' : 'primary'} target={link.newTab ? '_blank' : undefined}>{link.label}<Icon name="arrow-right" size="sm" /></Button> })}
-            </div>
+  {
+    isHighImpact && (
+      <Hero
+        layout="centered"
+        size="xl"
+        class="hero-dark-gradient"
+        fullHeight
+        style={
+          heroImageUrl
+            ? `background-image: linear-gradient(rgba(0,0,0,0.55),rgba(0,0,0,0.3)), url(${heroImageUrl}); background-size: cover; background-position: center;`
+            : ''
+        }
+      >
+        <Badge slot="badge" variant="brand" pill pulse class="dark:text-brand-200">
+          {t('pages.home.hero.badge', locale)}
+        </Badge>
+        <h1
+          slot="title"
+          class="text-[clamp(2rem,12.6vw,3rem)]! sm:text-5xl! md:text-6xl! lg:text-7xl!"
+        >
+          {heroTitle ? (
+            <span
+              class={
+                heroImageUrl
+                  ? 'text-white [-webkit-text-fill-color:currentColor]'
+                  : 'text-brand-600 dark:text-foreground [-webkit-text-fill-color:currentColor]'
+              }
+            >
+              {heroTitle}
+            </span>
+          ) : (
+            <>
+              <span class="text-brand-600 dark:text-foreground whitespace-nowrap [-webkit-text-fill-color:currentColor]">
+                {t('pages.home.hero.titleLine1', locale)}
+              </span>
+              <br />
+              <span class="text-brand-600 dark:text-foreground [-webkit-text-fill-color:currentColor]">
+                {t('pages.home.hero.titleLine2', locale)}
+              </span>
+              <br class="md:hidden" />
+              <span class="text-brand-600 dark:text-foreground [-webkit-text-fill-color:currentColor]">
+                {' '}
+                {t('pages.home.hero.titleLine3', locale)}
+              </span>
+            </>
           )}
+        </h1>
+        <p slot="description" class="text-balance!">
+          <span class={heroImageUrl ? 'text-white/80' : ''}>
+            <span class="sm:hidden">{t('pages.home.hero.descriptionMobile', locale)}</span>
+            <span class="hidden sm:inline">{t('pages.home.hero.description', locale)}</span>
+          </span>
+        </p>
+        <Fragment slot="actions">
+          {heroLinks.length > 0 ? (
+            heroLinks.map((item) => {
+              const link = item.link;
+              if (!link) return null;
+              return (
+                <Button
+                  size="lg"
+                  href={getLinkUrl(link)}
+                  variant={link.appearance === 'outline' ? 'outline' : 'primary'}
+                  target={link.newTab ? '_blank' : undefined}
+                >
+                  {link.label}
+                  <Icon name="arrow-right" size="sm" />
+                </Button>
+              );
+            })
+          ) : (
+            <>
+              <Button size="lg" href={localizedPath('/services', locale)}>
+                {t('pages.home.cta.primary', locale)}
+                <Icon name="arrow-right" size="sm" />
+              </Button>
+              <Button size="lg" variant="outline" href={localizedPath('/contact', locale)}>
+                {t('pages.home.cta.secondary', locale)}
+                <Icon name="arrow-right" size="sm" />
+              </Button>
+            </>
+          )}
+        </Fragment>
+        <div slot="bottom" class="mx-auto w-full max-w-6xl px-6">
+          <div class="hp-hero-marquee" aria-hidden="true">
+            <StackMarquee
+              items={heroStackItems}
+              rows={1}
+              duration={55}
+              pauseOnHover={false}
+              linked={false}
+              cardWidth="auto"
+              gap="1rem"
+            />
+          </div>
+          <div class="hp-hero-logos" aria-hidden="true">
+            {heroStackItems.slice(0, 4).map((item) => (
+              <span class="hp-hero-logo">
+                <Icon name={item.icon} size="lg" />
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
-      {heroImageUrl && (
-        <div class="mx-auto max-w-6xl px-6 mt-8">
-          <img src={heroImageUrl} alt={home?.hero?.media && typeof home.hero.media !== 'number' && home.hero.media.alt ? home.hero.media.alt : heroTitle} class="w-full rounded-xl shadow-lg" />
-        </div>
-      )}
-    </section>
-  )}
+      </Hero>
+    )
+  }
 
-  {heroType === 'lowImpact' && (
-    <section class="pt-16 pb-8">
-      <div class="mx-auto max-w-6xl px-6">
-        <div class="max-w-[48rem]">
-          {heroTitle && <h1 class="font-display text-3xl md:text-4xl font-bold text-foreground">{heroTitle}</h1>}
+  {
+    isMediumImpact && (
+      <section class="relative z-10 pt-[var(--space-section-md)]">
+        <div class="mx-auto max-w-6xl px-6">
+          <div class="mx-auto max-w-[48rem] text-center">
+            {heroTitle && (
+              <h1 class="font-display text-foreground mb-6 text-3xl font-bold md:text-4xl">
+                {heroTitle}
+              </h1>
+            )}
+            {heroLinks.length > 0 && (
+              <div class="mb-8 flex justify-center gap-4">
+                {heroLinks.map((item) => {
+                  const link = item.link;
+                  if (!link) return null;
+                  return (
+                    <Button
+                      size="lg"
+                      href={getLinkUrl(link)}
+                      variant={link.appearance === 'outline' ? 'outline' : 'primary'}
+                      target={link.newTab ? '_blank' : undefined}
+                    >
+                      {link.label}
+                      <Icon name="arrow-right" size="sm" />
+                    </Button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </section>
-  )}
+        {heroImageUrl && (
+          <div class="mx-auto mt-8 max-w-6xl px-6">
+            <img
+              src={heroImageUrl}
+              alt={
+                home?.hero?.media && typeof home.hero.media !== 'number' && home.hero.media.alt
+                  ? home.hero.media.alt
+                  : heroTitle
+              }
+              class="w-full rounded-xl shadow-lg"
+            />
+          </div>
+        )}
+      </section>
+    )
+  }
+
+  {
+    heroType === 'lowImpact' && (
+      <section class="pt-16 pb-8">
+        <div class="mx-auto max-w-6xl px-6">
+          <div class="max-w-[48rem]">
+            {heroTitle && (
+              <h1 class="font-display text-foreground text-3xl font-bold md:text-4xl">
+                {heroTitle}
+              </h1>
+            )}
+          </div>
+        </div>
+      </section>
+    )
+  }
 
   <!-- CMS Layout Blocks -->
   {
     home?.layout && home.layout.length > 0 ? (
       <BlockRenderer layout={home.layout as PageBlock[]} locale={locale} />
     ) : (
-      <div class="py-24 text-center text-foreground-muted bg-background-secondary border-t border-border">
+      <div class="text-foreground-muted bg-background-secondary border-border border-t py-24 text-center">
         <Icon name="layout" size="lg" class="mx-auto mb-4 opacity-40" />
         <p class="text-lg">No hay contenido configurado en la página de inicio.</p>
-        <p class="text-sm mt-2">Edita la página "home" desde el panel de administración de Payload.</p>
+        <p class="mt-2 text-sm">
+          Edita la página "home" desde el panel de administración de Payload.
+        </p>
       </div>
     )
   }
@@ -196,15 +318,23 @@ const heroStackItems = viptelStack
     }
   }
   @keyframes hp-hero-marquee-fade {
-    from { opacity: 0.01; }
-    to   { opacity: 1; }
+    from {
+      opacity: 0.01;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   @media (max-width: 767px) {
-    .hp-hero-marquee { display: none; }
+    .hp-hero-marquee {
+      display: none;
+    }
   }
   @media (orientation: landscape) and (max-height: 500px) and (pointer: coarse) {
-    .hp-hero-marquee { display: none; }
+    .hp-hero-marquee {
+      display: none;
+    }
   }
 
   .hp-hero-logos {
@@ -215,7 +345,10 @@ const heroStackItems = viptelStack
     pointer-events: none;
   }
   @media (max-width: 767px) and (orientation: portrait) {
-    .hp-hero-logos { display: flex; padding-bottom: 2rem; }
+    .hp-hero-logos {
+      display: flex;
+      padding-bottom: 2rem;
+    }
   }
 
   .hp-hero-logo {

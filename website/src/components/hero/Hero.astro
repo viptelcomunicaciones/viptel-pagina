@@ -83,10 +83,7 @@ const sectionClasses = cn(
   className
 );
 
-const contentClasses = cn(
-  'z-10 flex flex-col',
-  alignment
-);
+const contentClasses = cn('z-10 flex flex-col', alignment);
 
 const gridClasses = cn(
   'relative z-10 mx-auto grid max-w-6xl grid-cols-1 items-center gap-[var(--space-section-gap)] px-6',
@@ -117,124 +114,185 @@ const sectionStyle = backgroundImage
   {showHeroHalo && <HeroGrid />}
   {showHeroHalo && <HeroBeam />}
 
-  {showGrid && (
-    <div
-      class="bg-grid-pattern pointer-events-none absolute inset-x-0 -inset-y-[20%] opacity-30 hidden md:dark:block"
-      style="mask-image: radial-gradient(ellipse 50% 50% at 50% 40%, black 0%, transparent 70%); -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 40%, black 0%, transparent 70%);"
-      aria-hidden="true"
-    />
-  )}
-
-  {showGlow && (
-    <>
-      <div class="pointer-events-none absolute left-1/2 top-1/4 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-500/15 blur-[120px] hidden dark:block" aria-hidden="true" />
-      <div class="pointer-events-none absolute bottom-1/4 right-1/4 h-[400px] w-[400px] rounded-full bg-brand-600/10 blur-[100px] hidden dark:block" aria-hidden="true" />
-    </>
-  )}
-
-  {showBlob && (
-    <>
+  {
+    showGrid && (
       <div
-        class="pointer-events-none absolute hidden dark:block dark:opacity-[0.20] rounded-full blur-[120px] h-[500px] w-[500px] -left-20 top-0 -translate-y-1/4"
-        style="background: radial-gradient(ellipse at center, var(--color-brand-400) 0%, transparent 70%);"
+        class="bg-grid-pattern pointer-events-none absolute inset-x-0 -inset-y-[20%] hidden opacity-30 md:dark:block"
+        style="mask-image: radial-gradient(ellipse 50% 50% at 50% 40%, black 0%, transparent 70%); -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 40%, black 0%, transparent 70%);"
         aria-hidden="true"
       />
+    )
+  }
+
+  {
+    showGlow && (
+      <>
+        <div
+          class="bg-brand-500/15 pointer-events-none absolute top-1/4 left-1/2 hidden h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[120px] dark:block"
+          aria-hidden="true"
+        />
+        <div
+          class="bg-brand-600/10 pointer-events-none absolute right-1/4 bottom-1/4 hidden h-[400px] w-[400px] rounded-full blur-[100px] dark:block"
+          aria-hidden="true"
+        />
+      </>
+    )
+  }
+
+  {
+    showBlob && (
+      <>
+        <div
+          class="pointer-events-none absolute top-0 -left-20 hidden h-[500px] w-[500px] -translate-y-1/4 rounded-full blur-[120px] dark:block dark:opacity-[0.20]"
+          style="background: radial-gradient(ellipse at center, var(--color-brand-400) 0%, transparent 70%);"
+          aria-hidden="true"
+        />
+        <div
+          class="pointer-events-none absolute top-0 -right-20 hidden h-[500px] w-[500px] -translate-y-1/4 rounded-full blur-[120px] dark:block dark:opacity-[0.20]"
+          style="background: radial-gradient(ellipse at center, var(--color-brand-400) 0%, transparent 70%);"
+          aria-hidden="true"
+        />
+      </>
+    )
+  }
+
+  {
+    bottomFade && (
       <div
-        class="pointer-events-none absolute hidden dark:block dark:opacity-[0.20] rounded-full blur-[120px] h-[500px] w-[500px] -right-20 top-0 -translate-y-1/4"
-        style="background: radial-gradient(ellipse at center, var(--color-brand-400) 0%, transparent 70%);"
+        class="to-background-secondary pointer-events-none absolute inset-x-0 bottom-0 hidden h-40 bg-gradient-to-b from-transparent dark:block"
         aria-hidden="true"
       />
-    </>
-  )}
+    )
+  }
 
-  {bottomFade && (
-    <div class="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-background-secondary hidden dark:block" aria-hidden="true" />
-  )}
-
-
-  {showScrollIndicator && (
-    <div class="scroll-indicator-wrapper absolute bottom-14 left-1/2 -translate-x-1/2 z-10" aria-hidden="true">
-      <div class="scroll-indicator flex flex-col items-center gap-0.5">
-        <svg class="scroll-indicator-chevron w-7 h-7 text-brand-500/70" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-        <svg class="scroll-indicator-chevron-2 w-7 h-7 text-brand-500/35" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
+  {
+    showScrollIndicator && (
+      <div
+        class="scroll-indicator-wrapper absolute bottom-14 left-1/2 z-10 -translate-x-1/2"
+        aria-hidden="true"
+      >
+        <div class="scroll-indicator flex flex-col items-center gap-0.5">
+          <svg
+            class="scroll-indicator-chevron text-brand-500/70 h-7 w-7"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+          <svg
+            class="scroll-indicator-chevron-2 text-brand-500/35 h-7 w-7"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </div>
       </div>
-    </div>
-  )}
+    )
+  }
 
   <div class={gridClasses}>
     {/* Content Column */}
     <div class={cn(contentClasses, 'order-1 lg:order-none animate-hero-stagger')}>
       {/* Badge Slot */}
-      {hasBadgeSlot && (
-        <div class="mb-[var(--space-heading-gap)]">
-          <slot name="badge" />
-        </div>
-      )}
+      {
+        hasBadgeSlot && (
+          <div class="mb-[var(--space-heading-gap)]">
+            <slot name="badge" />
+          </div>
+        )
+      }
 
       {/* Title Slot */}
-      {hasTitleSlot && (
-        <div class={cn(
-          'hero-title-slot mb-[var(--space-heading-gap)]',
-          '[&>h1]:font-display [&>h1]:text-5xl [&>h1]:leading-[1.1] [&>h1]:font-bold [&>h1]:tracking-tight [&>h1]:text-balance md:[&>h1]:text-6xl lg:[&>h1]:text-7xl',
-          '[&>h2]:font-display [&>h2]:text-4xl [&>h2]:leading-[1.1] [&>h2]:font-bold [&>h2]:tracking-tight [&>h2]:text-balance md:[&>h2]:text-5xl lg:[&>h2]:text-6xl',
-          titleSlotClasses
-        )}>
-          <slot name="title" />
-        </div>
-      )}
+      {
+        hasTitleSlot && (
+          <div
+            class={cn(
+              'hero-title-slot mb-[var(--space-heading-gap)]',
+              '[&>h1]:font-display [&>h1]:text-5xl [&>h1]:leading-[1.1] [&>h1]:font-bold [&>h1]:tracking-tight [&>h1]:text-balance md:[&>h1]:text-6xl lg:[&>h1]:text-7xl',
+              '[&>h2]:font-display [&>h2]:text-4xl [&>h2]:leading-[1.1] [&>h2]:font-bold [&>h2]:tracking-tight [&>h2]:text-balance md:[&>h2]:text-5xl lg:[&>h2]:text-6xl',
+              titleSlotClasses
+            )}
+          >
+            <slot name="title" />
+          </div>
+        )
+      }
 
       {/* Description Slot */}
-      {hasDescriptionSlot && (
-        <div class={cn(
-          'mb-[var(--space-stack-lg)] max-w-xl text-lg leading-relaxed',
-          '[&>p]:text-lg [&>p]:leading-relaxed',
-          descriptionSlotClasses,
-          layout === 'centered' && 'mx-auto'
-        )}>
-          <slot name="description" />
-        </div>
-      )}
+      {
+        hasDescriptionSlot && (
+          <div
+            class={cn(
+              'mb-[var(--space-stack-lg)] max-w-xl text-lg leading-relaxed',
+              '[&>p]:text-lg [&>p]:leading-relaxed',
+              descriptionSlotClasses,
+              layout === 'centered' && 'mx-auto'
+            )}
+          >
+            <slot name="description" />
+          </div>
+        )
+      }
 
       {/* Actions Slot */}
-      {hasActionsSlot && (
-        <div class={cn(
-          'flex w-full flex-col gap-4 sm:w-auto sm:flex-row',
-          layout === 'centered' && 'justify-center'
-        )}>
-          <slot name="actions" />
-        </div>
-      )}
+      {
+        hasActionsSlot && (
+          <div
+            class={cn(
+              'flex w-full flex-col gap-4 sm:w-auto sm:flex-row',
+              layout === 'centered' && 'justify-center'
+            )}
+          >
+            <slot name="actions" />
+          </div>
+        )
+      }
 
       {/* Default slot for additional content (social proof, etc.) */}
       <slot />
     </div>
 
     {/* Aside Column (for split layout) */}
-    {layout === 'split' && hasAsideSlot && (
-      <div class="relative z-10 w-full order-2 lg:order-none">
-        <slot name="aside" />
-      </div>
-    )}
+    {
+      layout === 'split' && hasAsideSlot && (
+        <div class="relative z-10 order-2 w-full lg:order-none">
+          <slot name="aside" />
+        </div>
+      )
+    }
   </div>
 
-  {/* Bottom slot — e.g. the homepage tech-stack marquee, in place of the scroll
+  {
+    /* Bottom slot — e.g. the homepage tech-stack marquee, in place of the scroll
       indicator. In a full-height hero it's the last flex child, so it sits on
       the floor while the content grid centres itself in the leftover height
       (my-auto above); the section's column `gap` guarantees a minimum gap so
       the slot never crowds the content on short windows. Outside full-height
-      it falls back to absolute. */}
-  {hasBottomSlot && (
-    <div class={cn(
-      'hero-bottom-slot z-10 w-full',
-      isFlooredBottom ? 'relative' : 'absolute inset-x-0 bottom-0'
-    )}>
-      <slot name="bottom" />
-    </div>
-  )}
+      it falls back to absolute. */
+  }
+  {
+    hasBottomSlot && (
+      <div
+        class={cn(
+          'hero-bottom-slot z-10 w-full',
+          isFlooredBottom ? 'relative' : 'absolute inset-x-0 bottom-0'
+        )}
+      >
+        <slot name="bottom" />
+      </div>
+    )
+  }
 </section>
 
 <style>
@@ -252,7 +310,9 @@ const sectionStyle = backgroundImage
   /* Fade in after the hero slide-up animation completes */
   .scroll-indicator {
     animation: si-fade-in 0.6s ease-out 1.4s backwards;
-    transition: opacity 0.5s ease, transform 0.5s ease;
+    transition:
+      opacity 0.5s ease,
+      transform 0.5s ease;
   }
 
   .scroll-indicator.is-hidden {
@@ -262,8 +322,14 @@ const sectionStyle = backgroundImage
   }
 
   @keyframes si-fade-in {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   /* First chevron bounces, second follows with a slight delay */
@@ -276,15 +342,24 @@ const sectionStyle = backgroundImage
   }
 
   @keyframes si-bounce {
-    0%, 100% { transform: translateY(0); }
-    50%       { transform: translateY(5px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(5px);
+    }
   }
 
-
   @media (prefers-reduced-motion: reduce) {
-    .scroll-indicator              { animation: none; opacity: 1; }
+    .scroll-indicator {
+      animation: none;
+      opacity: 1;
+    }
     .scroll-indicator-chevron,
-    .scroll-indicator-chevron-2    { animation: none; }
+    .scroll-indicator-chevron-2 {
+      animation: none;
+    }
   }
 </style>
 

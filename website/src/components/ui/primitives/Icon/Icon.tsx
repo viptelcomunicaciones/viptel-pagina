@@ -32,25 +32,25 @@ const sizes: Record<string, string> = {
  */
 const iconMap: Record<string, string> = {
   // Social & brand → Simple Icons
-  github:           'simple-icons:github',
-  'x-twitter':      'simple-icons:x',
-  twitter:          'simple-icons:x',
-  instagram:        'simple-icons:instagram',
-  linkedin:         'simple-icons:linkedin',
-  bluesky:          'simple-icons:bluesky',
+  github: 'simple-icons:github',
+  'x-twitter': 'simple-icons:x',
+  twitter: 'simple-icons:x',
+  instagram: 'simple-icons:instagram',
+  linkedin: 'simple-icons:linkedin',
+  bluesky: 'simple-icons:bluesky',
   // Tech stack → Simple Icons
-  'brand-astro':      'simple-icons:astro',
-  'brand-tailwind':   'simple-icons:tailwindcss',
+  'brand-astro': 'simple-icons:astro',
+  'brand-tailwind': 'simple-icons:tailwindcss',
   'brand-typescript': 'simple-icons:typescript',
-  'brand-react':      'simple-icons:react',
-  'brand-github':     'simple-icons:github',
-  'brand-vercel':     'simple-icons:vercel',
-  'brand-mdx':        'simple-icons:mdx',
-  'brand-claude':     'simple-icons:claude',
-  'brand-payload':    'simple-icons:payloadcms',
-  'brand-nextjs':     'simple-icons:nextdotjs',
+  'brand-react': 'simple-icons:react',
+  'brand-github': 'simple-icons:github',
+  'brand-vercel': 'simple-icons:vercel',
+  'brand-mdx': 'simple-icons:mdx',
+  'brand-claude': 'simple-icons:claude',
+  'brand-payload': 'simple-icons:payloadcms',
+  'brand-nextjs': 'simple-icons:nextdotjs',
   'brand-postgresql': 'simple-icons:postgresql',
-  'brand-docker':     'simple-icons:docker',
+  'brand-docker': 'simple-icons:docker',
 };
 
 export function Icon({

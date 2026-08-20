@@ -1,38 +1,39 @@
 ---
-import ServiceView from '@/components/pages/views/ServiceView.astro'
-import { payload } from '@/lib/payload-client'
-import { getSecondaryLocales, isValidLocale } from '@/i18n'
+import ServiceView from '@/components/pages/views/ServiceView.astro';
+import { payload } from '@/lib/payload-client';
+import { getSecondaryLocales, isValidLocale } from '@/i18n';
 
-export const prerender = false
+export const prerender = false;
 
 export function getStaticPaths() {
-  return getSecondaryLocales().map((locale) => ({ params: { locale } }))
+  return getSecondaryLocales().map((locale) => ({ params: { locale } }));
 }
 
-const { slug, locale } = Astro.params as { slug: string; locale: string }
+const { slug, locale } = Astro.params as { slug: string; locale: string };
 
 if (!isValidLocale(locale)) {
-  return Astro.redirect('/404')
+  return Astro.redirect('/404');
 }
 
-if (!slug) return Astro.redirect('/404')
+if (!slug) return Astro.redirect('/404');
 
-const querySlug = slug.includes('/') ? slug.split('/').pop()! : slug
-const service = await payload.services().getBySlug(querySlug, locale)
-if (!service) return Astro.redirect('/404')
+const querySlug = slug.includes('/') ? slug.split('/').pop()! : slug;
+const service = await payload.services().getBySlug(querySlug, locale);
+if (!service) return Astro.redirect('/404');
 
-let parentService = null
-let childrenServices: any[] = []
+let parentService = null;
+let childrenServices: any[] = [];
 
 if (service.parent) {
-  const parentSlug = typeof service.parent === 'object' && service.parent !== null
-    ? (service.parent as any).slug
-    : null
+  const parentSlug =
+    typeof service.parent === 'object' && service.parent !== null
+      ? (service.parent as any).slug
+      : null;
   if (parentSlug) {
-    parentService = await payload.services().getBySlug(parentSlug, locale)
+    parentService = await payload.services().getBySlug(parentSlug, locale);
   }
 } else {
-  childrenServices = await payload.services().getByParent(service.id, locale)
+  childrenServices = await payload.services().getByParent(service.id, locale);
 }
 ---
 

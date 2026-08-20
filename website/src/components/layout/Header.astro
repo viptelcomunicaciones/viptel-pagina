@@ -23,7 +23,12 @@
  */
 import type { HTMLAttributes } from 'astro/types';
 import { cn } from '@/lib/cn';
-import { getLogoHref, isExternalOrAnchorHref, resolveNavItem, navItems as navConfigItems } from '@/config/nav.config';
+import {
+  getLogoHref,
+  isExternalOrAnchorHref,
+  resolveNavItem,
+  navItems as navConfigItems,
+} from '@/config/nav.config';
 import { localizedPath } from '@/i18n';
 import { headerVariants, headerInnerVariants } from './header.variants';
 import Button from '@/components/ui/form/Button/Button.astro';
@@ -170,9 +175,9 @@ const hasMobileMenuSlot = Astro.slots.has('mobile-menu');
 if (import.meta.env.DEV && Astro.slots.has('default')) {
   console.warn(
     '[Header] Received content in the default slot, which Header does not render — ' +
-    'it only outputs the named slots (logo, nav, actions, mobile-menu), so this content is dropped. ' +
-    'A common cause is a misplaced </Header> wrapping the page <slot /> or <Footer>: ' +
-    'make sure those sit OUTSIDE <Header> and that only slotted children (e.g. <img slot="logo" />) sit inside it.'
+      'it only outputs the named slots (logo, nav, actions, mobile-menu), so this content is dropped. ' +
+      'A common cause is a misplaced </Header> wrapping the page <slot /> or <Footer>: ' +
+      'make sure those sit OUTSIDE <Header> and that only slotted children (e.g. <img slot="logo" />) sit inside it.'
   );
 }
 
@@ -198,22 +203,31 @@ function isActive(href: string): boolean {
 
 function getSocialIconData(url: string): { icon: string; label: string } {
   const resolved = resolveSocialLink(url);
-  return resolved ? { icon: resolved.icon, label: resolved.label } : { icon: 'link', label: 'Social' };
+  return resolved
+    ? { icon: resolved.icon, label: resolved.label }
+    : { icon: 'link', label: 'Social' };
 }
 
 function getNavIcon(href: string): string {
   if (href === '/' || href === '') return 'home';
-  if (href.startsWith('/blog'))     return 'pen-line';
+  if (href.startsWith('/blog')) return 'pen-line';
   if (href.startsWith('/projects')) return 'layers';
   if (href.startsWith('/services')) return 'sparkles';
-  if (href.startsWith('/about'))    return 'user';
-  if (href.startsWith('/contact'))  return 'mail';
-  if (href.startsWith('#'))         return 'hash';
-  if (href.startsWith('http'))      return 'arrow-up-right';
+  if (href.startsWith('/about')) return 'user';
+  if (href.startsWith('/contact')) return 'mail';
+  if (href.startsWith('#')) return 'hash';
+  if (href.startsWith('http')) return 'arrow-up-right';
   return 'chevron-right';
 }
 
-const mobileSocialOrder = ['x.com', 'instagram.com', 'bsky.app', 'github.com', 'linkedin.com', 'youtube.com'];
+const mobileSocialOrder = [
+  'x.com',
+  'instagram.com',
+  'bsky.app',
+  'github.com',
+  'linkedin.com',
+  'youtube.com',
+];
 const mobileSocialLinks = mobileSocialOrder
   .map((host) => siteConfig.socialLinks.find((u) => u.includes(host)))
   .filter((u): u is string => Boolean(u));
@@ -250,7 +264,11 @@ const buttonId = `${menuId}-button`;
             <span
               class={cn(
                 'font-display text-[clamp(1rem,16vw_-_2.2rem,1.25rem)] font-bold tracking-tight whitespace-nowrap',
-                isFloating ? 'hdr-logo-text' : (isInvert ? 'text-brand-600 dark:text-foreground lg:text-on-invert' : 'text-brand-600 dark:text-foreground')
+                isFloating
+                  ? 'hdr-logo-text'
+                  : isInvert
+                    ? 'text-brand-600 dark:text-foreground lg:text-on-invert'
+                    : 'text-brand-600 dark:text-foreground'
               )}
             >
               {logoText || siteConfig.name}
@@ -268,10 +286,10 @@ const buttonId = `${menuId}-button`;
         ) : (
           <nav class="hidden items-center gap-1 lg:flex" aria-label={t('nav.mainNav', locale)}>
             {navItems.map((item) => {
-              const { label, href } = item
+              const { label, href } = item;
               if (item.children && item.children.length > 0) {
                 return (
-                  <div class="relative group">
+                  <div class="group relative">
                     <a
                       href={href.startsWith('#') && !isLandingPage ? `/${href}` : href}
                       class={cn(
@@ -279,51 +297,62 @@ const buttonId = `${menuId}-button`;
                         'transition-all duration-(--transition-fast)',
                         isFloating && 'hdr-invert-text',
                         isFloating
-                          ? (isActive(href)
-                              ? 'hdr-nav-active font-semibold'
-                              : 'font-medium')
-                          : (isActive(href)
-                              ? 'nav-link-active font-semibold text-foreground bg-secondary'
-                              : 'nav-link-inactive font-medium text-foreground-muted hover:text-foreground hover:bg-secondary/70')
+                          ? isActive(href)
+                            ? 'hdr-nav-active font-semibold'
+                            : 'font-medium'
+                          : isActive(href)
+                            ? 'nav-link-active text-foreground bg-secondary font-semibold'
+                            : 'nav-link-inactive text-foreground-muted hover:text-foreground hover:bg-secondary/70 font-medium'
                       )}
                       aria-current={isActive(href) ? 'page' : undefined}
                       aria-haspopup="true"
                       aria-expanded="false"
                     >
                       {label}
-                      <svg class="h-3 w-3 opacity-60" viewBox="0 0 12 12" fill="currentColor"><path d="M3 4.5L6 7.5L9 4.5"/></svg>
+                      <svg class="h-3 w-3 opacity-60" viewBox="0 0 12 12" fill="currentColor">
+                        <path d="M3 4.5L6 7.5L9 4.5" />
+                      </svg>
                     </a>
-                    <div class="absolute left-0 top-full pt-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50">
-                      <div class="rounded-xl border border-border bg-background p-1.5 shadow-lg min-w-[180px]">
-                        {item.children.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map((child) => {
-                          const childHref = child.external || isExternalOrAnchorHref(child.href)
-                            ? child.href
-                            : localizedPath(child.href, locale)
-                          return (
-                            <a
-                              href={childHref}
-                              target={child.external ? '_blank' : undefined}
-                              rel={child.external ? 'noopener noreferrer' : undefined}
-                              class={cn(
-                                'block rounded-lg px-3 py-2 text-sm transition-colors',
-                                isActive(child.href)
-                                  ? 'bg-secondary font-medium text-foreground'
-                                  : 'text-foreground-muted hover:bg-secondary hover:text-foreground'
-                              )}
-                            >
-                              {child.label}
-                            </a>
-                          )
-                        })}
+                    <div class="invisible absolute top-full left-0 z-50 pt-1 opacity-0 transition-all duration-150 group-hover:visible group-hover:opacity-100">
+                      <div class="border-border bg-background min-w-[180px] rounded-xl border p-1.5 shadow-lg">
+                        {item.children
+                          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                          .map((child) => {
+                            const childHref =
+                              child.external || isExternalOrAnchorHref(child.href)
+                                ? child.href
+                                : localizedPath(child.href, locale);
+                            return (
+                              <a
+                                href={childHref}
+                                target={child.external ? '_blank' : undefined}
+                                rel={child.external ? 'noopener noreferrer' : undefined}
+                                class={cn(
+                                  'block rounded-lg px-3 py-2 text-sm transition-colors',
+                                  isActive(child.href)
+                                    ? 'bg-secondary text-foreground font-medium'
+                                    : 'text-foreground-muted hover:bg-secondary hover:text-foreground'
+                                )}
+                              >
+                                {child.label}
+                              </a>
+                            );
+                          })}
                       </div>
                     </div>
                   </div>
-                )
+                );
               }
 
               return (
                 <a
-                  href={item.external || isExternalOrAnchorHref(href) ? href : (href.startsWith('#') && !isLandingPage ? `/${href}` : href)}
+                  href={
+                    item.external || isExternalOrAnchorHref(href)
+                      ? href
+                      : href.startsWith('#') && !isLandingPage
+                        ? `/${href}`
+                        : href
+                  }
                   target={item.external ? '_blank' : undefined}
                   rel={item.external ? 'noopener noreferrer' : undefined}
                   class={cn(
@@ -331,21 +360,29 @@ const buttonId = `${menuId}-button`;
                     'transition-all duration-(--transition-fast)',
                     isFloating && 'hdr-invert-text',
                     isFloating
-                      ? (isActive(href)
-                          ? 'hdr-nav-active font-semibold'
-                          : 'font-medium')
-                      : (isActive(href)
-                          ? 'nav-link-active font-semibold text-foreground bg-secondary'
-                          : 'nav-link-inactive font-medium text-foreground-muted hover:text-foreground hover:bg-secondary/70')
+                      ? isActive(href)
+                        ? 'hdr-nav-active font-semibold'
+                        : 'font-medium'
+                      : isActive(href)
+                        ? 'nav-link-active text-foreground bg-secondary font-semibold'
+                        : 'nav-link-inactive text-foreground-muted hover:text-foreground hover:bg-secondary/70 font-medium'
                   )}
                   aria-current={isActive(href) ? 'page' : undefined}
                 >
                   {label}
                   {item.external && (
-                    <svg class="h-3 w-3 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M7 7h10v10"/></svg>
+                    <svg
+                      class="h-3 w-3 opacity-60"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path d="M7 17L17 7M7 7h10v10" />
+                    </svg>
                   )}
                 </a>
-              )
+              );
             })}
           </nav>
         ))
@@ -381,12 +418,15 @@ const buttonId = `${menuId}-button`;
 
             {showLanguageSwitcher && (
               <div class="hidden lg:flex">
-                <LanguageSwitcher class={isFloating ? 'hdr-invert-text' : undefined} alternates={languageAlternates} />
+                <LanguageSwitcher
+                  class={isFloating ? 'hdr-invert-text' : undefined}
+                  alternates={languageAlternates}
+                />
               </div>
             )}
 
             {showSocialLinks && siteConfig.socialLinks.length > 0 && (
-              <div class="hidden lg:flex items-center gap-0.5">
+              <div class="hidden items-center gap-0.5 lg:flex">
                 {siteConfig.socialLinks.map((url) => {
                   const { icon, label } = getSocialIconData(url);
                   return (
@@ -397,7 +437,7 @@ const buttonId = `${menuId}-button`;
                       aria-label={label}
                       class={cn(
                         'rounded-md p-2 transition-colors duration-(--transition-fast)',
-                        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                        'focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none',
                         isFloating
                           ? 'hdr-invert-text'
                           : 'text-foreground-muted hover:text-foreground hover:bg-secondary/70'
@@ -471,25 +511,26 @@ const buttonId = `${menuId}-button`;
     </div>
   </div>
 
-  {effectiveShowScrollProgress && (
-    isFloating ? (
-      <div
-        class={`absolute inset-x-3 h-[2px] overflow-hidden rounded-full ${scrollProgressPosition === 'top' ? 'top-[2px]' : 'bottom-[2px]'}`}
-        aria-hidden="true"
-      >
+  {
+    effectiveShowScrollProgress &&
+      (isFloating ? (
+        <div
+          class={`absolute inset-x-3 h-[2px] overflow-hidden rounded-full ${scrollProgressPosition === 'top' ? 'top-[2px]' : 'bottom-[2px]'}`}
+          aria-hidden="true"
+        >
+          <div
+            id="scroll-progress-bar"
+            class="bg-brand-500 absolute top-0 left-0 h-full w-0 transition-none"
+          />
+        </div>
+      ) : (
         <div
           id="scroll-progress-bar"
-          class="absolute left-0 top-0 h-full w-0 bg-brand-500 transition-none"
+          class={`bg-brand-500 absolute left-0 h-[2px] w-0 transition-none ${scrollProgressPosition === 'top' ? 'top-0' : 'bottom-0'}`}
+          aria-hidden="true"
         />
-      </div>
-    ) : (
-      <div
-        id="scroll-progress-bar"
-        class={`absolute left-0 h-[2px] w-0 bg-brand-500 transition-none ${scrollProgressPosition === 'top' ? 'top-0' : 'bottom-0'}`}
-        aria-hidden="true"
-      />
-    )
-  )}
+      ))
+  }
 
   {
     showMobileMenu &&
@@ -500,7 +541,7 @@ const buttonId = `${menuId}-button`;
           class={cn(
             'hidden origin-top scale-y-0 opacity-0 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.12)] lg:hidden',
             isFloating
-              ? 'rounded-b-2xl bg-background/95 backdrop-blur-xl'
+              ? 'bg-background/95 rounded-b-2xl backdrop-blur-xl'
               : 'border-border bg-background border-t'
           )}
           role="navigation"
@@ -514,21 +555,23 @@ const buttonId = `${menuId}-button`;
           class={cn(
             'hidden origin-top scale-y-0 opacity-0 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.12)] lg:hidden',
             isFloating
-              ? 'rounded-b-2xl bg-background/95 backdrop-blur-xl'
+              ? 'bg-background/95 rounded-b-2xl backdrop-blur-xl'
               : 'border-border bg-background border-t'
           )}
           role="navigation"
           aria-label={t('nav.mobileNav', locale)}
         >
-          <div class={cn(
-            'mobile-menu-body py-3',
-            isFloating ? 'px-3' : cn('mx-auto px-4', maxWidthClass)
-          )}>
+          <div
+            class={cn(
+              'mobile-menu-body py-3',
+              isFloating ? 'px-3' : cn('mx-auto px-4', maxWidthClass)
+            )}
+          >
             {showSearch && (
               <section class="mobile-menu-section">
                 <button
                   type="button"
-                  class="mobile-menu-search mobile-menu-stagger flex w-full items-center gap-3 rounded-xl border border-border-strong px-3 py-3 text-base text-foreground-muted transition-colors hover:text-foreground hover:border-brand-500"
+                  class="mobile-menu-search mobile-menu-stagger border-border-strong text-foreground-muted hover:text-foreground hover:border-brand-500 flex w-full items-center gap-3 rounded-xl border px-3 py-3 text-base transition-colors"
                   style="--stagger-index: 0"
                   aria-haspopup="dialog"
                 >
@@ -536,7 +579,9 @@ const buttonId = `${menuId}-button`;
                     <Icon name="search" size="sm" />
                   </span>
                   <span class="flex-1 text-left">{t('nav.searchSite', locale)}</span>
-                  <kbd class="hidden sm:inline-block rounded border border-border-strong px-1.5 py-0.5 text-xs text-foreground-muted">⌘K</kbd>
+                  <kbd class="border-border-strong text-foreground-muted hidden rounded border px-1.5 py-0.5 text-xs sm:inline-block">
+                    ⌘K
+                  </kbd>
                 </button>
               </section>
             )}
@@ -545,41 +590,63 @@ const buttonId = `${menuId}-button`;
               <p class="mobile-menu-label">{t('nav.sectionNavigate', locale)}</p>
               <ul class="space-y-0.5">
                 {navItems.map((item, idx) => {
-                  const { label, href } = item
+                  const { label, href } = item;
                   const active = isActive(href);
-                  const resolvedHref = item.external || isExternalOrAnchorHref(href) ? href : (href.startsWith('#') && !isLandingPage ? `/${href}` : href);
+                  const resolvedHref =
+                    item.external || isExternalOrAnchorHref(href)
+                      ? href
+                      : href.startsWith('#') && !isLandingPage
+                        ? `/${href}`
+                        : href;
                   if (item.children && item.children.length > 0) {
                     return (
                       <li>
                         <details class="group">
-                          <summary class={cn(
-                            'mobile-menu-row mobile-menu-stagger flex cursor-pointer items-center gap-3 rounded-xl px-3 py-3 text-base transition-colors list-none marker:hidden',
-                            active ? 'mobile-menu-row-active' : 'mobile-menu-row-inactive'
-                          )}
+                          <summary
+                            class={cn(
+                              'mobile-menu-row mobile-menu-stagger flex cursor-pointer list-none items-center gap-3 rounded-xl px-3 py-3 text-base transition-colors marker:hidden',
+                              active ? 'mobile-menu-row-active' : 'mobile-menu-row-inactive'
+                            )}
                             style={`--stagger-index: ${idx}`}
                           >
                             <span class="mobile-menu-tile">
                               <Icon name={getNavIcon(href)} size="sm" />
                             </span>
                             <span class="flex-1">{label}</span>
-                            <svg class="h-4 w-4 transition-transform group-open:rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                            <svg
+                              class="h-4 w-4 transition-transform group-open:rotate-180"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                            >
+                              <path d="m6 9 6 6 6-6" />
+                            </svg>
                           </summary>
-                          <div class="ml-10 mt-1 flex flex-col gap-0.5">
-{item.children.sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map((child) => {
-                              const childHref = child.external || isExternalOrAnchorHref(child.href) ? child.href : child.href
-                              return (
-                                <a href={childHref} target={child.external ? '_blank' : undefined} rel={child.external ? 'noopener noreferrer' : undefined}
-                                  class="mobile-menu-row rounded-lg px-3 py-2 text-sm text-foreground-muted transition-colors hover:text-foreground hover:bg-secondary/50 flex items-center gap-2"
-                                >
-                                  {child.label}
-                                  {child.external && <Icon name="arrow-up-right" size="sm" />}
-                                </a>
-                              )
-                            })}
+                          <div class="mt-1 ml-10 flex flex-col gap-0.5">
+                            {item.children
+                              .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                              .map((child) => {
+                                const childHref =
+                                  child.external || isExternalOrAnchorHref(child.href)
+                                    ? child.href
+                                    : child.href;
+                                return (
+                                  <a
+                                    href={childHref}
+                                    target={child.external ? '_blank' : undefined}
+                                    rel={child.external ? 'noopener noreferrer' : undefined}
+                                    class="mobile-menu-row text-foreground-muted hover:text-foreground hover:bg-secondary/50 flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors"
+                                  >
+                                    {child.label}
+                                    {child.external && <Icon name="arrow-up-right" size="sm" />}
+                                  </a>
+                                );
+                              })}
                           </div>
                         </details>
                       </li>
-                    )
+                    );
                   }
                   return (
                     <li>
@@ -587,9 +654,7 @@ const buttonId = `${menuId}-button`;
                         href={resolvedHref}
                         class={cn(
                           'mobile-menu-row mobile-menu-stagger group flex items-center gap-3 rounded-xl px-3 py-3 text-base transition-colors',
-                          active
-                            ? 'mobile-menu-row-active'
-                            : 'mobile-menu-row-inactive'
+                          active ? 'mobile-menu-row-active' : 'mobile-menu-row-inactive'
                         )}
                         style={`--stagger-index: ${idx}`}
                         aria-current={active ? 'page' : undefined}
@@ -613,7 +678,9 @@ const buttonId = `${menuId}-button`;
                   class="mobile-menu-stagger flex items-center justify-between rounded-xl px-3 py-2.5"
                   style={`--stagger-index: ${navItems.length}`}
                 >
-                  <span class="text-sm text-foreground-muted">{t('theme.colourTheme', locale)}</span>
+                  <span class="text-foreground-muted text-sm">
+                    {t('theme.colourTheme', locale)}
+                  </span>
                   <ThemeSelector />
                 </div>
               </section>
@@ -626,7 +693,9 @@ const buttonId = `${menuId}-button`;
                   class="mobile-menu-stagger flex items-center justify-between rounded-xl px-3 py-2.5"
                   style={`--stagger-index: ${navItems.length + (showThemeSelector ? 1 : 0)}`}
                 >
-                  <span class="text-sm text-foreground-muted">{t('nav.sectionLanguage', locale)}</span>
+                  <span class="text-foreground-muted text-sm">
+                    {t('nav.sectionLanguage', locale)}
+                  </span>
                   <LanguageSwitcher alternates={languageAlternates} />
                 </div>
               </section>
@@ -645,7 +714,7 @@ const buttonId = `${menuId}-button`;
                         rel="noopener noreferrer"
                         aria-label={label}
                         title={label}
-                        class="mobile-menu-social mobile-menu-stagger inline-flex h-11 w-11 items-center justify-center rounded-full border border-border-strong text-foreground-muted transition-colors"
+                        class="mobile-menu-social mobile-menu-stagger border-border-strong text-foreground-muted inline-flex h-11 w-11 items-center justify-center rounded-full border transition-colors"
                         style={`--stagger-index: ${navItems.length + (showThemeSelector ? 1 : 0) + (showLanguageSwitcher ? 1 : 0) + sIdx}`}
                       >
                         <Icon name={icon} size="md" />
@@ -661,7 +730,11 @@ const buttonId = `${menuId}-button`;
                 class="mobile-menu-stagger mobile-menu-cta-wrap pt-2"
                 style={`--stagger-index: ${navItems.length + (showThemeSelector ? 1 : 0) + (showLanguageSwitcher ? 1 : 0) + mobileSocialLinks.length}`}
               >
-                <Button fullWidth href={ctaHref} target={ctaHref?.startsWith('http') ? '_blank' : undefined}>
+                <Button
+                  fullWidth
+                  href={ctaHref}
+                  target={ctaHref?.startsWith('http') ? '_blank' : undefined}
+                >
                   {cta.icon && <Icon name={cta.icon} size="sm" />}
                   {cta.label}
                   {cta.trailingIcon && <Icon name={cta.trailingIcon} size="sm" />}
@@ -847,7 +920,12 @@ const buttonId = `${menuId}-button`;
   // without re-introducing a critical-path reflow.
   const SCROLL_THRESHOLD = 60;
   const AUTO_HIDE_THRESHOLD = 150;
-  const BAR_SCROLLED_CLASSES = ['bg-background/80', 'backdrop-blur-lg', 'border-b', 'border-border/50'];
+  const BAR_SCROLLED_CLASSES = [
+    'bg-background/80',
+    'backdrop-blur-lg',
+    'border-b',
+    'border-border/50',
+  ];
 
   let docMaxScrollY = 0;
   let docMetricsInited = false;
@@ -924,7 +1002,7 @@ const buttonId = `${menuId}-button`;
                 if (wasHidden) {
                   lastShownAtY = Math.min(
                     currentScrollY,
-                    Math.max(0, docMaxScrollY - AUTO_HIDE_THRESHOLD),
+                    Math.max(0, docMaxScrollY - AUTO_HIDE_THRESHOLD)
                   );
                   header.setAttribute('data-header-returned', '');
                 }
@@ -976,7 +1054,7 @@ const buttonId = `${menuId}-button`;
             requestAnimationFrame(updateProgress);
           }
         },
-        { passive: true },
+        { passive: true }
       );
       requestAnimationFrame(() => {
         updateDocMaxScrollY();
@@ -994,57 +1072,63 @@ const buttonId = `${menuId}-button`;
   .mobile-menu-blur {
     opacity: 0.3;
     filter: blur(4px);
-    transition: opacity 200ms, filter 200ms;
+    transition:
+      opacity 200ms,
+      filter 200ms;
   }
 
-  [data-header-shape="floating"] {
-    transition-property: translate, background, border-color, box-shadow, width, max-width, border-radius, margin-top;
+  [data-header-shape='floating'] {
+    transition-property:
+      translate, background, border-color, box-shadow, width, max-width, border-radius, margin-top;
     transition-duration: 300ms;
     transition-timing-function: ease;
   }
 
-  [data-header-shape="floating"][data-header-hidden] {
+  [data-header-shape='floating'][data-header-hidden] {
     translate: -50% calc(-100% - 1.5rem) !important;
   }
 
-  [data-header-shape="floating"][data-scrolled] {
+  [data-header-shape='floating'][data-scrolled] {
     background: color-mix(in oklch, var(--color-background) 92%, transparent);
     backdrop-filter: blur(24px);
     border-color: var(--color-border);
-    box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.14), 0 2px 8px -2px rgba(0, 0, 0, 0.08);
+    box-shadow:
+      0 8px 32px -8px rgba(0, 0, 0, 0.14),
+      0 2px 8px -2px rgba(0, 0, 0, 0.08);
   }
 
-  [data-header-shape="floating"] .hdr-inner {
+  [data-header-shape='floating'] .hdr-inner {
     max-width: 72rem;
     margin-left: auto;
     margin-right: auto;
     transition: box-shadow 300ms;
   }
 
-  [data-header-shape="floating"][data-header-color-scheme="invert"] .hdr-invert-text {
+  [data-header-shape='floating'][data-header-color-scheme='invert'] .hdr-invert-text {
     color: var(--color-on-invert);
     transition: color 300ms;
   }
-  [data-header-shape="floating"][data-header-color-scheme="invert"][data-scrolled] .hdr-invert-text {
+  [data-header-shape='floating'][data-header-color-scheme='invert'][data-scrolled]
+    .hdr-invert-text {
     color: var(--color-foreground);
   }
 
-  [data-header-shape="floating"][data-header-color-scheme="invert"] .hdr-logo-text {
+  [data-header-shape='floating'][data-header-color-scheme='invert'] .hdr-logo-text {
     color: var(--color-on-invert);
     transition: color 300ms;
   }
-  [data-header-shape="floating"][data-header-color-scheme="invert"][data-scrolled] .hdr-logo-text {
+  [data-header-shape='floating'][data-header-color-scheme='invert'][data-scrolled] .hdr-logo-text {
     color: var(--color-brand-600);
   }
 
-  [data-header-shape="floating"][data-header-color-scheme="default"] .hdr-logo-text {
+  [data-header-shape='floating'][data-header-color-scheme='default'] .hdr-logo-text {
     color: var(--color-brand-600);
   }
-  [data-header-shape="floating"][data-header-color-scheme="default"] .hdr-invert-text {
+  [data-header-shape='floating'][data-header-color-scheme='default'] .hdr-invert-text {
     color: var(--color-foreground-muted);
     transition: color 300ms;
   }
-  [data-header-shape="floating"][data-header-color-scheme="default"] .hdr-invert-text:hover {
+  [data-header-shape='floating'][data-header-color-scheme='default'] .hdr-invert-text:hover {
     color: var(--color-foreground);
   }
 
@@ -1053,144 +1137,190 @@ const buttonId = `${menuId}-button`;
      hero gradient the pill is a translucent tint of the current text colour,
      so it reads on the brand blue; once the header gains its solid background
      on scroll ([data-scrolled]) it switches to the fixed bar's exact colours. */
-  [data-header-shape="floating"] .nav-link:hover {
+  [data-header-shape='floating'] .nav-link:hover {
     background: color-mix(in srgb, currentColor 12%, transparent);
   }
-  [data-header-shape="floating"] .nav-link.hdr-nav-active {
+  [data-header-shape='floating'] .nav-link.hdr-nav-active {
     background: color-mix(in srgb, currentColor 16%, transparent);
   }
-  [data-header-shape="floating"][data-scrolled] .nav-link:hover {
+  [data-header-shape='floating'][data-scrolled] .nav-link:hover {
     background: color-mix(in srgb, var(--color-secondary) 70%, transparent);
   }
-  [data-header-shape="floating"][data-scrolled] .nav-link.hdr-nav-active {
+  [data-header-shape='floating'][data-scrolled] .nav-link.hdr-nav-active {
     background: var(--color-secondary);
   }
 
-  [data-header-shape="floating"][data-header-color-scheme="invert"] .hdr-invert-cta {
+  [data-header-shape='floating'][data-header-color-scheme='invert'] .hdr-invert-cta {
     background: white;
     color: #111;
     border: 1px solid rgba(0, 0, 0, 0.15);
-    transition: background 300ms, color 300ms, border-color 300ms;
+    transition:
+      background 300ms,
+      color 300ms,
+      border-color 300ms;
   }
-  [data-header-shape="floating"][data-header-color-scheme="invert"] .hdr-invert-cta:hover {
+  [data-header-shape='floating'][data-header-color-scheme='invert'] .hdr-invert-cta:hover {
     background: rgba(255, 255, 255, 0.9);
   }
-  [data-header-shape="floating"][data-header-color-scheme="invert"][data-scrolled] .hdr-invert-cta {
+  [data-header-shape='floating'][data-header-color-scheme='invert'][data-scrolled] .hdr-invert-cta {
     background: var(--color-primary);
     color: var(--color-primary-foreground);
   }
-  [data-header-shape="floating"][data-header-color-scheme="invert"][data-scrolled] .hdr-invert-cta:hover {
+  [data-header-shape='floating'][data-header-color-scheme='invert'][data-scrolled]
+    .hdr-invert-cta:hover {
     opacity: 0.9;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    [data-header-shape="floating"],
-    [data-header-shape="floating"] .hdr-inner,
-    [data-header-shape="floating"] .hdr-invert-text,
-    [data-header-shape="floating"] .hdr-logo-text,
-    [data-header-shape="floating"] .hdr-invert-cta,
-    [data-header-shape="floating"] .nav-link {
+    [data-header-shape='floating'],
+    [data-header-shape='floating'] .hdr-inner,
+    [data-header-shape='floating'] .hdr-invert-text,
+    [data-header-shape='floating'] .hdr-logo-text,
+    [data-header-shape='floating'] .hdr-invert-cta,
+    [data-header-shape='floating'] .nav-link {
       transition: none !important;
     }
-    [data-header-shape="floating"][data-header-hidden] {
+    [data-header-shape='floating'][data-header-hidden] {
       translate: -50% calc(-100% - 1.5rem) !important;
     }
   }
 
-  .dark [data-header-shape="floating"] {
+  .dark [data-header-shape='floating'] {
     background: color-mix(in oklch, var(--color-background) 65%, transparent);
     border-color: color-mix(in oklch, var(--color-brand-400) 35%, transparent);
     box-shadow: none;
   }
-  .dark [data-header-shape="floating"][data-scrolled] {
+  .dark [data-header-shape='floating'][data-scrolled] {
     background: color-mix(in oklch, var(--color-background) 88%, transparent);
     border-color: rgba(255, 255, 255, 0.14);
-    box-shadow: 0 4px 32px rgba(255, 255, 255, 0.07), 0 12px 40px -8px rgba(0, 0, 0, 0.6), 0 2px 8px -2px rgba(0, 0, 0, 0.4);
+    box-shadow:
+      0 4px 32px rgba(255, 255, 255, 0.07),
+      0 12px 40px -8px rgba(0, 0, 0, 0.6),
+      0 2px 8px -2px rgba(0, 0, 0, 0.4);
   }
 
   /* Light-mode floating header at rest: dark-glass capsule, mirroring the
      dark-mode look so it reads cleanly over the home hero's black→brand
      gradient. A neutral 18% white hairline sits below the badge and pill
      borders so the header reads as the quiet frame those chips live in. */
-  html:not(.dark) [data-header-shape="floating"]:not([data-scrolled]) {
+  html:not(.dark) [data-header-shape='floating']:not([data-scrolled]) {
     background: color-mix(in oklch, var(--surface-invert) 70%, transparent);
     border-color: color-mix(in oklch, var(--color-on-invert) 18%, transparent);
     box-shadow: none;
   }
-  html:not(.dark) [data-header-shape="floating"][data-scrolled] {
-    box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.14), 0 2px 8px -2px rgba(0, 0, 0, 0.08);
+  html:not(.dark) [data-header-shape='floating'][data-scrolled] {
+    box-shadow:
+      0 8px 32px -8px rgba(0, 0, 0, 0.14),
+      0 2px 8px -2px rgba(0, 0, 0, 0.08);
   }
 
-  html:not(.dark) [data-header-shape="floating"][data-header-color-scheme="default"]:not([data-scrolled]) .hdr-logo-text {
+  html:not(.dark)
+    [data-header-shape='floating'][data-header-color-scheme='default']:not([data-scrolled])
+    .hdr-logo-text {
     color: oklch(91% 0.008 250);
   }
-  html:not(.dark) [data-header-shape="floating"][data-header-color-scheme="default"]:not([data-scrolled]) .hdr-invert-text {
+  html:not(.dark)
+    [data-header-shape='floating'][data-header-color-scheme='default']:not([data-scrolled])
+    .hdr-invert-text {
     color: oklch(68% 0.01 250);
   }
-  html:not(.dark) [data-header-shape="floating"][data-header-color-scheme="default"]:not([data-scrolled]) .hdr-invert-text:hover {
+  html:not(.dark)
+    [data-header-shape='floating'][data-header-color-scheme='default']:not([data-scrolled])
+    .hdr-invert-text:hover {
     color: oklch(91% 0.008 250);
   }
 
-  html:not(.dark) [data-header-shape="floating"]:not([data-scrolled]) .ttg-wrapper > .ttg-trigger,
-  html:not(.dark) [data-header-shape="floating"]:not([data-scrolled]) .theme-dropdown-wrapper > button,
-  html:not(.dark) [data-header-shape="floating"]:not([data-scrolled]) .search-wrapper > .search-trigger {
+  html:not(.dark) [data-header-shape='floating']:not([data-scrolled]) .ttg-wrapper > .ttg-trigger,
+  html:not(.dark)
+    [data-header-shape='floating']:not([data-scrolled])
+    .theme-dropdown-wrapper
+    > button,
+  html:not(.dark)
+    [data-header-shape='floating']:not([data-scrolled])
+    .search-wrapper
+    > .search-trigger {
     border-color: oklch(58% 0.008 250 / 0.6);
     color: oklch(68% 0.01 250);
     box-shadow: none;
   }
-  html:not(.dark) [data-header-shape="floating"]:not([data-scrolled]) .ttg-wrapper > .ttg-trigger:hover,
-  html:not(.dark) [data-header-shape="floating"]:not([data-scrolled]) .theme-dropdown-wrapper > button:hover,
-  html:not(.dark) [data-header-shape="floating"]:not([data-scrolled]) .search-wrapper > .search-trigger:hover {
+  html:not(.dark)
+    [data-header-shape='floating']:not([data-scrolled])
+    .ttg-wrapper
+    > .ttg-trigger:hover,
+  html:not(.dark)
+    [data-header-shape='floating']:not([data-scrolled])
+    .theme-dropdown-wrapper
+    > button:hover,
+  html:not(.dark)
+    [data-header-shape='floating']:not([data-scrolled])
+    .search-wrapper
+    > .search-trigger:hover {
     border-color: oklch(58% 0.008 250 / 0.85);
     background-color: rgb(255 255 255 / 0.06);
     color: oklch(91% 0.008 250);
   }
 
-  html:not(.dark) [data-header-shape="floating"][data-header-color-scheme="default"]:not([data-scrolled]) .hdr-hamburger,
-  html:not(.dark) [data-header-shape="floating"][data-header-color-scheme="default"]:not([data-scrolled]) .hdr-hamburger svg {
+  html:not(.dark)
+    [data-header-shape='floating'][data-header-color-scheme='default']:not([data-scrolled])
+    .hdr-hamburger,
+  html:not(.dark)
+    [data-header-shape='floating'][data-header-color-scheme='default']:not([data-scrolled])
+    .hdr-hamburger
+    svg {
     color: oklch(68% 0.01 250);
   }
-  html:not(.dark) [data-header-shape="floating"][data-header-color-scheme="default"]:not([data-scrolled]) .hdr-hamburger:hover,
-  html:not(.dark) [data-header-shape="floating"][data-header-color-scheme="default"]:not([data-scrolled]) .hdr-hamburger:hover svg {
+  html:not(.dark)
+    [data-header-shape='floating'][data-header-color-scheme='default']:not([data-scrolled])
+    .hdr-hamburger:hover,
+  html:not(.dark)
+    [data-header-shape='floating'][data-header-color-scheme='default']:not([data-scrolled])
+    .hdr-hamburger:hover
+    svg {
     background-color: rgb(255 255 255 / 0.06);
     color: oklch(91% 0.008 250);
   }
 
-  .dark [data-header-shape="floating"] .theme-dropdown-wrapper button,
-  .dark [data-header-shape="floating"] .ttg-wrapper .ttg-trigger,
-  .dark [data-header-shape="floating"] .search-wrapper .search-trigger {
+  .dark [data-header-shape='floating'] .theme-dropdown-wrapper button,
+  .dark [data-header-shape='floating'] .ttg-wrapper .ttg-trigger,
+  .dark [data-header-shape='floating'] .search-wrapper .search-trigger {
     border-color: var(--color-foreground-subtle);
   }
 
-  [data-header-shape="floating"][data-header-color-scheme="invert"][data-scrolled] .hdr-logo-text {
+  [data-header-shape='floating'][data-header-color-scheme='invert'][data-scrolled] .hdr-logo-text {
     color: var(--color-brand-600);
   }
-  .dark [data-header-shape="floating"][data-header-color-scheme="invert"][data-scrolled] .hdr-logo-text {
+  .dark
+    [data-header-shape='floating'][data-header-color-scheme='invert'][data-scrolled]
+    .hdr-logo-text {
     color: var(--color-foreground);
   }
-  [data-header-shape="floating"][data-header-color-scheme="default"] .hdr-logo-text {
+  [data-header-shape='floating'][data-header-color-scheme='default'] .hdr-logo-text {
     color: var(--color-brand-600);
   }
-  .dark [data-header-shape="floating"][data-header-color-scheme="default"] .hdr-logo-text {
+  .dark [data-header-shape='floating'][data-header-color-scheme='default'] .hdr-logo-text {
     color: var(--color-foreground);
   }
 
-  [data-header-shape="floating"][data-header-color-scheme="default"] .hdr-invert-text {
+  [data-header-shape='floating'][data-header-color-scheme='default'] .hdr-invert-text {
     color: var(--color-foreground-muted);
     transition: color 300ms;
   }
-  .dark [data-header-shape="floating"][data-header-color-scheme="default"] .hdr-invert-text {
+  .dark [data-header-shape='floating'][data-header-color-scheme='default'] .hdr-invert-text {
     color: var(--color-foreground-muted);
   }
-  [data-header-shape="floating"][data-header-color-scheme="default"] .hdr-invert-text:hover {
+  [data-header-shape='floating'][data-header-color-scheme='default'] .hdr-invert-text:hover {
     color: var(--color-foreground);
   }
 
   @media (max-width: 1023px) {
-    html:not(.dark) [data-header-shape="floating"][data-header-color-scheme="invert"] .hdr-logo-text {
+    html:not(.dark)
+      [data-header-shape='floating'][data-header-color-scheme='invert']
+      .hdr-logo-text {
       color: var(--color-brand-500);
     }
-    html:not(.dark) [data-header-shape="floating"][data-header-color-scheme="invert"][data-scrolled] .hdr-logo-text {
+    html:not(.dark)
+      [data-header-shape='floating'][data-header-color-scheme='invert'][data-scrolled]
+      .hdr-logo-text {
       color: var(--color-brand-500);
     }
   }
@@ -1198,60 +1328,105 @@ const buttonId = `${menuId}-button`;
   /* ===== Returned state: color flip only when header comes back after being hidden ===== */
 
   /* Dark mode: flip to white capsule */
-  .dark [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] {
+  .dark [data-header-shape='floating'][data-header-returned][data-header-invert-on-return='true'] {
     background: rgba(255, 255, 255, 0.95);
     border-color: rgba(0, 0, 0, 0.06);
-    box-shadow: 0 4px 32px rgba(255, 255, 255, 0.12), 0 8px 24px -4px rgba(0, 0, 0, 0.25);
+    box-shadow:
+      0 4px 32px rgba(255, 255, 255, 0.12),
+      0 8px 24px -4px rgba(0, 0, 0, 0.25);
   }
-  .dark [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .hdr-invert-text {
+  .dark
+    [data-header-shape='floating'][data-header-returned][data-header-invert-on-return='true']
+    .hdr-invert-text {
     color: oklch(20% 0.005 250);
     transition: color 300ms;
   }
-  .dark [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .hdr-invert-text:hover {
+  .dark
+    [data-header-shape='floating'][data-header-returned][data-header-invert-on-return='true']
+    .hdr-invert-text:hover {
     color: oklch(8% 0 0);
   }
-  .dark [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .hdr-logo-text {
+  .dark
+    [data-header-shape='floating'][data-header-returned][data-header-invert-on-return='true']
+    .hdr-logo-text {
     color: var(--color-brand-700);
   }
-  .dark [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .theme-dropdown-wrapper button,
-  .dark [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .ttg-wrapper .ttg-trigger,
-  .dark [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .search-wrapper .search-trigger {
+  .dark
+    [data-header-shape='floating'][data-header-returned][data-header-invert-on-return='true']
+    .theme-dropdown-wrapper
+    button,
+  .dark
+    [data-header-shape='floating'][data-header-returned][data-header-invert-on-return='true']
+    .ttg-wrapper
+    .ttg-trigger,
+  .dark
+    [data-header-shape='floating'][data-header-returned][data-header-invert-on-return='true']
+    .search-wrapper
+    .search-trigger {
     border-color: rgba(0, 0, 0, 0.15);
   }
 
   /* Light mode: flip to dark capsule */
-  html:not(.dark) [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] {
+  html:not(.dark)
+    [data-header-shape='floating'][data-header-returned][data-header-invert-on-return='true'] {
     background: oklch(12% 0.005 250 / 0.93);
     border-color: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.45), 0 2px 8px -2px rgba(0, 0, 0, 0.25);
+    box-shadow:
+      0 8px 32px -4px rgba(0, 0, 0, 0.45),
+      0 2px 8px -2px rgba(0, 0, 0, 0.25);
   }
-  html:not(.dark) [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .hdr-invert-text {
+  html:not(.dark)
+    [data-header-shape='floating'][data-header-returned][data-header-invert-on-return='true']
+    .hdr-invert-text {
     color: rgba(255, 255, 255, 0.82);
     transition: color 300ms;
   }
-  html:not(.dark) [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .hdr-invert-text:hover {
+  html:not(.dark)
+    [data-header-shape='floating'][data-header-returned][data-header-invert-on-return='true']
+    .hdr-invert-text:hover {
     color: rgba(255, 255, 255, 1);
   }
-  html:not(.dark) [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .hdr-logo-text {
+  html:not(.dark)
+    [data-header-shape='floating'][data-header-returned][data-header-invert-on-return='true']
+    .hdr-logo-text {
     color: var(--color-brand-500);
   }
-  html:not(.dark) [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .theme-dropdown-wrapper button,
-  html:not(.dark) [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .ttg-wrapper .ttg-trigger,
-  html:not(.dark) [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .search-wrapper .search-trigger {
+  html:not(.dark)
+    [data-header-shape='floating'][data-header-returned][data-header-invert-on-return='true']
+    .theme-dropdown-wrapper
+    button,
+  html:not(.dark)
+    [data-header-shape='floating'][data-header-returned][data-header-invert-on-return='true']
+    .ttg-wrapper
+    .ttg-trigger,
+  html:not(.dark)
+    [data-header-shape='floating'][data-header-returned][data-header-invert-on-return='true']
+    .search-wrapper
+    .search-trigger {
     border-color: rgba(255, 255, 255, 0.2);
   }
 
   /* ===== Returned state: fix button hover backgrounds ===== */
   /* Dark mode: white header needs light hover, not dark-mode secondary */
-  .dark [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] button.hdr-invert-text:hover,
-  .dark [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .theme-dropdown-wrapper > button:hover {
+  .dark
+    [data-header-shape='floating'][data-header-returned][data-header-invert-on-return='true']
+    button.hdr-invert-text:hover,
+  .dark
+    [data-header-shape='floating'][data-header-returned][data-header-invert-on-return='true']
+    .theme-dropdown-wrapper
+    > button:hover {
     background-color: rgba(0, 0, 0, 0.08);
     color: oklch(8% 0 0);
   }
 
   /* Light mode: dark header needs dark hover, not light-mode secondary */
-  html:not(.dark) [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] button.hdr-invert-text:hover,
-  html:not(.dark) [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .theme-dropdown-wrapper > button:hover {
+  html:not(.dark)
+    [data-header-shape='floating'][data-header-returned][data-header-invert-on-return='true']
+    button.hdr-invert-text:hover,
+  html:not(.dark)
+    [data-header-shape='floating'][data-header-returned][data-header-invert-on-return='true']
+    .theme-dropdown-wrapper
+    > button:hover {
     background-color: rgba(255, 255, 255, 0.12);
     color: rgba(255, 255, 255, 1);
   }
@@ -1309,7 +1484,9 @@ const buttonId = `${menuId}-button`;
     border-radius: 0.625rem;
     background-color: color-mix(in oklch, var(--color-secondary) 70%, transparent);
     color: var(--color-foreground-muted);
-    transition: background-color 200ms ease, color 200ms ease;
+    transition:
+      background-color 200ms ease,
+      color 200ms ease;
   }
   .mobile-menu-row-inactive:hover .mobile-menu-tile {
     background-color: var(--color-secondary);
@@ -1326,7 +1503,9 @@ const buttonId = `${menuId}-button`;
 
   .mobile-menu-chevron {
     opacity: 0.4;
-    transition: opacity 200ms ease, transform 200ms ease;
+    transition:
+      opacity 200ms ease,
+      transform 200ms ease;
   }
   .mobile-menu-row:hover .mobile-menu-chevron {
     opacity: 0.8;

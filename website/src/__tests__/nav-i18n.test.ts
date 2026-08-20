@@ -44,10 +44,15 @@ describe('nav config — locale resolution (es default, en secondary)', () => {
 
   it('never locale-prefixes external, mailto/tel, or anchor hrefs', () => {
     expect(
-      resolveNavItem({ label: 'GitHub', href: 'https://github.com/x', order: 1, external: true }, 'en').href,
+      resolveNavItem(
+        { label: 'GitHub', href: 'https://github.com/x', order: 1, external: true },
+        'en'
+      ).href
     ).toBe('https://github.com/x');
     expect(resolveNavItem({ label: 'Top', href: '#top', order: 1 }, 'en').href).toBe('#top');
-    expect(resolveNavItem({ label: 'Mail', href: 'mailto:a@b.com', order: 1 }, 'en').href).toBe('mailto:a@b.com');
+    expect(resolveNavItem({ label: 'Mail', href: 'mailto:a@b.com', order: 1 }, 'en').href).toBe(
+      'mailto:a@b.com'
+    );
   });
 
   it('applies a per-locale override (label + path), still locale-prefixed', () => {

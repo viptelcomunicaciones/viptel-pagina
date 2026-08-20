@@ -7,7 +7,12 @@ import JsonLd from '@/components/seo/JsonLd.astro';
 import Analytics from '@/components/layout/Analytics.astro';
 import ConsentBanner from '@/components/ui/overlay/ConsentBanner';
 import CursorTrail from '@/components/effects/CursorTrail.astro';
-import { createWebsiteSchema, createOrganizationSchema, createPersonSchema, createProfessionalServiceSchema } from '@/lib/schema';
+import {
+  createWebsiteSchema,
+  createOrganizationSchema,
+  createPersonSchema,
+  createProfessionalServiceSchema,
+} from '@/lib/schema';
 import type { Thing, WithContext } from 'schema-dts';
 import siteConfig from '@/config/site.config';
 import { t, getLocaleFromPath } from '@/i18n';
@@ -87,7 +92,7 @@ if (commentsConfig?.enabled) {
 ---
 
 <!doctype html>
-<html lang={locale} class="scroll-smooth dark" data-theme="blue" data-theme-mode="system">
+<html lang={locale} class="dark scroll-smooth" data-theme="blue" data-theme-mode="system">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -122,7 +127,12 @@ if (commentsConfig?.enabled) {
     />
 
     <!-- RSS Feed -->
-    <link rel="alternate" type="application/rss+xml" title={`${siteConfig.name} RSS Feed`} href="/rss.xml" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${siteConfig.name} RSS Feed`}
+      href="/rss.xml"
+    />
 
     <!-- JSON-LD Structured Data -->
     <JsonLd schema={schemas} />
@@ -149,14 +159,29 @@ if (commentsConfig?.enabled) {
          When mode === 'system', <html>.dark tracks prefers-color-scheme live. -->
     <script is:inline>
       (function () {
-        const COLOR_THEMES = ['orange', 'amber', 'lime', 'emerald', 'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet', 'purple', 'magenta'];
+        const COLOR_THEMES = [
+          'orange',
+          'amber',
+          'lime',
+          'emerald',
+          'teal',
+          'cyan',
+          'sky',
+          'blue',
+          'indigo',
+          'violet',
+          'purple',
+          'magenta',
+        ];
         const VALID_MODES = ['system', 'light', 'dark'];
 
         function getMode() {
           try {
             const stored = localStorage.getItem('theme');
             if (VALID_MODES.indexOf(stored) !== -1) return stored;
-          } catch { /* private mode / disabled storage */ }
+          } catch {
+            /* private mode / disabled storage */
+          }
           return 'system';
         }
 
@@ -177,7 +202,9 @@ if (commentsConfig?.enabled) {
             if (saved && COLOR_THEMES.indexOf(saved) !== -1) {
               el.setAttribute('data-theme', saved);
             }
-          } catch { /* ignored */ }
+          } catch {
+            /* ignored */
+          }
         }
 
         function applyTheme(el) {
@@ -210,11 +237,14 @@ if (commentsConfig?.enabled) {
     </script>
   </head>
 
-  <body class="min-h-screen bg-background text-foreground antialiased" data-eager-reveal={eagerReveal ? '' : undefined}>
+  <body
+    class="bg-background text-foreground min-h-screen antialiased"
+    data-eager-reveal={eagerReveal ? '' : undefined}
+  >
     <!-- Skip to content link -->
     <a
       href="#main-content"
-      class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground"
+      class="focus:bg-primary focus:text-primary-foreground sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:px-4 focus:py-2"
     >
       {t('nav.skipToContent', locale)}
     </a>
@@ -235,19 +265,52 @@ if (commentsConfig?.enabled) {
     <button
       id="back-to-top"
       aria-label={t('common.backToTop', locale)}
-      class="fixed bottom-6 right-6 z-50 h-12 w-12"
+      class="fixed right-6 bottom-6 z-50 h-12 w-12"
       style="opacity:0;translate:0 2rem;pointer-events:none"
     >
       <!-- Scroll-progress ring (rotated so arc starts at 12 o'clock) -->
       <svg class="absolute inset-0 h-full w-full -rotate-90" viewBox="0 0 48 48" aria-hidden="true">
         <!-- Faint grey track -->
-        <circle cx="24" cy="24" r="21" fill="none" stroke="currentColor" class="text-border" stroke-width="2" opacity="0.5" />
+        <circle
+          cx="24"
+          cy="24"
+          r="21"
+          fill="none"
+          stroke="currentColor"
+          class="text-border"
+          stroke-width="2"
+          opacity="0.5"></circle>
         <!-- Brand progress arc -->
-        <circle id="back-to-top-ring" cx="24" cy="24" r="21" fill="none" stroke="currentColor" class="text-brand-500" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="131.95" stroke-dashoffset="131.95" />
+        <circle
+          id="back-to-top-ring"
+          cx="24"
+          cy="24"
+          r="21"
+          fill="none"
+          stroke="currentColor"
+          class="text-brand-500"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-dasharray="131.95"
+          stroke-dashoffset="131.95"></circle>
       </svg>
       <!-- Inner face -->
-      <span class="absolute inset-[5px] flex items-center justify-center rounded-full bg-background border border-border-strong text-foreground-muted shadow-md" aria-hidden="true">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"/></svg>
+      <span
+        class="bg-background border-border-strong text-foreground-muted absolute inset-[5px] flex items-center justify-center rounded-full border shadow-md"
+        aria-hidden="true"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"><path d="m18 15-6-6-6 6"></path></svg
+        >
       </span>
     </button>
 
@@ -291,7 +354,8 @@ if (commentsConfig?.enabled) {
             if (reducedMotion) {
               btn.style.transition = 'none';
             } else {
-              btn.style.transition = 'opacity 250ms cubic-bezier(0,0,0.2,1), translate 250ms cubic-bezier(0,0,0.2,1)';
+              btn.style.transition =
+                'opacity 250ms cubic-bezier(0,0,0.2,1), translate 250ms cubic-bezier(0,0,0.2,1)';
             }
             btn.style.opacity = '1';
             btn.style.translate = '0 0';
@@ -303,7 +367,8 @@ if (commentsConfig?.enabled) {
             if (reducedMotion) {
               btn.style.transition = 'none';
             } else {
-              btn.style.transition = 'opacity 300ms cubic-bezier(0.4,0,1,1), translate 300ms cubic-bezier(0.4,0,1,1)';
+              btn.style.transition =
+                'opacity 300ms cubic-bezier(0.4,0,1,1), translate 300ms cubic-bezier(0.4,0,1,1)';
             }
             btn.style.opacity = '0';
             btn.style.translate = '0 2rem';
@@ -312,7 +377,8 @@ if (commentsConfig?.enabled) {
           }
 
           function updateFrame() {
-            const pct = docMaxScrollY > 0 ? Math.min(1, Math.max(0, window.scrollY / docMaxScrollY)) : 0;
+            const pct =
+              docMaxScrollY > 0 ? Math.min(1, Math.max(0, window.scrollY / docMaxScrollY)) : 0;
             if (ring) {
               ring.style.strokeDashoffset = String(CIRCUMFERENCE * (1 - pct));
             }
@@ -336,9 +402,13 @@ if (commentsConfig?.enabled) {
             window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' });
           });
 
-          document.addEventListener('astro:before-swap', function () {
-            window.removeEventListener('scroll', onScroll);
-          }, { once: true });
+          document.addEventListener(
+            'astro:before-swap',
+            function () {
+              window.removeEventListener('scroll', onScroll);
+            },
+            { once: true }
+          );
 
           // Run the first frame on rAF so it picks up the initial scroll
           // position after layout has settled — and read scrollHeight here
@@ -358,7 +428,9 @@ if (commentsConfig?.enabled) {
       (function () {
         function initReveal() {
           const els = Array.prototype.slice.call(
-            document.querySelectorAll('[data-reveal]:not(.is-visible), [data-reveal-children]:not(.is-visible)')
+            document.querySelectorAll(
+              '[data-reveal]:not(.is-visible), [data-reveal-children]:not(.is-visible)'
+            )
           );
 
           // Also observe each direct child of [data-reveal-content] so long
@@ -383,23 +455,29 @@ if (commentsConfig?.enabled) {
           // elements (taller than ~85% of the viewport — long code blocks,
           // large embeds) use threshold 0 so they still fire; shorter
           // elements use 0.15 so animations feel earned.
-          const shortObs = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-              if (entry.isIntersecting) {
-                entry.target.classList.add('is-visible');
-                shortObs.unobserve(entry.target);
-              }
-            });
-          }, { threshold: 0.15, rootMargin: belowFoldMargin });
+          const shortObs = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add('is-visible');
+                  shortObs.unobserve(entry.target);
+                }
+              });
+            },
+            { threshold: 0.15, rootMargin: belowFoldMargin }
+          );
 
-          const tallObs = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-              if (entry.isIntersecting) {
-                entry.target.classList.add('is-visible');
-                tallObs.unobserve(entry.target);
-              }
-            });
-          }, { threshold: 0, rootMargin: belowFoldMargin });
+          const tallObs = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add('is-visible');
+                  tallObs.unobserve(entry.target);
+                }
+              });
+            },
+            { threshold: 0, rootMargin: belowFoldMargin }
+          );
 
           // First-pass observer: hands us boundingClientRect and rootBounds
           // for each element without forcing a synchronous layout read. The
@@ -411,29 +489,35 @@ if (commentsConfig?.enabled) {
           // top 75% of the viewport, matching the prior `rect.top < vh*0.75`
           // condition.
           let revealIndex = 0;
-          const firstPass = new IntersectionObserver(function (entries) {
-            // Preserve document order so the above-fold stagger is stable.
-            entries.sort(function (a, b) {
-              const pos = a.target.compareDocumentPosition(b.target);
-              if (pos & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
-              if (pos & Node.DOCUMENT_POSITION_PRECEDING) return 1;
-              return 0;
-            });
+          const firstPass = new IntersectionObserver(
+            function (entries) {
+              // Preserve document order so the above-fold stagger is stable.
+              entries.sort(function (a, b) {
+                const pos = a.target.compareDocumentPosition(b.target);
+                if (pos & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
+                if (pos & Node.DOCUMENT_POSITION_PRECEDING) return 1;
+                return 0;
+              });
 
-            entries.forEach(function (entry) {
-              firstPass.unobserve(entry.target);
-              if (entry.isIntersecting) {
-                const i = revealIndex++;
-                setTimeout(function () {
-                  entry.target.classList.add('is-visible');
-                }, 250 + i * 80);
-              } else {
-                const rb = entry.rootBounds;
-                const tall = rb ? entry.boundingClientRect.height > rb.height * 0.85 : false;
-                (tall ? tallObs : shortObs).observe(entry.target);
-              }
-            });
-          }, { threshold: 0, rootMargin: '0px 0px -25% 0px' });
+              entries.forEach(function (entry) {
+                firstPass.unobserve(entry.target);
+                if (entry.isIntersecting) {
+                  const i = revealIndex++;
+                  setTimeout(
+                    function () {
+                      entry.target.classList.add('is-visible');
+                    },
+                    250 + i * 80
+                  );
+                } else {
+                  const rb = entry.rootBounds;
+                  const tall = rb ? entry.boundingClientRect.height > rb.height * 0.85 : false;
+                  (tall ? tallObs : shortObs).observe(entry.target);
+                }
+              });
+            },
+            { threshold: 0, rootMargin: '0px 0px -25% 0px' }
+          );
 
           // Cards flagged data-reveal-eager (the first card on a listing page)
           // reveal on load with the normal animation instead of waiting for
@@ -481,7 +565,9 @@ if (commentsConfig?.enabled) {
             if (el.hasAttribute('data-reveal-eager')) {
               const group = eagerGroups.get(el);
               setTimeout(function () {
-                group.forEach(function (node) { node.classList.add('is-visible'); });
+                group.forEach(function (node) {
+                  node.classList.add('is-visible');
+                });
               }, 250);
               return;
             }

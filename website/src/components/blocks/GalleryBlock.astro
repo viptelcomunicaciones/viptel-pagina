@@ -1,39 +1,52 @@
 ---
-import { payload } from '@/lib/payload-client'
-import type { GalleryBlock as GalleryBlockType } from '@/lib/block-types'
+import { payload } from '@/lib/payload-client';
+import type { GalleryBlock as GalleryBlockType } from '@/lib/block-types';
 
 interface Props {
-  block: GalleryBlockType
-  locale?: string
+  block: GalleryBlockType;
+  locale?: string;
 }
 
-const { block } = Astro.props
+const { block } = Astro.props;
 const slides = (block.images ?? []).flatMap((img) => {
-  const image = typeof img.image === 'object' && img.image !== null ? img.image : undefined
-  return image ? [{ image, alt: img.alt, caption: img.caption, id: img.id }] : []
-})
+  const image = typeof img.image === 'object' && img.image !== null ? img.image : undefined;
+  return image ? [{ image, alt: img.alt, caption: img.caption, id: img.id }] : [];
+});
 ---
 
-<section class="relative z-10 py-[var(--space-section-md)] bg-background border-t border-border">
+<section class="bg-background border-border relative z-10 border-t py-[var(--space-section-md)]">
   <div class="mx-auto max-w-6xl px-6">
-    {block.heading && (
-      <h2 class="font-display text-3xl md:text-4xl font-bold text-foreground text-center mb-12" data-reveal>{block.heading}</h2>
-    )}
-    <div class="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-      {slides.map((img, i) => (
-        <div class="group relative overflow-hidden rounded-xl aspect-square" data-reveal data-reveal-delay={(i % 4) || undefined}>
-          <img
-            src={payload.resolveMediaUrl(img.image?.url)}
-            alt={img.alt || img.image?.alt || ''}
-            class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
-          {img.caption && (
-            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-              <p class="text-white text-sm">{img.caption}</p>
-            </div>
-          )}
-        </div>
-      ))}
+    {
+      block.heading && (
+        <h2
+          class="font-display text-foreground mb-12 text-center text-3xl font-bold md:text-4xl"
+          data-reveal
+        >
+          {block.heading}
+        </h2>
+      )
+    }
+    <div class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+      {
+        slides.map((img, i) => (
+          <div
+            class="group relative aspect-square overflow-hidden rounded-xl"
+            data-reveal
+            data-reveal-delay={i % 4 || undefined}
+          >
+            <img
+              src={payload.resolveMediaUrl(img.image?.url)}
+              alt={img.alt || img.image?.alt || ''}
+              class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            {img.caption && (
+              <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100">
+                <p class="text-sm text-white">{img.caption}</p>
+              </div>
+            )}
+          </div>
+        ))
+      }
     </div>
   </div>
 </section>

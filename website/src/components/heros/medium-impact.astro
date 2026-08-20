@@ -4,26 +4,26 @@
  * image flowing below the content. Rendered when the CMS hero type is
  * `mediumImpact`.
  */
-import { Hero } from '@/components/hero'
-import RichText from '@/components/blocks/RichText.astro'
-import HeroLinks from './HeroLinks.astro'
-import { extractHeroTitle } from './hero-helpers'
-import { payload } from '@/lib/payload-client'
-import type { PageHero } from '@/lib/block-types'
+import { Hero } from '@/components/hero';
+import RichText from '@/components/blocks/RichText.astro';
+import HeroLinks from './HeroLinks.astro';
+import { extractHeroTitle } from './hero-helpers';
+import { payload } from '@/lib/payload-client';
+import type { PageHero } from '@/lib/block-types';
 
 interface Props {
-  hero: PageHero
-  locale?: string
+  hero: PageHero;
+  locale?: string;
 }
 
-const { hero, locale } = Astro.props
+const { hero, locale } = Astro.props;
 
-const title = extractHeroTitle(hero.richText)
-const hasLinks = Array.isArray(hero.links) && hero.links.length > 0
+const title = extractHeroTitle(hero.richText);
+const hasLinks = Array.isArray(hero.links) && hero.links.length > 0;
 const imageUrl =
   hero.media && typeof hero.media === 'object' && hero.media.url
     ? payload.resolveMediaUrl(hero.media.url)
-    : undefined
+    : undefined;
 ---
 
 <Hero layout="centered" showGlow>

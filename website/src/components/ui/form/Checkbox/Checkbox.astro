@@ -24,7 +24,7 @@ const checkboxId = id || generateId('checkbox');
     )}
   >
     <!-- Custom checkbox visual -->
-    <div class="relative flex items-center justify-center mt-0.5">
+    <div class="relative mt-0.5 flex items-center justify-center">
       <input
         type="checkbox"
         id={checkboxId}
@@ -47,7 +47,8 @@ const checkboxId = id || generateId('checkbox');
           'peer-checked:group-hover:bg-foreground/90',
           error && 'border-destructive peer-focus-visible:ring-destructive'
         )}
-      />
+      >
+      </div>
       <!-- Checkmark icon -->
       <svg
         class={cn(
@@ -63,7 +64,7 @@ const checkboxId = id || generateId('checkbox');
         stroke-linecap="round"
         stroke-linejoin="round"
       >
-        <path d="M2.5 6L5 8.5L9.5 3.5" />
+        <path d="M2.5 6L5 8.5L9.5 3.5"></path>
       </svg>
     </div>
 
@@ -71,15 +72,11 @@ const checkboxId = id || generateId('checkbox');
     {
       (label || description) && (
         <div class="grid gap-0.5 leading-tight">
-          {label && (
-            <span class="text-sm font-medium text-foreground">
-              {label}
-            </span>
-          )}
+          {label && <span class="text-foreground text-sm font-medium">{label}</span>}
           {description && (
             <span
               id={`${checkboxId}-description`}
-              class="text-xs text-foreground-subtle leading-normal"
+              class="text-foreground-subtle text-xs leading-normal"
             >
               {description}
             </span>
@@ -89,9 +86,5 @@ const checkboxId = id || generateId('checkbox');
     }
   </label>
 
-  {
-    error && (
-      <p class="mt-2 text-sm text-destructive pl-[30px]">{error}</p>
-    )
-  }
+  {error && <p class="text-destructive mt-2 pl-[30px] text-sm">{error}</p>}
 </div>

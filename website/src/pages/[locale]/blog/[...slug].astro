@@ -1,37 +1,39 @@
 ---
-import PageLayout from '@/layouts/PageLayout.astro'
-import PostLayout from '@/layouts/PostLayout.astro'
-import BlogArchiveView from '@/components/blog/views/BlogArchiveView.astro'
-import { defaultLocale, isValidLocale } from '@/i18n'
-import { resolveBlogArchive } from '@/lib/blog'
+import PageLayout from '@/layouts/PageLayout.astro';
+import PostLayout from '@/layouts/PostLayout.astro';
+import BlogArchiveView from '@/components/blog/views/BlogArchiveView.astro';
+import { defaultLocale, isValidLocale } from '@/i18n';
+import { resolveBlogArchive } from '@/lib/blog';
 
-export const prerender = false
+export const prerender = false;
 
-const { locale = defaultLocale, slug } = Astro.params
+const { locale = defaultLocale, slug } = Astro.params;
 
 if (!isValidLocale(locale)) {
-  return Astro.redirect('/404')
+  return Astro.redirect('/404');
 }
 
 if (!slug) {
-  return Astro.redirect('/404')
+  return Astro.redirect('/404');
 }
 
-const segments = slug.split('/').filter(Boolean)
-const currentPage = Math.max(1, Number(Astro.url.searchParams.get('page')) || 1)
-const archive = await resolveBlogArchive(segments, locale, currentPage)
+const segments = slug.split('/').filter(Boolean);
+const currentPage = Math.max(1, Number(Astro.url.searchParams.get('page')) || 1);
+const archive = await resolveBlogArchive(segments, locale, currentPage);
 
 if (archive.kind === 'not-found') {
-  return Astro.redirect('/404')
+  return Astro.redirect('/404');
 }
 
-const post = archive.kind === 'post' ? archive.post! : null
+const post = archive.kind === 'post' ? archive.post! : null;
 ---
 
-{post ? (
-  <PageLayout title={post.title} description={post.excerpt || post.title}>
-    <PostLayout post={post} locale={locale} />
-  </PageLayout>
-) : (
-  <BlogArchiveView archive={archive} currentPage={currentPage} locale={locale} />
-)}
+{
+  post ? (
+    <PageLayout title={post.title} description={post.excerpt || post.title}>
+      <PostLayout post={post} locale={locale} />
+    </PageLayout>
+  ) : (
+    <BlogArchiveView archive={archive} currentPage={currentPage} locale={locale} />
+  )
+}

@@ -7,7 +7,7 @@ The theme is distributed by cloning the repository, so the way to receive a fix
 is to update from upstream — see the update guide on the theme blog.
 
 | Version | Supported |
-|---------|-----------|
+| ------- | --------- |
 | 2.x     | Yes       |
 | 1.x     | No        |
 

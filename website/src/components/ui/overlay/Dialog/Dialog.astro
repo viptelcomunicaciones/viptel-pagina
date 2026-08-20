@@ -35,13 +35,14 @@ const sizes = {
 >
   <!-- Backdrop -->
   <div
-    class="fixed inset-0 bg-foreground/50 backdrop-blur-sm opacity-0 transition-opacity duration-200"
+    class="bg-foreground/50 fixed inset-0 opacity-0 backdrop-blur-sm transition-opacity duration-200"
     data-dialog-backdrop
     aria-hidden="true"
-  />
+  >
+  </div>
 
   <!-- Dialog Panel -->
-  <div class="fixed inset-0 flex items-center justify-center p-4 overflow-y-auto">
+  <div class="fixed inset-0 flex items-center justify-center overflow-y-auto p-4">
     <div
       class={cn(
         'relative w-full',
@@ -64,30 +65,26 @@ const sizes = {
         data-dialog-close
         aria-label="Close dialog"
       >
-        <Icon name="x" class="w-5 h-5" />
+        <Icon name="x" class="h-5 w-5" />
       </button>
 
       <!-- Header -->
-      {(title || description) && (
-        <div class="p-6 pb-0">
-          {title && (
-            <h2
-              id={`${id}-title`}
-              class="text-lg font-semibold text-foreground pr-8"
-            >
-              {title}
-            </h2>
-          )}
-          {description && (
-            <p
-              id={`${id}-description`}
-              class="mt-1 text-sm text-foreground-muted"
-            >
-              {description}
-            </p>
-          )}
-        </div>
-      )}
+      {
+        (title || description) && (
+          <div class="p-6 pb-0">
+            {title && (
+              <h2 id={`${id}-title`} class="text-foreground pr-8 text-lg font-semibold">
+                {title}
+              </h2>
+            )}
+            {description && (
+              <p id={`${id}-description`} class="text-foreground-muted mt-1 text-sm">
+                {description}
+              </p>
+            )}
+          </div>
+        )
+      }
 
       <!-- Content -->
       <div class="p-6">

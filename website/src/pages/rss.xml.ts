@@ -6,7 +6,10 @@ import type { Post } from '@/lib/payload-types';
 import { buildRssFeed } from '@/lib/rss';
 
 export async function GET(context: APIContext) {
-  const posts = await payload.posts().getAll(defaultLocale).catch(() => [] as Post[]);
+  const posts = await payload
+    .posts()
+    .getAll(defaultLocale)
+    .catch(() => [] as Post[]);
 
   const site = context.site?.toString() ?? siteConfig.url;
   const siteUrl = site.endsWith('/') ? site.slice(0, -1) : site;
