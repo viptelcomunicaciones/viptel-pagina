@@ -5,6 +5,7 @@ import { formatDate, getReadingTime } from '@/lib/utils';
 import { t, getLocaleFromPath } from '@/i18n';
 import Logo from '@/components/ui/marketing/Logo/Logo.astro';
 import BlogImageSVG from '@/components/blog/BlogImageSVG.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 
 interface Props {
   title: string;
@@ -17,6 +18,12 @@ interface Props {
   image?: ImageMetadata;
   svgSlug?: string;
   imageUrl?: string;
+  /** Nombre del tipo de post, mostrado como badge sobre la imagen. */
+  postTypeName?: string;
+  /** Icono Lucide del tipo de post. */
+  postTypeIcon?: string;
+  /** Nombre de la categoría del post, mostrado como badge sobre la imagen. */
+  postCategoryName?: string;
   /**
    * Marks the first card on a listing page. On mobile it reveals on load with
    * the standard animation instead of waiting for scroll, matching how the
@@ -45,6 +52,9 @@ const {
   image,
   svgSlug,
   imageUrl,
+  postTypeName,
+  postTypeIcon,
+  postCategoryName,
   eager = false,
   revealDelay,
   class: className,
@@ -67,6 +77,17 @@ const readingTime = getReadingTime(body ?? description);
         bg-background-secondary bg-gradient-to-br from-brand-100/65 to-transparent dark:from-brand-900/60 dark:to-brand-600/25"
       style="color: var(--brand-500);"
     >
+      {postTypeName && (
+        <div class="absolute left-3 top-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-background/90 px-3 py-1 text-xs font-semibold text-brand-700 dark:text-brand-400 ring-1 ring-inset ring-brand-500/40 backdrop-blur-sm">
+          <Icon name={postTypeIcon || 'file-text'} size="xs" />
+          {postTypeName}
+        </div>
+      )}
+      {postCategoryName && (
+        <div class="absolute bottom-3 left-3 z-10 inline-flex items-center rounded-full bg-background/90 px-3 py-1 text-xs font-medium text-foreground-muted ring-1 ring-inset ring-border/60 backdrop-blur-sm">
+          {postCategoryName}
+        </div>
+      )}
       {svgSlug ? (
         <div class="transition-transform duration-300 group-hover:scale-105">
           <BlogImageSVG slug={svgSlug} title={title} />

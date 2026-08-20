@@ -64,9 +64,14 @@ if (isServices) {
   const all: (Post | Project)[] = isProjects ? await payload.projects().getAll(locale) : await payload.posts().getAll(locale)
   let selected = all
   if (block.categories?.length) {
+    const selectedCategoryIds = new Set(
+      block.categories.map((c) => (typeof c === 'object' && c ? (c as any).id : c)),
+    )
     selected = selected.filter((p) => {
-      const categories = 'categories' in p ? p.categories : undefined
-      return categories?.some((c) => block.categories!.includes(typeof c === 'number' ? c : (c as any).id))
+      if (!('categories' in p)) return false
+      const cat = p.categories
+      const catId = typeof cat === 'object' && cat !== null ? (cat as any).id : cat
+      return catId != null && selectedCategoryIds.has(catId)
     })
   }
   if (block.limit) selected = selected.slice(0, block.limit)

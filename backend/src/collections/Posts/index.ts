@@ -120,12 +120,22 @@ export const Posts: CollectionConfig<'posts'> = {
               relationTo: 'posts',
             },
             {
+              name: 'postType',
+              type: 'relationship',
+              admin: {
+                description: 'Formato del contenido. Es un eje aparte de la categoría.',
+                position: 'sidebar',
+              },
+              relationTo: 'post-types',
+              required: true,
+            },
+            {
               name: 'categories',
               type: 'relationship',
               admin: {
+                description: 'Categoría raíz o subcategoría (una sola por post).',
                 position: 'sidebar',
               },
-              hasMany: true,
               relationTo: 'categories',
             },
           ],

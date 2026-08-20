@@ -13,7 +13,7 @@ import siteConfig from '@/config/site.config'
 import type { Post } from '@/lib/payload-types'
 import { payload } from '@/lib/payload-client'
 import { t, localizedPath } from '@/i18n'
-import { getBlogBaseUrl, getTagName, getPostUrl, getRelatedByTags } from '@/lib/blog'
+import { getBlogBaseUrl, getTagName, getPostUrl, getRelatedByTags, getPostTypeName, getPostTypeIcon, getPostCategory, getPostTypeUrl, getCategoryArchiveUrl, getSubcategoryArchiveUrl } from '@/lib/blog'
 import { formatDate, getReadingTime, resolveSocialLinks } from '@/lib/utils'
 import { extractHeadings, getPlainText } from '@/lib/headings'
 import Breadcrumbs from '@/components/seo/Breadcrumbs.astro'
@@ -62,6 +62,23 @@ const heroImage = post.heroImage && typeof post.heroImage !== 'number' ? post.he
 const imageUrl = heroImage?.url ? payload.resolveMediaUrl(heroImage.url) : undefined
 const imageAlt = heroImage?.alt ?? undefined
 
+// Tipo de contenido y categoría del post, para las píldoras del hero.
+const postTypeName = getPostTypeName(post)
+const postTypeIcon = getPostTypeIcon(post)
+const postTypeSlug = typeof post.postType === 'object' && post.postType ? post.postType.slug : ''
+const postTypeHref = postTypeSlug ? getPostTypeUrl(postTypeSlug, locale) : undefined
+
+const postCategory = getPostCategory(post)
+const postCategoryName = postCategory?.title
+const postCategoryHref = (() => {
+  if (!postCategory || !postTypeSlug) return undefined
+  const parent = postCategory.parent
+  if (typeof parent === 'object' && parent) {
+    return getSubcategoryArchiveUrl(postTypeSlug, parent.slug, postCategory, locale)
+  }
+  return getCategoryArchiveUrl(postTypeSlug, postCategory, locale)
+})()
+
 const breadcrumbs = [
   { label: t('common.home', locale), href: localizedPath('/', locale) },
   { label: t('blog.title', locale), href: getBlogBaseUrl(locale) },
@@ -102,6 +119,11 @@ const relatedPosts = [...manualRelated, ...tagRelated].slice(0, 3)
   imageUrl={imageUrl}
   imageAlt={imageAlt}
   body={bodyText}
+  postTypeName={postTypeName}
+  postTypeIcon={postTypeIcon}
+  postTypeHref={postTypeHref}
+  postCategoryName={postCategoryName}
+  postCategoryHref={postCategoryHref}
 />
 
 <article class="pt-8 pb-[var(--space-section-md)]">
@@ -195,6 +217,9 @@ const relatedPosts = [...manualRelated, ...tagRelated].slice(0, 3)
               ? payload.resolveMediaUrl(rp.heroImage.url ?? '')
               : undefined
           }
+          postTypeName={getPostTypeName(rp)}
+          postTypeIcon={getPostTypeIcon(rp)}
+          postCategoryName={getPostCategory(rp)?.title}
         />
       ))}
     </div>

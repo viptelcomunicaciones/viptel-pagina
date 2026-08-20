@@ -9,6 +9,7 @@
  */
 import PageLayout from '@/layouts/PageLayout.astro';
 import BlogCard from '@/components/blog/BlogCard.astro';
+import BlogTypeTabs from '@/components/blog/BlogTypeTabs.astro';
 import Pagination from '@/components/blog/Pagination.astro';
 import TagList from '@/components/blog/TagList.astro';
 import Badge from '@/components/ui/data-display/Badge/Badge.astro';
@@ -28,6 +29,8 @@ import {
   getPostUrl,
   getPublishedPosts,
   getTagName,
+  getPostTypeIcon,
+  getPostTypeName,
 } from '@/lib/blog';
 
 interface Props {
@@ -43,6 +46,7 @@ const { docs, totalDocs, totalPages } = await payload.posts().getPaginated(local
 
 const allPosts = await getPublishedPosts(locale);
 const topTags = collectTopTags(allPosts, BLOG_TAG_CLOUD_LIMIT);
+const postTypes = await payload.postTypes().getAll(locale);
 
 const regularPosts = docs;
 ---
@@ -63,6 +67,8 @@ const regularPosts = docs;
   <section class="bg-background-secondary py-[var(--space-section-md)] border-t border-border">
     <div class="mx-auto max-w-6xl px-6 flex flex-col gap-8">
       <div class="flex flex-col items-center gap-4" data-reveal>
+        <BlogTypeTabs postTypes={postTypes} activeSlug="" locale={locale} />
+
         {topTags.length > 0 && (
           <TagList tags={topTags} locale={locale} class="justify-center" />
         )}
@@ -80,6 +86,8 @@ const regularPosts = docs;
                 tags={(post.tags ?? []).map(t => getTagName(t))}
                 author={post.populatedAuthors?.[0]?.name || 'Viptel'}
                 imageUrl={post.heroImage && typeof post.heroImage !== 'number' ? payload.resolveMediaUrl(post.heroImage.url ?? '') : undefined}
+                postTypeName={getPostTypeName(post)}
+                postTypeIcon={getPostTypeIcon(post)}
                 revealDelay={index % 3}
                 eager={index === 0}
               />

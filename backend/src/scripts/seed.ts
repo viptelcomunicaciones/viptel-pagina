@@ -24,6 +24,7 @@ const collections: CollectionSlug[] = [
   'media',
   'pages',
   'posts',
+  'post-types',
   'projects',
   'redirects',
   'services',
@@ -149,15 +150,15 @@ export const seed = async (payload: Payload): Promise<void> => {
   // Clear it first so deleting users does not violate the constraint.
   await payload.db.deleteMany({ collection: 'payload-mcp-api-keys' as never, where: {} })
 
-  await Promise.all(
-    collections.map((collection) => payload.db.deleteMany({ collection, where: {} })),
-  )
+  for (const collection of collections) {
+    await payload.db.deleteMany({ collection, where: {} })
+  }
 
-  await Promise.all(
-    collections
-      .filter((collection) => Boolean(payload.collections[collection]?.config.versions))
-      .map((collection) => payload.db.deleteVersions({ collection, where: {} })),
-  )
+  for (const collection of collections.filter((collection) =>
+    Boolean(payload.collections[collection]?.config.versions),
+  )) {
+    await payload.db.deleteVersions({ collection, where: {} })
+  }
 
   payload.logger.info(`- Seeding users...`)
 
@@ -223,15 +224,70 @@ export const seed = async (payload: Payload): Promise<void> => {
     }),
   ])
 
-  payload.logger.info(`- Seeding categories...`)
+  payload.logger.info(`- Seeding post types...`)
 
-  const categoryData: Array<{ es: string; en: string; slug: string }> = [
-    { es: 'Telecomunicaciones', en: 'Telecommunications', slug: 'telecomunicaciones' },
-    { es: 'Desarrollo Web', en: 'Web Development', slug: 'desarrollo-web' },
-    { es: 'Marketing Digital', en: 'Digital Marketing', slug: 'marketing-digital' },
+  type PostTypeSeed = { es: string; en: string; slug: string; icon: string; position: number }
+
+  const postTypesData: PostTypeSeed[] = [
+    { es: 'Guía y tutorial', en: 'Guide & tutorial', slug: 'guias', icon: 'book', position: 1 },
+    { es: 'Caso de éxito', en: 'Case study', slug: 'casos-exito', icon: 'trending-up', position: 2 },
+    { es: 'Guía de compra', en: 'Buying guide', slug: 'guias-compra', icon: 'shopping-bag', position: 3 },
+    { es: 'Noticia', en: 'News', slug: 'noticias', icon: 'newspaper', position: 4 },
   ]
 
-  const categoryDocs = []
+  const postTypeIdBySlug = new Map<string, number>()
+  for (const type of postTypesData) {
+    const doc = await payload.create({
+      collection: 'post-types',
+      locale: 'es',
+      data: { title: type.es, slug: type.slug, icon: type.icon, position: type.position },
+    })
+    await payload.update({
+      collection: 'post-types',
+      id: doc.id,
+      locale: 'en',
+      data: { title: type.en },
+    })
+    postTypeIdBySlug.set(type.slug, doc.id as number)
+  }
+
+  payload.logger.info(`- Seeding categories...`)
+
+  type SubcategorySeed = { es: string; en: string; slug: string }
+  type CategorySeed = { es: string; en: string; slug: string; subcategories: SubcategorySeed[] }
+
+  const categoryData: CategorySeed[] = [
+    {
+      es: 'Telecomunicaciones',
+      en: 'Telecommunications',
+      slug: 'telecomunicaciones',
+      subcategories: [
+        { es: 'VoIP', en: 'VoIP', slug: 'voip' },
+        { es: 'PBX y centrales telefónicas', en: 'PBX & phone systems', slug: 'pbx-centrales' },
+        { es: 'Redes y conectividad', en: 'Networking & connectivity', slug: 'redes-conectividad' },
+      ],
+    },
+    {
+      es: 'Desarrollo Web',
+      en: 'Web Development',
+      slug: 'desarrollo-web',
+      subcategories: [
+        { es: 'Aplicaciones web', en: 'Web applications', slug: 'aplicaciones-web' },
+        { es: 'E-commerce', en: 'E-commerce', slug: 'e-commerce' },
+      ],
+    },
+    {
+      es: 'Marketing Digital',
+      en: 'Digital Marketing',
+      slug: 'marketing-digital',
+      subcategories: [
+        { es: 'SEO', en: 'SEO', slug: 'seo' },
+        { es: 'Publicidad digital', en: 'Digital advertising', slug: 'publicidad-digital' },
+      ],
+    },
+  ]
+
+  const categoryIdBySlug = new Map<string, number>()
   for (const cat of categoryData) {
     const doc = await payload.create({
       collection: 'categories',
@@ -244,7 +300,21 @@ export const seed = async (payload: Payload): Promise<void> => {
       locale: 'en',
       data: { title: cat.en },
     })
-    categoryDocs.push(doc)
+    categoryIdBySlug.set(cat.slug, doc.id as number)
+    for (const sub of cat.subcategories) {
+      const subDoc = await payload.create({
+        collection: 'categories',
+        locale: 'es',
+        data: { title: sub.es, slug: sub.slug, parent: doc.id as number },
+      })
+      await payload.update({
+        collection: 'categories',
+        id: subDoc.id,
+        locale: 'en',
+        data: { title: sub.en },
+      })
+      categoryIdBySlug.set(sub.slug, subDoc.id as number)
+    }
   }
 
   payload.logger.info(`- Seeding tags...`)
@@ -270,7 +340,8 @@ export const seed = async (payload: Payload): Promise<void> => {
     es: { title: string; slug: string; excerpt: string; content: SeedBlock[] }
     en: { title: string; excerpt: string; content: SeedBlock[] }
     heroImage: number
-    category: number
+    postType: string
+    category: string
     tags: string[]
     toc?: 'inherit' | 'enabled' | 'disabled'
   }
@@ -305,7 +376,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image1.id as number,
-      category: categoryDocs[0].id as number,
+      category: 'voip',
+      postType: 'guias',
       tags: ['VoIP', 'PBX'],
       toc: 'enabled',
     },
@@ -338,7 +410,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image2.id as number,
-      category: categoryDocs[1].id as number,
+      category: 'desarrollo-web',
+      postType: 'guias',
       tags: ['Frontend', 'Desarrollo Web'],
       toc: 'inherit',
     },
@@ -371,7 +444,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image1.id as number,
-      category: categoryDocs[2].id as number,
+      category: 'redes-conectividad',
+      postType: 'guias',
       tags: ['Ciberseguridad', 'Seguridad'],
       toc: 'inherit',
     },
@@ -404,7 +478,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image2.id as number,
-      category: categoryDocs[1].id as number,
+      category: 'aplicaciones-web',
+      postType: 'guias',
       tags: ['Inteligencia Artificial', 'Desarrollo Web'],
       toc: 'enabled',
     },
@@ -437,7 +512,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image1.id as number,
-      category: categoryDocs[1].id as number,
+      category: 'desarrollo-web',
+      postType: 'noticias',
       tags: ['UX/UI', 'Diseño'],
       toc: 'inherit',
     },
@@ -470,7 +546,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image2.id as number,
-      category: categoryDocs[0].id as number,
+      category: 'redes-conectividad',
+      postType: 'guias',
       tags: ['Nube', 'Redes'],
       toc: 'inherit',
     },
@@ -503,7 +580,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image1.id as number,
-      category: categoryDocs[2].id as number,
+      category: 'aplicaciones-web',
+      postType: 'guias',
       tags: ['Nube', 'Cloud'],
       toc: 'inherit',
     },
@@ -536,7 +614,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image2.id as number,
-      category: categoryDocs[1].id as number,
+      category: 'desarrollo-web',
+      postType: 'noticias',
       tags: ['Headless CMS', 'Desarrollo Web'],
       toc: 'enabled',
     },
@@ -569,7 +648,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image1.id as number,
-      category: categoryDocs[1].id as number,
+      category: 'desarrollo-web',
+      postType: 'guias',
       tags: ['Rendimiento', 'SEO'],
       toc: 'inherit',
     },
@@ -602,7 +682,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image2.id as number,
-      category: categoryDocs[1].id as number,
+      category: 'aplicaciones-web',
+      postType: 'guias',
       tags: ['Astro', 'Frontend'],
       toc: 'enabled',
     },
@@ -635,7 +716,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image1.id as number,
-      category: categoryDocs[1].id as number,
+      category: 'aplicaciones-web',
+      postType: 'guias',
       tags: ['Base de datos', 'Desarrollo Web'],
       toc: 'inherit',
     },
@@ -668,7 +750,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image2.id as number,
-      category: categoryDocs[2].id as number,
+      category: 'marketing-digital',
+      postType: 'guias',
       tags: ['Marketing Digital', 'Automatización'],
       toc: 'inherit',
     },
@@ -701,7 +784,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image1.id as number,
-      category: categoryDocs[1].id as number,
+      category: 'aplicaciones-web',
+      postType: 'guias',
       tags: ['APIs', 'Desarrollo Web'],
       toc: 'inherit',
     },
@@ -734,7 +818,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image2.id as number,
-      category: categoryDocs[0].id as number,
+      category: 'pbx-centrales',
+      postType: 'guias',
       tags: ['Telefonía IP', 'VoIP'],
       toc: 'enabled',
     },
@@ -767,7 +852,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image1.id as number,
-      category: categoryDocs[1].id as number,
+      category: 'aplicaciones-web',
+      postType: 'guias',
       tags: ['Testing', 'Desarrollo Web'],
       toc: 'inherit',
     },
@@ -800,7 +886,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image2.id as number,
-      category: categoryDocs[1].id as number,
+      category: 'aplicaciones-web',
+      postType: 'guias',
       tags: ['DevOps', 'Contenedores'],
       toc: 'inherit',
     },
@@ -833,7 +920,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image1.id as number,
-      category: categoryDocs[2].id as number,
+      category: 'seo',
+      postType: 'guias',
       tags: ['SEO', 'Marketing Digital'],
       toc: 'inherit',
     },
@@ -866,7 +954,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image2.id as number,
-      category: categoryDocs[2].id as number,
+      category: 'redes-conectividad',
+      postType: 'guias',
       tags: ['Ciberseguridad', 'Seguridad'],
       toc: 'disabled',
     },
@@ -899,7 +988,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image1.id as number,
-      category: categoryDocs[1].id as number,
+      category: 'e-commerce',
+      postType: 'guias-compra',
       tags: ['E-commerce', 'SEO'],
       toc: 'inherit',
     },
@@ -932,7 +1022,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         ],
       },
       heroImage: image2.id as number,
-      category: categoryDocs[0].id as number,
+      category: 'redes-conectividad',
+      postType: 'noticias',
       tags: ['Redes', 'Conectividad'],
       toc: 'disabled',
     },
@@ -950,7 +1041,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         excerpt: post.es.excerpt,
         content: sections(...post.es.content),
         heroImage: post.heroImage,
-        categories: [post.category],
+        categories: categoryIdBySlug.get(post.category) as number,
+        postType: postTypeIdBySlug.get(post.postType) as number,
         authors: [admin.id],
         tags: await Promise.all(post.tags.map(ensureTag)),
         toc: post.toc ?? 'inherit',

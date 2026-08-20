@@ -9,6 +9,7 @@ import { Categories } from './collections/Categories'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
+import { PostTypes } from './collections/PostTypes'
 import { Projects } from './collections/Projects'
 import { Services } from './collections/Services'
 import { Tags } from './collections/Tags'
@@ -69,7 +70,7 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || '',
     },
   }),
-  collections: [Pages, Posts, Projects, Services, Media, Categories, Tags, Users],
+  collections: [Pages, Posts, Projects, Services, Media, Categories, Tags, PostTypes, Users],
   cors: [getServerSideURL(), getFrontendURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [...plugins, mcpPlugin({}), formBuilderPlugin({

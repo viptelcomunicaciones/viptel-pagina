@@ -75,6 +75,7 @@ export interface Config {
     media: Media;
     categories: Category;
     tags: Tag;
+    'post-types': PostType;
     users: User;
     redirects: Redirect;
     forms: Form;
@@ -100,6 +101,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
+    'post-types': PostTypesSelect<false> | PostTypesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
@@ -386,7 +388,14 @@ export interface Post {
   } | null;
   excerpt?: string | null;
   relatedPosts?: (number | Post)[] | null;
-  categories?: (number | Category)[] | null;
+  /**
+   * Formato del contenido. Es un eje aparte de la categoría.
+   */
+  postType: number | PostType;
+  /**
+   * Categoría raíz o subcategoría (una sola por post).
+   */
+  categories?: (number | null) | Category;
   meta?: {
     title?: string | null;
     /**
@@ -537,12 +546,44 @@ export interface FolderInterface {
   createdAt: string;
 }
 /**
+ * Formato del contenido del blog (guías, casos de éxito, noticias…). Es un eje aparte de la categoría: no crees un tipo por cada tema.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "post-types".
+ */
+export interface PostType {
+  id: number;
+  title: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  description?: string | null;
+  /**
+   * Selecciona un icono de la librería Lucide.
+   */
+  icon?: string | null;
+  /**
+   * Orden en el que aparece en las pestañas del blog.
+   */
+  position?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Jerarquía de dos niveles: categoría raíz y subcategoría. Crear una subcategoría solo si agrupa 10+ posts (regla de volumen).
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */
 export interface Category {
   id: number;
   title: string;
+  /**
+   * Dejar vacío si es una categoría raíz. Seleccionar un padre para crear una subcategoría.
+   */
+  parent?: (number | null) | Category;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
@@ -1430,6 +1471,10 @@ export interface PayloadLockedDocument {
         value: number | Tag;
       } | null)
     | ({
+        relationTo: 'post-types';
+        value: number | PostType;
+      } | null)
+    | ({
         relationTo: 'users';
         value: number | User;
       } | null)
@@ -1742,6 +1787,7 @@ export interface PostsSelect<T extends boolean = true> {
   content?: T;
   excerpt?: T;
   relatedPosts?: T;
+  postType?: T;
   categories?: T;
   meta?:
     | T
@@ -2045,6 +2091,7 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
+  parent?: T;
   generateSlug?: T;
   slug?: T;
   updatedAt?: T;
@@ -2058,6 +2105,20 @@ export interface TagsSelect<T extends boolean = true> {
   name?: T;
   generateSlug?: T;
   slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "post-types_select".
+ */
+export interface PostTypesSelect<T extends boolean = true> {
+  title?: T;
+  generateSlug?: T;
+  slug?: T;
+  description?: T;
+  icon?: T;
+  position?: T;
   updatedAt?: T;
   createdAt?: T;
 }

@@ -1,7 +1,9 @@
 ---
 import PageLayout from '@/layouts/PageLayout.astro'
 import PostLayout from '@/layouts/PostLayout.astro'
-import { payload } from '@/lib/payload-client'
+import BlogArchiveView from '@/components/blog/views/BlogArchiveView.astro'
+import { defaultLocale } from '@/i18n'
+import { resolveBlogArchive } from '@/lib/blog'
 
 export const prerender = false
 
@@ -11,13 +13,21 @@ if (!slug) {
   return Astro.redirect('/404')
 }
 
-const post = await payload.posts().getBySlug(slug)
+const segments = slug.split('/').filter(Boolean)
+const currentPage = Math.max(1, Number(Astro.url.searchParams.get('page')) || 1)
+const archive = await resolveBlogArchive(segments, defaultLocale, currentPage)
 
-if (!post) {
+if (archive.kind === 'not-found') {
   return Astro.redirect('/404')
 }
+
+const post = archive.kind === 'post' ? archive.post! : null
 ---
 
-<PageLayout title={post.meta?.title || post.title} description={post.meta?.description || post.excerpt || post.title}>
-  <PostLayout post={post} />
-</PageLayout>
+{post ? (
+  <PageLayout title={post.title} description={post.excerpt || post.title}>
+    <PostLayout post={post} locale={defaultLocale} />
+  </PageLayout>
+) : (
+  <BlogArchiveView archive={archive} currentPage={currentPage} locale={defaultLocale} />
+)}

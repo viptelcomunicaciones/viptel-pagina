@@ -5,7 +5,7 @@
  *   import { payload } from '@/lib/payload-client'
  *   const home = await payload.pages().getBySlug('home', 'es')
  */
-import type { Page, Post, Project, Redirect, Service } from './payload-types'
+import type { Category, Page, Post, PostType, Project, Redirect, Service } from './payload-types'
 import { defaultLocale } from '@/i18n'
 
 // ── Constants ────────────────────────────────────────────
@@ -97,6 +97,14 @@ export class PayloadClient {
     return new PostQueries(this)
   }
 
+  postTypes(): PostTypeQueries {
+    return new PostTypeQueries(this)
+  }
+
+  categories(): CategoryQueries {
+    return new CategoryQueries(this)
+  }
+
   projects(): ProjectQueries {
     return new ProjectQueries(this)
   }
@@ -170,6 +178,79 @@ class PostQueries extends QueryBase<Post> {
       `posts?sort=-publishedAt&limit=${limit}&page=${page}&where[tags.name][equals]=${encodeURIComponent(tag)}&where[_status][equals]=published`,
       { locale },
     )
+  }
+
+  async getByPostType(
+    postTypeId: number | string,
+    locale = defaultLocale,
+    page = 1,
+    limit = 20,
+  ): Promise<DocsResponse<Post>> {
+    return this.client.fetchAPI<DocsResponse<Post>>(
+      `posts?sort=-publishedAt&limit=${limit}&page=${page}&where[postType][equals]=${encodeURIComponent(String(postTypeId))}&where[_status][equals]=published`,
+      { locale },
+    )
+  }
+
+  async getByCategory(
+    categoryId: number | string,
+    locale = defaultLocale,
+    page = 1,
+    limit = 20,
+  ): Promise<DocsResponse<Post>> {
+    return this.client.fetchAPI<DocsResponse<Post>>(
+      `posts?sort=-publishedAt&limit=${limit}&page=${page}&where[categories][equals]=${encodeURIComponent(String(categoryId))}&where[_status][equals]=published`,
+      { locale },
+    )
+  }
+
+  async getByPostTypeAndCategory(
+    postTypeId: number | string,
+    categoryId: number | string,
+    locale = defaultLocale,
+    page = 1,
+    limit = 20,
+  ): Promise<DocsResponse<Post>> {
+    return this.client.fetchAPI<DocsResponse<Post>>(
+      `posts?sort=-publishedAt&limit=${limit}&page=${page}&where[postType][equals]=${encodeURIComponent(String(postTypeId))}&where[categories][equals]=${encodeURIComponent(String(categoryId))}&where[_status][equals]=published`,
+      { locale },
+    )
+  }
+}
+
+class PostTypeQueries extends QueryBase<PostType> {
+  constructor(client: PayloadClient) {
+    super(client, 'post-types')
+  }
+
+  async getAll(locale = defaultLocale): Promise<PostType[]> {
+    const data = await this.client.fetchAPI<DocsResponse<PostType>>(
+      `post-types?sort=position&limit=${MAX_DOCS_PER_PAGE}`,
+      { locale },
+    )
+    return data.docs ?? []
+  }
+}
+
+class CategoryQueries extends QueryBase<Category> {
+  constructor(client: PayloadClient) {
+    super(client, 'categories')
+  }
+
+  async getAll(locale = defaultLocale): Promise<Category[]> {
+    const data = await this.client.fetchAPI<DocsResponse<Category>>(
+      `categories?limit=${MAX_DOCS_PER_PAGE}`,
+      { locale },
+    )
+    return data.docs ?? []
+  }
+
+  async getRoots(locale = defaultLocale): Promise<Category[]> {
+    const data = await this.client.fetchAPI<DocsResponse<Category>>(
+      `categories?limit=${MAX_DOCS_PER_PAGE}&where[parent][exists]=false`,
+      { locale },
+    )
+    return data.docs ?? []
   }
 }
 

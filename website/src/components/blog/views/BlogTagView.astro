@@ -20,7 +20,7 @@ import siteConfig from '@/config/site.config';
 import { resolveSocialLinks } from '@/lib/utils';
 import { t, defaultLocale } from '@/i18n';
 import { payload } from '@/lib/payload-client';
-import { getBlogBaseUrl, getPostUrl, getTagName } from '@/lib/blog';
+import { getBlogBaseUrl, getPostUrl, getTagName, getPostTypeIcon, getPostTypeName } from '@/lib/blog';
 import type { Post } from '@/lib/payload-types';
 
 interface Props {
@@ -89,6 +89,8 @@ const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
               tags={(post.tags ?? []).map(t => getTagName(t))}
               author={post.populatedAuthors?.[0]?.name || 'Viptel'}
               imageUrl={post.heroImage && typeof post.heroImage !== 'number' ? payload.resolveMediaUrl(post.heroImage.url ?? '') : undefined}
+              postTypeName={getPostTypeName(post)}
+              postTypeIcon={getPostTypeIcon(post)}
               revealDelay={index % 3}
               eager={index === 0}
             />

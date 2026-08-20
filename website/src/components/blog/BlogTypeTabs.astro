@@ -1,0 +1,64 @@
+---
+/**
+ * BlogTypeTabs — pestañas de tipos de post del blog.
+ *
+ * Muestra "Todos" seguido de cada tipo gestionable (`post-types`) y enlaza a
+ * sus archivos jerárquicos: `/blog/<tipo>`. El tipo activo se marca con el
+ * estilo relleno de marca; el resto, contorno. Pure HTML — sin JS.
+ */
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import { getBlogBaseUrl, getPostTypeUrl } from '@/lib/blog';
+import { t, defaultLocale } from '@/i18n';
+import type { PostType } from '@/lib/payload-types';
+
+interface Props {
+  /** Tipos a mostrar, ordenados por `position`. */
+  postTypes: PostType[];
+  /** Slug del tipo activo (vacío cuando estamos en "Todos"). */
+  activeSlug?: string;
+  locale?: string;
+  class?: string;
+}
+
+const { postTypes, activeSlug = '', locale = defaultLocale, class: extraClass } = Astro.props;
+---
+
+{postTypes.length > 0 && (
+  <ul class:list={['flex flex-wrap items-center justify-center gap-2', extraClass]} aria-label="Browse by post type">
+    <li>
+      <a
+        href={getBlogBaseUrl(locale)}
+        class:list={[
+          'inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+          activeSlug === ''
+            ? 'border-brand-500 bg-brand-500 text-white'
+            : 'border-brand-500/40 bg-transparent text-brand-700 dark:text-brand-400 hover:border-brand-500/80',
+        ]}
+        aria-current={activeSlug === '' ? 'page' : undefined}
+      >
+        {t('blog.allPosts', locale)}
+      </a>
+    </li>
+
+    {postTypes.map((type) => {
+      const isActive = activeSlug === type.slug;
+      return (
+        <li>
+          <a
+            href={getPostTypeUrl(type.slug, locale)}
+            class:list={[
+              'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+              isActive
+                ? 'border-brand-500 bg-brand-500 text-white'
+                : 'border-brand-500/40 bg-transparent text-brand-700 dark:text-brand-400 hover:border-brand-500/80',
+            ]}
+            aria-current={isActive ? 'page' : undefined}
+          >
+            <Icon name={type.icon || 'file-text'} size="xs" />
+            {type.title}
+          </a>
+        </li>
+      );
+    })}
+  </ul>
+)}

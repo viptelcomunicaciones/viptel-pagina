@@ -6,6 +6,7 @@ import { t, getLocaleFromPath } from '@/i18n';
 import Logo from '@/components/ui/marketing/Logo/Logo.astro';
 import BlogImageSVG from '@/components/blog/BlogImageSVG.astro';
 import TagList from '@/components/blog/TagList.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import HeroGrid from '@/components/effects/HeroGrid.astro';
 import HeroBeam from '@/components/effects/HeroBeam.astro';
 
@@ -24,6 +25,16 @@ interface Props {
   svgSlug?: string;
   /** Raw post body, used to estimate reading time (CJK-aware). */
   body?: string;
+  /** Tipo de contenido del post (badge enlazado al archivo de tipo). */
+  postTypeName?: string;
+  /** Icono Lucide del tipo de post. */
+  postTypeIcon?: string;
+  /** URL del archivo de tipo. */
+  postTypeHref?: string;
+  /** Categoría del post (badge enlazado al archivo de categoría). */
+  postCategoryName?: string;
+  /** URL del archivo de categoría. */
+  postCategoryHref?: string;
 }
 
 const {
@@ -38,6 +49,11 @@ const {
   imageUrl,
   svgSlug,
   body,
+  postTypeName,
+  postTypeIcon,
+  postTypeHref,
+  postCategoryName,
+  postCategoryHref,
 } = Astro.props;
 
 const locale = getLocaleFromPath(Astro.url.pathname);
@@ -53,6 +69,37 @@ const readingTime = getReadingTime(body ?? description);
   <HeroBeam />
 
   <div class="relative z-[1] mx-auto max-w-4xl px-6 animate-hero-stagger">
+    <!-- Post type + category pills -->
+    {(postTypeName || postCategoryName) && (
+      <div class="mb-4 flex flex-wrap items-center gap-2">
+        {postTypeName && (postTypeHref ? (
+          <a
+            href={postTypeHref}
+            class="inline-flex items-center gap-1.5 rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-700 dark:text-brand-400 ring-1 ring-inset ring-brand-500/40 transition-colors hover:bg-brand-500/20"
+          >
+            <Icon name={postTypeIcon || 'file-text'} size="xs" />
+            {postTypeName}
+          </a>
+        ) : (
+          <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-500/10 px-3 py-1 text-xs font-semibold text-brand-700 dark:text-brand-400 ring-1 ring-inset ring-brand-500/40">
+            <Icon name={postTypeIcon || 'file-text'} size="xs" />
+            {postTypeName}
+          </span>
+        ))}
+        {postCategoryName && (postCategoryHref ? (
+          <a
+            href={postCategoryHref}
+            class="inline-flex items-center rounded-full bg-background/60 px-3 py-1 text-xs font-medium text-foreground-muted ring-1 ring-inset ring-border/60 transition-colors hover:ring-brand-500/80"
+          >
+            {postCategoryName}
+          </a>
+        ) : (
+          <span class="inline-flex items-center rounded-full bg-background/60 px-3 py-1 text-xs font-medium text-foreground-muted ring-1 ring-inset ring-border/60">
+            {postCategoryName}
+          </span>
+        ))}
+      </div>
+    )}
     <!-- Title -->
     <h1 class="font-display text-4xl font-bold tracking-tight text-foreground md:text-5xl lg:text-6xl mb-[var(--space-heading-gap)]">
       {title}

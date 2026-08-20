@@ -1,7 +1,7 @@
 ---
 import BlogCard from './BlogCard.astro';
 import { t, defaultLocale } from '@/i18n';
-import { getPostUrl, getTagName, getRelatedByTags } from '@/lib/blog';
+import { getPostUrl, getTagName, getRelatedByTags, getPostTypeName, getPostTypeIcon, getPostCategory } from '@/lib/blog';
 import { payload } from '@/lib/payload-client';
 
 interface Props {
@@ -32,6 +32,9 @@ const relatedPosts = await getRelatedByTags(currentSlug, tags, locale, maxPosts)
           tags={(post.tags || []).map((t) => getTagName(t))}
           author={post.populatedAuthors?.[0]?.name || 'Viptel'}
           imageUrl={post.heroImage && typeof post.heroImage !== 'number' ? payload.resolveMediaUrl(post.heroImage.url ?? '') : undefined}
+          postTypeName={getPostTypeName(post)}
+          postTypeIcon={getPostTypeIcon(post)}
+          postCategoryName={getPostCategory(post)?.title}
         />
       ))}
     </div>

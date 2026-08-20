@@ -29,6 +29,8 @@ import {
   getPostUrl,
   getPublishedPosts,
   getTagName,
+  getPostTypeIcon,
+  getPostTypeName,
 } from '@/lib/blog';
 
 interface Props {
@@ -94,6 +96,8 @@ const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
             tags={(post.tags ?? []).map(t => getTagName(t))}
             author={post.populatedAuthors?.[0]?.name || 'Viptel'}
             imageUrl={post.heroImage && typeof post.heroImage !== 'number' ? payload.resolveMediaUrl(post.heroImage.url ?? '') : undefined}
+            postTypeName={getPostTypeName(post)}
+            postTypeIcon={getPostTypeIcon(post)}
             revealDelay={index % 3}
             eager={index === 0}
           />
