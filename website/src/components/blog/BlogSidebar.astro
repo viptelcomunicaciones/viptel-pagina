@@ -2,7 +2,7 @@
 /**
  * BlogSidebar — menú lateral del blog.
  *
- * Columna izquierda sticky para las páginas de listado del blog: enlaces de
+ * Columna izquierda para las páginas de listado del blog: enlaces de
  * navegación global, tipos de post como acordeones (`<details>`) con sus
  * categorías y subcategorías, y una sección de etiquetas con contador.
  *
@@ -242,14 +242,28 @@ const blogHref = getBlogBaseUrl(locale);
                   class:list={[
                     'flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors',
                     isActive
-                      ? 'bg-brand-500/10 text-brand-700 dark:text-brand-400 font-medium'
+                      ? 'bg-brand-500 text-white'
                       : 'text-foreground-muted hover:bg-brand-500/10 hover:text-brand-700 dark:hover:text-brand-400',
                   ]}
                   aria-current={isActive ? 'page' : undefined}
                 >
-                  <Icon name="tag" size="xs" class="text-foreground-subtle shrink-0" />
+                  <Icon
+                    name="tag"
+                    size="xs"
+                    class:list={[
+                      'shrink-0 transition-colors',
+                      isActive ? 'text-white' : 'text-foreground-subtle',
+                    ]}
+                  />
                   <span class="min-w-0 flex-1 truncate">#{tag.name}</span>
-                  <span class="text-foreground-subtle text-xs">{tag.count}</span>
+                  <span
+                    class:list={[
+                      'text-xs transition-colors',
+                      isActive ? 'text-white/70' : 'text-foreground-subtle',
+                    ]}
+                  >
+                    {tag.count}
+                  </span>
                 </a>
               </li>
             );

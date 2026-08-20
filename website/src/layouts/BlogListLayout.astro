@@ -3,7 +3,7 @@
  * BlogListLayout — layout compartido para las páginas de listado del blog.
  *
  * Renderiza el Hero (slot `hero`), una sección de dos columnas con el
- * `BlogSidebar` sticky a la izquierda y el contenido en el slot por defecto,
+ * `BlogSidebar` a la izquierda y el contenido en el slot por defecto,
  * y una zona `footer` (CTA / LetterGlitch) a ancho completo.
  *
  * En móvil el sidebar queda colapsado por defecto y se abre con un toggle
@@ -124,10 +124,7 @@ if (activeCategorySlug && activeTypeSlug) {
           {t('blog.sidebarToggle', locale)}
         </label>
 
-        <div
-          data-sidebar-scroll
-          class="hidden [scrollbar-gutter:stable] peer-checked:block lg:sticky lg:top-24 lg:block lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto"
-        >
+        <div class="hidden peer-checked:block lg:block">
           <BlogSidebar
             locale={locale}
             types={sidebarData.types}
@@ -157,24 +154,3 @@ if (activeCategorySlug && activeTypeSlug) {
 
   <slot name="footer" />
 </PageLayout>
-
-<script>
-  const sidebarContainer = document.querySelector('[data-sidebar-scroll]');
-  if (sidebarContainer) {
-    const activeNodes = sidebarContainer.querySelectorAll('[aria-current="page"]');
-    const active = activeNodes.length > 0 ? activeNodes[activeNodes.length - 1] : null;
-    const toggle = document.getElementById('blog-sidebar-toggle') as HTMLInputElement | null;
-    const scrollToActive = () => {
-      active?.scrollIntoView({ block: 'nearest' });
-    };
-
-    if (active) {
-      if (window.matchMedia('(min-width: 1024px)').matches) {
-        scrollToActive();
-      }
-      toggle?.addEventListener('change', () => {
-        if (toggle.checked) scrollToActive();
-      });
-    }
-  }
-</script>
