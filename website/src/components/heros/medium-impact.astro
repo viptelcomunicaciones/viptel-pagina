@@ -10,6 +10,7 @@ import HeroLinks from './HeroLinks.astro';
 import { extractHeroTitle } from './hero-helpers';
 import { payload } from '@/lib/payload-client';
 import type { PageHero } from '@/lib/block-types';
+import { Image } from 'astro:assets';
 
 interface Props {
   hero: PageHero;
@@ -30,5 +31,15 @@ const imageUrl =
   {title && <h1 slot="title">{title}</h1>}
   <RichText slot="description" content={hero.richText} excludeFirstHeading />
   {hasLinks && <HeroLinks slot="actions" links={hero.links!} locale={locale} />}
-  {imageUrl && <img src={imageUrl} alt={title} class="mt-8 w-full rounded-xl shadow-lg" />}
+  {imageUrl && (
+    <Image
+      src={imageUrl}
+      alt={title}
+      inferSize
+      widths={[640, 960, 1280, 1920]}
+      sizes="100vw"
+      class="mt-8 w-full rounded-xl shadow-lg"
+      loading="eager"
+    />
+  )}
 </Hero>

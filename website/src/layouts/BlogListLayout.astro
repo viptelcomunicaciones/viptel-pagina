@@ -11,15 +11,9 @@
  */
 import PageLayout from '@/layouts/PageLayout.astro';
 import BlogSidebar from '@/components/blog/BlogSidebar.astro';
-import BlogFilterRow, { type BlogFilterItem } from '@/components/blog/BlogFilterRow.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import { t, defaultLocale } from '@/i18n';
-import {
-  getBlogSidebarData,
-  getCategoryArchiveUrl,
-  getPostTypeUrl,
-  getSubcategoryArchiveUrl,
-} from '@/lib/blog';
+import { getBlogSidebarData } from '@/lib/blog';
 
 interface Props {
   locale?: string;
@@ -48,58 +42,6 @@ const {
 } = Astro.props;
 
 const sidebarData = await getBlogSidebarData(locale);
-
-// Fila de navegación jerárquica:
-//  índice → chips de tipos; tipo → chips de categorías; categoría → chips de
-//  subcategorías (también en subcategoría, para saltar entre hermanas).
-let filterItems: BlogFilterItem[] = [];
-let filterActiveHref: string | undefined;
-let filterLabel = '';
-
-if (activeCategorySlug && activeTypeSlug) {
-  const category = sidebarData.types
-    .find((t) => t.type.slug === activeTypeSlug)
-    ?.categories.find((c) => c.category.slug === activeCategorySlug);
-  if (category && category.subcategories.length > 0) {
-    filterItems = category.subcategories.map((sub) => ({
-      label: sub.category.title,
-      href: getSubcategoryArchiveUrl(activeTypeSlug, category.category.slug, sub.category, locale),
-      count: sub.count,
-    }));
-    filterLabel = t('blog.filterSubcategories', locale);
-    if (activeSubcategorySlug) {
-      const activeSub = category.subcategories.find(
-        (s) => s.category.slug === activeSubcategorySlug
-      );
-      if (activeSub) {
-        filterActiveHref = getSubcategoryArchiveUrl(
-          activeTypeSlug,
-          category.category.slug,
-          activeSub.category,
-          locale
-        );
-      }
-    }
-  }
-} else if (activeTypeSlug) {
-  const type = sidebarData.types.find((t) => t.type.slug === activeTypeSlug);
-  if (type && type.categories.length > 0) {
-    filterItems = type.categories.map((c) => ({
-      label: c.category.title,
-      href: getCategoryArchiveUrl(activeTypeSlug, c.category, locale),
-      count: c.count,
-    }));
-    filterLabel = t('blog.filterCategories', locale);
-  }
-} else if (!activeTag) {
-  filterItems = sidebarData.types.map((t) => ({
-    label: t.type.title,
-    href: getPostTypeUrl(t.type.slug, locale),
-    icon: t.type.icon || undefined,
-    count: t.count,
-  }));
-  filterLabel = t('blog.filterTypes', locale);
-}
 ---
 
 <PageLayout
@@ -137,15 +79,6 @@ if (activeCategorySlug && activeTypeSlug) {
         </div>
 
         <div class="flex min-w-0 flex-col gap-8">
-          {
-            filterItems.length > 0 && (
-              <BlogFilterRow
-                label={filterLabel}
-                items={filterItems}
-                activeHref={filterActiveHref}
-              />
-            )
-          }
           <slot />
         </div>
       </div>

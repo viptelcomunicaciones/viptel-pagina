@@ -22,6 +22,7 @@ import Button from '@/components/ui/form/Button/Button.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import TagList from '@/components/blog/TagList.astro';
 import CTA from '@/components/ui/marketing/CTA/CTA.astro';
+import { Image } from 'astro:assets';
 
 interface Props {
   project: Project;
@@ -106,11 +107,15 @@ const breadcrumbs = [
     coverUrl && (
       <div class="relative z-[1] mx-auto mt-[var(--space-section-sm)] max-w-5xl px-6">
         <div class="media-shadow relative overflow-hidden rounded-xl">
-          <img
+          <Image
             src={coverUrl}
             alt={coverAlt || project.title}
-            loading="eager"
+            layout="full-width"
+            inferSize
+            widths={[640, 960, 1280, 1920]}
+            sizes="100vw"
             class="aspect-video w-full object-cover"
+            loading="eager"
           />
         </div>
       </div>
@@ -185,10 +190,14 @@ const breadcrumbs = [
             {project.gallery.map((img) =>
               img.image && typeof img.image !== 'number' && img.image.url ? (
                 <div class="aspect-square overflow-hidden rounded-xl">
-                  <img
+                  <Image
                     src={payload.resolveMediaUrl(img.image.url)}
                     alt={img.alt || img.image.alt || ''}
+                    inferSize
+                    widths={[320, 480, 640]}
+                    sizes="(max-width: 768px) 50vw, 33vw"
                     class="h-full w-full object-cover"
+                    loading="lazy"
                   />
                 </div>
               ) : null

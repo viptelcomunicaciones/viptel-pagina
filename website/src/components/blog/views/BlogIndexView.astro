@@ -86,7 +86,7 @@ const regularPosts = docs;
             postTypeName={getPostTypeName(post)}
             postTypeIcon={getPostTypeIcon(post)}
             revealDelay={index % 3}
-            eager={index === 0}
+            eager={index < 3}
           />
         ))}
       </div>

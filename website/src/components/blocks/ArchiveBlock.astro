@@ -8,6 +8,7 @@ import BlogCard from '@/components/blog/BlogCard.astro';
 import Button from '@/components/ui/form/Button/Button.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import { getPostUrl, getTagName, getPostTypeName, getPostTypeIcon } from '@/lib/blog';
+import { Image } from 'astro:assets';
 
 interface Props {
   block: ArchiveBlockType;
@@ -138,7 +139,7 @@ const linkPrefix = isServices ? '/services' : isProjects ? '/projects' : '/blog'
                 postTypeName={getPostTypeName(post)}
                 postTypeIcon={getPostTypeIcon(post)}
                 revealDelay={index % 3}
-                eager={index === 0}
+                eager={index < 3}
               />
             ))}
           </div>
@@ -157,10 +158,14 @@ const linkPrefix = isServices ? '/services' : isProjects ? '/projects' : '/blog'
               class="group bg-background border-border hover:border-brand-500/40 overflow-hidden rounded-xl border transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
             >
               {item.imageUrl && (
-                <img
+                <Image
                   src={payload.resolveMediaUrl(item.imageUrl)}
                   alt={item.imageAlt || item.title}
+                  inferSize
+                  widths={[320, 640, 960]}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   class="aspect-video w-full object-cover"
+                  loading="lazy"
                 />
               )}
               <div class="p-5">

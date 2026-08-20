@@ -2,6 +2,7 @@
 import { payload } from '@/lib/payload-client';
 import type { MediaBlock as MediaBlockType } from '@/lib/payload-types';
 import BlockSection from './BlockSection.astro';
+import { Image } from 'astro:assets';
 
 interface Props {
   block: MediaBlockType;
@@ -21,7 +22,15 @@ const alt =
   url && (
     <BlockSection background="secondary">
       <div class="mx-auto max-w-6xl px-6">
-        <img src={url} alt={alt} class="w-full rounded-xl shadow-lg" loading="lazy" />
+        <Image
+          src={url}
+          alt={alt}
+          inferSize
+          widths={[640, 960, 1280, 1920]}
+          sizes="100vw"
+          class="w-full rounded-xl shadow-lg"
+          loading="lazy"
+        />
       </div>
     </BlockSection>
   )

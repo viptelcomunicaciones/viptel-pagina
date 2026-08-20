@@ -1,6 +1,7 @@
 ---
 import { payload } from '@/lib/payload-client';
 import type { GalleryBlock as GalleryBlockType } from '@/lib/block-types';
+import { Image } from 'astro:assets';
 
 interface Props {
   block: GalleryBlockType;
@@ -34,10 +35,14 @@ const slides = (block.images ?? []).flatMap((img) => {
             data-reveal
             data-reveal-delay={i % 4 || undefined}
           >
-            <img
+            <Image
               src={payload.resolveMediaUrl(img.image?.url)}
               alt={img.alt || img.image?.alt || ''}
+              inferSize
+              widths={[320, 480, 640]}
+              sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
               class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              loading="lazy"
             />
             {img.caption && (
               <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 transition-opacity group-hover:opacity-100">

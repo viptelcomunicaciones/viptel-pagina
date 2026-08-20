@@ -11,6 +11,7 @@ import type { Project } from '@/lib/payload-types';
 import { defaultLocale } from '@/i18n';
 import { getProjectUrl, getTagName } from '@/lib/projects';
 import { payload } from '@/lib/payload-client';
+import { Image } from 'astro:assets';
 
 interface Props {
   project: Project;
@@ -39,11 +40,14 @@ const { project, index = 0, locale = defaultLocale } = Astro.props;
     {
       project.coverImage && typeof project.coverImage !== 'number' && project.coverImage.url && (
         <div class="mb-4 overflow-hidden rounded-lg">
-          <img
+          <Image
             src={payload.resolveMediaUrl(project.coverImage.url)}
             alt={project.coverImage.alt || project.title}
+            inferSize
+            widths={[320, 640, 960]}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             class="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            loading="lazy"
+            loading={index < 2 ? 'eager' : 'lazy'}
           />
         </div>
       )

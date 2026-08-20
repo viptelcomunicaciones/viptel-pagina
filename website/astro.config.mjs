@@ -137,6 +137,14 @@ export default defineConfig({
 
   image: {
     layout: 'constrained',
+    // Permite optimizar imágenes remotas servidas por el CMS (Payload). En
+    // desarrollo el backend vive en localhost:3000; en producción se permite
+    // cualquier dominio https. TODO(prod): restringir al host real del CMS
+    // antes de desplegar (p. ej. `{ protocol: 'https', hostname: 'cms.…' }`).
+    remotePatterns: [
+      { protocol: 'http', hostname: 'localhost' },
+      { protocol: 'https' },
+    ],
   },
 
   integrations: [react(), mdx(), sitemap(), icon(), pagefind()],

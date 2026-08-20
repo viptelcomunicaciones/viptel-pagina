@@ -20,7 +20,7 @@ interface Props {
   tags?: string[];
   image?: ImageMetadata;
   imageAlt?: string;
-  /** Pre-resolved image URL (CMS-hosted media) — rendered as a plain <img>. */
+  /** Pre-resolved image URL (CMS-hosted media). */
   imageUrl?: string;
   svgSlug?: string;
   /** Raw post body, used to estimate reading time (CJK-aware). */
@@ -230,11 +230,15 @@ const readingTime = getReadingTime(body ?? description);
           </div>
         ) : imageUrl ? (
           <div class="media-shadow relative overflow-hidden rounded-xl">
-            <img
+            <Image
               src={imageUrl}
               alt={imageAlt || title}
-              loading="eager"
+              layout="full-width"
+              inferSize
+              widths={[640, 960, 1280, 1920]}
+              sizes="100vw"
               class="aspect-video w-full object-cover"
+              loading="eager"
             />
           </div>
         ) : null}

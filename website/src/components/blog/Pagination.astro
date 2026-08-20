@@ -61,20 +61,24 @@ const nextHref = currentPage < totalPages ? href(currentPage + 1) : null;
         class="flex items-center justify-center gap-2"
         aria-label={t('pagination.label', locale)}
       >
-        <a
-          href={prevHref ?? undefined}
-          class:list={[
-            'border-border bg-background text-foreground-muted inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors',
-            prevHref
-              ? 'hover:border-brand-500 hover:text-brand-500'
-              : 'pointer-events-none cursor-not-allowed opacity-40',
-          ]}
-          aria-label={t('pagination.previousPage', locale)}
-          aria-disabled={prevHref ? undefined : 'true'}
-          rel={prevHref ? 'prev' : undefined}
-        >
-          <Icon name="arrow-left" size="sm" />
-        </a>
+        {prevHref ? (
+          <a
+            href={prevHref}
+            class="border-border bg-background text-foreground-muted hover:border-brand-500 hover:text-brand-500 inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors"
+            aria-label={t('pagination.previousPage', locale)}
+            rel="prev"
+          >
+            <Icon name="arrow-left" size="sm" />
+          </a>
+        ) : (
+          <span
+            class="border-border bg-background text-foreground-muted pointer-events-none inline-flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-full border opacity-40"
+            aria-disabled="true"
+            aria-label={t('pagination.previousPage', locale)}
+          >
+            <Icon name="arrow-left" size="sm" />
+          </span>
+        )}
 
         <ol class="flex items-center gap-1">
           {pages[0] > 1 && (
@@ -131,20 +135,24 @@ const nextHref = currentPage < totalPages ? href(currentPage + 1) : null;
           )}
         </ol>
 
-        <a
-          href={nextHref ?? undefined}
-          class:list={[
-            'border-border bg-background text-foreground-muted inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors',
-            nextHref
-              ? 'hover:border-brand-500 hover:text-brand-500'
-              : 'pointer-events-none cursor-not-allowed opacity-40',
-          ]}
-          aria-label={t('pagination.nextPage', locale)}
-          aria-disabled={nextHref ? undefined : 'true'}
-          rel={nextHref ? 'next' : undefined}
-        >
-          <Icon name="arrow-right" size="sm" />
-        </a>
+        {nextHref ? (
+          <a
+            href={nextHref}
+            class="border-border bg-background text-foreground-muted hover:border-brand-500 hover:text-brand-500 inline-flex h-10 w-10 items-center justify-center rounded-full border transition-colors"
+            aria-label={t('pagination.nextPage', locale)}
+            rel="next"
+          >
+            <Icon name="arrow-right" size="sm" />
+          </a>
+        ) : (
+          <span
+            class="border-border bg-background text-foreground-muted pointer-events-none inline-flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-full border opacity-40"
+            aria-disabled="true"
+            aria-label={t('pagination.nextPage', locale)}
+          >
+            <Icon name="arrow-right" size="sm" />
+          </span>
+        )}
       </nav>
     </div>
   )

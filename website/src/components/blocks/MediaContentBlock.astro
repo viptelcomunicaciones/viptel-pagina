@@ -2,6 +2,7 @@
 import RichText from './RichText.astro';
 import { payload } from '@/lib/payload-client';
 import type { MediaContentBlock as MediaContentBlockType } from '@/lib/block-types';
+import { Image } from 'astro:assets';
 
 interface Props {
   block: MediaContentBlockType;
@@ -22,9 +23,12 @@ const mediaUrl = image?.url;
       {
         isLeft && mediaUrl && (
           <div data-reveal>
-            <img
+            <Image
               src={payload.resolveMediaUrl(mediaUrl)}
               alt={image?.alt || ''}
+              inferSize
+              widths={[480, 640, 960, 1280]}
+              sizes="(max-width: 768px) 100vw, 50vw"
               class="h-auto w-full rounded-xl shadow-lg"
             />
           </div>
@@ -47,9 +51,12 @@ const mediaUrl = image?.url;
       {
         !isLeft && mediaUrl && (
           <div data-reveal data-reveal-delay="1">
-            <img
+            <Image
               src={payload.resolveMediaUrl(mediaUrl)}
               alt={image?.alt || ''}
+              inferSize
+              widths={[480, 640, 960, 1280]}
+              sizes="(max-width: 768px) 100vw, 50vw"
               class="h-auto w-full rounded-xl shadow-lg"
             />
           </div>

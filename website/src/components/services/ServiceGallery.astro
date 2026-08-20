@@ -4,6 +4,7 @@ import { cn } from '@/lib/cn';
 
 import { payload } from '@/lib/payload-client';
 import type { Service } from '@/lib/payload-types';
+import { Image } from 'astro:assets';
 
 interface Props {
   gallery: NonNullable<Service['gallery']>;
@@ -46,9 +47,12 @@ const validImages = gallery.filter((img) => getImageUrl(img) !== null);
             const alt = getImageAlt(img);
             return (
               <div class="border-border bg-secondary overflow-hidden rounded-xl border">
-                <img
+                <Image
                   src={url}
                   alt={alt}
+                  inferSize
+                  widths={[320, 480, 640]}
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                   class="h-56 w-full object-cover transition-transform hover:scale-105"
                   loading="lazy"
                 />

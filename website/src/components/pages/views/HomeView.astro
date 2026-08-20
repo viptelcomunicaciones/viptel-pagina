@@ -21,6 +21,7 @@ import { viptelStack } from '@/data/stack';
 import { payload } from '@/lib/payload-client';
 import { t, defaultLocale, localizedPath } from '@/i18n';
 import type { PageBlock } from '@/lib/block-types';
+import { Image } from 'astro:assets';
 
 interface HeroLink {
   link?: {
@@ -238,14 +239,18 @@ const heroStackItems = viptelStack
         </div>
         {heroImageUrl && (
           <div class="mx-auto mt-8 max-w-6xl px-6">
-            <img
+            <Image
               src={heroImageUrl}
               alt={
                 home?.hero?.media && typeof home.hero.media !== 'number' && home.hero.media.alt
                   ? home.hero.media.alt
                   : heroTitle
               }
+              inferSize
+              widths={[640, 960, 1280, 1920]}
+              sizes="100vw"
               class="w-full rounded-xl shadow-lg"
+              loading="eager"
             />
           </div>
         )}
