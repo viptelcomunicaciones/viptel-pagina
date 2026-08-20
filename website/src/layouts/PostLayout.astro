@@ -19,6 +19,8 @@ import { extractHeadings, getPlainText } from '@/lib/headings'
 import Breadcrumbs from '@/components/seo/Breadcrumbs.astro'
 import ArticleHero from '@/components/blog/ArticleHero.astro'
 import TableOfContents from '@/components/blog/TableOfContents.astro'
+import ShareButtons from '@/components/blog/ShareButtons.astro'
+import Comments from '@/components/blog/Comments.astro'
 import RichText from '@/components/blocks/RichText.astro'
 import Button from '@/components/ui/form/Button/Button.astro'
 import Icon from '@/components/ui/primitives/Icon/Icon.astro'
@@ -107,6 +109,11 @@ const tagRelated = (await getRelatedByTags(post.slug, tags, locale, 3)).filter(
 )
 
 const relatedPosts = [...manualRelated, ...tagRelated].slice(0, 3)
+
+const showComments = !!siteConfig.articleFeatures?.comments?.enabled
+
+// Full URL for share buttons.
+const fullUrl = new URL(Astro.url.pathname, Astro.site).toString()
 ---
 
 <ArticleHero
@@ -197,6 +204,13 @@ const relatedPosts = [...manualRelated, ...tagRelated].slice(0, 3)
     )}
   </div>
 </article>
+
+<!-- Share buttons (centered, above the footer divider) -->
+<div class="mt-12 flex justify-center" data-reveal>
+  <ShareButtons title={post.title} url={fullUrl} />
+</div>
+
+{showComments && <Comments />}
 
 {relatedPosts.length > 0 && (
   <section class="border-t border-border py-[var(--space-section-sm)]">

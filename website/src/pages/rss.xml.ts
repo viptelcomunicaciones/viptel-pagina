@@ -3,20 +3,7 @@ import siteConfig from '@/config/site.config';
 import { payload } from '@/lib/payload-client';
 import { defaultLocale } from '@/i18n';
 import type { Post } from '@/lib/payload-types';
-import { getTagName } from '@/lib/blog';
-
-function escapeXml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
-}
-
-function formatRfc822Date(date: Date): string {
-  return date.toUTCString();
-}
+import { buildRssFeed } from '@/lib/rss';
 
 export async function GET(context: APIContext) {
   const posts = await payload.posts().getAll(defaultLocale).catch(() => [] as Post[]);
@@ -24,36 +11,7 @@ export async function GET(context: APIContext) {
   const site = context.site?.toString() ?? siteConfig.url;
   const siteUrl = site.endsWith('/') ? site.slice(0, -1) : site;
 
-  const items = posts
-    .map((post) => {
-      const link = `${siteUrl}/blog/${post.slug}/`;
-      const categories = (post.tags ?? [])
-        .map((t) => `<category>${escapeXml(getTagName(t))}</category>`)
-        .join('\n        ');
-
-      return `    <item>
-      <title>${escapeXml(post.title)}</title>
-      <link>${link}</link>
-      <guid>${link}</guid>
-      <description>${escapeXml(post.excerpt || '')}</description>
-      <pubDate>${formatRfc822Date(post.publishedAt ? new Date(post.publishedAt) : new Date())}</pubDate>
-      ${categories}
-    </item>`;
-    })
-    .join('\n');
-
-  const rss = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>${escapeXml(siteConfig.name)}</title>
-    <description>${escapeXml(siteConfig.description)}</description>
-    <link>${siteUrl}</link>
-    <atom:link href="${siteUrl}/rss.xml" rel="self" type="application/rss+xml"/>
-    <language>${defaultLocale}</language>
-    <lastBuildDate>${formatRfc822Date(new Date())}</lastBuildDate>
-${items}
-  </channel>
-</rss>`;
+  const rss = buildRssFeed(posts, siteUrl, defaultLocale, siteConfig.blog?.rssMaxItems ?? 20);
 
   return new Response(rss, {
     headers: {

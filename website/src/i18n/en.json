@@ -74,6 +74,8 @@
     "updatedOn": "Updated on {date}",
     "writtenBy": "Written by {author}",
     "tagsLabel": "Tags",
+    "sidebarTypes": "Content types",
+    "sidebarToggle": "Browse categories",
     "featured": "Featured",
     "draft": "Draft",
     "noPostsFound": "No posts found.",

@@ -1,0 +1,89 @@
+---
+/**
+ * BlogListLayout — layout compartido para las páginas de listado del blog.
+ *
+ * Renderiza el Hero (slot `hero`), una sección de dos columnas con el
+ * `BlogSidebar` sticky a la izquierda y el contenido en el slot por defecto,
+ * y una zona `footer` (CTA / LetterGlitch) a ancho completo.
+ *
+ * En móvil el sidebar queda colapsado por defecto y se abre con un toggle
+ * (checkbox + label, sin JS). La interacción es 100% HTML nativa.
+ */
+import PageLayout from '@/layouts/PageLayout.astro';
+import BlogSidebar from '@/components/blog/BlogSidebar.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import { t, defaultLocale } from '@/i18n';
+import { getBlogSidebarData } from '@/lib/blog';
+
+interface Props {
+  locale?: string;
+  title: string;
+  description: string;
+  activeTypeSlug?: string;
+  activeCategorySlug?: string;
+  activeSubcategorySlug?: string;
+  activeTag?: string;
+  showScrollProgress?: boolean;
+  eagerReveal?: boolean;
+  footerBackground?: 'default' | 'secondary' | 'invert';
+}
+
+const {
+  locale = defaultLocale,
+  title,
+  description,
+  activeTypeSlug,
+  activeCategorySlug,
+  activeSubcategorySlug,
+  activeTag,
+  showScrollProgress = false,
+  eagerReveal = false,
+  footerBackground = 'default',
+} = Astro.props;
+
+const sidebarData = await getBlogSidebarData(locale);
+---
+
+<PageLayout
+  title={title}
+  description={description}
+  showScrollProgress={showScrollProgress}
+  eagerReveal={eagerReveal}
+  footerBackground={footerBackground}
+>
+  <slot name="hero" />
+
+  <section class="bg-background-secondary py-[var(--space-section-md)] border-t border-border">
+    <div class="mx-auto max-w-7xl px-6">
+      <div class="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-start">
+        <input type="checkbox" id="blog-sidebar-toggle" class="peer sr-only" />
+
+        <label
+          for="blog-sidebar-toggle"
+          class="lg:hidden inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
+        >
+          <Icon name="menu" size="sm" />
+          {t('blog.sidebarToggle', locale)}
+        </label>
+
+        <div class="hidden peer-checked:block lg:block lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto">
+          <BlogSidebar
+            locale={locale}
+            types={sidebarData.types}
+            tags={sidebarData.tags}
+            activeTypeSlug={activeTypeSlug}
+            activeCategorySlug={activeCategorySlug}
+            activeSubcategorySlug={activeSubcategorySlug}
+            activeTag={activeTag}
+          />
+        </div>
+
+        <div class="min-w-0 flex flex-col gap-8">
+          <slot />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <slot name="footer" />
+</PageLayout>

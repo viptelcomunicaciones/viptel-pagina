@@ -3,18 +3,17 @@
  * BlogPageView — a paginated blog index page (page 2..N).
  *
  * Shared body for the default-locale route (`/blog/page/N`) and the
- * locale-prefixed route (`/<locale>/blog/page/N`). The page number and total
- * are resolved in each route's `getStaticPaths` and passed in; URLs are built
- * locale-aware via `lib/blog`.
+ * locale-prefixed route (`/<locale>/blog/page/N`). Renders inside
+ * `BlogListLayout`, which provides the left sidebar navigation.
  */
-import PageLayout from '@/layouts/PageLayout.astro';
+import BlogListLayout from '@/layouts/BlogListLayout.astro';
 import BlogCard from '@/components/blog/BlogCard.astro';
 import Pagination from '@/components/blog/Pagination.astro';
-import TagList from '@/components/blog/TagList.astro';
 import Badge from '@/components/ui/data-display/Badge/Badge.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import CTA from '@/components/ui/marketing/CTA/CTA.astro';
 import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
+import NewsletterForm from '@/components/patterns/NewsletterForm.astro';
 import { Hero } from '@/components/hero';
 import siteConfig from '@/config/site.config';
 import { resolveSocialLinks } from '@/lib/utils';
@@ -22,12 +21,9 @@ import { t, defaultLocale } from '@/i18n';
 import { payload } from '@/lib/payload-client';
 import {
   BLOG_POSTS_PER_PAGE,
-  BLOG_TAG_CLOUD_LIMIT,
-  collectTopTags,
   getBlogBaseUrl,
   getBlogPageUrl,
   getPostUrl,
-  getPublishedPosts,
   getTagName,
   getPostTypeIcon,
   getPostTypeName,
@@ -44,118 +40,76 @@ const { locale = defaultLocale, page } = Astro.props;
 
 const { docs, totalDocs, totalPages } = await payload.posts().getPaginated(locale, page, BLOG_POSTS_PER_PAGE);
 
-const allPosts = await getPublishedPosts(locale);
-const topTags = collectTopTags(allPosts, BLOG_TAG_CLOUD_LIMIT);
-
 const pagePosts = docs;
 
 const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
 ---
 
-<PageLayout
+<BlogListLayout
   title={t('blog.pageMetaTitle', locale, { page })}
   description={t('blog.pageMetaDescription', locale, { page, total: totalPages })}
+  locale={locale}
   showScrollProgress
   eagerReveal
   footerBackground="secondary"
+  activeTypeSlug=""
 >
-  <Hero layout="centered" size="sm">
-    <Badge slot="badge" variant="brand" pill>
-      <Icon name="book" size="sm" />
-      {t('blog.pageBadge', locale, { page, total: totalPages })}
-    </Badge>
+  <Fragment slot="hero">
+    <Hero layout="centered" size="sm">
+      <Badge slot="badge" variant="brand" pill>
+        <Icon name="book" size="sm" />
+        {t('blog.pageBadge', locale, { page, total: totalPages })}
+      </Badge>
 
-    <h1 slot="title">{t('blog.title', locale)}</h1>
+      <h1 slot="title">{t('blog.title', locale)}</h1>
 
-    <p slot="description" class="!text-balance">{t('blog.heroDescription', locale)}</p>
-  </Hero>
+      <p slot="description" class="!text-balance">{t('blog.heroDescription', locale)}</p>
+    </Hero>
+  </Fragment>
 
-  <section class="bg-background-secondary py-[var(--space-section-md)] border-t border-border">
-    <div class="mx-auto max-w-6xl px-6 flex flex-col gap-8">
-      <div class="flex flex-col items-center gap-4" data-reveal>
-        <a
-          href={getBlogBaseUrl(locale)}
-          class="group inline-flex items-center gap-2 rounded-lg border border-brand-500/40 bg-transparent px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 hover:border-brand-500/80 hover:bg-brand-500/10 transition-colors"
-        >
-          <Icon name="arrow-left" size="sm" />
-          {t('blog.newestPosts', locale)}
-        </a>
+  <a
+    href={getBlogBaseUrl(locale)}
+    class="group inline-flex w-fit items-center gap-2 rounded-lg border border-brand-500/40 bg-transparent px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 hover:border-brand-500/80 hover:bg-brand-500/10 transition-colors"
+  >
+    <Icon name="arrow-left" size="sm" />
+    {t('blog.newestPosts', locale)}
+  </a>
 
-        {topTags.length > 0 && (
-          <TagList tags={topTags} locale={locale} class="justify-center" />
-        )}
-      </div>
-
-      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {pagePosts.map((post, index) => (
-          <BlogCard
-            title={post.title}
-            description={post.excerpt || ''}
-            href={getPostUrl(post, locale)}
-            publishedAt={new Date(post.publishedAt ?? '')}
-            tags={(post.tags ?? []).map(t => getTagName(t))}
-            author={post.populatedAuthors?.[0]?.name || 'Viptel'}
-            imageUrl={post.heroImage && typeof post.heroImage !== 'number' ? payload.resolveMediaUrl(post.heroImage.url ?? '') : undefined}
-            postTypeName={getPostTypeName(post)}
-            postTypeIcon={getPostTypeIcon(post)}
-            revealDelay={index % 3}
-            eager={index === 0}
-          />
-        ))}
-      </div>
-
-      <Pagination
-        currentPage={page}
-        totalPages={totalPages}
-        href={(p) => getBlogPageUrl(p, locale)}
-        totalDocs={totalDocs}
-        pageSize={BLOG_POSTS_PER_PAGE}
+  <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    {pagePosts.map((post, index) => (
+      <BlogCard
+        title={post.title}
+        description={post.excerpt || ''}
+        href={getPostUrl(post, locale)}
+        publishedAt={new Date(post.publishedAt ?? '')}
+        tags={(post.tags ?? []).map(t => getTagName(t))}
+        author={post.populatedAuthors?.[0]?.name || 'Viptel'}
+        imageUrl={post.heroImage && typeof post.heroImage !== 'number' ? payload.resolveMediaUrl(post.heroImage.url ?? '') : undefined}
+        postTypeName={getPostTypeName(post)}
+        postTypeIcon={getPostTypeIcon(post)}
+        revealDelay={index % 3}
+        eager={index === 0}
       />
-    </div>
-  </section>
+    ))}
+  </div>
 
-  <CTA variant="default" size="md" maxWidth="lg" glow={false} data-reveal class="glitch:hidden">
-    <h2 slot="heading" class="!text-4xl">{t('blog.followAlong', locale)}</h2>
-    <p slot="description" class="!text-lg text-balance">{t('blog.followAlongLead', locale)}</p>
+  <Pagination
+    currentPage={page}
+    totalPages={totalPages}
+    href={(p) => getBlogPageUrl(p, locale)}
+    totalDocs={totalDocs}
+    pageSize={BLOG_POSTS_PER_PAGE}
+  />
 
-    <div class="flex flex-wrap items-center justify-center gap-3">
-      <a
-        href="/rss.xml"
-        class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
-      >
-        <Icon name="rss" size="sm" />
-        {t('blog.rssFeed', locale)}
-      </a>
-      {socialLinks.map((link) => (
-        <a
-          href={link.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
-        >
-          <Icon name={link.icon} size="sm" />
-          {link.label}
-        </a>
-      ))}
-      <a
-        href={`mailto:${siteConfig.email}`}
-        class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
-      >
-        <Icon name="mail" size="sm" />
-        {t('blog.emailLabel', locale)}
-      </a>
-    </div>
-  </CTA>
-
-  <section class="hidden glitch:block relative z-10 py-[var(--space-section-md)] bg-background">
-    <LetterGlitchBand>
-      <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">{t('blog.followAlong', locale)}</h2>
-      <p class="text-lg text-foreground-muted mb-8 text-balance">{t('blog.followAlongLead', locale)}</p>
+  <Fragment slot="footer">
+    <CTA variant="default" size="md" maxWidth="lg" glow={false} data-reveal class="glitch:hidden">
+      <h2 slot="heading" class="!text-4xl">{t('blog.followAlong', locale)}</h2>
+      <p slot="description" class="!text-lg text-balance">{t('blog.followAlongLead', locale)}</p>
 
       <div class="flex flex-wrap items-center justify-center gap-3">
         <a
           href="/rss.xml"
-          class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
+          class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
         >
           <Icon name="rss" size="sm" />
           {t('blog.rssFeed', locale)}
@@ -165,20 +119,60 @@ const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
             href={link.href}
             target="_blank"
             rel="noopener noreferrer"
-            class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
+            class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
           >
             <Icon name={link.icon} size="sm" />
             {link.label}
           </a>
         ))}
-        <a
-          href={`mailto:${siteConfig.email}`}
-          class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
-        >
-          <Icon name="mail" size="sm" />
-          {t('blog.emailLabel', locale)}
-        </a>
-      </div>
-    </LetterGlitchBand>
-  </section>
-</PageLayout>
+<a
+            href={`mailto:${siteConfig.email}`}
+            class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
+          >
+            <Icon name="mail" size="sm" />
+            {t('blog.emailLabel', locale)}
+          </a>
+        </div>
+
+        <div class="mx-auto mt-8 w-full max-w-md">
+          <p class="mb-3 text-sm text-foreground-muted">{t('newsletter.description', locale)}</p>
+          <NewsletterForm />
+        </div>
+      </CTA>
+
+    <section class="hidden glitch:block relative z-10 py-[var(--space-section-md)] bg-background">
+      <LetterGlitchBand>
+        <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">{t('blog.followAlong', locale)}</h2>
+        <p class="text-lg text-foreground-muted mb-8 text-balance">{t('blog.followAlongLead', locale)}</p>
+
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <a
+            href="/rss.xml"
+            class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
+          >
+            <Icon name="rss" size="sm" />
+            {t('blog.rssFeed', locale)}
+          </a>
+          {socialLinks.map((link) => (
+            <a
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
+            >
+              <Icon name={link.icon} size="sm" />
+              {link.label}
+            </a>
+          ))}
+          <a
+            href={`mailto:${siteConfig.email}`}
+            class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
+          >
+            <Icon name="mail" size="sm" />
+            {t('blog.emailLabel', locale)}
+          </a>
+        </div>
+      </LetterGlitchBand>
+    </section>
+  </Fragment>
+</BlogListLayout>

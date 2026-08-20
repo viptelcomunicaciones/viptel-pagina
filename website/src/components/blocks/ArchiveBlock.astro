@@ -1,9 +1,13 @@
 ---
 import type { ArchiveBlock as ArchiveBlockType, Post, Project, Service } from '@/lib/payload-types'
 import { payload } from '@/lib/payload-client'
-import { localizedPath } from '@/i18n'
+import { localizedPath, t } from '@/i18n'
 import RichText from './RichText.astro'
 import ServiceCard from '@/components/services/ServiceCard.astro'
+import BlogCard from '@/components/blog/BlogCard.astro'
+import Button from '@/components/ui/form/Button/Button.astro'
+import Icon from '@/components/ui/primitives/Icon/Icon.astro'
+import { getPostUrl, getTagName, getPostTypeName, getPostTypeIcon } from '@/lib/blog'
 
 interface Props {
   block: ArchiveBlockType
@@ -42,8 +46,10 @@ function toCard(item: Post | Project): ArchiveCard {
 
 const isProjects = block.relationTo === 'projects'
 const isServices = block.relationTo === 'services'
+const isPosts = block.relationTo === 'posts'
 
 let items: ArchiveCard[] = []
+let postItems: Post[] = []
 let serviceItems: Service[] = []
 
 if (isServices) {
@@ -58,10 +64,14 @@ if (isServices) {
     payload.projects().getAll(locale),
     payload.services().getAll(locale),
   ])
-  items = [...posts, ...projects].filter((p) => selectedIds.has(p.id)).map(toCard)
+  if (isPosts) {
+    postItems = posts.filter((p) => selectedIds.has(p.id))
+  } else {
+    items = projects.filter((p) => selectedIds.has(p.id)).map(toCard)
+  }
   serviceItems = services.filter((s) => selectedIds.has(s.id))
 } else {
-  const all: (Post | Project)[] = isProjects ? await payload.projects().getAll(locale) : await payload.posts().getAll(locale)
+  const all = isProjects ? await payload.projects().getAll(locale) : await payload.posts().getAll(locale)
   let selected = all
   if (block.categories?.length) {
     const selectedCategoryIds = new Set(
@@ -75,7 +85,11 @@ if (isServices) {
     })
   }
   if (block.limit) selected = selected.slice(0, block.limit)
-  items = selected.map(toCard)
+  if (isPosts) {
+    postItems = selected as Post[]
+  } else {
+    items = selected.map(toCard)
+  }
 }
 
 const linkPrefix = isServices ? '/services' : isProjects ? '/projects' : '/blog'
@@ -96,6 +110,32 @@ const linkPrefix = isServices ? '/services' : isProjects ? '/projects' : '/blog'
             href={localizedPath(`/services/${service.slug}`, locale)}
           />
         ))}
+      </div>
+    ) : isPosts ? (
+      <div>
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {postItems.map((post, index) => (
+            <BlogCard
+              title={post.title}
+              description={post.excerpt || ''}
+              href={getPostUrl(post, locale)}
+              publishedAt={new Date(post.publishedAt ?? '')}
+              tags={(post.tags ?? []).map((tag) => getTagName(tag))}
+              author={post.populatedAuthors?.[0]?.name || 'Viptel'}
+              imageUrl={post.heroImage && typeof post.heroImage !== 'number' ? payload.resolveMediaUrl(post.heroImage.url ?? '') : undefined}
+              postTypeName={getPostTypeName(post)}
+              postTypeIcon={getPostTypeIcon(post)}
+              revealDelay={index % 3}
+              eager={index === 0}
+            />
+          ))}
+        </div>
+        <div class="mt-10 flex justify-center">
+          <Button href={localizedPath('/blog', locale)} variant="brand-outline" size="sm">
+            <Icon name="arrow-right" size="sm" />
+            {t('pages.home.blog.viewAll', locale)}
+          </Button>
+        </div>
       </div>
     ) : (
       <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

@@ -11,7 +11,7 @@
       "type": "remote",
       "url": "http://localhost:3000/api/mcp",
       "headers": {
-        "Authorization": "Bearer 7bb41888-39dd-49d9-89f4-243445c621b2"
+        "Authorization": "Bearer bcb27d5f-552f-484a-8a86-ef28828f3f54"
       },
       "enabled": true
     }

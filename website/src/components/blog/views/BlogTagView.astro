@@ -3,18 +3,18 @@
  * BlogTagView — a tag archive page.
  *
  * Shared body for the default-locale route (`/blog/tag/<tag>`) and the
- * locale-prefixed route (`/<locale>/blog/tag/<tag>`). The matching posts and
- * the visible tag cloud are resolved in each route's `getStaticPaths` and
- * passed in; URLs are built locale-aware via `lib/blog`.
+ * locale-prefixed route (`/<locale>/blog/tag/<tag>`). Renders inside
+ * `BlogListLayout`, which provides the left sidebar navigation with the active
+ * tag highlighted and its post count.
  */
-import PageLayout from '@/layouts/PageLayout.astro';
+import BlogListLayout from '@/layouts/BlogListLayout.astro';
 import BlogCard from '@/components/blog/BlogCard.astro';
-import TagList from '@/components/blog/TagList.astro';
 import Badge from '@/components/ui/data-display/Badge/Badge.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import Button from '@/components/ui/form/Button/Button.astro';
 import CTA from '@/components/ui/marketing/CTA/CTA.astro';
 import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
+import NewsletterForm from '@/components/patterns/NewsletterForm.astro';
 import { Hero } from '@/components/hero';
 import siteConfig from '@/config/site.config';
 import { resolveSocialLinks } from '@/lib/utils';
@@ -30,131 +30,90 @@ interface Props {
   tag: string;
   /** Posts carrying this tag, in the locale. */
   posts: Post[];
-  /** Tags to render in the cloud (always includes the active tag). */
-  visibleTags: string[];
 }
 
-const { locale = defaultLocale, tag, posts, visibleTags } = Astro.props;
+const { locale = defaultLocale, tag, posts } = Astro.props;
 
 const blogHref = getBlogBaseUrl(locale);
 const countKey = posts.length === 1 ? 'blog.tagCountOne' : 'blog.tagCountOther';
 const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
 ---
 
-<PageLayout
+<BlogListLayout
   title={t('blog.tagMetaTitle', locale, { tag })}
   description={t('blog.tagMetaDescription', locale, { tag })}
+  locale={locale}
   eagerReveal
+  activeTag={tag}
 >
-  <Hero layout="centered" size="sm">
-    <Badge slot="badge" variant="brand" pill>
-      <Icon name="tag" size="sm" />
-      {t('blog.tagBadge', locale)}
-    </Badge>
+  <Fragment slot="hero">
+    <Hero layout="centered" size="sm">
+      <Badge slot="badge" variant="brand" pill>
+        <Icon name="tag" size="sm" />
+        {t('blog.tagBadge', locale)}
+      </Badge>
 
-    <h1
-      slot="title"
-      class="!text-4xl sm:!text-5xl md:!text-6xl lg:!text-7xl break-words [overflow-wrap:anywhere]"
-    >#{tag}</h1>
+      <h1
+        slot="title"
+        class="!text-4xl sm:!text-5xl md:!text-6xl lg:!text-7xl break-words [overflow-wrap:anywhere]"
+      >#{tag}</h1>
 
-    <p slot="description">
-      {t(countKey, locale, { count: posts.length, tag })}
-    </p>
-  </Hero>
+      <p slot="description">
+        {t(countKey, locale, { count: posts.length, tag })}
+      </p>
+    </Hero>
+  </Fragment>
 
-  <section class="bg-background-secondary py-[var(--space-section-md)] border-t border-border">
-    <div class="mx-auto max-w-6xl px-6 flex flex-col gap-8">
-      <div class="flex flex-col items-center gap-4" data-reveal>
-        <a
-          href={blogHref}
-          class="group inline-flex items-center gap-2 rounded-lg border border-brand-500/40 bg-transparent px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 hover:border-brand-500/80 hover:bg-brand-500/10 transition-colors"
-        >
-          <Icon name="arrow-left" size="sm" />
-          {t('blog.allPosts', locale)}
-        </a>
+  <a
+    href={blogHref}
+    class="group inline-flex w-fit items-center gap-2 rounded-lg border border-brand-500/40 bg-transparent px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 hover:border-brand-500/80 hover:bg-brand-500/10 transition-colors"
+  >
+    <Icon name="arrow-left" size="sm" />
+    {t('blog.allPosts', locale)}
+  </a>
 
-        {visibleTags.length > 0 && (
-          <TagList tags={visibleTags} active={tag} locale={locale} class="justify-center" />
-        )}
-      </div>
-
-      {posts.length > 0 ? (
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post, index) => (
-            <BlogCard
-              title={post.title}
-              description={post.excerpt || ''}
-              href={getPostUrl(post, locale)}
-              publishedAt={new Date(post.publishedAt ?? '')}
-              tags={(post.tags ?? []).map(t => getTagName(t))}
-              author={post.populatedAuthors?.[0]?.name || 'Viptel'}
-              imageUrl={post.heroImage && typeof post.heroImage !== 'number' ? payload.resolveMediaUrl(post.heroImage.url ?? '') : undefined}
-              postTypeName={getPostTypeName(post)}
-              postTypeIcon={getPostTypeIcon(post)}
-              revealDelay={index % 3}
-              eager={index === 0}
-            />
-          ))}
-        </div>
-      ) : (
-        <div class="py-16 text-center">
-          <div class="bg-background mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-            <Icon name="file-text" size="lg" class="text-foreground-muted" />
-          </div>
-          <p class="text-foreground-muted text-lg">{t('blog.tagEmpty', locale)}</p>
-          <div class="mt-6">
-            <Button href={blogHref} variant="brand-outline" size="sm">
-              <Icon name="arrow-left" size="sm" />
-              {t('blog.tagBackToAll', locale)}
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
-  </section>
-
-  <CTA variant="default" size="md" maxWidth="lg" glow={false} data-reveal class="glitch:hidden">
-    <h2 slot="heading" class="!text-4xl">{t('blog.followAlong', locale)}</h2>
-    <p slot="description" class="!text-lg text-balance">{t('blog.followAlongLead', locale)}</p>
-
-    <div class="flex flex-wrap items-center justify-center gap-3">
-      <a
-        href="/rss.xml"
-        class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
-      >
-        <Icon name="rss" size="sm" />
-        {t('blog.rssFeed', locale)}
-      </a>
-      {socialLinks.map((link) => (
-        <a
-          href={link.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
-        >
-          <Icon name={link.icon} size="sm" />
-          {link.label}
-        </a>
+  {posts.length > 0 ? (
+    <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {posts.map((post, index) => (
+        <BlogCard
+          title={post.title}
+          description={post.excerpt || ''}
+          href={getPostUrl(post, locale)}
+          publishedAt={new Date(post.publishedAt ?? '')}
+          tags={(post.tags ?? []).map(t => getTagName(t))}
+          author={post.populatedAuthors?.[0]?.name || 'Viptel'}
+          imageUrl={post.heroImage && typeof post.heroImage !== 'number' ? payload.resolveMediaUrl(post.heroImage.url ?? '') : undefined}
+          postTypeName={getPostTypeName(post)}
+          postTypeIcon={getPostTypeIcon(post)}
+          revealDelay={index % 3}
+          eager={index === 0}
+        />
       ))}
-      <a
-        href={`mailto:${siteConfig.email}`}
-        class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
-      >
-        <Icon name="mail" size="sm" />
-        {t('blog.emailLabel', locale)}
-      </a>
     </div>
-  </CTA>
+  ) : (
+    <div class="py-16 text-center">
+      <div class="bg-background mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+        <Icon name="file-text" size="lg" class="text-foreground-muted" />
+      </div>
+      <p class="text-foreground-muted text-lg">{t('blog.tagEmpty', locale)}</p>
+      <div class="mt-6">
+        <Button href={blogHref} variant="brand-outline" size="sm">
+          <Icon name="arrow-left" size="sm" />
+          {t('blog.tagBackToAll', locale)}
+        </Button>
+      </div>
+    </div>
+  )}
 
-  <section class="hidden glitch:block relative z-10 py-[var(--space-section-md)] bg-background">
-    <LetterGlitchBand>
-      <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">{t('blog.followAlong', locale)}</h2>
-      <p class="text-lg text-foreground-muted mb-8 text-balance">{t('blog.followAlongLead', locale)}</p>
+  <Fragment slot="footer">
+    <CTA variant="default" size="md" maxWidth="lg" glow={false} data-reveal class="glitch:hidden">
+      <h2 slot="heading" class="!text-4xl">{t('blog.followAlong', locale)}</h2>
+      <p slot="description" class="!text-lg text-balance">{t('blog.followAlongLead', locale)}</p>
 
       <div class="flex flex-wrap items-center justify-center gap-3">
         <a
           href="/rss.xml"
-          class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
+          class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
         >
           <Icon name="rss" size="sm" />
           {t('blog.rssFeed', locale)}
@@ -164,20 +123,60 @@ const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
             href={link.href}
             target="_blank"
             rel="noopener noreferrer"
-            class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
+            class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
           >
             <Icon name={link.icon} size="sm" />
             {link.label}
           </a>
         ))}
-        <a
-          href={`mailto:${siteConfig.email}`}
-          class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
-        >
-          <Icon name="mail" size="sm" />
-          {t('blog.emailLabel', locale)}
-        </a>
-      </div>
-    </LetterGlitchBand>
-  </section>
-</PageLayout>
+<a
+            href={`mailto:${siteConfig.email}`}
+            class="inline-flex items-center gap-2 rounded-full border border-brand-500/40 bg-background px-4 py-2 text-sm font-medium text-brand-700 dark:text-brand-400 transition-colors hover:border-brand-500/80"
+          >
+            <Icon name="mail" size="sm" />
+            {t('blog.emailLabel', locale)}
+          </a>
+        </div>
+
+        <div class="mx-auto mt-8 w-full max-w-md">
+          <p class="mb-3 text-sm text-foreground-muted">{t('newsletter.description', locale)}</p>
+          <NewsletterForm />
+        </div>
+      </CTA>
+
+    <section class="hidden glitch:block relative z-10 py-[var(--space-section-md)] bg-background">
+      <LetterGlitchBand>
+        <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">{t('blog.followAlong', locale)}</h2>
+        <p class="text-lg text-foreground-muted mb-8 text-balance">{t('blog.followAlongLead', locale)}</p>
+
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <a
+            href="/rss.xml"
+            class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
+          >
+            <Icon name="rss" size="sm" />
+            {t('blog.rssFeed', locale)}
+          </a>
+          {socialLinks.map((link) => (
+            <a
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
+            >
+              <Icon name={link.icon} size="sm" />
+              {link.label}
+            </a>
+          ))}
+          <a
+            href={`mailto:${siteConfig.email}`}
+            class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
+          >
+            <Icon name="mail" size="sm" />
+            {t('blog.emailLabel', locale)}
+          </a>
+        </div>
+      </LetterGlitchBand>
+    </section>
+  </Fragment>
+</BlogListLayout>

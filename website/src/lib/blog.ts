@@ -179,3 +179,120 @@ export async function getRelatedByTags(
     return []
   }
 }
+
+// ── Sidebar data ──────────────────────────────────────────
+
+export interface SidebarType {
+  type: PostType
+  count: number
+  categories: SidebarCategory[]
+}
+export interface SidebarCategory {
+  category: Category
+  count: number
+  subcategories: SidebarSubcategory[]
+}
+export interface SidebarSubcategory {
+  category: Category
+  count: number
+}
+export interface SidebarTag {
+  name: string
+  slug: string
+  count: number
+}
+export interface BlogSidebarData {
+  types: SidebarType[]
+  tags: SidebarTag[]
+}
+
+export function getCategoryChildren(categoryId: number, categories: Category[]): Category[] {
+  return categories.filter((c) => {
+    if (!c.parent) return false
+    return typeof c.parent === 'object' ? c.parent.id === categoryId : c.parent === categoryId
+  })
+}
+
+function postTypeSlugOf(post: Post): string {
+  return typeof post.postType === 'object' && post.postType ? post.postType.slug : ''
+}
+
+function postCategoryOf(post: Post): Category | null {
+  return typeof post.categories === 'object' && post.categories ? post.categories : null
+}
+
+/**
+ * Construye el árbol de tipos → categorías → subcategorías con conteos y la
+ * lista de etiquetas con contador, todo calculado en memoria desde los posts
+ * publicados. Las categorías raíz de un tipo son las que usan sus posts (la
+ * relación tipo↔categoría no existe en el esquema, se deriva del contenido).
+ */
+export function computeSidebarData(
+  postTypes: PostType[],
+  categories: Category[],
+  posts: Post[],
+): BlogSidebarData {
+  const roots = categories.filter((c) => !c.parent)
+
+  const types = postTypes
+    .map((type) => {
+      const typePosts = posts.filter((p) => postTypeSlugOf(p) === type.slug)
+      const categoryCounts = new Map<number, number>()
+      const subcategoryCounts = new Map<number, number>()
+      for (const p of typePosts) {
+        const cat = postCategoryOf(p)
+        if (!cat) continue
+        const parentId =
+          typeof cat.parent === 'object' && cat.parent ? cat.parent.id : (cat.parent as number | undefined)
+        if (parentId !== undefined) {
+          subcategoryCounts.set(cat.id, (subcategoryCounts.get(cat.id) ?? 0) + 1)
+          categoryCounts.set(parentId, (categoryCounts.get(parentId) ?? 0) + 1)
+        } else {
+          categoryCounts.set(cat.id, (categoryCounts.get(cat.id) ?? 0) + 1)
+        }
+      }
+      const categoriesForType = roots
+        .filter((root) => categoryCounts.has(root.id))
+        .map((root) => {
+          const children = getCategoryChildren(root.id, categories).filter(
+            (sub) => subcategoryCounts.has(sub.id) || typePosts.some((p) => postCategoryOf(p)?.id === sub.id),
+          )
+          return {
+            category: root,
+            count: categoryCounts.get(root.id) ?? 0,
+            subcategories: children.map((sub) => ({
+              category: sub,
+              count: subcategoryCounts.get(sub.id) ?? 0,
+            })),
+          }
+        })
+        .sort((a, b) => a.category.title.localeCompare(b.category.title))
+      return { type, count: typePosts.length, categories: categoriesForType }
+    })
+    .filter((t) => t.count > 0)
+
+  const tagCounts = new Map<string, { name: string; count: number }>()
+  for (const p of posts) {
+    for (const t of p.tags ?? []) {
+      const name = getTagName(t)
+      if (!name) continue
+      const entry = tagCounts.get(name) ?? { name, count: 0 }
+      entry.count += 1
+      tagCounts.set(name, entry)
+    }
+  }
+  const tags = [...tagCounts.values()]
+    .map(({ name, count }) => ({ name, slug: tagToSlug(name), count }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+
+  return { types, tags }
+}
+
+export async function getBlogSidebarData(locale = defaultLocale): Promise<BlogSidebarData> {
+  const [postTypes, categories, posts] = await Promise.all([
+    payload.postTypes().getAll(locale),
+    payload.categories().getAll(locale),
+    getPublishedPosts(locale),
+  ])
+  return computeSidebarData(postTypes, categories, posts)
+}

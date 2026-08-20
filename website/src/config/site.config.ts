@@ -195,6 +195,8 @@ export interface SiteConfig {
     postsPerPage?: number;
     /** How many of the most-used tags to surface in the blog tag cloud. 0 = show all. Default 10. */
     tagCloudLimit?: number;
+    /** Max posts included in the RSS feed. Default 20. */
+    rssMaxItems?: number;
   };
   /** Projects listing configuration. */
   projects?: {
@@ -284,7 +286,7 @@ const siteConfig: SiteConfig = {
       maxDepth: 3,
     },
     comments: {
-      enabled: false,
+      enabled: true,
       provider: 'giscus',
       giscus: {
         repo: 'owner/repo',
@@ -330,6 +332,8 @@ const siteConfig: SiteConfig = {
   blog: {
     postsPerPage: 12,
     tagCloudLimit: 0,
+    /** Max posts in the RSS feed. Default 20. */
+    rssMaxItems: 20,
   },
   projects: {
     perPage: 12,

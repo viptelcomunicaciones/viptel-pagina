@@ -74,6 +74,8 @@
     "updatedOn": "Actualizado el {date}",
     "writtenBy": "Escrito por {author}",
     "tagsLabel": "Etiquetas",
+    "sidebarTypes": "Tipos de contenido",
+    "sidebarToggle": "Explorar categorías",
     "featured": "Destacado",
     "draft": "Borrador",
     "noPostsFound": "No se encontraron artículos.",
