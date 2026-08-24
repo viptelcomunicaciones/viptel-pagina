@@ -4,6 +4,7 @@
   "description": "Sitio público de Viptel Comunicaciones",
   "author": "Viptel Comunicaciones",
   "license": "MIT",
+  "type": "module",
   "keywords": [
     "astro",
     "astro-theme",
