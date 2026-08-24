@@ -2,12 +2,14 @@
   "name": "viptelcomunicaciones",
   "private": true,
   "scripts": {
-    "dev": "pnpm --parallel -r run dev",
+    "dev": "node scripts/dev-sequential.mjs",
+    "dev:seq": "node scripts/dev-sequential.mjs",
     "dev:backend": "pnpm --filter ./backend dev",
     "dev:website": "pnpm --filter ./website dev",
-    "generate:types": "pnpm --filter ./backend generate:types && pnpm --filter ./website generate:types",
+    "dev:parallel": "pnpm --parallel -r run dev",
     "build": "pnpm -r run build",
     "build:backend": "pnpm --filter ./backend build",
-    "build:website": "pnpm --filter ./website build"
+    "build:website": "pnpm --filter ./website build",
+    "generate:types": "pnpm --filter ./backend generate:types && pnpm --filter ./website generate:types"
   }
 }
