@@ -10,7 +10,7 @@ import { defaultLocale } from '@/i18n';
 
 // ── Constants ────────────────────────────────────────────
 
-const DEFAULT_TIMEOUT = 15_000;
+const DEFAULT_TIMEOUT = 30_000;
 const DEFAULT_DEPTH = 2;
 const MAX_DOCS_PER_PAGE = 100;
 
