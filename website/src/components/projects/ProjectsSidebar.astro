@@ -1,0 +1,271 @@
+---
+/**
+ * ProjectsSidebar — menú lateral de proyectos. Espejo de `BlogSidebar`:
+ * enlaces globales, tipos de proyecto como acordeones (`<details>`) con sus
+ * categorías y subcategorías, y sección de etiquetas con contador.
+ * Interacción 100% HTML nativa (sin JS).
+ */
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import {
+  getProjectsBaseUrl,
+  getProjectCategoryArchiveUrl,
+  getProjectTypeUrl,
+  getProjectSubcategoryArchiveUrl,
+  getProjectTagUrl,
+  type ProjectSidebarCategory,
+  type ProjectSidebarTag,
+  type ProjectSidebarType,
+} from '@/lib/projects';
+import { t, defaultLocale } from '@/i18n';
+
+interface Props {
+  locale?: string;
+  types: ProjectSidebarType[];
+  tags: ProjectSidebarTag[];
+  activeTypeSlug?: string;
+  activeCategorySlug?: string;
+  activeSubcategorySlug?: string;
+  activeTag?: string;
+  class?: string;
+}
+
+const {
+  locale = defaultLocale,
+  types,
+  tags,
+  activeTypeSlug = '',
+  activeCategorySlug = '',
+  activeSubcategorySlug = '',
+  activeTag = '',
+  class: extraClass,
+} = Astro.props;
+
+const isIndex = activeTypeSlug === '' && activeTag === '';
+const projectsHref = getProjectsBaseUrl(locale);
+---
+
+<aside
+  class:list={['projects-sidebar flex w-full flex-col gap-6', extraClass]}
+  aria-label="Explorar proyectos"
+>
+  <nav aria-label="Proyectos">
+    <ul class="flex flex-col gap-1">
+      <li>
+        <a
+          href={projectsHref}
+          class:list={[
+            'flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+            isIndex
+              ? 'bg-brand-500 text-white'
+              : 'text-brand-700 dark:text-brand-400 hover:bg-brand-500/10',
+          ]}
+          aria-current={isIndex ? 'page' : undefined}
+        >
+          <Icon name="layers" size="sm" />
+          {t('projects.title', locale)}
+        </a>
+      </li>
+      <li>
+        <a
+          href={projectsHref}
+          class="text-foreground-muted hover:bg-brand-500/10 hover:text-brand-700 dark:hover:text-brand-400 flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors"
+        >
+          <Icon name="layout-grid" size="sm" />
+          {t('projects.allProjects', locale)}
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  {
+    types.length > 0 && (
+      <section class="projects-sidebar-section border-border bg-background rounded-xl border p-3">
+        <h2 class="text-foreground-subtle mb-2 px-2 text-xs font-semibold tracking-wide uppercase">
+          {t('projects.sidebarTypes', locale)}
+        </h2>
+        <ul class="flex flex-col gap-1">
+          {types.map((entry) => {
+            const isTypeActive = activeTypeSlug === entry.type.slug;
+            return (
+              <li>
+                <details class="group" open={isTypeActive}>
+                  <summary
+                    class:list={[
+                      'flex cursor-pointer list-none items-center gap-2 rounded-lg px-2 py-2 text-sm font-medium transition-colors [&::-webkit-details-marker]:hidden',
+                      isTypeActive
+                        ? 'bg-brand-500 text-white'
+                        : 'text-foreground hover:bg-brand-500/10',
+                    ]}
+                  >
+                    <Icon
+                      name={entry.type.icon || 'layers'}
+                      size="sm"
+                      class:list={[
+                        'shrink-0 transition-colors',
+                        isTypeActive ? 'text-white' : 'text-brand-600 dark:text-brand-400',
+                      ]}
+                    />
+                    <a
+                      href={getProjectTypeUrl(entry.type.slug, locale)}
+                      class:list={[
+                        'min-w-0 flex-1 truncate transition-colors',
+                        isTypeActive
+                          ? 'text-white'
+                          : 'text-foreground group-hover:text-brand-700 dark:group-hover:text-brand-400',
+                      ]}
+                      aria-current={isTypeActive ? 'page' : undefined}
+                    >
+                      {entry.type.title}
+                    </a>
+                    <span
+                      class:list={[
+                        'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold transition-colors',
+                        isTypeActive
+                          ? 'bg-white/20 text-white'
+                          : 'bg-brand-500/10 text-brand-700 dark:text-brand-400',
+                      ]}
+                    >
+                      {entry.count}
+                    </span>
+                    <Icon
+                      name="chevron-down"
+                      size="xs"
+                      class:list={[
+                        'shrink-0 transition-transform duration-200 group-open:rotate-180',
+                        isTypeActive ? 'text-white/70' : 'text-foreground-subtle',
+                      ]}
+                    />
+                  </summary>
+
+                  {entry.categories.length > 0 && (
+                    <ul class="border-border mt-1 ml-3 flex flex-col gap-0.5 border-l pl-3">
+                      {entry.categories.map((cat: ProjectSidebarCategory) => {
+                        const isCatActive =
+                          activeTypeSlug === entry.type.slug &&
+                          activeCategorySlug === cat.category.slug;
+                        return (
+                          <li>
+                            <a
+                              href={getProjectCategoryArchiveUrl(entry.type.slug, cat.category, locale)}
+                              class:list={[
+                                'flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors',
+                                isCatActive
+                                  ? 'bg-brand-500 text-white'
+                                  : 'text-foreground-muted hover:bg-brand-500/10 hover:text-brand-700 dark:hover:text-brand-400',
+                              ]}
+                              aria-current={isCatActive ? 'page' : undefined}
+                            >
+                              <span class="min-w-0 flex-1 truncate">{cat.category.title}</span>
+                              <span
+                                class:list={[
+                                  'text-xs transition-colors',
+                                  isCatActive ? 'text-white/70' : 'text-foreground-subtle',
+                                ]}
+                              >
+                                {cat.count}
+                              </span>
+                            </a>
+
+                            {cat.subcategories.length > 0 && (
+                              <ul class="border-border ml-3 flex flex-col gap-0.5 border-l pl-2">
+                                {cat.subcategories.map((sub) => {
+                                  const isSubActive =
+                                    activeTypeSlug === entry.type.slug &&
+                                    activeSubcategorySlug === sub.category.slug;
+                                  return (
+                                    <li>
+                                      <a
+                                        href={getProjectSubcategoryArchiveUrl(
+                                          entry.type.slug,
+                                          cat.category.slug,
+                                          sub.category,
+                                          locale
+                                        )}
+                                        class:list={[
+                                          'flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors',
+                                          isSubActive
+                                            ? 'bg-brand-500 text-white'
+                                            : 'text-foreground-muted hover:bg-brand-500/10 hover:text-brand-700 dark:hover:text-brand-400',
+                                        ]}
+                                        aria-current={isSubActive ? 'page' : undefined}
+                                      >
+                                        <span class="min-w-0 flex-1 truncate">
+                                          {sub.category.title}
+                                        </span>
+                                        <span
+                                          class:list={[
+                                            'text-xs transition-colors',
+                                            isSubActive
+                                              ? 'text-white/70'
+                                              : 'text-foreground-subtle',
+                                          ]}
+                                        >
+                                          {sub.count}
+                                        </span>
+                                      </a>
+                                    </li>
+                                  );
+                                })}
+                              </ul>
+                            )}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
+                </details>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    )
+  }
+
+  {
+    tags.length > 0 && (
+      <section class="projects-sidebar-section border-border bg-background rounded-xl border p-3">
+        <h2 class="text-foreground-subtle mb-2 px-2 text-xs font-semibold tracking-wide uppercase">
+          {t('blog.tagsLabel', locale)}
+        </h2>
+        <ul class="flex flex-col gap-1">
+          {tags.map((tag: ProjectSidebarTag) => {
+            const isActive = activeTag === tag.name;
+            return (
+              <li>
+                <a
+                  href={getProjectTagUrl(tag.name, locale)}
+                  class:list={[
+                    'flex items-center gap-2 rounded-md px-2 py-1.5 text-sm transition-colors',
+                    isActive
+                      ? 'bg-brand-500 text-white'
+                      : 'text-foreground-muted hover:bg-brand-500/10 hover:text-brand-700 dark:hover:text-brand-400',
+                  ]}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  <Icon
+                    name="tag"
+                    size="xs"
+                    class:list={[
+                      'shrink-0 transition-colors',
+                      isActive ? 'text-white' : 'text-foreground-subtle',
+                    ]}
+                  />
+                  <span class="min-w-0 flex-1 truncate">#{tag.name}</span>
+                  <span
+                    class:list={[
+                      'text-xs transition-colors',
+                      isActive ? 'text-white/70' : 'text-foreground-subtle',
+                    ]}
+                  >
+                    {tag.count}
+                  </span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    )
+  }
+</aside>

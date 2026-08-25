@@ -1,0 +1,82 @@
+---
+/**
+ * ProjectsListLayout — layout compartido para las páginas de listado de
+ * proyectos. Espejo de `BlogListLayout`: hero (slot `hero`), sidebar
+ * `ProjectsSidebar` a la izquierda, contenido en el slot por defecto y zona
+ * `footer` a ancho completo. El toggle móvil es checkbox + label (sin JS).
+ */
+import PageLayout from '@/layouts/PageLayout.astro';
+import ProjectsSidebar from '@/components/projects/ProjectsSidebar.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import { t, defaultLocale } from '@/i18n';
+import { getProjectSidebarData } from '@/lib/projects';
+
+interface Props {
+  locale?: string;
+  title: string;
+  description: string;
+  activeTypeSlug?: string;
+  activeCategorySlug?: string;
+  activeSubcategorySlug?: string;
+  activeTag?: string;
+  eagerReveal?: boolean;
+  footerBackground?: 'default' | 'secondary' | 'invert';
+}
+
+const {
+  locale = defaultLocale,
+  title,
+  description,
+  activeTypeSlug,
+  activeCategorySlug,
+  activeSubcategorySlug,
+  activeTag,
+  eagerReveal = false,
+  footerBackground = 'default',
+} = Astro.props;
+
+const sidebarData = await getProjectSidebarData(locale);
+---
+
+<PageLayout
+  title={title}
+  description={description}
+  eagerReveal={eagerReveal}
+  footerBackground={footerBackground}
+>
+  <slot name="hero" />
+
+  <section class="bg-background-secondary border-border border-t py-[var(--space-section-md)]">
+    <div class="mx-auto max-w-7xl px-6">
+      <div class="grid gap-8 lg:grid-cols-[16rem_minmax(0,1fr)] lg:items-start">
+        <input type="checkbox" id="projects-sidebar-toggle" class="peer sr-only" />
+
+        <label
+          for="projects-sidebar-toggle"
+          class="border-brand-500/40 bg-background text-brand-700 dark:text-brand-400 hover:border-brand-500/80 inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-colors lg:hidden"
+        >
+          <Icon name="menu" size="sm" />
+          {t('projects.sidebarToggle', locale)}
+        </label>
+
+        <div class="hidden peer-checked:block lg:block">
+          <ProjectsSidebar
+            locale={locale}
+            types={sidebarData.types}
+            tags={sidebarData.tags}
+            activeTypeSlug={activeTypeSlug}
+            activeCategorySlug={activeCategorySlug}
+            activeSubcategorySlug={activeSubcategorySlug}
+            activeTag={activeTag}
+          />
+        </div>
+
+        <div class="flex min-w-0 flex-col gap-8">
+          <slot />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <slot name="footer" />
+</PageLayout>

@@ -1,0 +1,65 @@
+---
+/**
+ * ProjectsTypeTabs — pestañas de tipos de proyecto. Muestra "Todos" seguido
+ * de cada tipo (`project-types`) y enlaza a `/projects/<tipo>`. El tipo activo
+ * se marca con estilo relleno de marca. Pure HTML — sin JS.
+ */
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import { getProjectsBaseUrl, getProjectTypeUrl } from '@/lib/projects';
+import { t, defaultLocale } from '@/i18n';
+import type { ProjectType } from '@/lib/payload-types';
+
+interface Props {
+  projectTypes: ProjectType[];
+  activeSlug?: string;
+  locale?: string;
+  class?: string;
+}
+
+const { projectTypes, activeSlug = '', locale = defaultLocale, class: extraClass } = Astro.props;
+---
+
+{
+  projectTypes.length > 0 && (
+    <ul
+      class:list={['flex flex-wrap items-center justify-center gap-2', extraClass]}
+      aria-label="Browse by project type"
+    >
+      <li>
+        <a
+          href={getProjectsBaseUrl(locale)}
+          class:list={[
+            'inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+            activeSlug === ''
+              ? 'border-brand-500 bg-brand-500 text-white'
+              : 'border-brand-500/40 text-brand-700 dark:text-brand-400 hover:border-brand-500/80 bg-transparent',
+          ]}
+          aria-current={activeSlug === '' ? 'page' : undefined}
+        >
+          {t('projects.allProjects', locale)}
+        </a>
+      </li>
+
+      {projectTypes.map((type) => {
+        const isActive = activeSlug === type.slug;
+        return (
+          <li>
+            <a
+              href={getProjectTypeUrl(type.slug, locale)}
+              class:list={[
+                'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+                isActive
+                  ? 'border-brand-500 bg-brand-500 text-white'
+                  : 'border-brand-500/40 text-brand-700 dark:text-brand-400 hover:border-brand-500/80 bg-transparent',
+              ]}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              <Icon name={type.icon || 'layers'} size="xs" />
+              {type.title}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  )
+}
