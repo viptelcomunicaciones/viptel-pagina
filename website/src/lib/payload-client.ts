@@ -5,7 +5,17 @@
  *   import { payload } from '@/lib/payload-client'
  *   const home = await payload.pages().getBySlug('home', 'es')
  */
-import type { Category, Page, Post, PostType, Project, Redirect, Service } from './payload-types';
+import type {
+  Category,
+  Page,
+  Post,
+  PostType,
+  Project,
+  ProjectCategory,
+  ProjectType,
+  Redirect,
+  Service,
+} from './payload-types';
 import { defaultLocale } from '@/i18n';
 
 // ── Constants ────────────────────────────────────────────
@@ -115,6 +125,14 @@ export class PayloadClient {
 
   redirects(): RedirectQueries {
     return new RedirectQueries(this);
+  }
+
+  projectTypes(): ProjectTypeQueries {
+    return new ProjectTypeQueries(this);
+  }
+
+  projectCategories(): ProjectCategoryQueries {
+    return new ProjectCategoryQueries(this);
   }
 }
 
@@ -316,6 +334,93 @@ class ProjectQueries extends QueryBase<Project> {
       `projects?sort=-year&limit=${limit}&page=${page}&where[tags.name][equals]=${encodeURIComponent(tag)}&where[_status][equals]=published`,
       { locale }
     );
+  }
+
+  async getByType(
+    projectTypeId: number | string,
+    locale = defaultLocale,
+    page = 1,
+    limit = 20
+  ): Promise<DocsResponse<Project>> {
+    return this.client.fetchAPI<DocsResponse<Project>>(
+      `projects?sort=-year&limit=${limit}&page=${page}&where[projectType][equals]=${encodeURIComponent(String(projectTypeId))}&where[_status][equals]=published`,
+      { locale }
+    );
+  }
+
+  async getByCategory(
+    categoryId: number | string,
+    locale = defaultLocale,
+    page = 1,
+    limit = 20
+  ): Promise<DocsResponse<Project>> {
+    return this.client.fetchAPI<DocsResponse<Project>>(
+      `projects?sort=-year&limit=${limit}&page=${page}&where[categories][equals]=${encodeURIComponent(String(categoryId))}&where[_status][equals]=published`,
+      { locale }
+    );
+  }
+
+  async getByTypeAndCategory(
+    projectTypeId: number | string,
+    categoryId: number | string,
+    locale = defaultLocale,
+    page = 1,
+    limit = 20
+  ): Promise<DocsResponse<Project>> {
+    return this.client.fetchAPI<DocsResponse<Project>>(
+      `projects?sort=-year&limit=${limit}&page=${page}&where[projectType][equals]=${encodeURIComponent(String(projectTypeId))}&where[categories][equals]=${encodeURIComponent(String(categoryId))}&where[_status][equals]=published`,
+      { locale }
+    );
+  }
+
+  async getByTypeAndCategories(
+    projectTypeId: number | string,
+    categoryIds: Array<number | string>,
+    locale = defaultLocale,
+    page = 1,
+    limit = 20
+  ): Promise<DocsResponse<Project>> {
+    const ids = categoryIds.map((id) => encodeURIComponent(String(id))).join(',');
+    return this.client.fetchAPI<DocsResponse<Project>>(
+      `projects?sort=-year&limit=${limit}&page=${page}&where[projectType][equals]=${encodeURIComponent(String(projectTypeId))}&where[categories][in]=${ids}&where[_status][equals]=published`,
+      { locale }
+    );
+  }
+}
+
+class ProjectTypeQueries extends QueryBase<ProjectType> {
+  constructor(client: PayloadClient) {
+    super(client, 'project-types');
+  }
+
+  async getAll(locale = defaultLocale): Promise<ProjectType[]> {
+    const data = await this.client.fetchAPI<DocsResponse<ProjectType>>(
+      `project-types?sort=position&limit=${MAX_DOCS_PER_PAGE}`,
+      { locale }
+    );
+    return data.docs ?? [];
+  }
+}
+
+class ProjectCategoryQueries extends QueryBase<ProjectCategory> {
+  constructor(client: PayloadClient) {
+    super(client, 'project-categories');
+  }
+
+  async getAll(locale = defaultLocale): Promise<ProjectCategory[]> {
+    const data = await this.client.fetchAPI<DocsResponse<ProjectCategory>>(
+      `project-categories?limit=${MAX_DOCS_PER_PAGE}`,
+      { locale }
+    );
+    return data.docs ?? [];
+  }
+
+  async getRoots(locale = defaultLocale): Promise<ProjectCategory[]> {
+    const data = await this.client.fetchAPI<DocsResponse<ProjectCategory>>(
+      `project-categories?limit=${MAX_DOCS_PER_PAGE}&where[parent][exists]=false`,
+      { locale }
+    );
+    return data.docs ?? [];
   }
 }
 
