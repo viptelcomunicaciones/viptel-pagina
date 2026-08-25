@@ -62,15 +62,22 @@ Ver `reference/BLOCKS.md` para slugs y campos de cada uno.
 ## Comandos
 
 ```bash
-pnpm dev          # Servidor de desarrollo (puerto 3000)
-pnpm build        # Build de producción
-pnpm seed         # Sembrar datos de demo
-pnpm clean-versions  # Eliminar versiones draft
-pnpm generate:types   # Regenerar payload-types.ts
-pnpm migrate:create   # Crear nueva migración
-pnpm test:int     # Tests de integración
-pnpm test:e2e     # Tests E2E
+pnpm dev               # Servidor de desarrollo (puerto 3000)
+pnpm build             # Build de producción
+pnpm ci                # payload migrate + build (para CI/deploy a producción)
+pnpm seed              # Sembrar datos de demo
+pnpm clean-versions    # Eliminar versiones draft
+pnpm generate:types    # Regenerar payload-types.ts
+pnpm payload migrate:create <nombre>  # Crear nueva migración (genera .ts + snapshot .json)
+pnpm payload migrate   # Aplicar migraciones pendientes
+pnpm payload migrate:status  # Estado de migraciones
+pnpm test:int          # Tests de integración
+pnpm test:e2e          # Tests E2E
 ```
+
+> Migraciones: dev usa push mode (no necesitas migrar localmente). Genera la migración
+> con `migrate:create` al terminar cada feature y revísala. Ver
+> `reference/MIGRATIONS.md` para el flujo completo y el checklist de producción.
 
 ## Cómo la API sirve contenido al website
 

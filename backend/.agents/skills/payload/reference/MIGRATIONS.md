@@ -2,73 +2,107 @@
 
 Payload CMS usa Drizzle ORM para generar y ejecutar migraciones SQL contra PostgreSQL.
 
+> **Estado de esta cadena: SANA** (reset completa el 2026-08-25, baseline `20260825_205151_initial`).
+> `migrate:create` funciona correctamente desde entonces. No escribas migraciones a mano sin
+> su snapshot `.json`: eso rompió la cadena anterior y obligó a resetear toda la historia.
+
 ## Estructura
 
 ```
 src/migrations/
-├── index.ts                      # Registro de migraciones
-├── 20260801_232755_initial.ts    # Migración inicial (todas las tablas base)
-├── 20260801_232755_initial.json  # SQL generado (up/down)
-├── 20260803_155526.ts           # Agrega colección services
-└── 20260803_155526.json         # SQL generado (up/down)
+├── index.ts                      # Registro de migraciones (auto-actualizado)
+├── 20260825_205151_initial.ts    # Baseline único: esquema completo (159 tablas)
+└── 20260825_205151_initial.json  # Snapshot Drizzle (base para futuros diffs)
 ```
 
-## Crear una migración
+## Regla de oro
+
+**dev = push mode · producción = migrate.**
+
+- En desarrollo, el adaptador postgres usa `push: true` por defecto: al arrancar
+  `next dev`, Drizzle sincroniza el esquema automáticamente. La DB local es un sandbox.
+- Las migraciones existen para producción/CI. Nunca corras `payload migrate` contra tu DB local
+  de desarrollo salvo que sepas lo que haces (mezclar push + migrate sin criterio corrompe el estado).
+- No mezcles: si una vez aplicas migrate manualmente a tu local, marca SIEMPRE la fila en
+  `payload_migrations` o genera el snapshot correspondiente.
+
+## Flujo por cada cambio de esquema (colecciones/campos/bloques)
 
 ```bash
-# En el directorio backend/
-pnpm migrate:create
+# 1. Edita payload.config.ts / colecciones
+# 2. Arranca pnpm dev → push ajusta tu DB local sola (no necesitas migrar localmente)
+# 3. Al terminar la feature, genera la migración:
+pnpm payload migrate:create nombre-descriptivo
+# 4. REVISAR el SQL generado en src/migrations/*.ts (buena práctica oficial)
+# 5. Commit del .ts + .json junto con el cambio de config
 ```
 
-Esto ejecuta `payload migrate:create` que:
-1. Compara el schema actual con la base de datos
-2. Genera archivos SQL (Drizzle)
-3. Crea archivos `.ts` y `.json` en `src/migrations/`
+Comandos (el bin se invoca vía el script `payload`):
 
-## Registrar una migración
+| Comando | Qué hace |
+|---|---|
+| `pnpm payload migrate:create <nombre>` | Genera `.ts` (SQL up/down) + `.json` (snapshot) y registra en `index.ts`. Flags: `--skip-empty`, `--force-accept-warning` |
+| `pnpm payload migrate` | Aplica las migraciones pendientes, en orden |
+| `pnpm payload migrate:status` | Tabla de estado: qué se ha ejecutado y qué no |
+| `pnpm payload migrate:down` | Revierte el último batch |
+| `pnpm payload migrate:fresh` | ⚠️ Borra TODAS las tablas y re-aplica todo. Solo dev |
 
-En `src/migrations/index.ts`:
+## Cómo funciona internamente (importante para no romperlo)
 
-```typescript
-import { initial } from './20260801_232755_initial'
-import { services } from './20260803_155526'
+- `migrate:create` **no mira la base de datos**: compara el último snapshot `.json`
+  ("before") contra el esquema derivado del config actual ("after").
+- Por eso una migración escrita a mano SIN su `.json` deja el diff siguiente corrupto
+  (esto fue lo que pasó antes del reset de 2026-08-25).
+- Cada migración exporta `up()` y `down()`; en Postgres usan
+  `import { type MigrateUpArgs, sql } from '@payloadcms/db-postgres'`.
+- Payload registra cada migración aplicada en la tabla `payload_migrations`.
+  El marcador `batch = -1, name = 'dev'` indica que la DB fue creada/modificada por push mode.
 
-export const migrations = [initial, services]
+## Producción
+
+Nunca push en producción. Dos mecanismos soportados:
+
+### Opción A — CI antes del build (recomendada)
+
+Script ya definido en `package.json`:
+
+```json
+"ci": "cross-env NODE_OPTIONS=--no-deprecation payload migrate && pnpm build"
 ```
 
-## Ejecutar migraciones
+Apunta el `build script` del plataforma de deploy a `pnpm ci`. Conecta a la DB de
+producción, aplica migraciones pendientes y solo entonces compila. Si una migración
+falla, el deploy se rechaza.
 
-Las migraciones se ejecutan automáticamente al iniciar el servidor Payload. También se pueden ejecutar manualmente:
+### Opción B — Al arranque del servidor (servidores de larga vida, no serverless)
 
-```bash
-pnpm migrate
+```ts
+// payload.config.ts
+import { migrations } from './migrations'
+
+db: postgresAdapter({
+  // ...
+  prodMigrations: migrations,
+})
 ```
 
-## Migraciones existentes
+### Checklist por deploy a producción
 
-### `20260801_232755_initial`
-Crea todas las tablas base:
-- `users`, `users_sessions`, `users_api_keys`
-- `media`, `media_sizes`, `media_folders`
-- `categories`, `categories_locales`
-- `pages`, `pages_locales`, `pages_rels`, `pages_versions`
-- `posts`, `posts_locales`, `posts_rels`, `posts_versions`, `posts_tags`
-- `projects`, `projects_locales`, `projects_rels`, `projects_versions`, `projects_tags`, `projects_gallery`
-- `redirects`
-- `header`, `header_locales`, `header_nav_items`
-- `footer`, `footer_locales`, `footer_nav_items`
-- Tablas del sistema Payload (`payload_preferences`, `payload_migrations`, etc.)
+1. **Backup** de la DB (`pg_dump -Fc`)
+2. Deploy del código que incluye las migraciones nuevas
+3. Ejecutar `payload migrate` (vía `pnpm ci` o startup)
+4. Verificar con `payload migrate:status` + smoke tests
 
-### `20260803_155526`
-Agrega:
-- `services`, `services_locales`, `services_rels`, `services_versions`, `services_tags`
-- `services_features`, `services_pricing`, `services_faq`, `services_gallery`
-- Relaciones self-referencing para `parent`
+## Historial
 
----
+| Migración | Nota |
+|---|---|
+| `20260825_205151_initial` | Baseline completo tras reset de la historia (incluye project-types/project-categories). Verificada aplicando limpia sobre DB fresca |
 
-## Cómo funciona Drizzle con Payload
+La historia anterior (20260801–20260815) fue eliminada en el reset: tenía drift
+(migraciones `.ts` sin snapshot + DB mantenida por push), lo que impedía generar
+nuevas migraciones correctamente.
 
-Payload 3.x usa Drizzle ORM internamente. Las migraciones son archivos SQL generados por `drizzle-kit` que Payload ejecuta contra PostgreSQL.
+## Conexión
 
-**Conexión**: `DATABASE_URL=postgres://postgres:CHANGE_ME@127.0.0.1:5432/payload_viptel`
+`DATABASE_URL=postgres://...@127.0.0.1:5432/payload_viptel` (ver `backend/.env`).
