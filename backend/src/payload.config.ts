@@ -11,6 +11,7 @@ import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { PostTypes } from './collections/PostTypes'
 import { Projects } from './collections/Projects'
+import { ProjectTypes } from './collections/ProjectTypes'
 import { Services } from './collections/Services'
 import { Tags } from './collections/Tags'
 import { Users } from './collections/Users'
@@ -70,7 +71,7 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || '',
     },
   }),
-  collections: [Pages, Posts, Projects, Services, Media, Categories, Tags, PostTypes, Users],
+  collections: [Pages, Posts, Projects, Services, Media, Categories, Tags, PostTypes, ProjectTypes, Users],
   cors: [getServerSideURL(), getFrontendURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [...plugins, mcpPlugin({}), formBuilderPlugin({
