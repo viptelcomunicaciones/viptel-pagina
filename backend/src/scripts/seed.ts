@@ -25,6 +25,8 @@ const collections: CollectionSlug[] = [
   'pages',
   'posts',
   'post-types',
+  'project-categories',
+  'project-types',
   'projects',
   'redirects',
   'services',
@@ -251,6 +253,33 @@ export const seed = async (payload: Payload): Promise<void> => {
     postTypeIdBySlug.set(type.slug, doc.id as number)
   }
 
+  payload.logger.info(`- Seeding project types...`)
+
+  type ProjectTypeSeed = { es: string; en: string; slug: string; icon: string; position: number }
+
+  const projectTypesData: ProjectTypeSeed[] = [
+    { es: 'Desarrollo Web', en: 'Web Development', slug: 'desarrollo-web', icon: 'globe', position: 1 },
+    { es: 'Telecomunicaciones', en: 'Telecommunications', slug: 'telecomunicaciones', icon: 'phone', position: 2 },
+    { es: 'Software Empresarial', en: 'Enterprise Software', slug: 'software-empresarial', icon: 'code', position: 3 },
+    { es: 'Marketing Digital', en: 'Digital Marketing', slug: 'marketing-digital', icon: 'trending-up', position: 4 },
+  ]
+
+  const projectTypeIdBySlug = new Map<string, number>()
+  for (const type of projectTypesData) {
+    const doc = await payload.create({
+      collection: 'project-types',
+      locale: 'es',
+      data: { title: type.es, slug: type.slug, icon: type.icon, position: type.position },
+    })
+    await payload.update({
+      collection: 'project-types',
+      id: doc.id,
+      locale: 'en',
+      data: { title: type.en },
+    })
+    projectTypeIdBySlug.set(type.slug, doc.id as number)
+  }
+
   payload.logger.info(`- Seeding categories...`)
 
   type SubcategorySeed = { es: string; en: string; slug: string }
@@ -314,6 +343,80 @@ export const seed = async (payload: Payload): Promise<void> => {
         data: { title: sub.en },
       })
       categoryIdBySlug.set(sub.slug, subDoc.id as number)
+    }
+  }
+
+  payload.logger.info(`- Seeding project categories...`)
+
+  type ProjectSubcategorySeed = { es: string; en: string; slug: string }
+  type ProjectCategorySeed = { es: string; en: string; slug: string; subcategories: ProjectSubcategorySeed[] }
+
+  const projectCategoryData: ProjectCategorySeed[] = [
+    {
+      es: 'Telecomunicaciones',
+      en: 'Telecommunications',
+      slug: 'telecomunicaciones',
+      subcategories: [
+        { es: 'PBX y VoIP', en: 'PBX & VoIP', slug: 'pbx-voip' },
+        { es: 'Redes y conectividad', en: 'Networking & connectivity', slug: 'redes-conectividad' },
+      ],
+    },
+    {
+      es: 'Desarrollo Web',
+      en: 'Web Development',
+      slug: 'desarrollo-web',
+      subcategories: [
+        { es: 'E-commerce', en: 'E-commerce', slug: 'e-commerce' },
+        { es: 'Aplicaciones web', en: 'Web applications', slug: 'aplicaciones-web' },
+      ],
+    },
+    {
+      es: 'Software Empresarial',
+      en: 'Enterprise Software',
+      slug: 'software-empresarial',
+      subcategories: [
+        { es: 'ERP', en: 'ERP', slug: 'erp' },
+        { es: 'CRM', en: 'CRM', slug: 'crm' },
+      ],
+    },
+    {
+      es: 'Marketing Digital',
+      en: 'Digital Marketing',
+      slug: 'marketing-digital',
+      subcategories: [
+        { es: 'SEO', en: 'SEO', slug: 'seo' },
+        { es: 'Publicidad digital', en: 'Digital advertising', slug: 'publicidad-digital' },
+      ],
+    },
+  ]
+
+  const projectCategoryIdBySlug = new Map<string, number>()
+  for (const cat of projectCategoryData) {
+    const doc = await payload.create({
+      collection: 'project-categories',
+      locale: 'es',
+      data: { title: cat.es, slug: cat.slug },
+    })
+    await payload.update({
+      collection: 'project-categories',
+      id: doc.id,
+      locale: 'en',
+      data: { title: cat.en },
+    })
+    projectCategoryIdBySlug.set(cat.slug, doc.id as number)
+    for (const sub of cat.subcategories) {
+      const subDoc = await payload.create({
+        collection: 'project-categories',
+        locale: 'es',
+        data: { title: sub.es, slug: sub.slug, parent: doc.id as number },
+      })
+      await payload.update({
+        collection: 'project-categories',
+        id: subDoc.id,
+        locale: 'en',
+        data: { title: sub.en },
+      })
+      projectCategoryIdBySlug.set(sub.slug, subDoc.id as number)
     }
   }
 
@@ -1079,6 +1182,8 @@ export const seed = async (payload: Payload): Promise<void> => {
     client: string
     year: number
     coverImage: number
+    projectType: string
+    category: string
     tags: string[]
     websiteUrl?: string
     sourceUrl?: string
@@ -1117,6 +1222,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Clínica Salud Plus',
       year: 2026,
       coverImage: image1.id as number,
+      projectType: 'telecomunicaciones',
+      category: 'pbx-voip',
       tags: ['PBX', 'VoIP', 'Nube'],
       websiteUrl: 'https://clinicasaludplus.com',
       sourceUrl: 'https://github.com/viptelcomunicaciones/pbx-nube-clinica',
@@ -1153,6 +1260,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Estudio Jurídico Ávila & Asociados',
       year: 2025,
       coverImage: image2.id as number,
+      projectType: 'telecomunicaciones',
+      category: 'redes-conectividad',
       tags: ['Redes', 'Seguridad'],
       websiteUrl: 'https://avila-asociados.com',
       sourceUrl: 'https://github.com/viptelcomunicaciones/red-vpn-firma-legal',
@@ -1189,6 +1298,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Moda Latina SAS',
       year: 2026,
       coverImage: image1.id as number,
+      projectType: 'desarrollo-web',
+      category: 'e-commerce',
       tags: ['E-commerce', 'SEO', 'Desarrollo Web'],
       websiteUrl: 'https://modalatina.co',
       sourceUrl: 'https://github.com/viptelcomunicaciones/ecommerce-moda',
@@ -1225,6 +1336,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Hotel Casa Verde',
       year: 2025,
       coverImage: image2.id as number,
+      projectType: 'desarrollo-web',
+      category: 'aplicaciones-web',
       tags: ['Desarrollo Web', 'Apps'],
       websiteUrl: 'https://hotelcasaverde.co',
       sourceUrl: 'https://github.com/viptelcomunicaciones/reservas-hotel-boutique',
@@ -1261,6 +1374,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Distribuidora Andina',
       year: 2024,
       coverImage: image1.id as number,
+      projectType: 'software-empresarial',
+      category: 'erp',
       tags: ['ERP', 'Desarrollo Web'],
       websiteUrl: 'https://distribuidoraandina.com',
       sourceUrl: 'https://github.com/viptelcomunicaciones/erp-inventario-distribuidora',
@@ -1297,6 +1412,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Logística TransCaribe',
       year: 2026,
       coverImage: image2.id as number,
+      projectType: 'software-empresarial',
+      category: 'aplicaciones-web',
       tags: ['Apps', 'Datos'],
       websiteUrl: 'https://transcaribe.co',
       sourceUrl: 'https://github.com/viptelcomunicaciones/seguimiento-flota-gps',
@@ -1333,6 +1450,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Cooperativa Financiera Andina',
       year: 2025,
       coverImage: image1.id as number,
+      projectType: 'telecomunicaciones',
+      category: 'redes-conectividad',
       tags: ['Nube', 'Seguridad'],
       websiteUrl: 'https://cooperativaandina.com',
       sourceUrl: 'https://github.com/viptelcomunicaciones/migracion-nube-cooperativa',
@@ -1369,6 +1488,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Viptel Comunicaciones',
       year: 2026,
       coverImage: image2.id as number,
+      projectType: 'desarrollo-web',
+      category: 'aplicaciones-web',
       tags: ['Desarrollo Web', 'SEO'],
       websiteUrl: 'https://viptelcomunicaciones.com',
       sourceUrl: 'https://github.com/viptelcomunicaciones/sitio-corporativo',
@@ -1405,6 +1526,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Universidad del Norte',
       year: 2024,
       coverImage: image1.id as number,
+      projectType: 'telecomunicaciones',
+      category: 'redes-conectividad',
       tags: ['Redes', 'WiFi'],
       websiteUrl: 'https://unorte.edu.co',
       sourceUrl: 'https://github.com/viptelcomunicaciones/wifi-campus',
@@ -1441,6 +1564,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Agencia Pixel Creativo',
       year: 2025,
       coverImage: image2.id as number,
+      projectType: 'software-empresarial',
+      category: 'crm',
       tags: ['CRM', 'Marketing Digital'],
       websiteUrl: 'https://pixelcreativo.co',
       sourceUrl: 'https://github.com/viptelcomunicaciones/crm-agencia-marketing',
@@ -1477,6 +1602,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Educación Virtual Latam',
       year: 2026,
       coverImage: image1.id as number,
+      projectType: 'desarrollo-web',
+      category: 'aplicaciones-web',
       tags: ['Desarrollo Web', 'Apps'],
       websiteUrl: 'https://educacionvirtuallatam.com',
       sourceUrl: 'https://github.com/viptelcomunicaciones/plataforma-lms',
@@ -1513,6 +1640,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Tienda Online Colombia',
       year: 2025,
       coverImage: image2.id as number,
+      projectType: 'desarrollo-web',
+      category: 'e-commerce',
       tags: ['E-commerce', 'Integración'],
       websiteUrl: 'https://tiendaonlinecol.com',
       sourceUrl: 'https://github.com/viptelcomunicaciones/pasarela-pagos',
@@ -1549,6 +1678,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Seguros Protección Total',
       year: 2024,
       coverImage: image1.id as number,
+      projectType: 'telecomunicaciones',
+      category: 'pbx-voip',
       tags: ['Contact Center', 'VoIP'],
       websiteUrl: 'https://protecciontotal.com',
       sourceUrl: 'https://github.com/viptelcomunicaciones/centro-contacto',
@@ -1585,6 +1716,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Retail Unión',
       year: 2026,
       coverImage: image2.id as number,
+      projectType: 'software-empresarial',
+      category: 'erp',
       tags: ['Datos', 'Desarrollo Web'],
       websiteUrl: 'https://retailunion.com',
       sourceUrl: 'https://github.com/viptelcomunicaciones/dashboard-retail',
@@ -1621,6 +1754,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Industrias Metálicas del Valle',
       year: 2025,
       coverImage: image1.id as number,
+      projectType: 'software-empresarial',
+      category: 'erp',
       tags: ['Facturación', 'Integración'],
       websiteUrl: 'https://industriasvalle.com',
       sourceUrl: 'https://github.com/viptelcomunicaciones/facturacion-dian',
@@ -1657,6 +1792,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Centro Médico Vital',
       year: 2026,
       coverImage: image2.id as number,
+      projectType: 'desarrollo-web',
+      category: 'aplicaciones-web',
       tags: ['Telemedicina', 'Apps', 'Seguridad'],
       websiteUrl: 'https://centromedicovital.com',
       sourceUrl: 'https://github.com/viptelcomunicaciones/telemedicina',
@@ -1693,6 +1830,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Grupo Empresarial del Pacífico',
       year: 2024,
       coverImage: image1.id as number,
+      projectType: 'software-empresarial',
+      category: 'crm',
       tags: ['Seguridad', 'Desarrollo Web'],
       websiteUrl: 'https://grupopacifico.com',
       sourceUrl: 'https://github.com/viptelcomunicaciones/portal-proveedores',
@@ -1729,6 +1868,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Clínica Estética Renace',
       year: 2025,
       coverImage: image2.id as number,
+      projectType: 'marketing-digital',
+      category: 'seo',
       tags: ['Marketing Digital', 'SEO'],
       websiteUrl: 'https://renaceestetica.com',
       sourceUrl: 'https://github.com/viptelcomunicaciones/campana-multicanal',
@@ -1765,6 +1906,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Hotel & Resort Bahía',
       year: 2024,
       coverImage: image1.id as number,
+      projectType: 'telecomunicaciones',
+      category: 'pbx-voip',
       tags: ['VoIP', 'Telefonía IP'],
       websiteUrl: 'https://bahiaresort.com',
       sourceUrl: 'https://github.com/viptelcomunicaciones/migracion-voip-hotel',
@@ -1801,6 +1944,8 @@ export const seed = async (payload: Payload): Promise<void> => {
       client: 'Inmobiliaria Capital',
       year: 2026,
       coverImage: image2.id as number,
+      projectType: 'desarrollo-web',
+      category: 'aplicaciones-web',
       tags: ['Desarrollo Web', 'Apps', 'SEO'],
       websiteUrl: 'https://inmobiliariacapital.co',
       sourceUrl: 'https://github.com/viptelcomunicaciones/plataforma-inmobiliaria',
@@ -1821,6 +1966,8 @@ export const seed = async (payload: Payload): Promise<void> => {
         client: project.client,
         year: project.year,
         coverImage: project.coverImage,
+        projectType: projectTypeIdBySlug.get(project.projectType) as number,
+        categories: projectCategoryIdBySlug.get(project.category) as number,
         tags: await Promise.all(project.tags.map(ensureTag)),
         websiteUrl: project.websiteUrl,
         sourceUrl: project.sourceUrl,
