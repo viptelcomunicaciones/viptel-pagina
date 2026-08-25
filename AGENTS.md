@@ -97,6 +97,10 @@ SEO plugin activo en pages, posts, projects.
 | `website/AGENTS.md` | Estructura y convenciones del tema Astro Rocket |
 | `backend/README.md` | Setup y arquitectura del backend |
 | `website/README.md` | Documentación completa del tema Astro Rocket |
+| `docs/superpowers/specs/` | Especificaciones de features (design specs) |
+| `docs/superpowers/plans/` | Planes de implementación |
+| `.superpowers/sdd/` | Spec-Driven Development task breakdowns |
+| `project-knowledge/SKILL.md` | Conocimiento completo del proyecto (skill) |
 
 ## Antes de finalizar
 

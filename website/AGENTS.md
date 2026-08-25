@@ -32,6 +32,22 @@ build **their** website on top of it, not to develop the theme itself. This file
 tells you where everything lives and which conventions to follow, so you can
 make changes that fit rather than changes that merely work.
 
+## Payload CMS Features — Plan de Mejora (2026-08-24)
+
+El backend Payload CMS tiene un plan de mejora enterprise-ready documentado en:
+
+| Documento | Ubicación |
+|---|---|
+| Spec (Diseño) | `docs/superpowers/specs/2026-08-24-payload-cms-features-design.md` |
+| Plan (Implementación) | `docs/superpowers/plans/2026-08-24-payload-cms-features-implementation.md` |
+| SDD Tasks | `.superpowers/sdd/2026-08-24-payload-cms-features/TASKS.md` |
+
+**Fases clave que afectan al website**:
+- **Fase 3**: Jobs Queue → endpoint `/api/revalidate` en Astro
+- **Fase 4**: Cloud Storage → URLs de media desde R2
+- **Fase 5**: Search → endpoint `/api/search` en Astro
+- **Fase 5**: Health checks → endpoint `/api/health` en backend
+
 ## The shape of the project
 
 ```

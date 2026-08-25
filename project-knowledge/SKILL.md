@@ -285,6 +285,43 @@ Dos migraciones en `backend/src/migrations/`:
 | `backend/.agents/skills/payload/reference/*.md` | 12 docs detallados de Payload |
 | `backend/README.md` | Setup del backend |
 | `website/README.md` | Documentación del tema Astro Rocket |
-| `docs/superpowers/specs/` | Especificaciones de features |
-| `docs/superpowers/plans/` | Planes de implementación |
+| `docs/superpowers/specs/` | Especificaciones de features (design specs) |
+| `docs/superpowers/plans/` | Planes de implementación (implementation plans) |
+| `.superpowers/sdd/` | Spec-Driven Development tasks breakdown |
 | `.opencode/opencode.json` | Configuración de agentes OpenCode |
+
+## Payload CMS Features — Plan de Mejora (2026-08-24)
+
+**Estado**: Planificado — Ver documentos detallados abajo.
+
+| Documento | Ubicación | Propósito |
+|---|---|---|
+| **Spec (Diseño)** | `docs/superpowers/specs/2026-08-24-payload-cms-features-design.md` | Arquitectura, flujos, código de referencia para cada feature |
+| **Plan (Implementación)** | `docs/superpowers/plans/2026-08-24-payload-cms-features-implementation.md` | Fases, tareas, estimación, rollout, métricas |
+| **SDD Tasks** | `.superpowers/sdd/2026-08-24-payload-cms-features/TASKS.md` | Desglose granular de 80+ tareas con dependencias |
+
+### Resumen de Fases (8 fases, ~70h, 6 semanas)
+
+| Fase | Enfoque | Features Clave |
+|---|---|---|
+| 1 | Fundamentos Críticos | Roles en Users, Revalidation hooks, Trash, Índices DB, Transaction safety |
+| 2 | Access Control Avanzado | Factory functions (role/org/time), Field-level access, Matriz de permisos |
+| 3 | Jobs Queue | 5 tasks: revalidate, syncSearch, sitemap, cleanup, webhook + cron |
+| 4 | Cloud Storage | Cloudflare R2 para Media, migración zero-downtime |
+| 5 | Search + Observabilidad | Meilisearch plugin, Sentry, Health checks, Structured logging |
+| 6 | Rich Text + UX | Tables, inline images, Dashboard widget (My Drafts), Custom views |
+| 7 | Admin Polish | Query Presets por colección, Collapsible en Services, Help text |
+| 8 | Email | Templates (contact, newsletter, welcome), Preview, Tests |
+
+### Feature Flags para Rollout Gradual
+
+```bash
+FEATURE_ROLES=true
+FEATURE_JOBS=true
+FEATURE_SEARCH=true
+FEATURE_R2=true
+FEATURE_SENTRY=true
+FEATURE_RICH_TEXT_TABLES=true
+FEATURE_DASHBOARD_WIDGETS=true
+FEATURE_QUERY_PRESETS=true
+```
