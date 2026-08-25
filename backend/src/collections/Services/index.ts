@@ -23,6 +23,10 @@ export const Services: CollectionConfig = {
     read: authenticatedOrPublished,
     update: authenticated,
   },
+  labels: {
+    singular: 'Servicio',
+    plural: 'Servicios',
+  },
   defaultPopulate: {
     title: true,
     slug: true,

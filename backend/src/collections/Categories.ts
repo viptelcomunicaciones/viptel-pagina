@@ -12,6 +12,10 @@ export const Categories: CollectionConfig = {
     read: anyone,
     update: authenticated,
   },
+  labels: {
+    singular: 'Categoría de contenido',
+    plural: 'Categorías de contenidos',
+  },
   admin: {
     description:
       'Jerarquía de dos niveles: categoría raíz y subcategoría. Crear una subcategoría solo si agrupa 10+ posts (regla de volumen).',

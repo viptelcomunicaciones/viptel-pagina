@@ -27,6 +27,10 @@ export const Pages: CollectionConfig<'pages'> = {
     read: authenticatedOrPublished,
     update: authenticated,
   },
+  labels: {
+    singular: 'Pagina',
+    plural: 'Paginas',
+  },
   // This config controls what's populated by default when a page is referenced
   defaultPopulate: {
     title: true,

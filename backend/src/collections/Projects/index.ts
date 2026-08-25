@@ -29,6 +29,10 @@ export const Projects: CollectionConfig<'projects'> = {
     read: authenticatedOrPublished,
     update: authenticated,
   },
+  labels: {
+    singular: 'Proyecto',
+    plural: 'Proyectos',
+  },
   defaultPopulate: {
     title: true,
     slug: true,
