@@ -11,7 +11,7 @@
  *   playing video pauses it
  */
 import { Image, getImage } from 'astro:assets';
-import { isVideoSlide, type GallerySlide } from '@/lib/gallery';
+import { isVideoSlide, isRemoteSlide, type GallerySlide } from '@/lib/gallery';
 
 interface Props {
   slides: GallerySlide[];
@@ -78,6 +78,16 @@ const posters = await Promise.all(
                 playsinline
                 preload="none"
                 aria-label={slide.alt}
+              />
+            ) : isRemoteSlide(slide) ? (
+              <Image
+                src={slide.src}
+                alt={slide.alt}
+                widths={[640, 960, 1280]}
+                sizes="(max-width: 1024px) 100vw, 640px"
+                class={imageClass}
+                loading={i === 0 ? 'eager' : 'lazy'}
+                inferSize
               />
             ) : (
               <Image

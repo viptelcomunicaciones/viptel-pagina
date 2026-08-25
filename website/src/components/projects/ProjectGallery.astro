@@ -1,6 +1,6 @@
 ---
 import { Image, getImage } from 'astro:assets';
-import { isVideoSlide, type GallerySlide } from '@/lib/gallery';
+import { isVideoSlide, isRemoteSlide, type GallerySlide } from '@/lib/gallery';
 
 type GalleryItem = GallerySlide & { caption?: string };
 
@@ -27,7 +27,12 @@ const slideData = images.map((item, i) =>
         alt: item.alt,
         caption: item.caption ?? '',
       }
-    : { type: 'image', src: item.src.src, alt: item.alt, caption: item.caption ?? '' }
+    : {
+        type: 'image',
+        src: isRemoteSlide(item) ? item.src : item.src.src,
+        alt: item.alt,
+        caption: item.caption ?? '',
+      }
 );
 ---
 
@@ -56,6 +61,14 @@ const slideData = images.map((item, i) =>
                 playsinline
                 preload="none"
                 aria-label={item.alt}
+              />
+            ) : isRemoteSlide(item) ? (
+              <Image
+                src={item.src}
+                alt={item.alt}
+                class="aspect-video w-full object-cover"
+                loading="lazy"
+                inferSize
               />
             ) : (
               <Image

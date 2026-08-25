@@ -1,108 +1,133 @@
 ---
 /**
- * ProjectsTagView — a project tag archive page.
- *
- * Shared body for the default-locale route (`/projects/tag/<tag>`) and the
- * locale-prefixed route (`/<locale>/projects/tag/<tag>`). The matching projects
- * and the visible tag cloud are resolved in each route's `getStaticPaths` and
- * passed in; URLs are built locale-aware via `lib/projects`.
+ * ProjectsTagView — a project tag archive page. Renders inside
+ * `ProjectsListLayout` (sidebar with the active tag highlighted).
  */
-import PageLayout from '@/layouts/PageLayout.astro';
+import ProjectsListLayout from '@/components/projects/ProjectsListLayout.astro';
 import ProjectCard from '@/components/projects/ProjectCard.astro';
-import ProjectTagList from '@/components/projects/ProjectTagList.astro';
 import Badge from '@/components/ui/data-display/Badge/Badge.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import Button from '@/components/ui/form/Button/Button.astro';
 import { Hero } from '@/components/hero';
-import { t, defaultLocale } from '@/i18n';
+import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
+import { t, defaultLocale, localizedPath } from '@/i18n';
 import { getProjectsBaseUrl } from '@/lib/projects';
 
 interface Props {
-  /** Locale whose projects this archive renders. Defaults to the site default. */
   locale?: string;
-  /** The active tag (display form). */
   tag: string;
-  /** Projects carrying this tag, in the locale. */
   projects: any[];
-  /** Tags to render in the cloud (always includes the active tag). */
   visibleTags: string[];
 }
 
-const { locale = defaultLocale, tag, projects, visibleTags } = Astro.props;
+const { locale = defaultLocale, tag, projects } = Astro.props;
 
 const projectsHref = getProjectsBaseUrl(locale);
 const countKey = projects.length === 1 ? 'projects.tagCountOne' : 'projects.tagCountOther';
 ---
 
-<PageLayout
+<ProjectsListLayout
   title={t('projects.tagMetaTitle', locale, { tag })}
   description={t('projects.tagMetaDescription', locale, { tag })}
+  locale={locale}
   eagerReveal
   footerBackground="secondary"
+  activeTag={tag}
 >
-  <Hero layout="centered" size="sm">
-    <Badge slot="badge" variant="brand" pill>
-      <Icon name="tag" size="sm" />
-      {t('projects.tagBadge', locale)}
-    </Badge>
+  <Fragment slot="hero">
+    <Hero layout="centered" size="sm">
+      <Badge slot="badge" variant="brand" pill>
+        <Icon name="tag" size="sm" />
+        {t('projects.tagBadge', locale)}
+      </Badge>
 
-    <h1
-      slot="title"
-      class="!text-4xl [overflow-wrap:anywhere] break-words sm:!text-5xl md:!text-6xl lg:!text-7xl"
-    >
-      #{tag}
-    </h1>
+      <h1
+        slot="title"
+        class="!text-4xl [overflow-wrap:anywhere] break-words sm:!text-5xl md:!text-6xl lg:!text-7xl"
+      >
+        #{tag}
+      </h1>
 
-    <p slot="description">
-      {t(countKey, locale, { count: projects.length, tag })}
-    </p>
-  </Hero>
+      <p slot="description">
+        {t(countKey, locale, { count: projects.length, tag })}
+      </p>
+    </Hero>
+  </Fragment>
 
-  <section class="bg-background-secondary border-border border-t py-[var(--space-section-md)]">
-    <div class="mx-auto flex max-w-6xl flex-col gap-8 px-6">
-      <div class="flex flex-col items-center gap-4" data-reveal>
-        <a
-          href={projectsHref}
-          class="group border-brand-500/40 text-brand-700 dark:text-brand-400 hover:border-brand-500/80 hover:bg-brand-500/10 inline-flex items-center gap-2 rounded-lg border bg-transparent px-4 py-2 text-sm font-medium transition-colors"
-        >
-          <Icon name="arrow-left" size="sm" />
-          {t('projects.allProjects', locale)}
-        </a>
+  <a
+    href={projectsHref}
+    class="group border-brand-500/40 text-brand-700 dark:text-brand-400 hover:border-brand-500/80 hover:bg-brand-500/10 inline-flex w-fit items-center gap-2 rounded-lg border bg-transparent px-4 py-2 text-sm font-medium transition-colors"
+  >
+    <Icon name="arrow-left" size="sm" />
+    {t('projects.allProjects', locale)}
+  </a>
 
-        {
-          visibleTags.length > 0 && (
-            <ProjectTagList
-              tags={visibleTags}
-              active={tag}
-              locale={locale}
-              class="justify-center"
-            />
-          )
-        }
+  {
+    projects.length > 0 ? (
+      <div class="grid gap-6 md:grid-cols-2">
+        {projects.map((project, i) => (
+          <ProjectCard project={project} index={i} locale={locale} />
+        ))}
+      </div>
+    ) : (
+      <div class="py-16 text-center">
+        <div class="bg-background mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+          <Icon name="layers" size="lg" class="text-foreground-muted" />
+        </div>
+        <p class="text-foreground-muted text-lg">{t('projects.tagEmpty', locale)}</p>
+        <div class="mt-6">
+          <Button href={projectsHref} variant="brand-outline" size="sm">
+            <Icon name="arrow-left" size="sm" />
+            {t('projects.tagBackToAll', locale)}
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  <Fragment slot="footer">
+    <section class="bg-background relative z-10 py-[var(--space-section-md)]">
+      <div class="glitch:hidden mx-auto max-w-2xl px-6 text-center" data-reveal>
+        <Badge variant="brand" pill class="mb-6">
+          <Icon name="message-circle" size="sm" />
+          {t('projects.ctaBadge', locale)}
+        </Badge>
+        <h2 class="font-display text-foreground mb-4 text-4xl font-bold text-balance">
+          {t('projects.ctaHeading', locale)}
+        </h2>
+        <p class="text-foreground-muted mb-8 text-lg text-balance">
+          {t('projects.ctaLead', locale)}
+        </p>
+        <div class="flex flex-col justify-center gap-4 sm:flex-row">
+          <Button size="lg" href={localizedPath('/contact', locale)} class="cta-btn-brand">
+            {t('projects.ctaPrimary', locale)}
+            <Icon name="arrow-right" size="sm" />
+          </Button>
+          <Button size="lg" variant="brand-outline" href={localizedPath('/about', locale)}>
+            {t('projects.ctaSecondary', locale)}
+            <Icon name="arrow-right" size="sm" />
+          </Button>
+        </div>
       </div>
 
-      {
-        projects.length > 0 ? (
-          <div class="grid gap-6 md:grid-cols-2">
-            {projects.map((project, i) => (
-              <ProjectCard project={project} index={i} locale={locale} />
-            ))}
-          </div>
-        ) : (
-          <div class="py-16 text-center">
-            <div class="bg-background mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
-              <Icon name="layers" size="lg" class="text-foreground-muted" />
-            </div>
-            <p class="text-foreground-muted text-lg">{t('projects.tagEmpty', locale)}</p>
-            <div class="mt-6">
-              <Button href={projectsHref} variant="brand-outline" size="sm">
-                <Icon name="arrow-left" size="sm" />
-                {t('projects.tagBackToAll', locale)}
-              </Button>
-            </div>
-          </div>
-        )
-      }
-    </div>
-  </section>
-</PageLayout>
+      <LetterGlitchBand>
+        <h2 class="font-display text-foreground mb-4 text-4xl font-bold text-balance">
+          {t('projects.ctaHeading', locale)}
+        </h2>
+        <p class="text-foreground-muted mb-8 text-lg text-balance">
+          {t('projects.ctaLead', locale)}
+        </p>
+        <div class="flex flex-col justify-center gap-4 sm:flex-row">
+          <Button size="lg" href={localizedPath('/contact', locale)} class="hero-btn-brand">
+            {t('projects.ctaPrimary', locale)}
+            <Icon name="arrow-right" size="sm" />
+          </Button>
+          <Button size="lg" variant="outline" href={localizedPath('/about', locale)}>
+            {t('projects.ctaSecondary', locale)}
+            <Icon name="arrow-right" size="sm" />
+          </Button>
+        </div>
+      </LetterGlitchBand>
+    </section>
+  </Fragment>
+</ProjectsListLayout>
