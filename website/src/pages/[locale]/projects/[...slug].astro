@@ -1,0 +1,39 @@
+---
+import PageLayout from '@/layouts/PageLayout.astro';
+import ProjectLayout from '@/layouts/ProjectLayout.astro';
+import ProjectsArchiveView from '@/components/projects/views/ProjectsArchiveView.astro';
+import { defaultLocale, isValidLocale } from '@/i18n';
+import { resolveProjectArchive } from '@/lib/projects';
+
+export const prerender = false;
+
+const { locale = defaultLocale, slug } = Astro.params;
+
+if (!isValidLocale(locale)) {
+  return Astro.redirect('/404');
+}
+
+if (!slug) {
+  return Astro.redirect('/404');
+}
+
+const segments = slug.split('/').filter(Boolean);
+const currentPage = Math.max(1, Number(Astro.url.searchParams.get('page')) || 1);
+const archive = await resolveProjectArchive(segments, locale, currentPage);
+
+if (archive.kind === 'not-found') {
+  return Astro.redirect('/404');
+}
+
+const project = archive.kind === 'project' ? archive.project! : null;
+---
+
+{
+  project ? (
+    <PageLayout title={project.title} description={project.description || project.title}>
+      <ProjectLayout project={project} locale={locale} />
+    </PageLayout>
+  ) : (
+    <ProjectsArchiveView archive={archive} currentPage={currentPage} locale={locale} />
+  )
+}

@@ -2,37 +2,39 @@
 /**
  * ProjectLayout — article body for CMS-driven portfolio projects.
  *
- * Renders the project hero (title, description, tags, client/year meta,
- * live/source buttons, cover image), the "On this page" table of contents
- * (sticky sidebar on desktop, collapsible card on mobile), the content,
- * gallery, a back-to-projects footer, related projects, and a closing CTA.
- *
- * The route wraps this in `PageLayout` so <head> SEO/meta stay on the page.
+ * Uses `ProjectHero` (2-column hero with a screenshot carousel), a
+ * hierarchical breadcrumb (Portafolio → Tipo → Categoría → Subcategoría),
+ * the content, `ProjectGallery` (carousel + lightbox), related projects by
+ * topic, and the closing CTA.
  */
 import siteConfig from '@/config/site.config';
 import type { Project } from '@/lib/payload-types';
-import { payload } from '@/lib/payload-client';
 import { t, localizedPath } from '@/i18n';
 import { extractHeadings } from '@/lib/headings';
-import { getTagName } from '@/lib/content-helpers';
 import Breadcrumbs from '@/components/seo/Breadcrumbs.astro';
 import TableOfContents from '@/components/blog/TableOfContents.astro';
 import RichText from '@/components/blocks/RichText.astro';
 import Button from '@/components/ui/form/Button/Button.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
-import TagList from '@/components/blog/TagList.astro';
 import CTA from '@/components/ui/marketing/CTA/CTA.astro';
-import { Image } from 'astro:assets';
+import ProjectHero from '@/components/projects/ProjectHero.astro';
+import ProjectGallery from '@/components/projects/ProjectGallery.astro';
+import { projectToSlides } from '@/lib/gallery';
+import {
+  getProjectTypeName,
+  getProjectTypeUrl,
+  getProjectCategory,
+  getProjectCategoryArchiveUrl,
+  getProjectSubcategoryArchiveUrl,
+  getRelatedByTopic,
+} from '@/lib/projects';
 
 interface Props {
   project: Project;
   locale?: string;
-  related?: Project[];
 }
 
-const { project, locale = 'es', related = [] } = Astro.props;
-
-const tags = (project.tags ?? []).map((tag) => getTagName(tag)).filter(Boolean);
+const { project, locale = 'es' } = Astro.props;
 
 const tocConfig = siteConfig.articleFeatures?.toc;
 const showToc = project.toc === 'enabled' || (!!tocConfig?.enabled && project.toc !== 'disabled');
@@ -43,85 +45,49 @@ const sidebarOnLeft = (tocConfig?.sidebarPosition ?? 'right') === 'left';
 
 const headings = extractHeadings(project.content);
 
-const coverImage =
-  project.coverImage && typeof project.coverImage !== 'number' ? project.coverImage : null;
-const coverUrl = coverImage?.url ? payload.resolveMediaUrl(coverImage.url) : undefined;
-const coverAlt = coverImage?.alt ?? undefined;
+const typeName = getProjectTypeName(project);
+const category = getProjectCategory(project);
 
-const breadcrumbs = [
+const breadcrumbs: { label: string; href?: string }[] = [
   { label: t('common.home', locale), href: localizedPath('/', locale) },
   { label: t('projects.title', locale), href: localizedPath('/projects', locale) },
-  { label: project.title },
 ];
+if (typeName && typeof project.projectType === 'object' && project.projectType) {
+  breadcrumbs.push({
+    label: typeName,
+    href: getProjectTypeUrl(project.projectType.slug, locale),
+  });
+}
+if (category && typeof project.projectType === 'object' && project.projectType) {
+  if (category.parent && typeof category.parent === 'object') {
+    breadcrumbs.push({
+      label: category.parent.title,
+      href: getProjectCategoryArchiveUrl(project.projectType.slug, category.parent, locale),
+    });
+    breadcrumbs.push({
+      label: category.title,
+      href: getProjectSubcategoryArchiveUrl(
+        project.projectType.slug,
+        category.parent.slug,
+        category,
+        locale
+      ),
+    });
+  } else {
+    breadcrumbs.push({
+      label: category.title,
+      href: getProjectCategoryArchiveUrl(project.projectType.slug, category, locale),
+    });
+  }
+}
+breadcrumbs.push({ label: project.title });
+
+const gallerySlides = projectToSlides(project).filter((s) => !('video' in s));
+
+const related = await getRelatedByTopic(project.slug, locale, 3);
 ---
 
-<header
-  class="relative isolate overflow-hidden pt-[var(--space-page-top-sm)] pb-[var(--space-section-sm)]"
->
-  <div class="relative z-[1] mx-auto max-w-4xl px-6">
-    <h1
-      class="font-display text-foreground mb-[var(--space-heading-gap)] text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl"
-    >
-      {project.title}
-    </h1>
-
-    {
-      project.description && (
-        <p class="text-foreground-muted mb-[var(--space-stack-lg)] max-w-3xl text-xl leading-relaxed">
-          {project.description}
-        </p>
-      )
-    }
-
-    {tags.length > 0 && <TagList tags={tags} locale={locale} class="mb-[var(--space-stack-lg)]" />}
-
-    <div
-      class="text-foreground-muted mb-[var(--space-stack-lg)] flex flex-wrap items-center gap-x-4 gap-y-3 text-sm"
-    >
-      {project.client && <span class="text-foreground font-semibold">{project.client}</span>}
-      {project.client && project.year && <span class="bg-border h-4 w-px" aria-hidden="true" />}
-      {project.year && <span>{project.year}</span>}
-    </div>
-
-    {
-      (project.websiteUrl || project.sourceUrl) && (
-        <div class="mb-[var(--space-stack-lg)] flex flex-wrap items-center gap-3">
-          {project.websiteUrl && (
-            <Button href={project.websiteUrl} variant="primary" size="md">
-              <Icon name="external-link" size="sm" />
-              {t('projects.viewLiveSite', locale)}
-            </Button>
-          )}
-          {project.sourceUrl && (
-            <Button href={project.sourceUrl} variant="brand-outline" size="md">
-              <Icon name="code" size="sm" />
-              {t('projects.viewSource', locale)}
-            </Button>
-          )}
-        </div>
-      )
-    }
-  </div>
-
-  {
-    coverUrl && (
-      <div class="relative z-[1] mx-auto mt-[var(--space-section-sm)] max-w-5xl px-6">
-        <div class="media-shadow relative overflow-hidden rounded-xl">
-          <Image
-            src={coverUrl}
-            alt={coverAlt || project.title}
-            layout="full-width"
-            inferSize
-            widths={[640, 960, 1280, 1920]}
-            sizes="100vw"
-            class="aspect-video w-full object-cover"
-            loading="eager"
-          />
-        </div>
-      </div>
-    )
-  }
-</header>
+<ProjectHero project={project} locale={locale} />
 
 <article class="pt-8 pb-[var(--space-section-md)]">
   <div
@@ -185,23 +151,9 @@ const breadcrumbs = [
       }
 
       {
-        project.gallery && project.gallery.length > 0 && (
-          <div class="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3">
-            {project.gallery.map((img) =>
-              img.image && typeof img.image !== 'number' && img.image.url ? (
-                <div class="aspect-square overflow-hidden rounded-xl">
-                  <Image
-                    src={payload.resolveMediaUrl(img.image.url)}
-                    alt={img.alt || img.image.alt || ''}
-                    inferSize
-                    widths={[320, 480, 640]}
-                    sizes="(max-width: 768px) 50vw, 33vw"
-                    class="h-full w-full object-cover"
-                    loading="lazy"
-                  />
-                </div>
-              ) : null
-            )}
+        gallerySlides.length > 0 && (
+          <div class="mt-10">
+            <ProjectGallery images={gallerySlides} />
           </div>
         )
       }
@@ -234,7 +186,7 @@ const breadcrumbs = [
     <section class="bg-background-secondary border-border border-t py-[var(--space-section-md)]">
       <div class="mx-auto max-w-6xl px-6">
         <h2 class="font-display text-foreground mb-8 text-center text-2xl font-bold">
-          {t('projects.moreProjects', locale)}
+          {t('projects.relatedProjects', locale)}
         </h2>
         <div class="grid gap-6 md:grid-cols-3">
           {related.map((p) => (
