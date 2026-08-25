@@ -3,28 +3,34 @@
  * Project listing card. Extracted so the projects index, paginated pages,
  * and tag archives render identical cards from one source of truth.
  *
- * Data comes from Payload CMS via the REST API — flat Project objects.
+ * Shows a type badge (top-left) and category badge (bottom-left) over the
+ * cover image, mirroring `BlogCard`.
  */
 import Card from '@/components/ui/data-display/Card/Card.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import type { Project } from '@/lib/payload-types';
 import { defaultLocale } from '@/i18n';
-import { getProjectUrl, getTagName } from '@/lib/projects';
+import {
+  getProjectUrl,
+  getTagName,
+  getProjectTypeName,
+  getProjectTypeIcon,
+  getProjectCategory,
+} from '@/lib/projects';
 import { payload } from '@/lib/payload-client';
 import { Image } from 'astro:assets';
 
 interface Props {
   project: Project;
-  /** Stagger index for the scroll-reveal cascade. */
   index?: number;
-  /**
-   * Locale the card's link belongs to. Default-locale links stay at
-   * `/projects/...`; other locales are prefixed (`/<locale>/projects/...`).
-   */
   locale?: string;
 }
 
 const { project, index = 0, locale = defaultLocale } = Astro.props;
+
+const typeName = getProjectTypeName(project);
+const typeIcon = getProjectTypeIcon(project);
+const category = getProjectCategory(project);
 ---
 
 <Card
@@ -39,7 +45,22 @@ const { project, index = 0, locale = defaultLocale } = Astro.props;
   <div class="flex flex-1 flex-col p-6">
     {
       project.coverImage && typeof project.coverImage !== 'number' && project.coverImage.url && (
-        <div class="mb-4 overflow-hidden rounded-lg">
+        <div class="relative mb-4 overflow-hidden rounded-lg">
+          {
+            typeName && (
+              <div class="bg-background/90 text-brand-700 dark:text-brand-400 ring-brand-500/40 absolute top-3 left-3 z-10 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ring-1 backdrop-blur-sm ring-inset">
+                <Icon name={typeIcon} size="xs" />
+                {typeName}
+              </div>
+            )
+          }
+          {
+            category && (
+              <div class="bg-background/90 text-foreground-muted ring-border/60 absolute bottom-3 left-3 z-10 inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ring-1 backdrop-blur-sm ring-inset">
+                {category.title}
+              </div>
+            )
+          }
           <Image
             src={payload.resolveMediaUrl(project.coverImage.url)}
             alt={project.coverImage.alt || project.title}
@@ -52,18 +73,6 @@ const { project, index = 0, locale = defaultLocale } = Astro.props;
         </div>
       )
     }
-    <div class="mb-3 flex items-start justify-between gap-4">
-      <div
-        class="from-brand-500/20 to-brand-500/5 text-brand-500 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br"
-      >
-        <Icon name="layers" size="sm" />
-      </div>
-      <Icon
-        name="arrow-up-right"
-        size="sm"
-        class="text-foreground-muted group-hover:text-brand-500 ml-auto shrink-0 transition-colors"
-      />
-    </div>
     <div class="mb-2 flex items-baseline gap-2">
       <h3 class="font-display text-foreground text-lg font-bold">{project.title}</h3>
       {project.year && <span class="text-foreground-muted text-xs">{project.year}</span>}
