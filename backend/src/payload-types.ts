@@ -1038,6 +1038,14 @@ export interface Project {
     | null;
   client?: string | null;
   year?: number | null;
+  /**
+   * Formato del proyecto. Es un eje aparte de la categoría.
+   */
+  projectType: number | ProjectType;
+  /**
+   * Categoría raíz o subcategoría (una sola por proyecto).
+   */
+  categories?: (number | null) | ProjectCategory;
   tags?: (number | Tag)[] | null;
   /**
    * URL del proyecto en vivo (botón "Ver sitio en vivo").
@@ -1068,6 +1076,53 @@ export interface Project {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * Formato del proyecto (web, telecomunicaciones, marketing…). Es un eje aparte de la categoría.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "project-types".
+ */
+export interface ProjectType {
+  id: number;
+  title: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  description?: string | null;
+  /**
+   * Selecciona un icono de la librería Lucide.
+   */
+  icon?: string | null;
+  /**
+   * Orden en el que aparece en las pestañas y la sidebar de proyectos.
+   */
+  position?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Jerarquía de dos niveles: categoría raíz y subcategoría. Crear una subcategoría solo si agrupa 10+ proyectos (regla de volumen).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "project-categories".
+ */
+export interface ProjectCategory {
+  id: number;
+  title: string;
+  /**
+   * Dejar vacío si es una categoría raíz. Seleccionar un padre para crear una subcategoría.
+   */
+  parent?: (number | null) | ProjectCategory;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1252,53 +1307,6 @@ export interface Form {
         id?: string | null;
       }[]
     | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Formato del proyecto (web, telecomunicaciones, marketing…). Es un eje aparte de la categoría.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "project-types".
- */
-export interface ProjectType {
-  id: number;
-  title: string;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
-  slug: string;
-  description?: string | null;
-  /**
-   * Selecciona un icono de la librería Lucide.
-   */
-  icon?: string | null;
-  /**
-   * Orden en el que aparece en las pestañas y la sidebar de proyectos.
-   */
-  position?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Jerarquía de dos niveles: categoría raíz y subcategoría. Crear una subcategoría solo si agrupa 10+ proyectos (regla de volumen).
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "project-categories".
- */
-export interface ProjectCategory {
-  id: number;
-  title: string;
-  /**
-   * Dejar vacío si es una categoría raíz. Seleccionar un padre para crear una subcategoría.
-   */
-  parent?: (number | null) | ProjectCategory;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
-  slug: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -1889,6 +1897,8 @@ export interface ProjectsSelect<T extends boolean = true> {
       };
   client?: T;
   year?: T;
+  projectType?: T;
+  categories?: T;
   tags?: T;
   websiteUrl?: T;
   sourceUrl?: T;

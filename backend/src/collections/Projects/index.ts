@@ -32,6 +32,12 @@ export const Projects: CollectionConfig<'projects'> = {
   defaultPopulate: {
     title: true,
     slug: true,
+    projectType: true,
+    categories: true,
+    meta: {
+      image: true,
+      description: true,
+    },
   },
   admin: {
     defaultColumns: ['title', 'client', 'year', '_status'],
@@ -125,6 +131,25 @@ export const Projects: CollectionConfig<'projects'> = {
               admin: {
                 position: 'sidebar',
               },
+            },
+            {
+              name: 'projectType',
+              type: 'relationship',
+              admin: {
+                description: 'Formato del proyecto. Es un eje aparte de la categoría.',
+                position: 'sidebar',
+              },
+              relationTo: 'project-types',
+              required: true,
+            },
+            {
+              name: 'categories',
+              type: 'relationship',
+              admin: {
+                description: 'Categoría raíz o subcategoría (una sola por proyecto).',
+                position: 'sidebar',
+              },
+              relationTo: 'project-categories',
             },
             {
               name: 'tags',
