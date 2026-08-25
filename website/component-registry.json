@@ -627,6 +627,58 @@
         "components": ["icon", "logo"]
       },
       "premium": false
+    },
+    "projects-list-layout": {
+      "name": "ProjectsListLayout",
+      "category": "layout",
+      "description": "Layout de listado de proyectos con sidebar de navegación (tipos → categorías → subcategorías + etiquetas). Toggle móvil sin JS.",
+      "files": ["src/components/projects/ProjectsListLayout.astro"],
+      "dependencies": {
+        "utilities": [],
+        "components": ["projects-sidebar", "icon"]
+      },
+      "premium": false
+    },
+    "projects-sidebar": {
+      "name": "ProjectsSidebar",
+      "category": "layout",
+      "description": "Navegación lateral de proyectos: tipos en acordeón <details> con categorías/subcategorías y etiquetas con contadores.",
+      "files": ["src/components/projects/ProjectsSidebar.astro"],
+      "dependencies": {
+        "utilities": [],
+        "components": ["icon"]
+      },
+      "premium": false
+    },
+    "projects-type-tabs": {
+      "name": "ProjectsTypeTabs",
+      "category": "patterns",
+      "description": "Pestañas 'Todos' + tipos de proyecto, enlazan a los archivos jerárquicos /projects/<tipo>.",
+      "files": ["src/components/projects/ProjectsTypeTabs.astro"],
+      "dependencies": {
+        "utilities": [],
+        "components": ["icon"]
+      },
+      "premium": false
+    },
+    "projects-archive-view": {
+      "name": "ProjectsArchiveView",
+      "category": "patterns",
+      "description": "Archivo jerárquico de proyectos (tipo/categoría/subcategoría): hero con badge, breadcrumb, grid de ProjectCard y paginación.",
+      "files": ["src/components/projects/views/ProjectsArchiveView.astro"],
+      "dependencies": {
+        "utilities": [],
+        "components": [
+          "projects-list-layout",
+          "projects-type-tabs",
+          "card",
+          "badge",
+          "button",
+          "pagination",
+          "letter-glitch-band"
+        ]
+      },
+      "premium": false
     }
   }
 }
