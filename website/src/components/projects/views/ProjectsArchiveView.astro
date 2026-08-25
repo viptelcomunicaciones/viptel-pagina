@@ -1,0 +1,204 @@
+---
+/**
+ * ProjectsArchiveView — archivo jerárquico de proyectos: tipo, categoría o
+ * subcategoría. Espejo de `BlogArchiveView`. Renderiza dentro de
+ * `ProjectsListLayout`, que provee la sidebar con el tipo/categoría activos.
+ */
+import ProjectsListLayout from '@/components/projects/ProjectsListLayout.astro';
+import ProjectCard from '@/components/projects/ProjectCard.astro';
+import Pagination from '@/components/blog/Pagination.astro';
+import Badge from '@/components/ui/data-display/Badge/Badge.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import Button from '@/components/ui/form/Button/Button.astro';
+import CTA from '@/components/ui/marketing/CTA/CTA.astro';
+import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
+import { Hero } from '@/components/hero';
+import { t, defaultLocale, localizedPath } from '@/i18n';
+import {
+  getProjectsBaseUrl,
+  getProjectCategoryArchiveUrl,
+  getProjectTypeUrl,
+  getProjectSubcategoryArchiveUrl,
+  PROJECTS_PER_PAGE,
+} from '@/lib/projects';
+import type { ProjectArchive } from '@/lib/projects';
+import type { Project } from '@/lib/payload-types';
+
+interface Props {
+  locale?: string;
+  archive: ProjectArchive;
+  currentPage?: number;
+}
+
+const { locale = defaultLocale, archive, currentPage = 1 } = Astro.props;
+
+if (archive.kind === 'not-found' || archive.kind === 'project' || !archive.projectType) {
+  throw new Error('ProjectsArchiveView requires a type/category/subcategory archive');
+}
+
+const { projectType, category, subcategory } = archive;
+const projects = (archive.projects ?? []) as Project[];
+const totalDocs = archive.totalDocs ?? 0;
+const totalPages = archive.totalPages ?? 1;
+
+const heading = subcategory?.title ?? category?.title ?? projectType.title;
+const archiveBaseUrl = subcategory
+  ? getProjectSubcategoryArchiveUrl(projectType.slug, category!.slug, subcategory, locale)
+  : category
+    ? getProjectCategoryArchiveUrl(projectType.slug, category, locale)
+    : getProjectTypeUrl(projectType.slug, locale);
+const countKey = totalDocs === 1 ? 'projects.archiveCountOne' : 'projects.archiveCountOther';
+const contactUrl = localizedPath('/contact', locale);
+const aboutUrl = localizedPath('/about', locale);
+---
+
+<ProjectsListLayout
+  title={`${heading} — ${t('projects.title', locale)}`}
+  description={projectType.description || t('projects.metaDescription', locale)}
+  locale={locale}
+  eagerReveal
+  activeTypeSlug={projectType.slug}
+  activeCategorySlug={category?.slug}
+  activeSubcategorySlug={subcategory?.slug}
+>
+  <Fragment slot="hero">
+    <Hero layout="centered" size="sm">
+      <Badge slot="badge" variant="brand" pill>
+        <Icon name={projectType.icon || 'layers'} size="sm" />
+        {projectType.title}
+      </Badge>
+
+      <h1
+        slot="title"
+        class="!text-4xl [overflow-wrap:anywhere] break-words sm:!text-5xl md:!text-6xl lg:!text-7xl"
+      >
+        {heading}
+      </h1>
+
+      <p slot="description">{projectType.description || t(countKey, locale, { count: totalDocs })}</p>
+    </Hero>
+  </Fragment>
+
+  <nav
+    aria-label="Breadcrumb"
+    class="text-foreground-muted flex flex-wrap items-center gap-1.5 text-sm"
+  >
+    <a
+      href={getProjectsBaseUrl(locale)}
+      class="text-brand-700 dark:text-brand-400 font-medium hover:underline"
+    >
+      {t('projects.title', locale)}
+    </a>
+    <Icon name="chevron-right" size="xs" class="text-foreground-subtle" />
+    <a
+      href={getProjectTypeUrl(projectType.slug, locale)}
+      class="text-brand-700 dark:text-brand-400 font-medium hover:underline"
+    >
+      {projectType.title}
+    </a>
+    {
+      category && (
+        <>
+          <Icon name="chevron-right" size="xs" class="text-foreground-subtle" />
+          <a
+            href={getProjectCategoryArchiveUrl(projectType.slug, category, locale)}
+            class="text-brand-700 dark:text-brand-400 font-medium hover:underline"
+          >
+            {category.title}
+          </a>
+        </>
+      )
+    }
+    {
+      subcategory && (
+        <>
+          <Icon name="chevron-right" size="xs" class="text-foreground-subtle" />
+          <span class="text-foreground font-medium" aria-current="page">
+            {subcategory.title}
+          </span>
+        </>
+      )
+    }
+  </nav>
+
+  {
+    projects.length > 0 ? (
+      <div class="grid gap-6 md:grid-cols-2">
+        {projects.map((project, i) => (
+          <ProjectCard project={project} index={i} locale={locale} />
+        ))}
+      </div>
+    ) : (
+      <div class="py-16 text-center">
+        <div class="bg-background mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+          <Icon name="layers" size="lg" class="text-foreground-muted" />
+        </div>
+        <p class="text-foreground-muted text-lg">{t('projects.archiveEmpty', locale)}</p>
+        <div class="mt-6">
+          <Button href={getProjectsBaseUrl(locale)} variant="brand-outline" size="sm">
+            <Icon name="arrow-left" size="sm" />
+            {t('projects.allProjects', locale)}
+          </Button>
+        </div>
+      </div>
+    )
+  }
+
+  {
+    projects.length > 0 && totalPages > 1 && (
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        href={(page) => (page <= 1 ? archiveBaseUrl : `${archiveBaseUrl}?page=${page}`)}
+        totalDocs={totalDocs}
+        pageSize={PROJECTS_PER_PAGE}
+      />
+    )
+  }
+
+  <Fragment slot="footer">
+    <section class="bg-background relative z-10 py-[var(--space-section-md)]">
+      <div class="glitch:hidden mx-auto max-w-2xl px-6 text-center" data-reveal>
+        <Badge variant="brand" pill class="mb-6">
+          <Icon name="message-circle" size="sm" />
+          {t('projects.ctaBadge', locale)}
+        </Badge>
+        <h2 class="font-display text-foreground mb-4 text-4xl font-bold text-balance">
+          {t('projects.ctaHeading', locale)}
+        </h2>
+        <p class="text-foreground-muted mb-8 text-lg text-balance">
+          {t('projects.ctaLead', locale)}
+        </p>
+        <div class="flex flex-col justify-center gap-4 sm:flex-row">
+          <Button size="lg" href={contactUrl} class="cta-btn-brand">
+            {t('projects.ctaPrimary', locale)}
+            <Icon name="arrow-right" size="sm" />
+          </Button>
+          <Button size="lg" variant="brand-outline" href={aboutUrl}>
+            {t('projects.ctaSecondary', locale)}
+            <Icon name="arrow-right" size="sm" />
+          </Button>
+        </div>
+      </div>
+
+      <LetterGlitchBand>
+        <h2 class="font-display text-foreground mb-4 text-4xl font-bold text-balance">
+          {t('projects.ctaHeading', locale)}
+        </h2>
+        <p class="text-foreground-muted mb-8 text-lg text-balance">
+          {t('projects.ctaLead', locale)}
+        </p>
+        <div class="flex flex-col justify-center gap-4 sm:flex-row">
+          <Button size="lg" href={contactUrl} class="hero-btn-brand">
+            {t('projects.ctaPrimary', locale)}
+            <Icon name="arrow-right" size="sm" />
+          </Button>
+          <Button size="lg" variant="outline" href={aboutUrl}>
+            {t('projects.ctaSecondary', locale)}
+            <Icon name="arrow-right" size="sm" />
+          </Button>
+        </div>
+      </LetterGlitchBand>
+    </section>
+  </Fragment>
+</ProjectsListLayout>
