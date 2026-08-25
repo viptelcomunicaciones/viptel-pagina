@@ -1,46 +1,33 @@
 ---
-import type { ImageMetadata } from 'astro';
+import type { Project } from '@/lib/payload-types';
 import Button from '@/components/ui/form/Button/Button.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import ProjectCarousel from '@/components/projects/ProjectCarousel.astro';
-import ProjectTagList from '@/components/projects/ProjectTagList.astro';
+import { projectToSlides, type GallerySlide } from '@/lib/gallery';
 import HeroGrid from '@/components/effects/HeroGrid.astro';
 import HeroBeam from '@/components/effects/HeroBeam.astro';
-import type { GallerySlide } from '@/lib/gallery';
-import { getLocaleFromPath } from '@/i18n';
+import { t, defaultLocale } from '@/i18n';
+import {
+  getProjectTypeIcon,
+  getProjectTypeName,
+  getProjectCategory,
+} from '@/lib/projects';
+import { getTagName } from '@/lib/content-helpers';
 
 interface Props {
-  title: string;
-  description: string;
-  meta?: string[];
-  url?: string;
-  repo?: string;
-  image?: ImageMetadata;
-  imageAlt?: string;
-  gallery?: GallerySlide[];
-  tags?: string[];
+  project: Project;
+  locale?: string;
 }
 
-const {
-  title,
-  description,
-  meta = [],
-  url,
-  repo,
-  image,
-  imageAlt,
-  gallery = [],
-  tags = [],
-} = Astro.props;
+const { project, locale = defaultLocale } = Astro.props;
 
-// Prefer gallery when provided; fall back to the single hero image; build a
-// 1-slide carousel out of the image so the visual frame stays consistent.
-const slides: GallerySlide[] =
-  gallery.length > 0 ? gallery : image ? [{ src: image, alt: imageAlt || title }] : [];
+const slides: GallerySlide[] = projectToSlides(project);
 const hasMedia = slides.length > 0;
-
-// Tag links must stay inside the active locale (`/<locale>/projects/tag/…`).
-const locale = getLocaleFromPath(Astro.url.pathname);
+const tags = (project.tags ?? []).map((t) => getTagName(t)).filter(Boolean);
+const meta = [project.client, project.year ? String(project.year) : ''].filter(Boolean);
+const typeName = getProjectTypeName(project);
+const typeIcon = getProjectTypeIcon(project);
+const category = getProjectCategory(project);
 ---
 
 <header
@@ -58,21 +45,45 @@ const locale = getLocaleFromPath(Astro.url.pathname);
     >
       <!-- Text column -->
       <div class="animate-hero-stagger min-w-0">
+        {
+          (typeName || category) && (
+            <div class="mb-[var(--space-stack-sm)] flex flex-wrap items-center gap-2">
+              {typeName && (
+                <span class="border-brand-500/40 text-brand-700 dark:text-brand-400 ring-brand-500/40 inline-flex items-center gap-1.5 rounded-full border bg-transparent px-3 py-1 text-xs font-semibold ring-1 ring-inset">
+                  <Icon name={typeIcon} size="xs" />
+                  {typeName}
+                </span>
+              )}
+              {category && (
+                <span class="border-border text-foreground-muted inline-flex items-center rounded-full border bg-transparent px-3 py-1 text-xs font-medium ring-1 ring-inset">
+                  {category.title}
+                </span>
+              )}
+            </div>
+          )
+        }
+
         <h1
           class="font-display text-foreground mb-[var(--space-heading-gap)] text-4xl font-bold tracking-tight text-balance md:text-5xl lg:text-6xl"
         >
-          {title}
+          {project.title}
         </h1>
 
         <p
           class="text-foreground-muted mb-[var(--space-stack-lg)] text-lg leading-relaxed md:text-xl"
         >
-          {description}
+          {project.description}
         </p>
 
         {
           tags.length > 0 && (
-            <ProjectTagList tags={tags} locale={locale} class="mb-[var(--space-stack-lg)]" />
+            <div class="mb-[var(--space-stack-lg)] flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <span class="text-brand-700 dark:text-brand-400 ring-brand-500/40 inline-flex items-center rounded-full bg-transparent px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset">
+                  #{tag}
+                </span>
+              ))}
+            </div>
           )
         }
 
@@ -94,30 +105,30 @@ const locale = getLocaleFromPath(Astro.url.pathname);
         }
 
         {
-          (url || repo) && (
+          (project.websiteUrl || project.sourceUrl) && (
             <div class="mb-[var(--space-stack-lg)] flex flex-wrap gap-3">
-              {url && (
+              {project.websiteUrl && (
                 <Button
-                  href={url}
+                  href={project.websiteUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   size="md"
                   class="project-live-btn"
                 >
                   <Icon name="external-link" size="sm" />
-                  View live site
+                  {t('projects.viewLiveSite', locale)}
                 </Button>
               )}
-              {repo && (
+              {project.sourceUrl && (
                 <Button
-                  href={repo}
+                  href={project.sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   variant="brand-outline"
                   size="md"
                 >
                   <Icon name="github" size="sm" />
-                  View source
+                  {t('projects.viewSource', locale)}
                 </Button>
               )}
             </div>
@@ -129,7 +140,7 @@ const locale = getLocaleFromPath(Astro.url.pathname);
       <div class="animate-hero-slide-up [animation-delay:300ms]">
         {
           hasMedia ? (
-            <ProjectCarousel slides={slides} label={`${title} screenshots`} />
+            <ProjectCarousel slides={slides} label={`${project.title} screenshots`} />
           ) : (
             <div
               class="border-border from-brand-500/20 via-brand-500/5 flex aspect-video w-full items-center justify-center rounded-xl border bg-gradient-to-br to-transparent shadow-lg"
