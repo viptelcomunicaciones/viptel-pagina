@@ -54,10 +54,10 @@ describe('API', () => {
     const { docs } = await payload.find({
       collection: 'posts',
       locale: 'en',
-      where: { slug: { equals: 'pbx-en-la-nube' } },
+      where: { slug: { equals: 'voip-pymes-2026' } },
     })
 
     expect(docs).toHaveLength(1)
-    expect(docs[0].title).toBe('Why your company needs a cloud PBX')
+    expect(docs[0].title).toBe('The definitive VoIP guide for SMBs')
   })
 })
