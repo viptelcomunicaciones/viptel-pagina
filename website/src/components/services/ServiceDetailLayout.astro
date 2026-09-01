@@ -7,12 +7,15 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
 import RichText from '@/components/blocks/RichText.astro';
+import Badge from '@/components/ui/data-display/Badge/Badge.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import ServiceBreadcrumb from './ServiceBreadcrumb.astro';
 import ServiceFeatures from './ServiceFeatures.astro';
 import ServicePricing from './ServicePricing.astro';
 import ServiceFAQ from './ServiceFAQ.astro';
 import ServiceGallery from './ServiceGallery.astro';
 import ServiceGrid from './ServiceGrid.astro';
+import { Hero } from '@/components/hero';
 import { t } from '@/i18n';
 import type { Service } from '@/lib/payload-types';
 import type { PageBlock } from '@/lib/block-types';
@@ -38,35 +41,33 @@ const isCategory = childrenServices.length > 0;
 ---
 
 <PageLayout title={title} description={description}>
-  <section class="pt-28 pb-12">
-    <div class="mx-auto max-w-6xl px-4">
-      <ServiceBreadcrumb
-        locale={locale}
-        parentTitle={parentService?.title ?? null}
-        parentSlug={parentService?.slug ?? null}
-        currentTitle={service.title}
-        class="mb-8"
-      />
-
-      <div class="mx-auto max-w-3xl text-center">
-        <h1 class="text-foreground text-3xl font-bold sm:text-4xl">{service.title}</h1>
-        {
-          service.shortDescription && (
-            <p class="text-foreground-muted mt-4 text-lg">{service.shortDescription}</p>
-          )
-        }
-      </div>
+  <Hero layout="centered" size="sm" class="isolate" showHeroHalo>
+    <Badge slot="badge" variant="brand" pill>
+      <Icon name={service.icon ?? 'briefcase'} size="sm" />
+      {t('services.heroBadge', locale)}
+    </Badge>
+    <div slot="title">
+      {parentService && (
+        <p class="text-foreground-muted font-display mb-2 text-sm font-medium tracking-wide uppercase">
+          <a href={`${hrefPrefix}/${parentService.slug}`} class="hover:text-brand-600 transition-colors">
+            {parentService.title}
+          </a>
+        </p>
+      )}
+      <h1 class="text-foreground [-webkit-text-fill-color:currentColor]">{service.title}</h1>
     </div>
-  </section>
+    {
+      service.shortDescription && (
+        <p slot="description" class="!text-balance">{service.shortDescription}</p>
+      )
+    }
+  </Hero>
 
   {
     service.description && (
-      <section class="py-12">
+      <section class="bg-background relative z-10 py-12">
         <div class="mx-auto max-w-6xl px-6">
-          <RichText
-            content={service.description}
-            class="prose prose-lg dark:prose-invert mx-auto max-w-none text-center"
-          />
+          <RichText content={service.description} class="mx-auto max-w-none text-center [&>p]:text-lg [&>p]:leading-relaxed [&>p]:text-foreground-muted [&>p]:mx-auto [&>p]:max-w-3xl" />
         </div>
       </section>
     )
@@ -74,7 +75,7 @@ const isCategory = childrenServices.length > 0;
 
   {
     isCategory && (
-      <section class="py-16">
+      <section class="py-[var(--space-section-md)]">
         <div class="mx-auto max-w-6xl px-4">
           <h2 class="text-foreground mb-10 text-center text-2xl font-bold">
             {t('services.detail.subServices', locale)}

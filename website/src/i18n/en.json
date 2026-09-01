@@ -28,6 +28,7 @@
       "home": "Home",
       "services": "Services"
     },
+    "heroBadge": "Services",
     "overview": {
       "hero": {
         "badge": "Services",

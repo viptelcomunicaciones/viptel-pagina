@@ -6,7 +6,10 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import Button from '@/components/ui/form/Button/Button.astro';
 import Badge from '@/components/ui/data-display/Badge/Badge.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import CTA from '@/components/ui/marketing/CTA/CTA.astro';
 import ServiceCard from '@/components/services/ServiceCard.astro';
+import { Hero } from '@/components/hero';
 import { t, localizedPath } from '@/i18n';
 import type { Service } from '@/lib/payload-types';
 
@@ -24,26 +27,25 @@ const { categories, childrenMap, hrefPrefix = '/services', locale = 'es' } = Ast
   title={t('services.overview.hero.title', locale)}
   description={t('services.overview.hero.description', locale)}
 >
-  <section class="pt-28 pb-12">
-    <div class="mx-auto max-w-4xl px-4 text-center">
-      <Badge>{t('services.overview.hero.badge', locale)}</Badge>
-      <h1 class="text-foreground mt-4 text-3xl font-bold sm:text-4xl">
-        {t('services.overview.hero.title', locale)}
-      </h1>
-      <p class="text-foreground-muted mt-4 text-lg">
-        {t('services.overview.hero.description', locale)}
-      </p>
-    </div>
-  </section>
+  <Hero layout="centered" size="sm" class="isolate" showHeroHalo>
+    <Badge slot="badge" variant="brand" pill>
+      <Icon name="briefcase" size="sm" />
+      {t('services.overview.hero.badge', locale)}
+    </Badge>
+    <h1 slot="title">{t('services.overview.hero.title', locale)}</h1>
+    <p slot="description" class="!text-balance">
+      {t('services.overview.hero.description', locale)}
+    </p>
+  </Hero>
 
-  <section class="py-16">
+  <section class="py-[var(--space-section-md)]">
     <div class="mx-auto max-w-6xl px-4">
       <div class="flex flex-col gap-16">
         {
           categories.map((category) => {
             const subs = childrenMap[category.id] || [];
             return (
-              <div>
+              <div data-reveal>
                 <div class="mb-6 flex items-center gap-4">
                   <h2 class="text-foreground text-xl font-bold">{category.title}</h2>
                   <span class="text-foreground-muted text-sm">
@@ -69,15 +71,15 @@ const { categories, childrenMap, hrefPrefix = '/services', locale = 'es' } = Ast
     </div>
   </section>
 
-  <section class="bg-background-secondary py-16">
-    <div class="mx-auto max-w-2xl px-4 text-center">
-      <h2 class="text-foreground text-2xl font-bold">{t('services.overview.cta.title', locale)}</h2>
-      <p class="text-foreground-muted mt-3">{t('services.overview.cta.description', locale)}</p>
-      <div class="mt-6">
-        <Button href={localizedPath('/contact', locale)} size="lg">
-          {t('services.overview.cta.button', locale)}
-        </Button>
-      </div>
+  <CTA variant="default" size="md" maxWidth="lg">
+    <h2 slot="heading" class="!text-3xl">{t('services.overview.cta.title', locale)}</h2>
+    <p slot="description" class="!text-lg text-balance">
+      {t('services.overview.cta.description', locale)}
+    </p>
+    <div slot="actions">
+      <Button href={localizedPath('/contact', locale)} size="lg">
+        {t('services.overview.cta.button', locale)}
+      </Button>
     </div>
-  </section>
+  </CTA>
 </PageLayout>

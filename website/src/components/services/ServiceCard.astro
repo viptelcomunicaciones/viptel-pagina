@@ -15,20 +15,18 @@ const { service, href, class: className } = Astro.props;
 <a
   href={href}
   class={cn(
-    'group flex flex-col gap-3 rounded-xl border border-border bg-background p-6 transition-all',
+    'group flex items-center gap-4 rounded-xl border border-border bg-background p-5 transition-all',
     'hover:border-brand-500 hover:shadow-md',
     className
   )}
 >
   <div
-    class="bg-brand-50 text-brand-600 dark:bg-brand-950 dark:text-brand-400 flex h-10 w-10 items-center justify-center rounded-lg"
+    class="bg-brand-50 text-brand-600 dark:bg-brand-950 dark:text-brand-400 flex h-12 w-12 shrink-0 items-center justify-center rounded-full"
   >
     <Icon name={service.icon ?? 'sparkles'} size="md" />
   </div>
-  <div class="flex flex-col gap-1">
-    <h3
-      class="text-foreground group-hover:text-brand-600 text-base font-semibold transition-colors"
-    >
+  <div class="flex min-w-0 flex-1 flex-col gap-1">
+    <h3 class="text-foreground group-hover:text-brand-600 text-base font-semibold transition-colors">
       {service.title}
     </h3>
     {
@@ -37,4 +35,9 @@ const { service, href, class: className } = Astro.props;
       )
     }
   </div>
+  <Icon
+    name="arrow-right"
+    size="sm"
+    class="text-foreground-muted group-hover:text-brand-600 shrink-0 transition-transform group-hover:translate-x-1"
+  />
 </a>
