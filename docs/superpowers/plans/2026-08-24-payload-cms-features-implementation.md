@@ -81,9 +81,9 @@ Este plan detalla la implementación de features faltantes y mejoras críticas e
 |---|-------|-------------------|----------|--------------|
 | 3.1 | Definir tipos de tasks en `payload.config.ts` | `backend/src/payload.config.ts` | 1h | — |
 | 3.2 | Task `revalidateFrontend` — llama webhook Astro | `backend/src/jobs/revalidateFrontend.ts` (nuevo) | 2h | 1.4 |
-| 3.3 | Task `syncSearchIndex` — Meilisearch/Typesense | `backend/src/jobs/syncSearchIndex.ts` (nuevo) | 3h | 3.1 |
+| 3.3 | Task `resyncSearchIndex` — reindexado bulk con Meilisearch (manual, no auto-sync) | `backend/src/jobs/resyncSearchIndex.ts` (nuevo) | 2h | 3.1 |
 | 3.4 | Task `generateSitemap` — trigger Astro rebuild | `backend/src/jobs/generateSitemap.ts` (nuevo) | 2h | 3.1 |
-| 3.5 | Task `cleanupOldVersions` — mantener últimas 50 | `backend/src/jobs/cleanupVersions.ts` (nuevo) | 1h | 3.1 |
+| 3.5 | Task `cleanupOldVersions` — reusar `cleanVersions()` de `scripts/clean-versions.ts` | `backend/src/jobs/cleanupVersions.ts` (nuevo, wrapper del script) | 1h | 3.1 |
 | 3.6 | Task `webhookDelivery` — cola con retry/backoff | `backend/src/jobs/webhookDelivery.ts` (nuevo) | 2h | 3.1 |
 | 3.7 | Configurar cron jobs para tasks recurrentes | `backend/src/payload.config.ts` + infra | 1h | 3.2-3.5 |
 | 3.8 | Tests de integración para jobs | `backend/tests/int/jobs.int.spec.ts` | 2h | 3.2-3.5 |
@@ -115,11 +115,11 @@ Este plan detalla la implementación de features faltantes y mejoras críticas e
 | # | Tarea | Archivos Afectados | Esfuerzo | Dependencias |
 |---|-------|-------------------|----------|--------------|
 | 5.1 | Query Presets en Pages: "Publicadas", "Borradores", "Programadas" | `backend/src/collections/Pages/index.ts` | 30min | — |
-| 4.2 | Query Presets en Posts: "Publicados", "Por revisar", "Míos" | `backend/src/collections/Posts/index.ts` | 30min | — |
-| 4.3 | Query Presets en Services: "Activos", "Con precios", "Raíz" | `backend/src/collections/Services/index.ts` | 30min | — |
-| 4.4 | Query Presets en Projects: "Publicados", "Con website", "Recientes" | `backend/src/collections/Projects/index.ts` | 30min | — |
-| 4.5 | Admin description/help text en campos complejos | `backend/src/collections/*/index.ts`, `backend/src/blocks/*/` | 1h | — |
-| 4.6 | Collapsible/Row en Services para features/pricing/faq | `backend/src/collections/Services/index.ts` | 1h | — |
+| 5.2 | Query Presets en Posts: "Publicados", "Por revisar", "Míos" | `backend/src/collections/Posts/index.ts` | 30min | — |
+| 5.3 | Query Presets en Services: "Activos", "Con precios", "Raíz" | `backend/src/collections/Services/index.ts` | 30min | — |
+| 5.4 | Query Presets en Projects: "Publicados", "Con website", "Recientes" | `backend/src/collections/Projects/index.ts` | 30min | — |
+| 5.5 | Admin description/help text en campos complejos | `backend/src/collections/*/index.ts`, `backend/src/blocks/*/` | 1h | — |
+| 5.6 | Collapsible/Row en Services para features/pricing/faq | `backend/src/collections/Services/index.ts` | 1h | — |
 
 **Entregable**: Admin UX optimizada, presets útiles, campos organizados.
 
@@ -207,32 +207,63 @@ backend/
 
 ## 5. Variables de Entorno Nuevas
 
+### Dependencias nuevas a instalar (Prerequisite Fase 3)
+
+| # | Paquete | Cuándo instalar | Notas |
+|---|---------|-----------------|-------|
+| D1 | `meilisearch` | Antes de Fase 3.3 | Cliente oficial, latest stable |
+| D2 | `@payloadcms/plugin-search` | Antes de Fase 3.3 | Auto-sync, sustituye `syncSearchIndexJob` |
+| D3 | `@aws-sdk/client-s3` | Solo si no se usa R2 plugin directo | ^3.x |
+| D4 | `@payloadcms/storage-r2` | Plan infra, no en este plan | ^3.86 |
+| D5 | `@payloadcms/plugin-sentry` | Plan infra, no en este plan | ^3.86 |
+
+**Comando unificado** (cuando llegue Fase 3):
+
+```bash
+pnpm --filter backend add meilisearch @payloadcms/plugin-search
+```
+
+R2, Sentry, AWS SDK se difieren al plan de infraestructura.
+
 ### Backend (.env)
 
-`nv
+```env
 # Fase 1: Auth
 # (existentes: PAYLOAD_SECRET, DATABASE_URL, etc.)
 
-# Fase 3: Jobs
-CRON_SECRET=                      # Ya existe
-REVALIDATE_WEBHOOK_URL=http://localhost:4321/api/revalidate
-SITEMAP_WEBHOOK_URL=http://localhost:4321/api/sitemap
+# Fase 0/3: Revalidation
+REVALIDATE_SECRET=                  # Compartido con el website (Fase 0)
 
-# Fase 3: Jobs (Search - mover a plan infra cuando se implemente)
-# SEARCH_INDEX_URL=http://localhost:7700
-# SEARCH_INDEX_KEY=
+# Fase 3: Jobs
+# CRON_SECRET=                      # Ya existe
+# FRONTEND_URL no se declara: usar getFrontendURL() de src/utilities/getURL.ts
+
+# Fase 3: Search (mover a plan infra cuando se implemente)
+# MEILISEARCH_HOST=http://localhost:7700
+# MEILISEARCH_API_KEY=
 
 # Fase 6: Email
 RESEND_API_KEY=
 RESEND_FROM_EMAIL=noreply@viptelcomunicaciones.com
 RESEND_AUDIENCE_ID=
-`
+
+# Feature flags
+FEATURE_ROLES=false
+FEATURE_TRASH=false
+FEATURE_JOBS=false
+FEATURE_RICH_TEXT_TABLES=false
+FEATURE_DASHBOARD_WIDGETS=false
+FEATURE_QUERY_PRESETS=false
+```
 
 ### Website (.env)
 
-`nv
+```env
 # (existente: PAYLOAD_URL, PAYLOAD_API_KEY, etc.)
-`
+
+# Fase 0: endpoints API
+REVALIDATE_SECRET=                  # Debe coincidir con el backend
+```
 
 ---
 
@@ -242,7 +273,7 @@ RESEND_AUDIENCE_ID=
 |------|-----------|-------------|--------|
 | **Unit** | Access control factories, hook logic | Vitest | Cada fase |
 | **Integration** | Collections CRUD, jobs, email | Vitest + Payload Local API | Fases 1,3,4,5,6 |
-| **E2E** | Admin flows: create/edit/publish/delete, preview | Playwright | Fases 1,2,4,5,6 |
+| **E2E** | Admin flows: create/edit/publish/delete, preview | Playwright (ya configurado en `backend/playwright.config.ts`) | Fases 1,2,4,5,6 |
 | **Contract** | Payload types ↔ Astro client types | TypeScript build | Continuo |
 
 **Comando unificado**: pnpm test (backend) / pnpm test (website)
@@ -261,11 +292,12 @@ RESEND_AUDIENCE_ID=
 
 ### Feature Flags Sugeridos
 
-`	ypescript
+```typescript
 // payload.config.ts
 const features = {
   roles: process.env.FEATURE_ROLES == 'true',
   jobs: process.env.FEATURE_JOBS == 'true',
+  trash: process.env.FEATURE_TRASH == 'true',
   richTextTables: process.env.FEATURE_RICH_TEXT_TABLES == 'true',
   dashboardWidgets: process.env.FEATURE_DASHBOARD_WIDGETS == 'true',
   queryPresets: process.env.FEATURE_QUERY_PRESETS == 'true',
@@ -273,7 +305,7 @@ const features = {
   // search: process.env.FEATURE_SEARCH == 'true',        // En plan infra
   // sentry: process.env.FEATURE_SENTRY == 'true',        // En plan infra
 }
-`
+```
 
 ---
 

@@ -737,7 +737,12 @@ export const defaultLexical = lexicalEditor({
         collections: ['media'],
         fields: ({ defaultFields }) => defaultFields,
       }),
-      EXPERIMENTAL_TableFeature(),
+      // EXPERIMENTAL_TableFeature: opt-in via FEATURE_RICH_TEXT_TABLES env var.
+      // Sigue marcado como EXPERIMENTAL en Payload 3.86 — no habilitar en producción
+      // sin validar contra el contenido existente. Ver Fase 4 del plan.
+      ...(process.env.FEATURE_RICH_TEXT_TABLES === 'true'
+        ? [EXPERIMENTAL_TableFeature()]
+        : []),
     ]
   },
 })
@@ -991,12 +996,41 @@ migrateMedia().catch(console.error)
 
 ### 6.2 Users Migration - Add Roles (Fase 1)
 
-```sql
--- backend/src/migrations/20260824_add_user_roles.sql
-ALTER TABLE "users" ADD COLUMN "roles" jsonb DEFAULT '["editor"]'::jsonb;
-ALTER TABLE "users" ADD COLUMN "last_login" timestamp with time zone;
-CREATE INDEX "users_roles_idx" ON "users" USING GIN ("roles");
+**No se escribe SQL a mano.** Payload genera la migración automáticamente comparando el schema actual contra la DB.
+
+**Workflow**:
+
+1. Modificar `backend/src/collections/Users/index.ts` (añadir `roles`, `lastLogin`)
+2. Ejecutar `pnpm --filter backend payload migrate:create`
+3. Payload diffs schema vs DB y genera archivo TS en `backend/src/migrations/`
+4. Revisar el diff generado (DDL via `sql` template literal de `@payloadcms/db-postgres`, mismo estilo que `20260825_205151_initial.ts` existente)
+5. Commitear el archivo generado
+6. Aplicar con `pnpm --filter backend payload migrate`
+
+**Ejemplo de output esperado** (generado, no escrito a mano):
+
+```typescript
+// backend/src/migrations/20260826_add_user_roles.ts
+import { MigrateUpArgs, sql } from '@payloadcms/db-postgres'
+
+export async function up({ db }: MigrateUpArgs): Promise<void> {
+  await db.execute(sql`
+    ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "roles" jsonb DEFAULT '["editor"]'::jsonb;
+    ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "last_login" timestamp with time zone;
+    CREATE INDEX IF NOT EXISTS "users_roles_idx" ON "users" USING GIN ("roles");
+  `)
+}
+
+export async function down({ db }: MigrateUpArgs): Promise<void> {
+  await db.execute(sql`
+    DROP INDEX IF EXISTS "users_roles_idx";
+    ALTER TABLE "users" DROP COLUMN IF EXISTS "last_login";
+    ALTER TABLE "users" DROP COLUMN IF EXISTS "roles";
+  `)
+}
 ```
+
+**Nota**: El `IF NOT EXISTS` / `IF EXISTS` en down no es generado por Payload — el archivo generado puede requerir edición manual para idempotencia. Revisar siempre.
 
 ---
 
