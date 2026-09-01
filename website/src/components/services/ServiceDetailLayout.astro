@@ -1,19 +1,19 @@
 ---
 /**
  * ServiceDetailLayout — renders a service category or sub-service page.
- * Composes breadcrumb, hero, features, pricing, FAQ, gallery, layout blocks,
- * and child services grid in a consistent order.
+ * Composes breadcrumb, hero, description, child services grid (categories),
+ * features, pricing, FAQ, gallery, and layout blocks (CTA from Payload).
  */
 import PageLayout from '@/layouts/PageLayout.astro';
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
-import Button from '@/components/ui/form/Button/Button.astro';
+import RichText from '@/components/blocks/RichText.astro';
 import ServiceBreadcrumb from './ServiceBreadcrumb.astro';
 import ServiceFeatures from './ServiceFeatures.astro';
 import ServicePricing from './ServicePricing.astro';
 import ServiceFAQ from './ServiceFAQ.astro';
 import ServiceGallery from './ServiceGallery.astro';
 import ServiceGrid from './ServiceGrid.astro';
-import { t, localizedPath } from '@/i18n';
+import { t } from '@/i18n';
 import type { Service } from '@/lib/payload-types';
 import type { PageBlock } from '@/lib/block-types';
 
@@ -34,6 +34,7 @@ const {
 } = Astro.props;
 const title = service.meta?.title || service.title;
 const description = service.meta?.description || service.shortDescription || service.title;
+const isCategory = childrenServices.length > 0;
 ---
 
 <PageLayout title={title} description={description}>
@@ -57,6 +58,32 @@ const description = service.meta?.description || service.shortDescription || ser
       </div>
     </div>
   </section>
+
+  {
+    service.description && (
+      <section class="py-12">
+        <div class="mx-auto max-w-6xl px-6">
+          <RichText
+            content={service.description}
+            class="prose prose-lg dark:prose-invert mx-auto max-w-none text-center"
+          />
+        </div>
+      </section>
+    )
+  }
+
+  {
+    isCategory && (
+      <section class="py-16">
+        <div class="mx-auto max-w-6xl px-4">
+          <h2 class="text-foreground mb-10 text-center text-2xl font-bold">
+            {t('services.detail.subServices', locale)}
+          </h2>
+          <ServiceGrid services={childrenServices} hrefPrefix={hrefPrefix} />
+        </div>
+      </section>
+    )
+  }
 
   {
     service.features && service.features.length > 0 && (
@@ -83,29 +110,4 @@ const description = service.meta?.description || service.shortDescription || ser
       <BlockRenderer layout={service.layout as PageBlock[]} locale={locale} />
     )
   }
-
-  {
-    childrenServices.length > 0 && (
-      <section class="py-16">
-        <div class="mx-auto max-w-6xl px-4">
-          <h2 class="text-foreground mb-10 text-center text-2xl font-bold">
-            {t('services.detail.subServices', locale)}
-          </h2>
-          <ServiceGrid services={childrenServices} hrefPrefix={hrefPrefix} />
-        </div>
-      </section>
-    )
-  }
-
-  <section class="bg-background-secondary py-16">
-    <div class="mx-auto max-w-2xl px-4 text-center">
-      <h2 class="text-foreground text-2xl font-bold">{t('services.overview.cta.title', locale)}</h2>
-      <p class="text-foreground-muted mt-3">{t('services.overview.cta.description', locale)}</p>
-      <div class="mt-6">
-        <Button href={localizedPath('/contact', locale)} size="lg">
-          {t('services.detail.cta', locale)}
-        </Button>
-      </div>
-    </div>
-  </section>
 </PageLayout>
