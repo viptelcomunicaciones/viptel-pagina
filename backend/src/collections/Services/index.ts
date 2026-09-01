@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
-import { adminOnly, contentRoles, contentRolesField, adminOnlyField } from '../../access/roleBased'
+import { adminOnly, contentRoles } from '../../access/roleBased'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { Cards } from '../../blocks/Cards/config'
 import { Content } from '../../blocks/Content/config'
@@ -92,123 +92,90 @@ admin: {
               localized: true,
             },
             {
-              type: 'collapsible',
-              label: 'Características',
-              admin: {
-                initCollapsed: true,
-              },
+              name: 'features',
+              type: 'array',
+              localized: true,
               fields: [
+                {
+                  name: 'title',
+                  type: 'text',
+                  localized: true,
+                  required: true,
+                },
+                {
+                  name: 'description',
+                  type: 'textarea',
+                  localized: true,
+                },
+                iconField(),
+              ],
+            },
+            {
+              name: 'pricing',
+              type: 'array',
+              localized: true,
+              fields: [
+                {
+                  name: 'planName',
+                  type: 'text',
+                  localized: true,
+                  required: true,
+                },
+                {
+                  name: 'price',
+                  type: 'number',
+                  required: true,
+                },
+                {
+                  name: 'currency',
+                  type: 'text',
+                  defaultValue: 'COP',
+                },
+                {
+                  name: 'period',
+                  type: 'text',
+                  defaultValue: '/mes',
+                },
                 {
                   name: 'features',
                   type: 'array',
                   localized: true,
-                  access: {
-                    read: contentRolesField,
-                  },
                   fields: [
                     {
-                      name: 'title',
-                      type: 'text',
-                      localized: true,
-                      required: true,
-                    },
-                    {
-                      name: 'description',
-                      type: 'textarea',
-                      localized: true,
-                    },
-                    iconField(),
-                  ],
-                },
-              ],
-            },
-            {
-              type: 'collapsible',
-              label: 'Precios',
-              admin: {
-                initCollapsed: true,
-              },
-              fields: [
-                {
-                  name: 'pricing',
-                  type: 'array',
-                  localized: true,
-                  access: {
-                    read: adminOnlyField,
-                  },
-                  fields: [
-                    {
-                      name: 'planName',
-                      type: 'text',
-                      localized: true,
-                      required: true,
-                    },
-                    {
-                      name: 'price',
-                      type: 'number',
-                      required: true,
-                    },
-                    {
-                      name: 'currency',
-                      type: 'text',
-                      defaultValue: 'COP',
-                    },
-                    {
-                      name: 'period',
-                      type: 'text',
-                      defaultValue: '/mes',
-                    },
-                    {
-                      name: 'features',
-                      type: 'array',
-                      localized: true,
-                      fields: [
-                        {
-                          name: 'feature',
-                          type: 'text',
-                          localized: true,
-                        },
-                      ],
-                    },
-                    {
-                      name: 'highlighted',
-                      type: 'checkbox',
-                      defaultValue: false,
-                    },
-                    {
-                      name: 'ctaLabel',
+                      name: 'feature',
                       type: 'text',
                       localized: true,
                     },
                   ],
                 },
+                {
+                  name: 'highlighted',
+                  type: 'checkbox',
+                  defaultValue: false,
+                },
+                {
+                  name: 'ctaLabel',
+                  type: 'text',
+                  localized: true,
+                },
               ],
             },
             {
-              type: 'collapsible',
-              label: 'Preguntas frecuentes',
-              admin: {
-                initCollapsed: true,
-              },
+              name: 'faq',
+              type: 'array',
+              localized: true,
               fields: [
                 {
-                  name: 'faq',
-                  type: 'array',
+                  name: 'question',
+                  type: 'text',
                   localized: true,
-                  fields: [
-                    {
-                      name: 'question',
-                      type: 'text',
-                      localized: true,
-                      required: true,
-                    },
-                    {
-                      name: 'answer',
-                      type: 'richText',
-                      localized: true,
-                      required: true,
-                    },
-                  ],
+                  required: true,
+                },
+                {
+                  name: 'answer',
+                  type: 'richText',
+                  localized: true,
+                  required: true,
                 },
               ],
             },

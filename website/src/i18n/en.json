@@ -52,7 +52,8 @@
       "currency": "USD",
       "period": "/month",
       "highlighted": "Recommended",
-      "cta": "Get started"
+      "cta": "Get started",
+      "onRequest": "On request"
     }
   },
   "common": {

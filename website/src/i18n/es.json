@@ -52,7 +52,8 @@
       "currency": "COP",
       "period": "/mes",
       "highlighted": "Recomendado",
-      "cta": "Contratar"
+      "cta": "Contratar",
+      "onRequest": "A convenir"
     }
   },
   "common": {

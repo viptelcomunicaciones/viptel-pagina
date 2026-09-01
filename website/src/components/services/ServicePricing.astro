@@ -37,13 +37,23 @@ const { plans, locale = 'es', class: className } = Astro.props;
             )}
             <h3 class="text-foreground text-lg font-semibold">{plan.planName}</h3>
             <div class="mt-4 flex items-baseline gap-1">
-              <span class="text-foreground text-3xl font-bold">
-                {plan.currency || '$'}
-                {plan.price.toLocaleString()}
-              </span>
-              <span class="text-foreground-muted text-sm">
-                {plan.period || t('services.pricing.period', locale)}
-              </span>
+              {
+                plan.price && plan.price > 0 ? (
+                  <>
+                    <span class="text-foreground text-3xl font-bold">
+                      {plan.currency || '$'}
+                      {plan.price.toLocaleString()}
+                    </span>
+                    <span class="text-foreground-muted text-sm">
+                      {plan.period || t('services.pricing.period', locale)}
+                    </span>
+                  </>
+                ) : (
+                  <span class="text-foreground text-2xl font-bold">
+                    {t('services.pricing.onRequest', locale)}
+                  </span>
+                )
+              }
             </div>
             {plan.features && plan.features.length > 0 && (
               <ul class="mt-6 flex flex-col gap-2">

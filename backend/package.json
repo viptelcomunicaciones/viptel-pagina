@@ -15,6 +15,7 @@
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "seed": "cross-env NODE_OPTIONS=--no-deprecation tsx src/scripts/seed.ts",
+    "seed:services": "cross-env NODE_OPTIONS=--no-deprecation tsx src/scripts/seed-services.ts",
     "clean-versions": "cross-env NODE_OPTIONS=--no-deprecation tsx src/scripts/clean-versions.ts",
     "jobs:cron": "cross-env NODE_OPTIONS=--no-deprecation tsx src/scripts/queue-scheduled-jobs.ts",
     "test": "pnpm run test:int && pnpm run test:e2e",
