@@ -7,9 +7,16 @@ declare global {
       FRONTEND_URL: string
       PREVIEW_SECRET: string
       CRON_SECRET: string
+      REVALIDATE_SECRET?: string
       RESEND_API_KEY: string
       RESEND_FROM_EMAIL: string
       MEDIA_PATH: string
+      FEATURE_ROLES?: string
+      FEATURE_TRASH?: string
+      FEATURE_JOBS?: string
+      FEATURE_RICH_TEXT_TABLES?: string
+      FEATURE_DASHBOARD_WIDGETS?: string
+      FEATURE_QUERY_PRESETS?: string
     }
   }
 }

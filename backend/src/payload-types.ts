@@ -137,6 +137,11 @@ export interface Config {
   user: User | PayloadMcpApiKey;
   jobs: {
     tasks: {
+      revalidateFrontend: TaskRevalidateFrontend;
+      resyncSearchIndex: TaskResyncSearchIndex;
+      generateSitemap: TaskGenerateSitemap;
+      cleanupVersions: TaskCleanupVersions;
+      webhookDelivery: TaskWebhookDelivery;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -365,6 +370,7 @@ export interface Page {
     | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -428,6 +434,7 @@ export interface Post {
   slug: string;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -602,7 +609,9 @@ export interface Category {
  */
 export interface User {
   id: number;
-  name?: string | null;
+  name: string;
+  roles: ('admin' | 'editor' | 'marketing' | 'sales')[];
+  lastLogin?: string | null;
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -843,6 +852,7 @@ export interface Service {
   publishedAt?: string | null;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -1075,6 +1085,7 @@ export interface Project {
   slug: string;
   updatedAt: string;
   createdAt: string;
+  deletedAt?: string | null;
   _status?: ('draft' | 'published') | null;
 }
 /**
@@ -1454,7 +1465,14 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'schedulePublish';
+        taskSlug:
+          | 'inline'
+          | 'revalidateFrontend'
+          | 'resyncSearchIndex'
+          | 'generateSitemap'
+          | 'cleanupVersions'
+          | 'webhookDelivery'
+          | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -1487,7 +1505,17 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'schedulePublish') | null;
+  taskSlug?:
+    | (
+        | 'inline'
+        | 'revalidateFrontend'
+        | 'resyncSearchIndex'
+        | 'generateSitemap'
+        | 'cleanupVersions'
+        | 'webhookDelivery'
+        | 'schedulePublish'
+      )
+    | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -1750,6 +1778,7 @@ export interface PagesSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -1877,6 +1906,7 @@ export interface PostsSelect<T extends boolean = true> {
   slug?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -1915,6 +1945,7 @@ export interface ProjectsSelect<T extends boolean = true> {
   slug?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -2058,6 +2089,7 @@ export interface ServicesSelect<T extends boolean = true> {
   publishedAt?: T;
   updatedAt?: T;
   createdAt?: T;
+  deletedAt?: T;
   _status?: T;
 }
 /**
@@ -2223,6 +2255,8 @@ export interface ProjectCategoriesSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  roles?: T;
+  lastLogin?: T;
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;
@@ -2627,6 +2661,77 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskRevalidateFrontend".
+ */
+export interface TaskRevalidateFrontend {
+  input: {
+    path?: string | null;
+    paths?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    collection?: string | null;
+    locale?: string | null;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskResyncSearchIndex".
+ */
+export interface TaskResyncSearchIndex {
+  input: {
+    collection: string;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskGenerateSitemap".
+ */
+export interface TaskGenerateSitemap {
+  input: {
+    trigger?: ('manual' | 'scheduled') | null;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskCleanupVersions".
+ */
+export interface TaskCleanupVersions {
+  input: {
+    dryRun?: boolean | null;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskWebhookDelivery".
+ */
+export interface TaskWebhookDelivery {
+  input: {
+    url: string;
+    payload?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    retries?: number | null;
+  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

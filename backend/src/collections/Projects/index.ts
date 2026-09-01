@@ -12,23 +12,26 @@ import {
 import { Banner } from '../../blocks/Banner/config'
 import { Code } from '../../blocks/Code/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
-import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
+import { adminOnly, contentRoles } from '../../access/roleBased'
 import { seoTab } from '../../fields/seoTab'
 import { tocField } from '../../fields/tocField'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
+import { revalidateFrontend } from '../../hooks/revalidateFrontend'
 
 import { slugField } from 'payload'
 
 export const Projects: CollectionConfig<'projects'> = {
   slug: 'projects',
   access: {
-    create: authenticated,
-    delete: authenticated,
+    create: contentRoles,
+    delete: adminOnly,
     read: authenticatedOrPublished,
-    update: authenticated,
+    update: contentRoles,
   },
+  // Soft-delete: move to trash instead of hard delete
+  trash: true,
   labels: {
     singular: 'Proyecto',
     plural: 'Proyectos',
@@ -43,7 +46,7 @@ export const Projects: CollectionConfig<'projects'> = {
       description: true,
     },
   },
-  admin: {
+admin: {
     defaultColumns: ['title', 'client', 'year', '_status'],
     group: 'Content',
     livePreview: {
@@ -146,13 +149,14 @@ export const Projects: CollectionConfig<'projects'> = {
               relationTo: 'project-types',
               required: true,
             },
-            {
+{
               name: 'categories',
               type: 'relationship',
               admin: {
                 description: 'Categoría raíz o subcategoría (una sola por proyecto).',
                 position: 'sidebar',
               },
+              index: true,
               relationTo: 'project-categories',
             },
             {
@@ -162,6 +166,7 @@ export const Projects: CollectionConfig<'projects'> = {
                 position: 'sidebar',
               },
               hasMany: true,
+              index: true,
               relationTo: 'tags',
             },
             {
@@ -191,12 +196,14 @@ export const Projects: CollectionConfig<'projects'> = {
       admin: {
         position: 'sidebar',
       },
+      index: true,
     },
     tocField(),
     slugField(),
   ],
   hooks: {
     beforeChange: [populatePublishedAt],
+    afterChange: [revalidateFrontend],
   },
   versions: {
     drafts: {

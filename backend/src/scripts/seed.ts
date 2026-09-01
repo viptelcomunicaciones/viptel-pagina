@@ -175,6 +175,7 @@ export const seed = async (payload: Payload): Promise<void> => {
         name: 'Admin Viptel',
         email: process.env.SEED_ADMIN_EMAIL || 'viptelcomunicaciones@hotmail.com',
         password: adminPassword,
+        roles: ['admin'],
       },
     }),
     // Service account used by the Astro website to fetch drafts in preview mode
@@ -187,6 +188,7 @@ export const seed = async (payload: Payload): Promise<void> => {
         password: `svc-${crypto.randomUUID()}`,
         enableAPIKey: true,
         apiKey: serviceApiKey,
+        roles: ['editor'],
       },
     }),
   ])

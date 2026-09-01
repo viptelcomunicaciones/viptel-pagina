@@ -3,6 +3,7 @@ import { resendAdapter } from '@payloadcms/email-resend'
 import sharp from 'sharp'
 import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
+import type { User } from '@/payload-types'
 import { fileURLToPath } from 'url'
 
 import { Categories } from './collections/Categories'
@@ -23,6 +24,13 @@ import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getFrontendURL, getServerSideURL } from './utilities/getURL'
+import {
+  cleanupVersionsTask,
+  generateSitemapTask,
+  resyncSearchIndexTask,
+  revalidateFrontendTask,
+  webhookDeliveryTask,
+} from './jobs'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -31,7 +39,7 @@ export default buildConfig({
   admin: {
     components: {
       afterNavLinks: ['@/components/LogoutButton#LogoutButton'],
-      beforeDashboard: ['@/components/BeforeDashboard#BeforeDashboard'],
+      beforeDashboard: ['@/components/BeforeDashboard#BeforeDashboard', '@/components/DashboardWidgets/MyDraftsWidget#MyDraftsWidget'],
       beforeLogin: ['@/components/BeforeLogin#BeforeLogin'],
     },
     importMap: {
@@ -93,10 +101,20 @@ export default buildConfig({
         apiKey: process.env.RESEND_API_KEY,
       })
     : undefined,
-  localization: {
+localization: {
     locales: ['es', 'en'],
     defaultLocale: 'es',
     fallback: true,
+  },
+  // Allow admins to save and share list filters, columns,and sort orders
+queryPresets: {
+    access: {
+      create: ({ req: { user } }) => (user as User)?.roles?.includes('admin') || false,
+      delete: ({ req: { user } }) => (user as User)?.roles?.includes('admin') || false,
+      read: ({ req: { user } }) => Boolean(user),
+      update: ({ req: { user } }) => (user as User)?.roles?.includes('admin') || false,
+    },
+    constraints: {},
   },
   jobs: {
     access: {
@@ -113,6 +131,12 @@ export default buildConfig({
         return authHeader === `Bearer ${secret}`
       },
     },
-    tasks: [],
+    tasks: [
+      revalidateFrontendTask,
+      resyncSearchIndexTask,
+      generateSitemapTask,
+      cleanupVersionsTask,
+      webhookDeliveryTask,
+    ],
   },
 })

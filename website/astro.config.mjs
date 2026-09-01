@@ -132,6 +132,7 @@ export default defineConfig({
       }),
       PAYLOAD_API_KEY: envField.string({ context: 'server', access: 'secret', optional: true }),
       PREVIEW_SECRET: envField.string({ context: 'server', access: 'secret', optional: true }),
+      REVALIDATE_SECRET: envField.string({ context: 'server', access: 'secret', optional: true }),
     },
   },
 

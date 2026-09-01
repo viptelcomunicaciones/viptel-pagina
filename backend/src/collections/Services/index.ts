@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
+import { adminOnly, contentRoles, contentRolesField, adminOnlyField } from '../../access/roleBased'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { Cards } from '../../blocks/Cards/config'
 import { Content } from '../../blocks/Content/config'
@@ -13,16 +13,23 @@ import { seoTab } from '../../fields/seoTab'
 import { iconField } from '../../fields/iconField'
 import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
+import { revalidateFrontend } from '../../hooks/revalidateFrontend'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 
 export const Services: CollectionConfig = {
   slug: 'services',
   access: {
-    create: authenticated,
-    delete: authenticated,
+    create: contentRoles,
+
+    delete: adminOnly,
+
     read: authenticatedOrPublished,
-    update: authenticated,
+
+    update: contentRoles,
+
   },
+  // Soft-delete: move to trash instead of hard delete
+  trash: true,
   labels: {
     singular: 'Servicio',
     plural: 'Servicios',
@@ -31,7 +38,7 @@ export const Services: CollectionConfig = {
     title: true,
     slug: true,
   },
-  admin: {
+admin: {
     defaultColumns: ['title', 'parent', '_status'],
     group: 'Content',
     livePreview: {
@@ -85,90 +92,123 @@ export const Services: CollectionConfig = {
               localized: true,
             },
             {
-              name: 'features',
-              type: 'array',
-              localized: true,
+              type: 'collapsible',
+              label: 'Características',
+              admin: {
+                initCollapsed: true,
+              },
               fields: [
-                {
-                  name: 'title',
-                  type: 'text',
-                  localized: true,
-                  required: true,
-                },
-                {
-                  name: 'description',
-                  type: 'textarea',
-                  localized: true,
-                },
-                iconField(),
-              ],
-            },
-            {
-              name: 'pricing',
-              type: 'array',
-              localized: true,
-              fields: [
-                {
-                  name: 'planName',
-                  type: 'text',
-                  localized: true,
-                  required: true,
-                },
-                {
-                  name: 'price',
-                  type: 'number',
-                  required: true,
-                },
-                {
-                  name: 'currency',
-                  type: 'text',
-                  defaultValue: 'COP',
-                },
-                {
-                  name: 'period',
-                  type: 'text',
-                  defaultValue: '/mes',
-                },
                 {
                   name: 'features',
                   type: 'array',
                   localized: true,
+                  access: {
+                    read: contentRolesField,
+                  },
                   fields: [
                     {
-                      name: 'feature',
+                      name: 'title',
+                      type: 'text',
+                      localized: true,
+                      required: true,
+                    },
+                    {
+                      name: 'description',
+                      type: 'textarea',
+                      localized: true,
+                    },
+                    iconField(),
+                  ],
+                },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: 'Precios',
+              admin: {
+                initCollapsed: true,
+              },
+              fields: [
+                {
+                  name: 'pricing',
+                  type: 'array',
+                  localized: true,
+                  access: {
+                    read: adminOnlyField,
+                  },
+                  fields: [
+                    {
+                      name: 'planName',
+                      type: 'text',
+                      localized: true,
+                      required: true,
+                    },
+                    {
+                      name: 'price',
+                      type: 'number',
+                      required: true,
+                    },
+                    {
+                      name: 'currency',
+                      type: 'text',
+                      defaultValue: 'COP',
+                    },
+                    {
+                      name: 'period',
+                      type: 'text',
+                      defaultValue: '/mes',
+                    },
+                    {
+                      name: 'features',
+                      type: 'array',
+                      localized: true,
+                      fields: [
+                        {
+                          name: 'feature',
+                          type: 'text',
+                          localized: true,
+                        },
+                      ],
+                    },
+                    {
+                      name: 'highlighted',
+                      type: 'checkbox',
+                      defaultValue: false,
+                    },
+                    {
+                      name: 'ctaLabel',
                       type: 'text',
                       localized: true,
                     },
                   ],
                 },
-                {
-                  name: 'highlighted',
-                  type: 'checkbox',
-                  defaultValue: false,
-                },
-                {
-                  name: 'ctaLabel',
-                  type: 'text',
-                  localized: true,
-                },
               ],
             },
             {
-              name: 'faq',
-              type: 'array',
-              localized: true,
+              type: 'collapsible',
+              label: 'Preguntas frecuentes',
+              admin: {
+                initCollapsed: true,
+              },
               fields: [
                 {
-                  name: 'question',
-                  type: 'text',
+                  name: 'faq',
+                  type: 'array',
                   localized: true,
-                  required: true,
-                },
-                {
-                  name: 'answer',
-                  type: 'richText',
-                  localized: true,
-                  required: true,
+                  fields: [
+                    {
+                      name: 'question',
+                      type: 'text',
+                      localized: true,
+                      required: true,
+                    },
+                    {
+                      name: 'answer',
+                      type: 'richText',
+                      localized: true,
+                      required: true,
+                    },
+                  ],
                 },
               ],
             },
@@ -212,10 +252,12 @@ export const Services: CollectionConfig = {
       admin: {
         position: 'sidebar',
       },
+      index: true,
     },
   ],
   hooks: {
     beforeChange: [populatePublishedAt],
+    afterChange: [revalidateFrontend],
   },
   versions: {
     drafts: {

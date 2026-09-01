@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
+import { adminOnly, contentRoles } from '../../access/roleBased'
 import { Archive } from '../../blocks/ArchiveBlock/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { Cards } from '../../blocks/Cards/config'
@@ -15,6 +15,7 @@ import { seoTab } from '../../fields/seoTab'
 import { hero } from '@/heros/config'
 import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
+import { revalidateFrontend } from '../../hooks/revalidateFrontend'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { Code } from '@/blocks/Code/config'
 import { Form } from '@/blocks/FormBlock/config'
@@ -22,11 +23,13 @@ import { Form } from '@/blocks/FormBlock/config'
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
   access: {
-    create: authenticated,
-    delete: authenticated,
+    create: contentRoles,
+    delete: adminOnly,
     read: authenticatedOrPublished,
-    update: authenticated,
+    update: contentRoles,
   },
+  // Soft-delete: move to trash instead of hard delete
+  trash: true,
   labels: {
     singular: 'Pagina',
     plural: 'Paginas',
@@ -36,7 +39,7 @@ export const Pages: CollectionConfig<'pages'> = {
     title: true,
     slug: true,
   },
-  admin: {
+admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     group: 'Content',
     livePreview: {
@@ -104,11 +107,13 @@ export const Pages: CollectionConfig<'pages'> = {
       admin: {
         position: 'sidebar',
       },
+      index: true,
     },
     slugField(),
   ],
   hooks: {
     beforeChange: [populatePublishedAt],
+    afterChange: [revalidateFrontend],
   },
   versions: {
     drafts: {

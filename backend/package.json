@@ -16,6 +16,7 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "seed": "cross-env NODE_OPTIONS=--no-deprecation tsx src/scripts/seed.ts",
     "clean-versions": "cross-env NODE_OPTIONS=--no-deprecation tsx src/scripts/clean-versions.ts",
+    "jobs:cron": "cross-env NODE_OPTIONS=--no-deprecation tsx src/scripts/queue-scheduled-jobs.ts",
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --import=tsx/esm\" playwright test --config=playwright.config.ts",
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"

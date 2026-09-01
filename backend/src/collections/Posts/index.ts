@@ -9,8 +9,8 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
-import { authenticated } from '../../access/authenticated'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
+import { adminOnly, contentRoles } from '../../access/roleBased'
 import { Banner } from '../../blocks/Banner/config'
 import { Code } from '../../blocks/Code/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
@@ -18,17 +18,20 @@ import { seoTab } from '../../fields/seoTab'
 import { tocField } from '../../fields/tocField'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { populateAuthors } from './hooks/populateAuthors'
+import { revalidateFrontend } from '../../hooks/revalidateFrontend'
 
 import { slugField } from 'payload'
 
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
   access: {
-    create: authenticated,
-    delete: authenticated,
+    create: contentRoles,
+    delete: adminOnly,
     read: authenticatedOrPublished,
-    update: authenticated,
+    update: contentRoles,
   },
+  // Soft-delete: move to trash instead of hard delete
+  trash: true,
   // This config controls what's populated by default when a post is referenced
   defaultPopulate: {
     title: true,
@@ -39,9 +42,10 @@ export const Posts: CollectionConfig<'posts'> = {
       description: true,
     },
   },
-  admin: {
+admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
     group: 'Content',
+    listSearchableFields: ['title', 'slug', 'excerpt'],
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({
@@ -129,15 +133,16 @@ export const Posts: CollectionConfig<'posts'> = {
               relationTo: 'post-types',
               required: true,
             },
-            {
-              name: 'categories',
-              type: 'relationship',
-              admin: {
-                description: 'Categoría raíz o subcategoría (una sola por post).',
-                position: 'sidebar',
-              },
-              relationTo: 'categories',
-            },
+{
+      name: 'categories',
+      type: 'relationship',
+      admin: {
+        description: 'Categoría raíz o subcategoría (una sola por post).',
+        position: 'sidebar',
+      },
+      index: true,
+      relationTo: 'categories',
+    },
           ],
           label: 'Meta',
         },
@@ -153,6 +158,7 @@ export const Posts: CollectionConfig<'posts'> = {
         },
         position: 'sidebar',
       },
+      index: true,
       hooks: {
         beforeChange: [
           ({ siblingData, value }) => {
@@ -204,12 +210,14 @@ export const Posts: CollectionConfig<'posts'> = {
         position: 'sidebar',
       },
       hasMany: true,
+      index: true,
       relationTo: 'tags',
     },
     slugField(),
   ],
   hooks: {
     afterRead: [populateAuthors],
+    afterChange: [revalidateFrontend],
   },
   versions: {
     drafts: {
