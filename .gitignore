@@ -35,3 +35,9 @@ Thumbs.db
 .playwright-mcp
 graphify-out/
 graphify/
+
+# temp dev files
+dev-output.txt
+projects-debug.txt
+home-screenshot.png
+home-scroll.mjs
