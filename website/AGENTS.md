@@ -25,6 +25,22 @@ telecomunicaciones. Está construido sobre el tema Astro Rocket.
 - `src/i18n/en.json` + `es.json` + `nl.json` — textos completos del sitio
 - `src/lib/schema.ts` — schema.org tipo Organization (no Person)
 
+## SSR Standalone Mode
+
+El website corre en modo SSR con `output: 'server'` y adaptador Node standalone:
+
+- `astro.config.mjs`: `output: 'server'`, `@astrojs/node` con `host: '0.0.0.0'` y `port: 4321`
+- Build: `pnpm build` genera `dist/server/entry.mjs`
+- Start: `node ./dist/server/entry.mjs`
+- No usa `server.cjs` (descontinuado por Astro)
+
+### Cómo consume el backend
+
+1. Website usa `PAYLOAD_URL` (env) para apuntar al backend
+2. Cliente REST en `src/lib/payload.ts` hace fetch a `/api/*`
+3. Timeout 15s por request
+4. Headers: `?locale=`, `?depth=2`, `Authorization` cuando `draft=true`
+
 ---
 
 Astro Rocket is a starter theme. You are almost certainly here to help someone
@@ -127,3 +143,44 @@ schemas and the link validation, and it fails on problems a dev server hides.
 
 Run `pnpm build`. Then confirm what you changed is actually visible on the page
 you changed it on — not merely that the command exited without an error.
+
+## Deployment con Dokploy
+
+### Archivos Docker
+
+| Archivo | Función |
+|---|---|
+| `Dockerfile` | Build del website (Node 22 Alpine) |
+| `scripts/start.sh` | Ejecuta `node ./dist/server/entry.mjs` |
+| `.dockerignore` | Excluye .env, node_modules, dist, .astro |
+
+### HEALTHCHECK
+
+El Dockerfile incluye un healthcheck que verifica `/api/health` cada 30 segundos.
+
+### scripts/start.sh
+
+```sh
+#!/bin/sh
+node ./dist/server/entry.mjs
+```
+
+Inicia el servidor Node standalone de Astro.
+
+### Variables de entorno para Dokploy
+
+| Variable | Fuente | Ejemplo |
+|---|---|---|
+| `PAYLOAD_URL` | URL del backend | `https://cms.viptelcomunicaciones.com` |
+| `SITE_URL` | URL del website | `https://viptelcomunicaciones.com` |
+| `PREVIEW_SECRET` | Compartir con backend | `tu-preview-secret` |
+
+### build.sh (si se usa)
+
+```sh
+#!/bin/sh
+pnpm install --frozen-lockfile
+pnpm build
+```
+
+Ejecuta install + build antes de iniciar el contenedor.

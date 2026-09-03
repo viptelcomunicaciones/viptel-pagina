@@ -86,6 +86,47 @@ SEO plugin activo en pages, posts, projects.
 4. Website obtiene el payload client via `src/lib/payload.ts` (REST API)
 5. CORS configurado en backend para permitir ambos orígenes
 
+## Deployment con Dokploy
+
+### Arquitectura
+
+```
+Dokploy
+├── PostgreSQL (addon)
+├── Backend (Dockerfile en backend/)
+│   ├── Puerto: 3000
+│   ├── Healthcheck: /api/health
+│   └── Start script: scripts/start.sh (migrate + start)
+└── Website (Dockerfile en website/)
+    ├── Puerto: 4321
+    ├── Healthcheck: /api/health
+    └── Start script: scripts/start.sh (node ./dist/server/entry.mjs)
+```
+
+### Archivos Docker
+
+| Archivo | Función |
+|---|---|
+| `backend/Dockerfile` | Build del backend (Node 22 Alpine) |
+| `backend/scripts/start.sh` | Ejecuta `pnpm payload migrate` luego `pnpm start` |
+| `website/Dockerfile` | Build del website (Node 22 Alpine) |
+| `website/scripts/start.sh` | Ejecuta `node ./dist/server/entry.mjs` |
+| `website/.dockerignore` | Excluye .env, node_modules, dist, .astro |
+
+### Variables de entorno (ver .env.example de cada paquete)
+
+**Backend**: `DATABASE_URL`, `PAYLOAD_SECRET`, `PAYLOAD_PUBLIC_SERVER_URL`, `FRONTEND_URL`, `PREVIEW_SECRET`
+**Website**: `PAYLOAD_URL`, `SITE_URL`, `PREVIEW_SECRET`
+
+### Flujo de deployment
+
+1. Subir código a GitHub
+2. Crear PostgreSQL en Dokploy (addon)
+3. Crear servicio backend (Dockerfile, variables de entorno)
+4. Crear servicio website (Dockerfile, variables de entorno)
+5. Configurar dominios
+6. Ejecutar seeds: `pnpm seed && pnpm seed:services` (terminal del backend)
+
 ## Documentación para agentes
 
 | Ubicación | Contenido |

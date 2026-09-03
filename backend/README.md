@@ -98,6 +98,54 @@ docker-compose up --build
 Usa host.docker.internal para conectar al PostgreSQL local.
 Requiere `.env` configurado.
 
+## Deployment con Dokploy
+
+### Archivos Docker
+
+| Archivo | Función |
+|---|---|
+| `Dockerfile` | Build del backend (Node 22 Alpine) |
+| `scripts/start.sh` | Ejecuta `pnpm payload migrate` luego `pnpm start` |
+
+### HEALTHCHECK
+
+El Dockerfile incluye un healthcheck que verifica `/api/health` cada 30 segundos.
+
+### scripts/start.sh
+
+```sh
+#!/bin/sh
+pnpm payload migrate
+pnpm start
+```
+
+Ejecuta migraciones automáticamente al iniciar el contenedor.
+
+### Variables de entorno para Dokploy
+
+| Variable | Fuente | Ejemplo |
+|---|---|---|
+| `DATABASE_URL` | addon PostgreSQL en Dokploy | `postgres://user:pass@host:5432/payload_viptel` |
+| `PAYLOAD_SECRET` | Generar string aleatorio | `tu-secreto-aqui-muy-largo` |
+| `PAYLOAD_PUBLIC_SERVER_URL` | URL del dominio | `https://cms.viptelcomunicaciones.com` |
+| `FRONTEND_URL` | URL del website | `https://viptelcomunicaciones.com` |
+| `PREVIEW_SECRET` | Compartir con website | `tu-preview-secret` |
+
+### Sembrar datos después del deploy
+
+Una vez que el backend esté corriendo en Dokploy, ejecutar en la terminal:
+
+```bash
+pnpm seed && pnpm seed:services
+```
+
+Esto crea:
+- Usuario admin: `viptelcomunicaciones@hotmail.com` / `Viptel3562/*-`
+- Medios de demostración
+- Posts de ejemplo
+- Páginas de ejemplo
+- Servicios Viptel (jerárquicos)
+
 ## Estructura del proyecto
 
 ```
