@@ -1,6 +1,7 @@
 {
   "name": "viptel-website",
   "version": "1.0.0",
+  "packageManager": "pnpm@10.31.0",
   "description": "Sitio público de Viptel Comunicaciones",
   "author": "Viptel Comunicaciones",
   "license": "MIT",

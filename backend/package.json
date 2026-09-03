@@ -1,6 +1,7 @@
 {
   "name": "viptel-cms",
   "version": "1.0.0",
+  "packageManager": "pnpm@10.31.0",
   "description": "Headless CMS de Viptel Comunicaciones (Payload CMS 3 + PostgreSQL)",
   "license": "MIT",
   "type": "module",
