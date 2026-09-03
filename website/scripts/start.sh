@@ -1,2 +1,2 @@
 #!/bin/sh
-node ./dist/server/entry.mjs
+HOST=0.0.0.0 node ./dist/server/entry.mjs
