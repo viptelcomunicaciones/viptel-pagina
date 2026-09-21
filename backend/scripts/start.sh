@@ -1,3 +1,3 @@
 #!/bin/sh
-pnpm payload migrate --forceAcceptWarning
+pnpm payload migrate
 pnpm start
