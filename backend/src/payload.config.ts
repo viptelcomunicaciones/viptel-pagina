@@ -40,7 +40,6 @@ const dirname = path.dirname(filename)
 export default buildConfig({
   admin: {
     components: {
-      afterNavLinks: ['@/components/LogoutButton#LogoutButton'],
       beforeDashboard: ['@/components/BeforeDashboard#BeforeDashboard', '@/components/DashboardWidgets/MyDraftsWidget#MyDraftsWidget'],
       beforeLogin: ['@/components/BeforeLogin#BeforeLogin'],
     },
