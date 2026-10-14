@@ -314,6 +314,8 @@ const LetterGlitch = ({
       if (brand.length > 0) {
         activeColors.current = brand;
       }
+    } else {
+      activeColors.current = glitchColors;
     }
 
     resizeCanvas();
@@ -325,6 +327,55 @@ const LetterGlitch = ({
     if (!prefersReducedMotion) {
       animate();
     }
+
+    const handleThemeChange = () => {
+      if (!useBrandTokens) return;
+      const brand = resolveBrandColors();
+      if (brand.length === 0) return;
+
+      const colorsChanged =
+        brand.length !== activeColors.current.length ||
+        brand.some((color, idx) => color !== activeColors.current[idx]);
+
+      if (!colorsChanged) return;
+
+      activeColors.current = brand;
+
+      if (letters.current.length > 0) {
+        const isReducedMotion =
+          typeof window !== 'undefined' &&
+          window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        letters.current.forEach((letter) => {
+          const nextColor = getRandomColor();
+          letter.targetColor = nextColor;
+          if (!smooth || isReducedMotion) {
+            letter.color = nextColor;
+            letter.colorProgress = 1;
+          } else {
+            letter.colorProgress = 0;
+          }
+        });
+        drawLetters();
+      }
+    };
+
+    let themeObserver: MutationObserver | null = null;
+    if (typeof MutationObserver !== 'undefined' && typeof document !== 'undefined') {
+      themeObserver = new MutationObserver(() => {
+        handleThemeChange();
+      });
+
+      themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['data-theme', 'class', 'data-theme-mode'],
+      });
+    }
+
+    const handleAstroSwap = () => {
+      handleThemeChange();
+    };
+    document.addEventListener('astro:after-swap', handleAstroSwap);
 
     let resizeTimeout: ReturnType<typeof setTimeout>;
 
@@ -347,7 +398,10 @@ const LetterGlitch = ({
       if (animationRef.current !== null) {
         cancelAnimationFrame(animationRef.current);
       }
+      clearTimeout(resizeTimeout);
       window.removeEventListener('resize', handleResize);
+      themeObserver?.disconnect();
+      document.removeEventListener('astro:after-swap', handleAstroSwap);
     };
   }, [glitchSpeed, smooth, useBrandTokens]);
 
