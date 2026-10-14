@@ -1,0 +1,100 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-payload_viptel}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-viptel_prod_db_secret}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-postgres} -d $${POSTGRES_DB:-payload_viptel}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - viptel-net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-viptel_prod_db_secret}@postgres:5432/${POSTGRES_DB:-payload_viptel}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      PAYLOAD_PUBLIC_SERVER_URL: ${PAYLOAD_PUBLIC_SERVER_URL:-https://cms.viptelcomunicaciones.com}
+      FRONTEND_URL: ${FRONTEND_URL:-https://viptelcomunicaciones.com}
+      PREVIEW_SECRET: ${PREVIEW_SECRET}
+      CRON_SECRET: ${CRON_SECRET}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-noreply@viptelcomunicaciones.com}
+      # Cloudflare R2 Storage (opcional)
+      R2_BUCKET: ${R2_BUCKET}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
+      R2_ENDPOINT: ${R2_ENDPOINT}
+      R2_PUBLIC_URL: ${R2_PUBLIC_URL}
+    volumes:
+      - backend_media:/app/public/media
+    expose:
+      - '3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r=>r.json()).then(d=>{if(!d.payloadReady)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - viptel-net
+      - dokploy-network
+
+  website:
+    build:
+      context: ./website
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      SITE_URL: ${SITE_URL:-https://viptelcomunicaciones.com}
+      # Comunicación directa interna (Astro SSR -> Payload CMS):
+      INTERNAL_PAYLOAD_URL: http://backend:3000
+      # URL pública para que los navegadores resuelvan recursos de medios:
+      PAYLOAD_URL: ${PAYLOAD_URL:-https://cms.viptelcomunicaciones.com}
+      PAYLOAD_API_KEY: ${PAYLOAD_API_KEY}
+      PREVIEW_SECRET: ${PREVIEW_SECRET}
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-noreply@viptelcomunicaciones.com}
+      RESEND_AUDIENCE_ID: ${RESEND_AUDIENCE_ID}
+      PUBLIC_GA_MEASUREMENT_ID: ${PUBLIC_GA_MEASUREMENT_ID}
+    expose:
+      - '4321'
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:4321/api/health').then(r=>r.json()).then(d=>{if(d.status!=='ok')process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - viptel-net
+      - dokploy-network
+
+volumes:
+  postgres_data:
+  backend_media:
+
+networks:
+  dokploy-network:
+    external: true
+  viptel-net:
+    driver: bridge

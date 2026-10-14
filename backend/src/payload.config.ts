@@ -23,6 +23,7 @@ import { Header } from './Header/config'
 import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { plugins } from './plugins'
+import { migrations } from './migrations'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getFrontendURL, getServerSideURL } from './utilities/getURL'
 import {
@@ -81,6 +82,7 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || '',
     },
     push: process.env.NODE_ENV !== 'production',
+    prodMigrations: migrations,
   }),
   collections: [Pages, Posts, Projects, Services, Media, Categories, Tags, PostTypes, ProjectTypes, ProjectCategories, Users],
   cors: [getServerSideURL(), getFrontendURL()].filter(Boolean),

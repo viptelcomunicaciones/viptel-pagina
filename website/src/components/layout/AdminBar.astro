@@ -1,10 +1,11 @@
 ---
 // AdminBar — shows inside the header when logged into Payload CMS
+const PUBLIC_PAYLOAD_URL = process.env.PAYLOAD_URL || 'http://localhost:3000';
 ---
 
-<script>
+<script is:inline define:vars={{ publicPayloadUrl: PUBLIC_PAYLOAD_URL }}>
   (async function () {
-    const PAYLOAD_URL = 'http://localhost:3000';
+    const PAYLOAD_URL = publicPayloadUrl;
     if (window.location.pathname.startsWith('/admin')) return;
 
     async function checkAuth() {

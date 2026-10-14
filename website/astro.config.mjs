@@ -106,6 +106,11 @@ export default defineConfig({
         access: 'public',
         optional: true,
       }),
+      INTERNAL_PAYLOAD_URL: envField.string({
+        context: 'server',
+        access: 'public',
+        optional: true,
+      }),
       PAYLOAD_URL: envField.string({
         context: 'server',
         access: 'public',
@@ -152,6 +157,11 @@ export default defineConfig({
 
   vite: {
     plugins: [tailwindcss()],
+    server: {
+      fs: {
+        allow: ['..'],
+      },
+    },
   },
 
   security: {

@@ -14,7 +14,8 @@ interface Props {
 }
 
 const { block } = Astro.props
-const PAYLOAD_URL = 'http://localhost:3000'
+const PAYLOAD_URL = process.env.INTERNAL_PAYLOAD_URL || process.env.PAYLOAD_URL || 'http://localhost:3000'
+const PUBLIC_PAYLOAD_URL = process.env.PAYLOAD_URL || 'http://localhost:3000'
 
 const formId = block.form && typeof block.form !== 'number' ? ((block.form as any).id || block.form) : null
 
@@ -173,34 +174,34 @@ if (formId) {
             </div>
           </form>
 
-          <script>
+          <script is:inline define:vars={{ formId, publicPayloadUrl: PUBLIC_PAYLOAD_URL }}>
             (function() {
-              const form = document.getElementById('payload-form-{formId}') as HTMLFormElement | null
-              if (!form) return
-              const status = document.getElementById('payload-form-{formId}-status')
+              const form = document.getElementById(`payload-form-${formId}`);
+              if (!form) return;
+              const status = document.getElementById(`payload-form-${formId}-status`);
 
               form.addEventListener('submit', async (e) => {
-                e.preventDefault()
-                const formData = new FormData(form)
-                const data: Record<string, any> = { form: '{formId}', submissionData: [] }
+                e.preventDefault();
+                const formData = new FormData(form);
+                const data = { form: formId, submissionData: [] };
 
                 formData.forEach((value, key) => {
-                  data.submissionData.push({ field: key, value: String(value) })
-                })
+                  data.submissionData.push({ field: key, value: String(value) });
+                });
 
                 try {
-                  const res = await fetch('{PAYLOAD_URL}/api/form-submissions', {
+                  const res = await fetch(`${publicPayloadUrl}/api/form-submissions`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data),
-                  })
+                  });
                   if (res.ok) {
-                    form.style.display = 'none'
-                    status?.classList.remove('hidden')
+                    form.style.display = 'none';
+                    status?.classList.remove('hidden');
                   }
                 } catch { /* submission failed — keep the form visible */ }
-              })
-            })()
+              });
+            })();
           </script>
         </>
       ) : (

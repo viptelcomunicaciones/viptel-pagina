@@ -96,7 +96,8 @@ export class PayloadClient {
   resolveMediaUrl(mediaUrl?: string | null): string {
     if (!mediaUrl) return '';
     if (mediaUrl.startsWith('http')) return mediaUrl;
-    return `${this.url}${mediaUrl}`;
+    const publicUrl = process.env.PAYLOAD_URL || this.url;
+    return `${publicUrl}${mediaUrl}`;
   }
 
   pages(): PageQueries {
@@ -484,6 +485,6 @@ export function redirectTarget(redirect: Redirect): { target: string; status: nu
 // ── Singleton ────────────────────────────────────────────
 
 export const payload = new PayloadClient({
-  url: process.env.PAYLOAD_URL || 'http://localhost:3000',
+  url: process.env.INTERNAL_PAYLOAD_URL || process.env.PAYLOAD_URL || 'http://localhost:3000',
   key: process.env.PAYLOAD_API_KEY || '',
 });

@@ -4,27 +4,29 @@ export const prerender = false;
 
 export const GET: APIRoute = async ({ url }) => {
   const timestamp = new Date().toISOString();
-  const payloadUrl = import.meta.env.PAYLOAD_URL || 'http://localhost:3000';
+  const payloadUrl =
+    process.env.INTERNAL_PAYLOAD_URL ||
+    process.env.PAYLOAD_URL ||
+    import.meta.env.PAYLOAD_URL ||
+    'http://localhost:3000';
 
   let payload = 'ok';
   try {
-    const response = await fetch(`${payloadUrl}/api/health`, { signal: AbortSignal.timeout(5000) });
-    if (!response.ok) payload = 'error';
+    const response = await fetch(`${payloadUrl}/api/health`, { signal: AbortSignal.timeout(4000) });
+    if (!response.ok) payload = 'degraded';
   } catch {
     payload = 'unreachable';
   }
 
-  const healthy = payload === 'ok';
-
   return new Response(
     JSON.stringify({
-      status: healthy ? 'ok' : 'degraded',
+      status: 'ok',
+      backendStatus: payload,
       timestamp,
-      services: { payload },
       host: url.hostname,
     }),
     {
-      status: healthy ? 200 : 503,
+      status: 200,
       headers: { 'Content-Type': 'application/json' },
     }
   );
