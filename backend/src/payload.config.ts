@@ -86,10 +86,6 @@ export default buildConfig({
   collections: [Pages, Posts, Projects, Services, Media, Categories, Tags, PostTypes, ProjectTypes, ProjectCategories, Users],
   cors: [getServerSideURL(), getFrontendURL()].filter(Boolean),
   globals: [Header, Footer],
-  graphQL: {
-    disablePlaygroundInProduction: false,
-    disableIntrospectionInProduction: false,
-  },
   plugins: [
     ...plugins,
     mcpPlugin({}),
