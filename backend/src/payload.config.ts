@@ -98,14 +98,16 @@ export default buildConfig({
     s3Storage({
       enabled: Boolean(process.env.R2_BUCKET),
       collections: {
-        media: {
-          disablePayloadAccessControl: true,
-          generateFileURL: ({ filename, prefix }) => {
-            const key = prefix ? `${prefix}/${filename}` : filename
-            const publicUrl = (process.env.R2_PUBLIC_URL || '').replace(/\/+$/, '')
-            return publicUrl ? `${publicUrl}/${key}` : `/${key}`
-          },
-        },
+        media: process.env.R2_PUBLIC_URL
+          ? {
+              disablePayloadAccessControl: true,
+              generateFileURL: ({ filename, prefix }) => {
+                const key = prefix ? `${prefix}/${filename}` : filename
+                const publicUrl = (process.env.R2_PUBLIC_URL || '').replace(/\/+$/, '')
+                return `${publicUrl}/${key}`
+              },
+            }
+          : true,
       },
       bucket: process.env.R2_BUCKET || '',
       config: {
