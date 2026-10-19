@@ -2,31 +2,44 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import ProjectLayout from '@/layouts/ProjectLayout.astro';
 import ProjectsArchiveView from '@/components/projects/views/ProjectsArchiveView.astro';
+import NotFoundView from '@/components/pages/views/NotFoundView.astro';
 import { defaultLocale } from '@/i18n';
 import { resolveProjectArchive } from '@/lib/projects';
+import { payload } from '@/lib/payload-client';
 
 export const prerender = false;
 
 const { slug } = Astro.params;
-
-if (!slug) {
-  return Astro.redirect('/404');
-}
-
-const segments = slug.split('/').filter(Boolean);
+const segments = slug ? slug.split('/').filter(Boolean) : [];
 const currentPage = Math.max(1, Number(Astro.url.searchParams.get('page')) || 1);
-const archive = await resolveProjectArchive(segments, defaultLocale, currentPage);
+const archive =
+  segments.length > 0
+    ? await resolveProjectArchive(segments, defaultLocale, currentPage)
+    : ({ kind: 'not-found' } as const);
 
-if (archive.kind === 'not-found') {
-  return Astro.redirect('/404');
+const is404 = archive.kind === 'not-found';
+if (is404) {
+  Astro.response.status = 404;
 }
 
 const project = archive.kind === 'project' ? archive.project! : null;
+const projectMetaImage =
+  project?.meta?.image && typeof project.meta.image === 'object' && project.meta.image.url
+    ? payload.resolveMediaUrl(project.meta.image.url)
+    : project?.coverImage && typeof project.coverImage === 'object' && project.coverImage.url
+      ? payload.resolveMediaUrl(project.coverImage.url)
+      : undefined;
 ---
 
 {
-  project ? (
-    <PageLayout title={project.title} description={project.description || project.title}>
+  is404 ? (
+    <NotFoundView locale={defaultLocale} />
+  ) : project ? (
+    <PageLayout
+      title={project.meta?.title || project.title}
+      description={project.meta?.description || project.description || project.title}
+      image={projectMetaImage}
+    >
       <ProjectLayout project={project} locale={defaultLocale} />
     </PageLayout>
   ) : (

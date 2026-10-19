@@ -1,7 +1,9 @@
 ---
 import ServiceView from '@/components/pages/views/ServiceView.astro';
+import NotFoundView from '@/components/pages/views/NotFoundView.astro';
 import { payload } from '@/lib/payload-client';
-import { getSecondaryLocales, isValidLocale } from '@/i18n';
+import type { Service } from '@/lib/payload-types';
+import { getSecondaryLocales, isValidLocale, defaultLocale } from '@/i18n';
 
 export const prerender = false;
 
@@ -10,37 +12,43 @@ export function getStaticPaths() {
 }
 
 const { slug, locale } = Astro.params as { slug: string; locale: string };
+const validLocale = isValidLocale(locale);
+const effectiveLocale = validLocale ? locale : defaultLocale;
+const querySlug = validLocale && slug ? (slug.includes('/') ? slug.split('/').pop()! : slug) : '';
+const service = querySlug ? await payload.services().getBySlug(querySlug, effectiveLocale) : null;
 
-if (!isValidLocale(locale)) {
-  return Astro.redirect('/404');
+if (!validLocale || !service) {
+  Astro.response.status = 404;
 }
 
-if (!slug) return Astro.redirect('/404');
-
-const querySlug = slug.includes('/') ? slug.split('/').pop()! : slug;
-const service = await payload.services().getBySlug(querySlug, locale);
-if (!service) return Astro.redirect('/404');
-
 let parentService = null;
-let childrenServices: any[] = [];
+let childrenServices: Service[] = [];
 
-if (service.parent) {
-  const parentSlug =
-    typeof service.parent === 'object' && service.parent !== null
-      ? (service.parent as any).slug
-      : null;
-  if (parentSlug) {
-    parentService = await payload.services().getBySlug(parentSlug, locale);
+if (service) {
+  if (service.parent) {
+    const parentSlug =
+      typeof service.parent === 'object' && service.parent !== null
+        ? (service.parent as Service).slug
+        : null;
+    if (parentSlug) {
+      parentService = await payload.services().getBySlug(parentSlug, effectiveLocale);
+    }
+  } else {
+    childrenServices = await payload.services().getByParent(service.id, effectiveLocale);
   }
-} else {
-  childrenServices = await payload.services().getByParent(service.id, locale);
 }
 ---
 
-<ServiceView
-  service={service}
-  parentService={parentService}
-  childrenServices={childrenServices}
-  hrefPrefix={`/${locale}/services`}
-  locale={locale}
-/>
+{
+  !validLocale || !service ? (
+    <NotFoundView locale={effectiveLocale} />
+  ) : (
+    <ServiceView
+      service={service}
+      parentService={parentService}
+      childrenServices={childrenServices}
+      hrefPrefix={`/${locale}/services`}
+      locale={locale}
+    />
+  )
+}

@@ -59,32 +59,46 @@ Ver los AGENTS.md respectivos:
 
 ## Colecciones del backend
 
-| Colección | Slug | Localizada | Versiones | Auth |
+| Colección | Slug | Localizada | Versiones | Auth / Acceso |
 |---|---|---|---|---|
-| Users | `users` | — | — | Email/ password |
-| Categories | `categories` | Sí | Drafts | Admin CRUD |
-| Media | `media` | — | — | Admin write, public read |
-| Pages | `pages` | Sí | Drafts | Admin write, public read (published) |
-| Posts | `posts` | Sí | Drafts | Admin write, public read (published) |
-| Projects | `projects` | Sí | Drafts | Admin write, public read (published) |
+| Users | `users` | — | — | Email/password + API key (`admin`, `editor`, `marketing`, `sales`) |
+| Media | `media` | Sí (`alt`, `caption`) | — | Escritura `contentRoles`, lectura pública (WebP quality 82 + R2 S3) |
+| Categories | `categories` | Sí | — | Escritura `contentRoles`, lectura pública |
+| ProjectCategories | `project-categories` | Sí | — | Escritura `contentRoles`, lectura pública |
+| Tags | `tags` | — | — | Escritura `contentRoles`, lectura pública |
+| PostTypes | `post-types` | Sí | — | Escritura `contentRoles`, lectura pública |
+| ProjectTypes | `project-types` | Sí | — | Escritura `contentRoles`, lectura pública |
+| Pages | `pages` | Sí | Drafts | Escritura `contentRoles`, lectura pública (`published`) |
+| Posts | `posts` | Sí | Drafts | Escritura `contentRoles`, lectura pública (`published`) |
+| Projects | `projects` | Sí | Drafts | Escritura `contentRoles`, lectura pública (`published`) |
+| Services | `services` | Sí | Drafts | Escritura `contentRoles`, lectura pública (`published`) |
+| Forms | `forms` | Sí | — | Plugin Form Builder (`contentRoles` write, public read) |
+| FormSubmissions | `form-submissions` | — | — | CRM Leads (`anyone` create, `crmRoles` read, `adminOnly` update/delete) |
+| Search | `search` | Sí | — | Índice FTS (`@payloadcms/plugin-search`) para Pages, Posts, Projects y Services |
+| Redirects | `redirects` | — | — | Redirecciones 301/302 (`contentRoles` write, public read) |
 
-Pages usa nested-docs plugin (jerarquía padre/hijo con breadcrumbs).
-SEO plugin activo en pages, posts, projects.
+`Pages` y `Services` usan nested-docs plugin (jerarquía padre/hijo con breadcrumbs).
+SEO plugin activo en `pages`, `posts`, `projects` y `services`.
 
 ## Plugins del CMS
 
-- `@payloadcms/plugin-nested-docs` — páginas jerárquicas
+- `@payloadcms/plugin-nested-docs` — páginas y servicios jerárquicos
 - `@payloadcms/plugin-seo` — meta títulos/descripciones generados automáticamente
+- `@payloadcms/plugin-search` — índice de búsqueda en tiempo real localizado (`es`/`en`)
+- `@payloadcms/plugin-form-builder` — formularios dinámicos y CRM de leads (`forms`, `form-submissions`)
+- `@payloadcms/plugin-redirects` — gestión de redirecciones 301/302
+- `@payloadcms/storage-s3` — almacenamiento en Cloudflare R2 (con conversión automática a WebP)
 - `@payloadcms/email-resend` — emails transaccionales vía Resend
 - `@payloadcms/richtext-lexical` — editor de contenido rico
 
 ## Cómo se comunican backend y website
 
-1. Backend corre en `http://localhost:3000` (dev)
-2. Website corre en `http://localhost:4321` (dev)
-3. Website usa `PAYLOAD_URL` (env) para apuntar al backend
-4. Website obtiene el payload client via `src/lib/payload.ts` (REST API)
-5. CORS configurado en backend para permitir ambos orígenes
+1. Backend corre en `http://localhost:3000` (dev) / `http://backend:3000` (red interna Docker)
+2. Website corre en `http://localhost:4321` (dev) / `http://website:4321` (red interna Docker)
+3. Website usa `INTERNAL_PAYLOAD_URL` (SSR fetch interno) y `PAYLOAD_URL` (URLs públicas de media)
+4. Website obtiene el cliente tipado via `src/lib/payload-client.ts` con caché híbrida L1 LRU + SWR (`src/lib/cache.ts`, soporte opcional Redis L2 con `REDIS_URL`)
+5. Al publicar/editar en Payload CMS, el hook `revalidateFrontend` notifica a `POST /api/revalidate` en el website para invalidar selectivamente la caché SSR
+6. CORS configurado en backend para permitir ambos orígenes
 
 ## Deployment con Dokploy
 

@@ -207,6 +207,14 @@
     "genericError": "Algo salió mal",
     "error": "Error al enviar el mensaje. Intenta de nuevo."
   },
+  "formBlock": {
+    "subtitle": "Completa el formulario y nuestro equipo te contactará pronto.",
+    "send": "Enviar mensaje",
+    "sending": "Enviando...",
+    "success": "¡Gracias! Tu mensaje ha sido enviado. Te contactaremos pronto.",
+    "error": "No se pudo enviar el formulario. Por favor inténtalo de nuevo.",
+    "empty": "Selecciona un formulario en el bloque desde el panel de administración."
+  },
   "theme": {
     "selectColourTheme": "Seleccionar tema de color",
     "colourTheme": "Tema de color",
@@ -220,7 +228,7 @@
     "swatchLabel": "Tema {name}"
   },
   "search": {
-    "placeholder": "Buscar artículos, proyectos y páginas…",
+    "placeholder": "Buscar artículos, proyectos, servicios y páginas…",
     "inputLabel": "Término de búsqueda",
     "resultsLabel": "Resultados de búsqueda",
     "hint": "Empieza a escribir para buscar en el sitio.",
@@ -232,11 +240,9 @@
     "watchOn": "Ver en YouTube"
   },
   "footer": {
-    "credit": "Desarrollado por Viptel Comunicaciones",
-    "builtWith": "Tecnología propia",
     "copyright": "© {year} {siteName}",
-    "credit": "Tema por <a href=\"https://hansmartens.dev\" class=\"transition-colors hover:text-foreground\" target=\"_blank\" rel=\"noopener noreferrer\">Hans Martens Dev</a>",
-    "builtWith": "Construido con Astro Rocket",
+    "credit": "Desarrollado por <a href=\"https://viptelcomunicaciones.com\" class=\"transition-colors hover:text-foreground\" target=\"_blank\" rel=\"noopener noreferrer\">Viptel Comunicaciones</a>",
+    "builtWith": "Tecnología propia",
     "followOn": "Síguenos en {platform}"
   },
   "pages": {
@@ -558,7 +564,7 @@
       "emailLabel": "Correo",
       "emailNote": "Escríbenos",
       "socialNote": "Síguenos",
-      "basedIn": "Basados en {country}"
+      "basedIn": "Basados en"
     },
     "home": {
       "meta": {

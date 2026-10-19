@@ -27,35 +27,49 @@ backend/
 
 ## Colecciones
 
-| Colección | Slug | Localizada | Versiones | Auth | Acceso lectura |
-|---|---|---|---|---|---|
-| Users | `users` | No | No | Email/password + API key | authenticated |
-| Media | `media` | No | No | — | anyone |
-| Categories | `categories` | Sí (title) | No | — | anyone |
-| Pages | `pages` | Sí | Drafts | — | authenticatedOrPublished |
-| Posts | `posts` | Sí | Drafts | — | authenticatedOrPublished |
-| Projects | `projects` | Sí | Drafts | — | authenticatedOrPublished |
-| Services | `services` | Sí | Drafts | — | authenticatedOrPublished |
+| Colección | Slug | Localizada | Versiones | Auth | Acceso lectura | Acceso escritura |
+|---|---|---|---|---|---|---|
+| Users | `users` | No | No | Email/password + API key | authenticated | `adminOnly` |
+| Media | `media` | Sí (`alt`, `caption`) | No | — | anyone | `contentRoles` (`adminOnly` delete) |
+| Categories | `categories` | Sí | No | — | anyone | `contentRoles` (`adminOnly` delete) |
+| ProjectCategories | `project-categories` | Sí | No | — | anyone | `contentRoles` (`adminOnly` delete) |
+| Tags | `tags` | No | No | — | anyone | `contentRoles` (`adminOnly` delete) |
+| PostTypes | `post-types` | Sí | No | — | anyone | `contentRoles` (`adminOnly` delete) |
+| ProjectTypes | `project-types` | Sí | No | — | anyone | `contentRoles` (`adminOnly` delete) |
+| Pages | `pages` | Sí | Drafts | — | authenticatedOrPublished | `contentRoles` (`adminOnly` delete) |
+| Posts | `posts` | Sí | Drafts | — | authenticatedOrPublished | `contentRoles` (`adminOnly` delete) |
+| Projects | `projects` | Sí | Drafts | — | authenticatedOrPublished | `contentRoles` (`adminOnly` delete) |
+| Services | `services` | Sí | Drafts | — | authenticatedOrPublished | `contentRoles` (`adminOnly` delete) |
+| Forms | `forms` | Sí | No | — | anyone | `contentRoles` (`adminOnly` delete) |
+| FormSubmissions | `form-submissions` | No | No | — | `crmRoles` | `anyone` create, `adminOnly` update/delete |
+| Search | `search` | Sí | No | — | anyone | Automático |
 
-## Access Control
+## Access Control (`src/access/roleBased.ts`)
 
-- `anyone`: Siempre `true` — usado en Media read
-- `authenticated`: `Boolean(user)` — requiere login
+- `anyone`: Siempre `true` — lectura pública en taxonomías, media, forms y search
+- `authenticated`: `Boolean(user)` — requiere sesión activa
 - `authenticatedOrPublished`: Si hay user → `true`, sino → `{ _status: { equals: 'published' } }`
+- `adminOnly`: Solo usuarios con rol `admin`
+- `contentRoles`: Usuarios con rol `admin`, `editor` o `marketing`
+- `crmRoles`: Usuarios con rol `admin`, `sales` o `marketing` (lectura de leads en `form-submissions`)
+- `allAdminRoles`: `admin`, `editor`, `marketing`, `sales` (acceso al panel `/admin`)
 
 Ver `reference/ACCESS-CONTROL.md` para detalles.
 
 ## Plugins
 
 - `@payloadcms/plugin-seo` — Meta títulos, descripciones, OG images en pages, posts, projects, services
-- `@payloadcms/plugin-nested-docs` — Jerarquía padre/hijo en pages
-- `@payloadcms/plugin-redirects` — Redirecciones para pages y posts
+- `@payloadcms/plugin-nested-docs` — Jerarquía padre/hijo en pages y services
+- `@payloadcms/plugin-redirects` — Redirecciones 301/302 para pages, posts y services
+- `@payloadcms/plugin-search` — Índice FTS localizado para pages, posts, projects y services
+- `@payloadcms/plugin-form-builder` — Formularios dinámicos (`forms`) y CRM de leads (`form-submissions`)
+- `@payloadcms/storage-s3` — Almacenamiento en Cloudflare R2 (con conversión WebP en `Media`)
 
 Ver `reference/PLUGINS.md` para configuración completa.
 
 ## Bloques
 
-11 bloques disponibles: Archive, Banner, CallToAction, Cards, Code, Content, FAQ, Gallery, MediaBlock, MediaContent, Pricing.
+12 bloques disponibles: Archive, Banner, CallToAction, Cards, Code, Content, FAQ, Form (`formBlock`), Gallery, MediaBlock, MediaContent, Pricing.
 
 Ver `reference/BLOCKS.md` para slugs y campos de cada uno.
 

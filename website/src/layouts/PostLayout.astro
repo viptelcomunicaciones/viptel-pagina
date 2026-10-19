@@ -25,7 +25,7 @@ import {
   getCategoryArchiveUrl,
   getSubcategoryArchiveUrl,
 } from '@/lib/blog';
-import { formatDate, getReadingTime, resolveSocialLinks } from '@/lib/utils';
+import { resolveSocialLinks } from '@/lib/utils';
 import { extractHeadings, getPlainText } from '@/lib/headings';
 import Breadcrumbs from '@/components/seo/Breadcrumbs.astro';
 import ArticleHero from '@/components/blog/ArticleHero.astro';
@@ -60,7 +60,6 @@ const updatedAt =
     : undefined;
 
 const bodyText = getPlainText(post.content);
-const readingTime = getReadingTime(bodyText);
 
 const tocConfig = siteConfig.articleFeatures?.toc;
 const showToc = post.toc === 'enabled' || (!!tocConfig?.enabled && post.toc !== 'disabled');

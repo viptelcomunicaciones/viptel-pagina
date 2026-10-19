@@ -2,8 +2,40 @@
 import { payload } from '@/lib/payload-client';
 import { slugify } from '@/lib/headings';
 
+interface LexicalBlockFields {
+  blockType?: string;
+  style?: string;
+  content?: LexicalContent | null;
+  language?: string;
+  code?: string;
+  linkType?: string;
+  url?: string;
+  newTab?: boolean;
+  doc?: {
+    value?: { slug?: string } | number | null;
+    relationTo?: string;
+  } | null;
+}
+
+interface LexicalNode {
+  type?: string;
+  text?: string;
+  format?: number | string;
+  tag?: string;
+  listType?: string;
+  children?: LexicalNode[];
+  fields?: LexicalBlockFields;
+  value?: { url?: string | null; alt?: string | null } | number | null;
+  [k: string]: unknown;
+}
+
+interface LexicalContent {
+  root?: LexicalNode | null;
+  [k: string]: unknown;
+}
+
 interface Props {
-  content: any;
+  content: LexicalContent | null | undefined;
   class?: string;
   /** Skip the first heading node (used by heros where the heading renders in its own slot) */
   excludeFirstHeading?: boolean;
@@ -15,7 +47,7 @@ interface RenderCtx {
   usedSlugs: Set<string>;
 }
 
-function textContent(nodes: any[]): string {
+function textContent(nodes?: LexicalNode[]): string {
   if (!Array.isArray(nodes)) return '';
   return nodes
     .map((n) => {
@@ -51,7 +83,7 @@ function wrapFormat(text: string, format: number): string {
   return result;
 }
 
-function resolveLinkUrl(fields: any): { href: string; isExternal: boolean } {
+function resolveLinkUrl(fields?: LexicalBlockFields): { href: string; isExternal: boolean } {
   if (!fields) return { href: '#', isExternal: false };
 
   const linkType = fields.linkType || 'custom';
@@ -60,7 +92,7 @@ function resolveLinkUrl(fields: any): { href: string; isExternal: boolean } {
     return { href: fields.url || '#', isExternal: Boolean(fields.newTab) };
   }
 
-  if (linkType === 'internal' && fields.doc?.value) {
+  if (linkType === 'internal' && fields.doc?.value && typeof fields.doc.value === 'object') {
     const doc = fields.doc.value;
     const relationTo = fields.doc.relationTo || 'posts';
     const prefix = relationTo === 'projects' ? '/projects' : '/blog';
@@ -70,19 +102,19 @@ function resolveLinkUrl(fields: any): { href: string; isExternal: boolean } {
   return { href: fields.url || '#', isExternal: Boolean(fields.newTab) };
 }
 
-function renderChildren(nodes: any[], ctx: RenderCtx): string {
+function renderChildren(nodes: LexicalNode[] | undefined, ctx: RenderCtx): string {
   if (!nodes || !Array.isArray(nodes)) return '';
   return nodes.map((n) => renderNode(n, ctx)).join('');
 }
 
-function renderNode(node: any, ctx: RenderCtx): string {
+function renderNode(node: LexicalNode | null | undefined, ctx: RenderCtx): string {
   if (!node) return '';
 
   // Text node — apply Lexical bit-flag formatting
   if (node.type === 'text') {
     const raw = node.text || '';
     const escaped = escapeHtml(raw);
-    return wrapFormat(escaped, node.format || 0);
+    return wrapFormat(escaped, typeof node.format === 'number' ? node.format : 0);
   }
 
   // Heading — Lexical uses type=heading + tag property. Emits a stable `id`
@@ -152,7 +184,7 @@ function renderNode(node: any, ctx: RenderCtx): string {
   }
 
   // Image upload
-  if (node.type === 'upload' && node.value) {
+  if (node.type === 'upload' && node.value && typeof node.value === 'object') {
     const url = node.value.url ? payload.resolveMediaUrl(node.value.url) : '';
     const alt = node.value.alt || '';
     return `<img src="${url}" alt="${alt}" class="rounded-lg max-w-full" />`;
@@ -172,7 +204,7 @@ function renderNode(node: any, ctx: RenderCtx): string {
   return '';
 }
 
-function renderBlock(fields: any, ctx: RenderCtx): string {
+function renderBlock(fields: LexicalBlockFields, ctx: RenderCtx): string {
   switch (fields.blockType) {
     case 'banner': {
       const style = fields.style || 'info';
@@ -201,7 +233,7 @@ function renderBlock(fields: any, ctx: RenderCtx): string {
 let rootChildren = content?.root?.children ?? [];
 
 if (excludeFirstHeading && Array.isArray(rootChildren)) {
-  const firstHeadingIndex = rootChildren.findIndex((node: any) => node?.type === 'heading');
+  const firstHeadingIndex = rootChildren.findIndex((node: LexicalNode) => node?.type === 'heading');
   if (firstHeadingIndex > -1) {
     rootChildren = [
       ...rootChildren.slice(0, firstHeadingIndex),

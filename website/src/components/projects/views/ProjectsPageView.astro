@@ -15,6 +15,7 @@ import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
 import { t, defaultLocale, localizedPath } from '@/i18n';
 import { payload } from '@/lib/payload-client';
 import { getProjectsPageUrl, PROJECTS_PER_PAGE } from '@/lib/projects';
+import NotFoundView from '@/components/pages/views/NotFoundView.astro';
 
 interface Props {
   locale?: string;
@@ -27,12 +28,20 @@ const { docs, totalDocs, totalPages } = await payload
   .projects()
   .getPaginated(locale, page, PROJECTS_PER_PAGE);
 
+const isOutOfRange = page > totalPages && totalPages > 0;
+if (isOutOfRange) {
+  Astro.response.status = 404;
+}
+
 const pageProjects = docs;
 
 const contactUrl = localizedPath('/contact', locale);
 const aboutUrl = localizedPath('/about', locale);
 ---
 
+{isOutOfRange ? (
+  <NotFoundView locale={locale} />
+) : (
 <ProjectsListLayout
   title={t('projects.pageMetaTitle', locale, { page })}
   description={t('projects.pageMetaDescription', locale, { page, total: totalPages })}
@@ -121,3 +130,4 @@ const aboutUrl = localizedPath('/about', locale);
     </section>
   </Fragment>
 </ProjectsListLayout>
+)}

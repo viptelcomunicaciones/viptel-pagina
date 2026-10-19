@@ -2,38 +2,80 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import PostLayout from '@/layouts/PostLayout.astro';
 import BlogArchiveView from '@/components/blog/views/BlogArchiveView.astro';
+import NotFoundView from '@/components/pages/views/NotFoundView.astro';
 import { defaultLocale, isValidLocale } from '@/i18n';
-import { resolveBlogArchive } from '@/lib/blog';
+import { resolveBlogArchive, getTagName } from '@/lib/blog';
+import { payload } from '@/lib/payload-client';
+import { createBlogPostSchema } from '@/lib/schema';
+import siteConfig from '@/config/site.config';
 
 export const prerender = false;
 
 const { locale = defaultLocale, slug } = Astro.params;
-
-if (!isValidLocale(locale)) {
-  return Astro.redirect('/404');
-}
-
-if (!slug) {
-  return Astro.redirect('/404');
-}
-
-const segments = slug.split('/').filter(Boolean);
+const validLocale = isValidLocale(locale);
+const effectiveLocale = validLocale ? locale : defaultLocale;
+const segments = validLocale && slug ? slug.split('/').filter(Boolean) : [];
 const currentPage = Math.max(1, Number(Astro.url.searchParams.get('page')) || 1);
-const archive = await resolveBlogArchive(segments, locale, currentPage);
+const archive =
+  segments.length > 0
+    ? await resolveBlogArchive(segments, effectiveLocale, currentPage)
+    : ({ kind: 'not-found' } as const);
 
-if (archive.kind === 'not-found') {
-  return Astro.redirect('/404');
+const is404 = !validLocale || archive.kind === 'not-found';
+if (is404) {
+  Astro.response.status = 404;
 }
 
 const post = archive.kind === 'post' ? archive.post! : null;
+const postMetaImage =
+  post?.meta?.image && typeof post.meta.image === 'object' && post.meta.image.url
+    ? payload.resolveMediaUrl(post.meta.image.url)
+    : post?.heroImage && typeof post.heroImage === 'object' && post.heroImage.url
+      ? payload.resolveMediaUrl(post.heroImage.url)
+      : undefined;
+
+const postAuthor = post?.populatedAuthors?.[0]?.name || siteConfig.name;
+const postPublishedAt = post?.publishedAt
+  ? new Date(post.publishedAt)
+  : post?.createdAt
+    ? new Date(post.createdAt)
+    : new Date();
+const postModifiedAt = post?.updatedAt ? new Date(post.updatedAt) : undefined;
+const postTags = (post?.tags ?? []).map((t) => getTagName(t)).filter(Boolean);
+const postSchemas = post
+  ? [
+      createBlogPostSchema({
+        title: post.meta?.title || post.title,
+        description: post.meta?.description || post.excerpt || post.title,
+        url: new URL(Astro.url.pathname, Astro.site).toString(),
+        image: postMetaImage || new URL(siteConfig.ogImage, Astro.site).toString(),
+        datePublished: postPublishedAt,
+        dateModified: postModifiedAt,
+        author: { name: postAuthor, url: siteConfig.url },
+      }),
+    ]
+  : undefined;
 ---
 
 {
-  post ? (
-    <PageLayout title={post.title} description={post.excerpt || post.title}>
-      <PostLayout post={post} locale={locale} />
+  is404 ? (
+    <NotFoundView locale={effectiveLocale} />
+  ) : post ? (
+    <PageLayout
+      title={post.meta?.title || post.title}
+      description={post.meta?.description || post.excerpt || post.title}
+      image={postMetaImage}
+      article={{
+        publishedTime: postPublishedAt,
+        modifiedTime: postModifiedAt,
+        authors: [postAuthor],
+        tags: postTags,
+      }}
+      extraSchemas={postSchemas}
+    >
+      <PostLayout post={post} locale={effectiveLocale} />
     </PageLayout>
   ) : (
-    <BlogArchiveView archive={archive} currentPage={currentPage} locale={locale} />
+    <BlogArchiveView archive={archive} currentPage={currentPage} locale={effectiveLocale} />
   )
 }

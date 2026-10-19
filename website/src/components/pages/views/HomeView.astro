@@ -21,6 +21,7 @@ import { viptelStack } from '@/data/stack';
 import { payload } from '@/lib/payload-client';
 import { t, defaultLocale, localizedPath } from '@/i18n';
 import type { PageBlock } from '@/lib/block-types';
+import type { LexicalNode, LexicalRoot } from '@/lib/headings';
 import { Image } from 'astro:assets';
 
 interface HeroLink {
@@ -29,7 +30,7 @@ interface HeroLink {
     label?: string | null;
     url?: string | null;
     appearance?: string | null;
-    reference?: any;
+    reference?: unknown;
     newTab?: boolean | null;
   };
   id?: string | null;
@@ -43,13 +44,13 @@ const { locale = defaultLocale } = Astro.props;
 
 const home = await payload.pages().getBySlug('home', locale);
 
-function extractRichText(richText: any): string {
+function extractRichText(richText?: LexicalRoot | null): string {
   try {
     const root = richText?.root;
     if (!root || !Array.isArray(root.children)) return '';
     return root.children
-      .filter((c: any) => c.type === 'paragraph' || c.type === 'heading')
-      .map((c: any) => c.children?.map((t: any) => t.text || '').join('') || '')
+      .filter((c: LexicalNode) => c.type === 'paragraph' || c.type === 'heading')
+      .map((c: LexicalNode) => c.children?.map((item: LexicalNode) => item.text || '').join('') || '')
       .join(' ');
   } catch {
     return '';
@@ -89,12 +90,16 @@ const heroStackOrder = [
 const heroStackItems = viptelStack
   .filter((e: StackItem) => heroStackOrder.includes(e.name))
   .sort((a, b) => heroStackOrder.indexOf(a.name) - heroStackOrder.indexOf(b.name));
+const metaImageUrl =
+  home?.meta?.image && typeof home.meta.image === 'object' && home.meta.image.url
+    ? payload.resolveMediaUrl(home.meta.image.url)
+    : heroImageUrl || '/og-default.svg';
 ---
 
 <LandingLayout
   title={home?.meta?.title || t('pages.home.meta.title', locale)}
   description={home?.meta?.description || t('pages.home.meta.description', locale)}
-  image="/og-default.svg"
+  image={metaImageUrl}
   includePersonSchema={true}
   includeProfessionalServiceSchema={true}
 >

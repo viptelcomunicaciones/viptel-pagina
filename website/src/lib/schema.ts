@@ -1,7 +1,6 @@
 import type {
   WebSite,
   Organization,
-  Person,
   LocalBusiness,
   BlogPosting,
   BreadcrumbList,

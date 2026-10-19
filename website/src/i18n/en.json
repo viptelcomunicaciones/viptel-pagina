@@ -207,6 +207,14 @@
     "genericError": "Something went wrong",
     "error": "Failed to send message. Please try again."
   },
+  "formBlock": {
+    "subtitle": "Complete the form below and our team will get back to you shortly.",
+    "send": "Send message",
+    "sending": "Sending...",
+    "success": "Thank you! Your message has been sent. We will get back to you soon.",
+    "error": "Could not send your message. Please try again.",
+    "empty": "Select a form in this block from the administration panel."
+  },
   "theme": {
     "selectColourTheme": "Select colour theme",
     "colourTheme": "Colour theme",
@@ -220,7 +228,7 @@
     "swatchLabel": "{name} theme"
   },
   "search": {
-    "placeholder": "Search posts, projects, and pages…",
+    "placeholder": "Search posts, projects, services, and pages…",
     "inputLabel": "Search query",
     "resultsLabel": "Search results",
     "hint": "Start typing to search the site.",
@@ -234,7 +242,7 @@
   "footer": {
     "copyright": "© {year} {siteName}",
     "credit": "Powered by <a href=\"https://viptelcomunicaciones.com\" class=\"transition-colors hover:text-foreground\" target=\"_blank\" rel=\"noopener noreferrer\">Viptel Comunicaciones</a>",
-    "builtWith": "Built with Astro",
+    "builtWith": "Proprietary technology",
     "followOn": "Follow us on {platform}"
   },
   "pages": {
@@ -529,7 +537,7 @@
       "emailLabel": "Email",
       "emailNote": "Write to us",
       "socialNote": "Follow us",
-      "basedIn": "Based in {country}"
+      "basedIn": "Based in"
     },
     "home": {
       "meta": {

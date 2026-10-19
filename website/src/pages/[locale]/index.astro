@@ -1,44 +1,52 @@
 ---
 import HomeView from '@/components/pages/views/HomeView.astro';
+import NotFoundView from '@/components/pages/views/NotFoundView.astro';
 import PageLayout from '@/layouts/PageLayout.astro';
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
 import RenderHero from '@/components/heros/RenderHero.astro';
 import { payload, redirectTarget } from '@/lib/payload-client';
 import { getSecondaryLocales, isValidLocale, defaultLocale } from '@/i18n';
 
-// Locale-prefixed landing page (`/<locale>`). One page per non-default locale;
-// emits nothing when i18n is off. Featured content and copy fall back to the
-// default locale, so the LanguageSwitcher never lands on a 404.
-//
-// In SSR this route also intercepts ANY single-segment URL (`/terminos`), so
-// when the first segment is not a valid locale we fall back to resolving it as
-// a CMS page in the default locale (served at the site root) before 404ing.
 export function getStaticPaths() {
   return getSecondaryLocales().map((locale) => ({ params: { locale } }));
 }
 
 const { locale } = Astro.params;
 
-// En SSR esta ruta también intercepta URLs de un segmento (`/home`, `/terminos`).
-// Los redirects de Payload se guardan con el path completo.
+if (locale === 'home') return Astro.redirect('/', 301);
+
 const redirect = await payload.redirects().get(`/${locale}`);
 if (redirect) {
   const { target, status } = redirectTarget(redirect);
   return Astro.redirect(target, status);
 }
 
+const isLocale = isValidLocale(locale);
 let rootPage = null;
-if (!isValidLocale(locale)) {
+let is404 = false;
+
+if (!isLocale) {
   rootPage = await payload.pages().getBySlug(locale ?? '', defaultLocale);
-  if (!rootPage) return Astro.redirect('/404');
+  if (!rootPage) {
+    Astro.response.status = 404;
+    is404 = true;
+  }
 }
+
+const metaImage =
+  rootPage?.meta?.image && typeof rootPage.meta.image === 'object' && rootPage.meta.image.url
+    ? payload.resolveMediaUrl(rootPage.meta.image.url)
+    : undefined;
 ---
 
 {
-  rootPage ? (
+  is404 ? (
+    <NotFoundView locale={defaultLocale} />
+  ) : rootPage ? (
     <PageLayout
       title={rootPage.meta?.title || rootPage.title}
       description={rootPage.meta?.description || rootPage.title}
+      image={metaImage}
     >
       {rootPage.hero && <RenderHero hero={rootPage.hero} locale={defaultLocale} />}
       <BlockRenderer layout={rootPage.layout} locale={defaultLocale} />

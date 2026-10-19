@@ -9,7 +9,6 @@ import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
 import RichText from '@/components/blocks/RichText.astro';
 import Badge from '@/components/ui/data-display/Badge/Badge.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
-import ServiceBreadcrumb from './ServiceBreadcrumb.astro';
 import ServiceFeatures from './ServiceFeatures.astro';
 import ServicePricing from './ServicePricing.astro';
 import ServiceFAQ from './ServiceFAQ.astro';
@@ -17,6 +16,10 @@ import ServiceGallery from './ServiceGallery.astro';
 import ServiceGrid from './ServiceGrid.astro';
 import { Hero } from '@/components/hero';
 import { t } from '@/i18n';
+import { payload } from '@/lib/payload-client';
+import { getPlainText } from '@/lib/headings';
+import { createProfessionalServiceSchema, createFAQSchema } from '@/lib/schema';
+import type { Thing, WithContext } from 'schema-dts';
 import type { Service } from '@/lib/payload-types';
 import type { PageBlock } from '@/lib/block-types';
 
@@ -37,10 +40,27 @@ const {
 } = Astro.props;
 const title = service.meta?.title || service.title;
 const description = service.meta?.description || service.shortDescription || service.title;
+const metaImage =
+  service.meta?.image && typeof service.meta.image === 'object' && service.meta.image.url
+    ? payload.resolveMediaUrl(service.meta.image.url)
+    : undefined;
 const isCategory = childrenServices.length > 0;
+
+const serviceSchemas: WithContext<Thing>[] = [createProfessionalServiceSchema()];
+if (service.faq && service.faq.length > 0) {
+  const faqItems = service.faq
+    .map((f) => ({
+      question: f.question || '',
+      answer: typeof f.answer === 'string' ? f.answer : getPlainText(f.answer),
+    }))
+    .filter((f) => f.question && f.answer);
+  if (faqItems.length > 0) {
+    serviceSchemas.push(createFAQSchema(faqItems));
+  }
+}
 ---
 
-<PageLayout title={title} description={description}>
+<PageLayout title={title} description={description} image={metaImage} extraSchemas={serviceSchemas}>
   <Hero layout="centered" size="sm" class="isolate" showHeroHalo>
     <Badge slot="badge" variant="brand" pill>
       <Icon name={service.icon ?? 'briefcase'} size="sm" />

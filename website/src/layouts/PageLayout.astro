@@ -7,12 +7,20 @@
 import BaseLayout from './BaseLayout.astro';
 import Header from '@/components/layout/Header.astro';
 import Footer from '@/components/layout/Footer.astro';
+import type { Thing, WithContext } from 'schema-dts';
 
 interface Props {
   title?: string;
   description?: string;
   image?: string;
   imageAlt?: string;
+  article?: {
+    publishedTime?: Date;
+    modifiedTime?: Date;
+    authors?: string[];
+    tags?: string[];
+  };
+  extraSchemas?: WithContext<Thing>[];
   noindex?: boolean;
   nofollow?: boolean;
   showScrollProgress?: boolean;
@@ -31,6 +39,8 @@ const {
   description,
   image,
   imageAlt,
+  article,
+  extraSchemas,
   noindex,
   nofollow,
   showScrollProgress = false,
@@ -44,6 +54,8 @@ const {
   description={description}
   image={image}
   imageAlt={imageAlt}
+  article={article}
+  extraSchemas={extraSchemas}
   noindex={noindex}
   nofollow={nofollow}
   eagerReveal={eagerReveal}
@@ -55,7 +67,6 @@ const {
     variant="solid"
     size="lg"
     showActiveState
-    showCta={false}
     showScrollProgress={showScrollProgress}
   />
 

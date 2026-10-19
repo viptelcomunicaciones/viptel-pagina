@@ -1,37 +1,62 @@
 ---
 /**
  * FormBlock — renders a Payload Form Builder form in Astro.
- * Fetches form fields from Payload CMS and renders them as HTML inputs.
- * Submits to Payload's form-submissions endpoint.
+ * Fetches form fields from Payload CMS (cached via Hybrid SSR Cache)
+ * and submits via `/api/forms/submit` (Rate-Limit + Honeypot + Payload CRM + Resend).
  */
 import Card from '@/components/ui/data-display/Card/Card.astro'
 import Button from '@/components/ui/form/Button/Button.astro'
+import { payload } from '@/lib/payload-client'
 import type { FormBlock as FormBlockType } from '@/lib/payload-types'
+import { defaultLocale, t, type Locale } from '@/i18n'
 
 interface Props {
   block: FormBlockType
   locale?: string
 }
 
-const { block } = Astro.props
-const PAYLOAD_URL = process.env.INTERNAL_PAYLOAD_URL || process.env.PAYLOAD_URL || 'http://localhost:3000'
-const PUBLIC_PAYLOAD_URL = process.env.PAYLOAD_URL || 'http://localhost:3000'
+const { block, locale = defaultLocale } = Astro.props
+const resolvedLocale = (locale === 'en' ? 'en' : 'es') as Locale
 
-const formId = block.form && typeof block.form !== 'number' ? ((block.form as any).id || block.form) : null
+const formId =
+  block.form && typeof block.form === 'object' && 'id' in block.form
+    ? block.form.id
+    : typeof block.form === 'number' || typeof block.form === 'string'
+      ? block.form
+      : null
 
-let fields: any[] = []
-let formTitle = ''
-
-if (formId) {
-  try {
-    const res = await fetch(`${PAYLOAD_URL}/api/forms/${formId}?depth=1`)
-    if (res.ok) {
-      const data: any = await res.json()
-      fields = data.fields || []
-      formTitle = data.title || ''
-    }
-  } catch { /* form unavailable — render the fallback */ }
+interface FormFieldOption {
+  label?: string
+  value?: string
 }
+
+interface FormFieldDef {
+  id?: string
+  name?: string
+  blockName?: string
+  blockType?: string
+  label?: string
+  required?: boolean | null
+  width?: number | null
+  options?: FormFieldOption[]
+}
+
+const formDoc = formId ? await payload.forms().getById(formId, locale) : null
+const inlineForm = typeof block.form === 'object' && block.form ? block.form : null
+const fields: FormFieldDef[] = (formDoc?.fields ?? inlineForm?.fields ?? []) as FormFieldDef[]
+const formTitle = formDoc?.title ?? inlineForm?.title ?? ''
+const submitLabel =
+  formDoc?.submitButtonLabel || t('formBlock.send', resolvedLocale)
+
+const copy = {
+  subtitle: t('formBlock.subtitle', resolvedLocale),
+  sending: t('formBlock.sending', resolvedLocale),
+  success: t('formBlock.success', resolvedLocale),
+  error: t('formBlock.error', resolvedLocale),
+  empty: t('formBlock.empty', resolvedLocale),
+}
+const getWidthSpan = (width?: number | null) =>
+  width && Number(width) <= 50 ? 'sm:col-span-1' : 'sm:col-span-2'
 ---
 
 <section class="py-[var(--space-section-md)] bg-background-secondary border-t border-border">
@@ -40,29 +65,41 @@ if (formId) {
       {formId ? (
         <>
           {formTitle && <h2 class="font-display text-2xl font-bold text-foreground mb-2">{formTitle}</h2>}
-          <p class="text-sm text-foreground-muted mb-6">Completa el formulario y te contactaremos pronto.</p>
+          <p class="text-sm text-foreground-muted mb-6">{copy.subtitle}</p>
 
-          <form id={`payload-form-${formId}`} class="flex flex-col gap-4" data-form-id={formId}>
-            {fields.map((field: any) => {
+          <form
+            id={`payload-form-${formId}`}
+            class="grid grid-cols-1 sm:grid-cols-2 gap-4"
+            data-form-id={formId}
+            data-sending-label={copy.sending}
+            data-submit-label={submitLabel}
+          >
+            <div class="hidden" aria-hidden="true">
+              <label for={`honeypot-${formId}`}>Website</label>
+              <input id={`honeypot-${formId}`} type="text" name="honeypot" tabindex="-1" autocomplete="off" />
+            </div>
+
+            {fields.map((field) => {
               const name = field.name || field.blockName || ''
               const label = field.label || name || ''
-              const required = field.required || false
-              const inputId = `field-${field.id || Math.random()}`
+              const required = Boolean(field.required)
+              const widthSpan = getWidthSpan(field.width)
+              const inputId = `field-${formId}-${field.id || name}`
 
               switch (field.blockType) {
                 case 'text':
                 case 'email':
                   return (
-                    <div class="flex flex-col gap-1">
+                    <div class:list={['flex flex-col gap-1.5', widthSpan]}>
                       <label for={inputId} class="text-sm font-medium text-foreground">
-                        {label}{required && <span class="text-red-500 ml-0.5">*</span>}
+                        {label}{required && <span class="text-error ml-0.5">*</span>}
                       </label>
                       <input
                         id={inputId}
                         type={field.blockType === 'email' ? 'email' : 'text'}
                         name={name}
                         required={required}
-                        class="rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-foreground-muted focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition-colors"
+                        class="rounded-lg border border-border bg-surface px-4 py-2.5 text-sm text-foreground placeholder:text-foreground-muted focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                         placeholder={label}
                       />
                     </div>
@@ -71,16 +108,16 @@ if (formId) {
                 case 'textarea':
                 case 'message':
                   return (
-                    <div class="flex flex-col gap-1">
+                    <div class="flex flex-col gap-1.5 sm:col-span-2">
                       <label for={inputId} class="text-sm font-medium text-foreground">
-                        {label}{required && <span class="text-red-500 ml-0.5">*</span>}
+                        {label}{required && <span class="text-error ml-0.5">*</span>}
                       </label>
                       <textarea
                         id={inputId}
                         name={name}
                         required={required}
                         rows={4}
-                        class="rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-foreground-muted focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition-colors resize-y"
+                        class="rounded-lg border border-border bg-surface px-4 py-2.5 text-sm text-foreground placeholder:text-foreground-muted focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-y"
                         placeholder={label}
                       />
                     </div>
@@ -88,16 +125,16 @@ if (formId) {
 
                 case 'number':
                   return (
-                    <div class="flex flex-col gap-1">
+                    <div class:list={['flex flex-col gap-1.5', widthSpan]}>
                       <label for={inputId} class="text-sm font-medium text-foreground">
-                        {label}{required && <span class="text-red-500 ml-0.5">*</span>}
+                        {label}{required && <span class="text-error ml-0.5">*</span>}
                       </label>
                       <input
                         id={inputId}
                         type="number"
                         name={name}
                         required={required}
-                        class="rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition-colors"
+                        class="rounded-lg border border-border bg-surface px-4 py-2.5 text-sm text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                         placeholder={label}
                       />
                     </div>
@@ -105,15 +142,16 @@ if (formId) {
 
                 case 'checkbox':
                   return (
-                    <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-3 sm:col-span-2">
                       <input
                         id={inputId}
                         type="checkbox"
                         name={name}
-                        class="h-4 w-4 rounded border-border text-brand-500 focus:ring-brand-500"
+                        required={required}
+                        class="h-4 w-4 rounded border-border text-primary focus:ring-primary"
                       />
                       <label for={inputId} class="text-sm font-medium text-foreground">
-                        {label}{required && <span class="text-red-500 ml-0.5">*</span>}
+                        {label}{required && <span class="text-error ml-0.5">*</span>}
                       </label>
                     </div>
                   )
@@ -123,18 +161,18 @@ if (formId) {
                 case 'country': {
                   const options = field.options || []
                   return (
-                    <div class="flex flex-col gap-1">
+                    <div class:list={['flex flex-col gap-1.5', widthSpan]}>
                       <label for={inputId} class="text-sm font-medium text-foreground">
-                        {label}{required && <span class="text-red-500 ml-0.5">*</span>}
+                        {label}{required && <span class="text-error ml-0.5">*</span>}
                       </label>
                       <select
                         id={inputId}
                         name={name}
                         required={required}
-                        class="rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition-colors"
+                        class="rounded-lg border border-border bg-surface px-4 py-2.5 text-sm text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                       >
                         <option value="">{label}...</option>
-                        {options.map((opt: any) => (
+                        {options.map((opt) => (
                           <option value={opt.value || opt.label}>{opt.label}</option>
                         ))}
                       </select>
@@ -144,16 +182,16 @@ if (formId) {
 
                 default:
                   return (
-                    <div class="flex flex-col gap-1">
+                    <div class:list={['flex flex-col gap-1.5', widthSpan]}>
                       <label for={inputId} class="text-sm font-medium text-foreground">
-                        {label}{required && <span class="text-red-500 ml-0.5">*</span>}
+                        {label}{required && <span class="text-error ml-0.5">*</span>}
                       </label>
                       <input
                         id={inputId}
                         type="text"
                         name={name}
                         required={required}
-                        class="rounded-lg border border-border bg-background px-4 py-2.5 text-sm text-foreground placeholder:text-foreground-muted focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition-colors"
+                        class="rounded-lg border border-border bg-surface px-4 py-2.5 text-sm text-foreground placeholder:text-foreground-muted focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                         placeholder={label}
                       />
                     </div>
@@ -162,51 +200,96 @@ if (formId) {
             })}
 
             {fields.length > 0 && (
-              <div class="mt-2">
-                <Button type="submit" size="lg" class="w-full sm:w-auto">
-                  Enviar
+              <div class="mt-2 sm:col-span-2">
+                <Button type="submit" size="lg" class="w-full sm:w-auto" data-submit-btn>
+                  {submitLabel}
                 </Button>
               </div>
             )}
 
-            <div id={`payload-form-${formId}-status`} class="hidden mt-4 p-4 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 text-sm">
-              ¡Gracias! Tu mensaje ha sido enviado. Te contactaremos pronto.
+            <div
+              id={`payload-form-${formId}-error`}
+              data-form-error
+              class="hidden sm:col-span-2 mt-2 p-4 rounded-lg bg-error/10 border border-error/20 text-error text-sm"
+              role="alert"
+            >
+              {copy.error}
             </div>
           </form>
 
-          <script is:inline define:vars={{ formId, publicPayloadUrl: PUBLIC_PAYLOAD_URL }}>
-            (function() {
-              const form = document.getElementById(`payload-form-${formId}`);
-              if (!form) return;
-              const status = document.getElementById(`payload-form-${formId}-status`);
+          <div
+            id={`payload-form-${formId}-status`}
+            data-form-status
+            class="hidden mt-4 p-4 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 text-sm"
+            role="status"
+          >
+            {copy.success}
+          </div>
 
-              form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const formData = new FormData(form);
-                const data = { form: formId, submissionData: [] };
+          <script>
+            function initPayloadForms() {
+              document.querySelectorAll<HTMLFormElement>('form[data-form-id]').forEach((form) => {
+                if (form.dataset.bound === 'true') return;
+                form.dataset.bound = 'true';
+                const currentFormId = form.dataset.formId || '';
+                const sendingLabel = form.dataset.sendingLabel || 'Sending...';
+                const defaultSubmitLabel = form.dataset.submitLabel || 'Send';
+                const status =
+                  form.parentElement?.querySelector<HTMLElement>('[data-form-status]') ??
+                  document.getElementById(`payload-form-${currentFormId}-status`);
+                const errorBox =
+                  form.querySelector<HTMLElement>('[data-form-error]') ??
+                  document.getElementById(`payload-form-${currentFormId}-error`);
+                const submitBtn = form.querySelector('[data-submit-btn]');
 
-                formData.forEach((value, key) => {
-                  data.submissionData.push({ field: key, value: String(value) });
-                });
-
-                try {
-                  const res = await fetch(`${publicPayloadUrl}/api/form-submissions`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
-                  });
-                  if (res.ok) {
-                    form.style.display = 'none';
-                    status?.classList.remove('hidden');
+                form.addEventListener('submit', async (e) => {
+                  e.preventDefault();
+                  errorBox?.classList.add('hidden');
+                  if (submitBtn) {
+                    submitBtn.setAttribute('disabled', 'true');
+                    submitBtn.textContent = sendingLabel;
                   }
-                } catch { /* submission failed — keep the form visible */ }
+
+                  const formData = new FormData(form);
+                  const honeypot = String(formData.get('honeypot') || '');
+                  const submissionData: Array<{ field: string; value: string }> = [];
+
+                  formData.forEach((value, key) => {
+                    if (key === 'honeypot') return;
+                    submissionData.push({ field: key, value: String(value) });
+                  });
+
+                  try {
+                    const res = await fetch('/api/forms/submit', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ form: currentFormId, honeypot, submissionData }),
+                    });
+                    if (res.ok) {
+                      form.style.display = 'none';
+                      status?.classList.remove('hidden');
+                    } else {
+                      errorBox?.classList.remove('hidden');
+                    }
+                  } catch {
+                    errorBox?.classList.remove('hidden');
+                  } finally {
+                    if (submitBtn) {
+                      submitBtn.removeAttribute('disabled');
+                      submitBtn.textContent = defaultSubmitLabel;
+                    }
+                  }
+                });
               });
-            })();
+            }
+
+            initPayloadForms();
+            document.addEventListener('astro:page-load', initPayloadForms);
           </script>
         </>
       ) : (
         <div class="py-8 text-center text-foreground-muted">
-          <p>Selecciona un formulario en el bloque desde el panel de administración.</p>
+          <p>{copy.empty}</p>
         </div>
       )}
     </Card>

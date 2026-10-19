@@ -7,6 +7,9 @@
  */
 import type {
   Category,
+  Footer,
+  Form,
+  Header,
   Page,
   Post,
   PostType,
@@ -14,9 +17,11 @@ import type {
   ProjectCategory,
   ProjectType,
   Redirect,
+  Search,
   Service,
 } from './payload-types';
 import { defaultLocale } from '@/i18n';
+import { ssrCache } from './cache';
 
 // ── Constants ────────────────────────────────────────────
 
@@ -37,6 +42,9 @@ export interface DocsResponse<T> {
 export interface FetchOptions {
   locale?: string;
   draft?: boolean;
+  cache?: boolean;
+  ttlMs?: number;
+  tags?: string[];
 }
 
 export interface PayloadClientConfig {
@@ -60,37 +68,54 @@ export class PayloadClient {
 
   async fetchAPI<T = unknown>(endpoint: string, options: FetchOptions = {}): Promise<T> {
     const locale = options.locale ?? defaultLocale;
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), this.timeout);
+    const params = new URLSearchParams();
+    params.set('locale', locale);
+    params.set('depth', String(DEFAULT_DEPTH));
+    if (options.draft) params.set('draft', 'true');
 
-    try {
-      const params = new URLSearchParams();
-      params.set('locale', locale);
-      params.set('depth', String(DEFAULT_DEPTH));
-      if (options.draft) params.set('draft', 'true');
+    const separator = endpoint.includes('?') ? '&' : '?';
+    const cacheKey = `${endpoint}${separator}${params.toString()}`;
+    const collectionSlug = endpoint.startsWith('globals/')
+      ? `global:${endpoint.split('/')[1]?.split('?')[0] ?? ''}`
+      : endpoint.split('?')[0].split('/')[0];
 
-      const separator = endpoint.includes('?') ? '&' : '?';
-      const url = `${this.url}/api/${endpoint}${separator}${params.toString()}`;
+    const tags = [`collection:${collectionSlug}`, ...(options.tags ?? [])];
+    const bypassCache = Boolean(options.draft) || options.cache === false;
 
-      const headers: Record<string, string> = {};
-      if (options.draft && this.key) {
-        headers['Authorization'] = `users API-Key ${this.key}`;
+    return ssrCache.getOrFetch<T>(
+      cacheKey,
+      async () => {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), this.timeout);
+
+        try {
+          const url = `${this.url}/api/${cacheKey}`;
+          const headers: Record<string, string> = {};
+          if (options.draft && this.key) {
+            headers['Authorization'] = `users API-Key ${this.key}`;
+          }
+
+          const res = await fetch(url, { signal: controller.signal, headers });
+          if (!res.ok) {
+            console.error(`[Payload] ${endpoint}: ${res.status} ${res.statusText}`);
+            throw new Error(`Payload API error: ${res.status}`);
+          }
+          return res.json() as Promise<T>;
+        } catch (err) {
+          if (err instanceof DOMException && err.name === 'AbortError') {
+            console.error(`[Payload] timeout fetching ${endpoint}`);
+          }
+          throw err;
+        } finally {
+          clearTimeout(timer);
+        }
+      },
+      {
+        bypass: bypassCache,
+        ttlMs: options.ttlMs,
+        tags,
       }
-
-      const res = await fetch(url, { signal: controller.signal, headers });
-      if (!res.ok) {
-        console.error(`[Payload] ${endpoint}: ${res.status} ${res.statusText}`);
-        throw new Error(`Payload API error: ${res.status}`);
-      }
-      return res.json();
-    } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') {
-        console.error(`[Payload] timeout fetching ${endpoint}`);
-      }
-      throw err;
-    } finally {
-      clearTimeout(timer);
-    }
+    );
   }
 
   resolveMediaUrl(mediaUrl?: string | null): string {
@@ -134,6 +159,25 @@ export class PayloadClient {
 
   projectCategories(): ProjectCategoryQueries {
     return new ProjectCategoryQueries(this);
+  }
+
+  globals(): GlobalQueries {
+    return new GlobalQueries(this);
+  }
+
+  forms(): FormQueries {
+    return new FormQueries(this);
+  }
+
+  async search(query: string, locale = defaultLocale, limit = 15): Promise<Search[]> {
+    const q = query.trim();
+    if (!q) return [];
+    const encoded = encodeURIComponent(q);
+    const data = await this.fetchAPI<DocsResponse<Search>>(
+      `search?where[or][0][title][like]=${encoded}&where[or][1][excerpt][like]=${encoded}&where[or][2][slug][like]=${encoded}&limit=${limit}`,
+      { locale, ttlMs: 15_000 }
+    );
+    return data.docs ?? [];
   }
 }
 
@@ -470,15 +514,104 @@ class RedirectQueries {
   }
 }
 
+class GlobalQueries {
+  constructor(private client: PayloadClient) {}
+
+  async getHeader(locale = defaultLocale): Promise<Header | null> {
+    try {
+      return await this.client.fetchAPI<Header>('globals/header', {
+        locale,
+        tags: ['collection:global:header'],
+      });
+    } catch {
+      return null;
+    }
+  }
+
+  async getFooter(locale = defaultLocale): Promise<Footer | null> {
+    try {
+      return await this.client.fetchAPI<Footer>('globals/footer', {
+        locale,
+        tags: ['collection:global:footer'],
+      });
+    } catch {
+      return null;
+    }
+  }
+}
+
+class FormQueries {
+  constructor(private client: PayloadClient) {}
+
+  async getById(id: number | string, locale = defaultLocale): Promise<Form | null> {
+    try {
+      return await this.client.fetchAPI<Form>(`forms/${encodeURIComponent(String(id))}`, {
+        locale,
+        tags: ['collection:forms'],
+      });
+    } catch {
+      return null;
+    }
+  }
+
+  async getByTitle(title: string, locale = defaultLocale): Promise<Form | null> {
+    try {
+      const data = await this.client.fetchAPI<DocsResponse<Form>>(
+        `forms?where[title][equals]=${encodeURIComponent(title)}&limit=1`,
+        { locale, tags: ['collection:forms'] }
+      );
+      return data.docs?.[0] ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  async getFirst(locale = defaultLocale): Promise<Form | null> {
+    try {
+      const data = await this.client.fetchAPI<DocsResponse<Form>>('forms?limit=1', {
+        locale,
+        tags: ['collection:forms'],
+      });
+      return data.docs?.[0] ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  async submit(
+    formId: number | string,
+    submissionData: Array<{ field: string; value: string }>
+  ): Promise<boolean> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), this.client.timeout);
+    try {
+      const res = await fetch(`${this.client.url}/api/form-submissions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          form: Number.isNaN(Number(formId)) ? formId : Number(formId),
+          submissionData,
+        }),
+        signal: controller.signal,
+      });
+      return res.ok;
+    } catch (err) {
+      console.error('[Payload] form submission failed:', err);
+      return false;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+}
+
 // The redirects collection is created without a `type` field (the plugin only
 // adds it when `redirectTypes` is configured), so a missing/invalid type means
 // the redirect is permanent (301).
 export function redirectTarget(redirect: Redirect): { target: string; status: number } {
-  const target =
-    typeof redirect.to === 'string' ? redirect.to : `/${(redirect.to as any)?.slug || ''}`;
-  const status = [301, 302, 303, 307, 308].includes(Number((redirect as any).type))
-    ? Number((redirect as any).type)
-    : 301;
+  const toVal = redirect.to as unknown as { slug?: string } | string | undefined;
+  const target = typeof toVal === 'string' ? toVal : `/${toVal?.slug || ''}`;
+  const rawType = Number((redirect as unknown as { type?: number | string }).type);
+  const status = [301, 302, 303, 307, 308].includes(rawType) ? rawType : 301;
   return { target, status };
 }
 

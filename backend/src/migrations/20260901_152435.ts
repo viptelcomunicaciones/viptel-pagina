@@ -1,6 +1,6 @@
 import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
-export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+export async function up({ db }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
   DO $$ BEGIN
     CREATE TYPE "public"."enum_users_roles" AS ENUM('admin', 'editor', 'marketing', 'sales');
@@ -63,7 +63,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX IF NOT EXISTS "_services_v_version_version_deleted_at_idx" ON "_services_v" USING btree ("version_deleted_at");`)
 }
 
-export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
+export async function down({ db }: MigrateDownArgs): Promise<void> {
   await db.execute(sql`
    ALTER TABLE "users_roles" DISABLE ROW LEVEL SECURITY;
   DROP TABLE "users_roles" CASCADE;

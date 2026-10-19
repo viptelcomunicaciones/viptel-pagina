@@ -135,6 +135,7 @@ admin: {
             {
               name: 'year',
               type: 'number',
+              index: true,
               admin: {
                 position: 'sidebar',
               },
@@ -146,6 +147,7 @@ admin: {
                 description: 'Formato del proyecto. Es un eje aparte de la categoría.',
                 position: 'sidebar',
               },
+              index: true,
               relationTo: 'project-types',
               required: true,
             },

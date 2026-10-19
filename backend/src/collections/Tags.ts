@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access/anyone'
-import { authenticated } from '../access/authenticated'
+import { adminOnly, contentRoles } from '../access/roleBased'
 import { slugField } from 'payload'
 
 // Matches the website's `tagToSlug` (lowercase, strip accents, spaces → dashes)
@@ -18,10 +18,10 @@ export const slugify = (value: string): string =>
 export const Tags: CollectionConfig = {
   slug: 'tags',
   access: {
-    create: authenticated,
-    delete: authenticated,
+    create: contentRoles,
+    delete: adminOnly,
     read: anyone,
-    update: authenticated,
+    update: contentRoles,
   },
   labels: {
     singular: 'Etiqueta',

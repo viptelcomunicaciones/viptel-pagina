@@ -3,17 +3,17 @@ import type { CollectionConfig } from 'payload'
 import { slugField } from 'payload'
 
 import { anyone } from '../access/anyone'
-import { authenticated } from '../access/authenticated'
+import { adminOnly, contentRoles } from '../access/roleBased'
 import { iconField } from '../fields/iconField'
 import { slugify } from './Tags'
 
 export const PostTypes: CollectionConfig = {
   slug: 'post-types',
   access: {
-    create: authenticated,
-    delete: authenticated,
+    create: contentRoles,
+    delete: adminOnly,
     read: anyone,
-    update: authenticated,
+    update: contentRoles,
   },
   labels: {
     singular: 'Tipo de contenido',

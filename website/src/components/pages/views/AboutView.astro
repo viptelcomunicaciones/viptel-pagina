@@ -11,6 +11,7 @@ import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
 import { payload } from '@/lib/payload-client';
 import { t, defaultLocale, localizedPath } from '@/i18n';
 import type { PageBlock } from '@/lib/block-types';
+import type { LexicalNode, LexicalRoot } from '@/lib/headings';
 
 interface Props {
   locale?: string;
@@ -19,13 +20,13 @@ interface Props {
 const { locale = defaultLocale } = Astro.props;
 const about = await payload.pages().getBySlug('about', locale);
 
-function extractRichText(richText: any): string {
+function extractRichText(richText?: LexicalRoot | null): string {
   try {
     const root = richText?.root;
     if (!root || !Array.isArray(root.children)) return '';
     return root.children
-      .filter((c: any) => c.type === 'paragraph' || c.type === 'heading')
-      .map((c: any) => c.children?.map((t: any) => t.text || '').join('') || '')
+      .filter((c: LexicalNode) => c.type === 'paragraph' || c.type === 'heading')
+      .map((c: LexicalNode) => c.children?.map((item: LexicalNode) => item.text || '').join('') || '')
       .join(' ');
   } catch {
     return '';
@@ -34,11 +35,16 @@ function extractRichText(richText: any): string {
 
 const heroTitle = extractRichText(about?.hero?.richText);
 const contactUrl = localizedPath('/contact', locale);
+const metaImage =
+  about?.meta?.image && typeof about.meta.image === 'object' && about.meta.image.url
+    ? payload.resolveMediaUrl(about.meta.image.url)
+    : undefined;
 ---
 
 <PageLayout
   title={about?.meta?.title || t('pages.about.meta.title', locale)}
   description={about?.meta?.description || t('pages.about.meta.description', locale)}
+  image={metaImage}
   footerBackground="secondary"
 >
   <Hero layout="centered" size="sm" class="isolate" showHeroHalo>

@@ -1,21 +1,25 @@
 ---
 import ProjectsPageView from '@/components/projects/views/ProjectsPageView.astro';
+import NotFoundView from '@/components/pages/views/NotFoundView.astro';
 import { defaultLocale, isValidLocale } from '@/i18n';
 
 export const prerender = false;
 
-// Locale-prefixed paginated projects index (`/<locale>/projects/page/N`, N >= 2).
-// Page 1 lives at `/<locale>/projects`. Rendered on demand.
 const { locale = defaultLocale } = Astro.params;
-
-if (!isValidLocale(locale)) {
-  return Astro.redirect('/404');
-}
-
+const validLocale = isValidLocale(locale);
+const effectiveLocale = validLocale ? locale : defaultLocale;
 const page = Number(Astro.params.page);
-if (!Number.isInteger(page) || page < 2) {
-  return Astro.redirect('/404');
+const isValidPage = validLocale && Number.isInteger(page) && page >= 2;
+
+if (!isValidPage) {
+  Astro.response.status = 404;
 }
 ---
 
-<ProjectsPageView locale={locale} page={page} />
+{
+  isValidPage ? (
+    <ProjectsPageView locale={effectiveLocale} page={page} />
+  ) : (
+    <NotFoundView locale={effectiveLocale} />
+  )
+}

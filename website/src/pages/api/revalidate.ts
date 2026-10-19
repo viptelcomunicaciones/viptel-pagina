@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { ssrCache } from '@/lib/cache';
 
 export const prerender = false;
 
@@ -21,21 +22,34 @@ export const POST: APIRoute = async ({ request, url }) => {
 
   try {
     const body = (await request.json()) as RevalidateBody;
-    const paths = Array.isArray(body?.paths) ? body.paths.filter((p): p is string => typeof p === 'string') : [];
+    const paths = Array.isArray(body?.paths)
+      ? body.paths.filter((p): p is string => typeof p === 'string')
+      : [];
+    const collection = typeof body?.collection === 'string' ? body.collection : null;
 
-    if (paths.length === 0) {
-      return new Response(JSON.stringify({ success: false, error: 'No paths provided' }), {
+    if (paths.length === 0 && !collection) {
+      return new Response(JSON.stringify({ success: false, error: 'No paths or collection provided' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
+    }
+
+    let purgedEntries = 0;
+    if (collection) {
+      purgedEntries += ssrCache.invalidateByCollection(collection);
+    }
+    if (paths.length > 0) {
+      purgedEntries += ssrCache.invalidateByPaths(paths);
     }
 
     return new Response(
       JSON.stringify({
         success: true,
         revalidated: paths,
-        collection: body?.collection ?? null,
+        collection,
         locale: body?.locale ?? null,
+        purgedEntries,
+        cacheStats: ssrCache.getStats(),
         timestamp: new Date().toISOString(),
       }),
       {

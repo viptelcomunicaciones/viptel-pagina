@@ -1,6 +1,6 @@
 import type { TaskConfig } from 'payload'
 
-import { getFrontendURL } from '@/utilities/getURL'
+import { getInternalFrontendURL } from '@/utilities/getURL'
 
 type RevalidateInput = {
   path?: string
@@ -18,9 +18,9 @@ export const revalidateFrontendTask: TaskConfig<'revalidateFrontend'> = {
     { name: 'locale', type: 'text', defaultValue: 'es' },
   ],
   retries: 2,
-  handler: async ({ input, req }) => {
+  handler: async ({ input }) => {
     const { path, paths, collection, locale } = input as RevalidateInput
-    const frontendUrl = getFrontendURL()
+    const frontendUrl = getInternalFrontendURL()
     const secret = process.env.REVALIDATE_SECRET || process.env.PREVIEW_SECRET
     if (!secret) {
       throw new Error('REVALIDATE_SECRET not configured')

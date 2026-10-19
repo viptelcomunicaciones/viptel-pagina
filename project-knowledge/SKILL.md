@@ -104,29 +104,39 @@ viptelcomunicaciones/
 
 ## Colecciones del backend
 
-| Colección | Slug | Localizada | Versiones | Acceso lectura |
-|---|---|---|---|---|
-| Users | `users` | No | No | authenticated |
-| Media | `media` | No | No | anyone |
-| Categories | `categories` | Sí (title) | No | anyone |
-| Pages | `pages` | Sí | Drafts | authenticatedOrPublished |
-| Posts | `posts` | Sí | Drafts | authenticatedOrPublished |
-| Projects | `projects` | Sí | Drafts | authenticatedOrPublished |
-| Services | `services` | Sí | Drafts | authenticatedOrPublished |
+| Colección | Slug | Localizada | Versiones | Acceso lectura | Acceso escritura |
+|---|---|---|---|---|---|
+| Users | `users` | No | No | authenticated | `adminOnly` (propio perfil `authenticated`) |
+| Media | `media` | Sí (`alt`, `caption`) | No | anyone | `contentRoles` (`adminOnly` delete) |
+| Categories | `categories` | Sí | No | anyone | `contentRoles` (`adminOnly` delete) |
+| ProjectCategories | `project-categories` | Sí | No | anyone | `contentRoles` (`adminOnly` delete) |
+| Tags | `tags` | No | No | anyone | `contentRoles` (`adminOnly` delete) |
+| PostTypes | `post-types` | Sí | No | anyone | `contentRoles` (`adminOnly` delete) |
+| ProjectTypes | `project-types` | Sí | No | anyone | `contentRoles` (`adminOnly` delete) |
+| Pages | `pages` | Sí | Drafts | authenticatedOrPublished | `contentRoles` (`adminOnly` delete) |
+| Posts | `posts` | Sí | Drafts | authenticatedOrPublished | `contentRoles` (`adminOnly` delete) |
+| Projects | `projects` | Sí | Drafts | authenticatedOrPublished | `contentRoles` (`adminOnly` delete) |
+| Services | `services` | Sí | Drafts | authenticatedOrPublished | `contentRoles` (`adminOnly` delete) |
+| Forms | `forms` | Sí | No | anyone | `contentRoles` (`adminOnly` delete) |
+| FormSubmissions | `form-submissions` | No | No | `crmRoles` (`admin`, `sales`, `marketing`) | `anyone` create, `adminOnly` update/delete |
+| Search | `search` | Sí | No | anyone | Automático (`@payloadcms/plugin-search`) |
 
 ## Plugins del CMS
 
 | Plugin | Aplica a | Función |
 |---|---|---|
 | `@payloadcms/plugin-seo` | pages, posts, projects, services | Meta títulos, OG images, preview |
-| `@payloadcms/plugin-nested-docs` | pages | Jerarquía padre/hijo, breadcrumbs |
-| `@payloadcms/plugin-redirects` | pages, posts | Redirecciones 301/302 |
+| `@payloadcms/plugin-nested-docs` | pages, services | Jerarquía padre/hijo, breadcrumbs |
+| `@payloadcms/plugin-redirects` | pages, posts, services | Redirecciones 301/302 |
+| `@payloadcms/plugin-search` | pages, posts, projects, services | Índice FTS localizado en tiempo real |
+| `@payloadcms/plugin-form-builder` | forms, form-submissions | Formularios dinámicos y CRM de leads |
+| `@payloadcms/storage-s3` | media | Almacenamiento Cloudflare R2 con WebP (`quality: 82`) |
 | `@payloadcms/richtext-lexical` | Todos los richText | Editor de contenido |
 | `@payloadcms/email-resend` | Sistema | Emails transaccionales |
 
-## Bloques de contenido (11)
+## Bloques de contenido (12)
 
-Archive, Banner, CallToAction, Cards, Code, Content, FAQ, Gallery, MediaBlock, MediaContent, Pricing.
+Archive, Banner, CallToAction, Cards, Code, Content, FAQ, Form (`formBlock`), Gallery, MediaBlock, MediaContent, Pricing.
 
 Ver `backend/.agents/skills/payload/reference/BLOCKS.md`.
 
@@ -149,19 +159,23 @@ Ver `backend/.agents/skills/payload/reference/BLOCKS.md`.
 
 | Ruta | Método | Función |
 |---|---|---|
-| `/api/contact` | POST | Formulario de contacto → Resend |
-| `/api/newsletter` | POST | Suscripción newsletter → Resend |
-| `/api/preview` | GET | Activar modo preview (setea cookie) |
+| `/api/contact` | POST | Formulario de contacto → guarda lead en `form-submissions` (Payload CRM) + envía email por Resend |
+| `/api/forms/submit` | POST | Envío de bloques `FormBlock` dinámicos → Rate-Limit + Honeypot + Payload CRM + Resend |
+| `/api/newsletter` | POST | Suscripción newsletter → Resend Audience |
+| `/api/search` | GET | Búsqueda SSR en tiempo real consultando el índice `@payloadcms/plugin-search` |
+| `/api/revalidate` | POST | Invalidación selectiva de caché SSR (`ssrCache`) disparada por hooks de Payload |
+| `/api/preview` | GET | Activar modo preview (valida path relativo seguro y setea cookie `__prv`) |
 | `/api/exit-preview` | GET | Desactivar preview |
+| `/api/health` | GET | Healthcheck de contenedor |
 
-## Website — Componentes clave (57 total)
+## Website — Componentes clave
 
 Ver `website/component-registry.json` para el catálogo completo.
 
 **Categorías**:
 - `ui/` (30+) — Primitivos de diseño (Button, Card, Badge, Dialog, Tabs, Accordion, etc.)
-- `layout/` (6) — Header, Footer, Analytics, LanguageSwitcher, SearchModal, Theme*
-- `blocks/` (9) — Renderizadores de bloques CMS (ContentBlock, CTABlock, FAQBlock, etc.)
+- `layout/` (6) — Header (consume global `Header` de Payload con fallback), Footer (consume global `Footer` de Payload con fallback), Analytics, LanguageSwitcher, SearchModal (SSR `/api/search` + Pagefind fallback), Theme*
+- `blocks/` (12) — Renderizadores de bloques CMS (ContentBlock, CTABlock, FAQBlock, FormBlock, etc.)
 - `patterns/` (11) — Formularios, Newsletter, YouTube, StatCard
 - `hero/` (2) — Hero variants (highImpact, mediumImpact, lowImpact)
 - `seo/` (3) — SEO meta, JSON-LD, Breadcrumbs
@@ -180,13 +194,14 @@ Ver `website/component-registry.json` para el catálogo completo.
 
 ## Comunicación Backend ↔ Website
 
-### Fetch wrapper (`website/src/lib/payload.ts`)
+### Cliente tipado + Caché Híbrida (`website/src/lib/payload-client.ts` + `website/src/lib/cache.ts`)
 
 ```typescript
-fetchAPI<T>(endpoint, { locale, draft? })
-// → GET {PAYLOAD_URL}/api/{endpoint}?locale=es&depth=2
-// → Timeout 15s
-// → Authorization header si draft=true
+fetchAPI<T>(endpoint, { locale, draft?, ttlMs?, tags? })
+// → Consulta caché L1 LRU (SWR) y L2 Redis opcional (REDIS_URL)
+// → GET {INTERNAL_PAYLOAD_URL || PAYLOAD_URL}/api/{endpoint}?locale=es&depth=2
+// → Timeout 8s
+// → Bypass automático de caché cuando draft=true
 ```
 
 ### Modo preview
@@ -194,16 +209,16 @@ fetchAPI<T>(endpoint, { locale, draft? })
 ```
 Payload Admin "Preview" →
   abre /api/preview?secret={PREVIEW_SECRET}&path=/slug →
-  Astro valida, setea cookie __prv →
+  Astro valida path relativo (anti-Open Redirect), setea cookie __prv →
   Página detecta cookie →
   fetchAPI con draft=true + API key →
-  Payload devuelve draft
+  Payload devuelve draft sin pasar por caché
 ```
 
 ### Media
 
-- Backend sirve archivos en `/api/media/file/{filename}`
-- `resolveMediaUrl()` en el website convierte paths relativos a absolutos
+- Backend convierte automáticamente imágenes subidas y sus 7 `imageSizes` a **WebP (`quality: 82`)** y las almacena en Cloudflare R2 (o `/api/media/file/{filename}` en local)
+- `resolveMediaUrl()` en el website convierte paths relativos a absolutos usando `PAYLOAD_URL`
 
 ## Comandos
 
@@ -269,10 +284,11 @@ pnpm fix            # ESLint + Prettier fixes
 | `PUBLIC_GA_MEASUREMENT_ID` | Google Analytics |
 
 ## Migraciones
-
-Dos migraciones en `backend/src/migrations/`:
-1. `20260801_232755_initial` — Todas las tablas base
-2. `20260803_155526` — Colección services
+ 
+Tres migraciones en `backend/src/migrations/`:
+1. `20260825_205151_initial` — Todas las tablas base y colecciones principales
+2. `20260901_152435` — Colección services jerárquicos
+3. `20261019_174809_v1_1_audit_improvements` — Índices de rendimiento (parent, postType, projectType, year), índice FTS de búsqueda y roles RBAC CRM
 
 ## Documentación relacionada
 

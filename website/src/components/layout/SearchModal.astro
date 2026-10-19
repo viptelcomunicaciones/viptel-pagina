@@ -109,6 +109,7 @@ const modalId = `search-modal-${Math.random().toString(36).slice(2, 9)}`;
         class="search-results max-h-[55vh] overflow-y-auto overscroll-contain p-2"
         role="listbox"
         aria-label={t('search.resultsLabel', locale)}
+        data-locale={locale}
         data-i18n-hint={t('search.hint', locale)}
         data-i18n-empty={t('search.noResults', locale)}
         data-i18n-unavailable={t('search.unavailable', locale)}
@@ -148,6 +149,12 @@ const modalId = `search-modal-${Math.random().toString(36).slice(2, 9)}`;
   interface Pagefind {
     search: (query: string) => Promise<{ results: PagefindResult[] }>;
   }
+  interface ApiSearchResult {
+    title: string;
+    url: string;
+    excerpt?: string;
+    collection?: string;
+  }
 
   const MAX_RESULTS = 8;
 
@@ -174,6 +181,18 @@ const modalId = `search-modal-${Math.random().toString(36).slice(2, 9)}`;
 
   function escapeHtml(text: string): string {
     return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function highlightQuery(text: string, query: string): string {
+    const escaped = escapeHtml(text);
+    const terms = query
+      .trim()
+      .split(/\s+/)
+      .filter((t) => t.length >= 2)
+      .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    if (terms.length === 0) return escaped;
+    const regex = new RegExp(`(${terms.join('|')})`, 'gi');
+    return escaped.replace(regex, '<mark>$1</mark>');
   }
 
   function initSearchModals() {
@@ -224,12 +243,66 @@ const modalId = `search-modal-${Math.random().toString(36).slice(2, 9)}`;
         results.innerHTML = `<p class="px-3 py-8 text-center text-sm text-foreground-muted">${html}</p>`;
       };
 
+      const renderItems = (
+        items: Array<{ title: string; url: string; excerptHtml: string }>
+      ) => {
+        results.innerHTML = items
+          .map(
+            (item) => `
+              <a
+                href="${item.url}"
+                class="search-result block rounded-lg px-3 py-2.5 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                role="option"
+              >
+                <span class="block text-sm font-semibold text-foreground">${escapeHtml(item.title)}</span>
+                ${item.excerptHtml ? `<span class="mt-0.5 block text-xs leading-relaxed text-foreground-muted [&_mark]:bg-transparent">${item.excerptHtml}</span>` : ''}
+              </a>`
+          )
+          .join('');
+      };
+
       const renderResults = async (query: string) => {
+        const locale = results.dataset.locale ?? 'es';
+
+        // 1. Primary: Real-time SSR search via Payload CMS (@payloadcms/plugin-search)
+        try {
+          const res = await fetch(
+            `/api/search?q=${encodeURIComponent(query)}&locale=${encodeURIComponent(locale)}`
+          );
+          if (res.ok) {
+            const data = (await res.json()) as { results?: ApiSearchResult[] };
+            if (input.value.trim() !== query) return;
+
+            const apiResults = data.results ?? [];
+            if (apiResults.length > 0) {
+              renderItems(
+                apiResults.slice(0, MAX_RESULTS).map((item) => ({
+                  title: item.title || item.url,
+                  url: item.url,
+                  excerptHtml: item.excerpt ? highlightQuery(item.excerpt, query) : '',
+                }))
+              );
+              return;
+            }
+
+            // If API responded 200 with 0 results, also check Pagefind fallback before declaring empty
+            const pfFallback = await loadPagefind();
+            if (!pfFallback) {
+              const tmpl = results.dataset.i18nEmpty ?? 'No results for “{query}”';
+              renderMessage(tmpl.replace('{query}', () => escapeHtml(query)));
+              return;
+            }
+          }
+        } catch {
+          // Fall through to Pagefind if SSR endpoint is unreachable
+        }
+
+        // 2. Fallback: Static Pagefind index if generated
         const pf = await loadPagefind();
         if (!pf) {
           renderMessage(
             results.dataset.i18nUnavailable ??
-              'The search index is generated at build time and isn’t available in <code class="rounded bg-secondary px-1.5 py-0.5 text-xs">astro dev</code>.<br />Run <code class="rounded bg-secondary px-1.5 py-0.5 text-xs">pnpm build &amp;&amp; pnpm preview</code> to try it locally.'
+              'Search is temporarily unavailable.'
           );
           return;
         }
@@ -240,27 +313,18 @@ const modalId = `search-modal-${Math.random().toString(36).slice(2, 9)}`;
 
         if (search.results.length === 0) {
           const tmpl = results.dataset.i18nEmpty ?? 'No results for “{query}”';
-          // Pass a function so the escaped query is inserted literally — a string
-          // replacement would interpret $&, $`, $', $$ in the query specially.
           renderMessage(tmpl.replace('{query}', () => escapeHtml(query)));
           return;
         }
 
         const items = await Promise.all(search.results.slice(0, MAX_RESULTS).map((r) => r.data()));
-
-        results.innerHTML = items
-          .map(
-            (item) => `
-              <a
-                href="${item.url}"
-                class="search-result block rounded-lg px-3 py-2.5 hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                role="option"
-              >
-                <span class="block text-sm font-semibold text-foreground">${escapeHtml(item.meta.title ?? item.url)}</span>
-                <span class="mt-0.5 block text-xs leading-relaxed text-foreground-muted [&_mark]:bg-transparent">${item.excerpt}</span>
-              </a>`
-          )
-          .join('');
+        renderItems(
+          items.map((item) => ({
+            title: item.meta.title ?? item.url,
+            url: item.url,
+            excerptHtml: item.excerpt,
+          }))
+        );
       };
 
       let debounce: number | undefined;

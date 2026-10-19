@@ -19,6 +19,7 @@ import siteConfig from '@/config/site.config';
 import { resolveSocialLinks } from '@/lib/utils';
 import { t, defaultLocale } from '@/i18n';
 import { payload } from '@/lib/payload-client';
+import NotFoundView from '@/components/pages/views/NotFoundView.astro';
 import {
   BLOG_POSTS_PER_PAGE,
   getBlogBaseUrl,
@@ -42,11 +43,19 @@ const { docs, totalDocs, totalPages } = await payload
   .posts()
   .getPaginated(locale, page, BLOG_POSTS_PER_PAGE);
 
+const isOutOfRange = page > totalPages && totalPages > 0;
+if (isOutOfRange) {
+  Astro.response.status = 404;
+}
+
 const pagePosts = docs;
 
 const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
 ---
 
+{isOutOfRange ? (
+  <NotFoundView locale={locale} />
+) : (
 <BlogListLayout
   title={t('blog.pageMetaTitle', locale, { page })}
   description={t('blog.pageMetaDescription', locale, { page, total: totalPages })}
@@ -192,3 +201,4 @@ const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
     </section>
   </Fragment>
 </BlogListLayout>
+)}

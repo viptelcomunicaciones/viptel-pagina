@@ -2,38 +2,49 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import ProjectLayout from '@/layouts/ProjectLayout.astro';
 import ProjectsArchiveView from '@/components/projects/views/ProjectsArchiveView.astro';
+import NotFoundView from '@/components/pages/views/NotFoundView.astro';
 import { defaultLocale, isValidLocale } from '@/i18n';
 import { resolveProjectArchive } from '@/lib/projects';
+import { payload } from '@/lib/payload-client';
 
 export const prerender = false;
 
 const { locale = defaultLocale, slug } = Astro.params;
-
-if (!isValidLocale(locale)) {
-  return Astro.redirect('/404');
-}
-
-if (!slug) {
-  return Astro.redirect('/404');
-}
-
-const segments = slug.split('/').filter(Boolean);
+const validLocale = isValidLocale(locale);
+const effectiveLocale = validLocale ? locale : defaultLocale;
+const segments = validLocale && slug ? slug.split('/').filter(Boolean) : [];
 const currentPage = Math.max(1, Number(Astro.url.searchParams.get('page')) || 1);
-const archive = await resolveProjectArchive(segments, locale, currentPage);
+const archive =
+  segments.length > 0
+    ? await resolveProjectArchive(segments, effectiveLocale, currentPage)
+    : ({ kind: 'not-found' } as const);
 
-if (archive.kind === 'not-found') {
-  return Astro.redirect('/404');
+const is404 = !validLocale || archive.kind === 'not-found';
+if (is404) {
+  Astro.response.status = 404;
 }
 
 const project = archive.kind === 'project' ? archive.project! : null;
+const projectMetaImage =
+  project?.meta?.image && typeof project.meta.image === 'object' && project.meta.image.url
+    ? payload.resolveMediaUrl(project.meta.image.url)
+    : project?.coverImage && typeof project.coverImage === 'object' && project.coverImage.url
+      ? payload.resolveMediaUrl(project.coverImage.url)
+      : undefined;
 ---
 
 {
-  project ? (
-    <PageLayout title={project.title} description={project.description || project.title}>
-      <ProjectLayout project={project} locale={locale} />
+  is404 ? (
+    <NotFoundView locale={effectiveLocale} />
+  ) : project ? (
+    <PageLayout
+      title={project.meta?.title || project.title}
+      description={project.meta?.description || project.description || project.title}
+      image={projectMetaImage}
+    >
+      <ProjectLayout project={project} locale={effectiveLocale} />
     </PageLayout>
   ) : (
-    <ProjectsArchiveView archive={archive} currentPage={currentPage} locale={locale} />
+    <ProjectsArchiveView archive={archive} currentPage={currentPage} locale={effectiveLocale} />
   )
 }

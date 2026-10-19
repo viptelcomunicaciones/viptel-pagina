@@ -22,12 +22,46 @@ import {
   getFooterNavItems,
   getLegalLinks,
   getLogoHref,
+  isExternalOrAnchorHref,
 } from '@/config/nav.config';
 import { footerVariants, footerColumnGridVariants } from './footer.variants';
 import Logo from '@/components/ui/marketing/Logo/Logo.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import siteConfig from '@/config/site.config';
-import { t, tData, getLocaleFromPath } from '@/i18n';
+import { t, tData, getLocaleFromPath, swapLocaleInPath } from '@/i18n';
+import { payload } from '@/lib/payload-client';
+import type { Footer as PayloadFooter } from '@/lib/payload-types';
+
+type PayloadFooterLinkData = NonNullable<NonNullable<PayloadFooter['navItems']>[number]>['link'];
+
+function resolveCmsLink(link: PayloadFooterLinkData | undefined | null, currentLocale: string): {
+  label: string;
+  href: string;
+  external?: boolean;
+} | null {
+  if (!link || !link.label) return null;
+  let rawHref = link.url || '/';
+  if (link.type === 'reference' && link.reference?.value && typeof link.reference.value === 'object') {
+    const doc = link.reference.value as { slug?: string | null; breadcrumbs?: Array<{ url?: string | null }> | null };
+    const slug = doc.slug || '';
+    if (link.reference.relationTo === 'pages') {
+      const lastCrumb = doc.breadcrumbs?.[doc.breadcrumbs.length - 1]?.url;
+      rawHref = slug === 'home' ? '/' : lastCrumb || `/${slug}`;
+    } else if (link.reference.relationTo === 'posts') {
+      rawHref = `/blog/${slug}`;
+    } else if (link.reference.relationTo === 'services') {
+      const lastCrumb = doc.breadcrumbs?.[doc.breadcrumbs.length - 1]?.url;
+      rawHref = lastCrumb ? `/services${lastCrumb}` : `/services/${slug}`;
+    }
+  }
+  const external = Boolean(link.newTab) || isExternalOrAnchorHref(rawHref);
+  const href = external ? rawHref : swapLocaleInPath(rawHref, currentLocale);
+  return {
+    label: link.label,
+    href,
+    external: Boolean(link.newTab),
+  };
+}
 
 export interface NavItem {
   label: string;
@@ -112,26 +146,38 @@ const maxWidthClass = {
 const locale = getLocaleFromPath(Astro.url.pathname);
 const logoHref = getLogoHref(locale);
 
+const cmsFooter = !nav || !legalLinks || !copyright ? await payload.globals().getFooter(locale) : null;
+const cmsNavItems: NavItem[] =
+  cmsFooter?.navItems
+    ?.map((item) => resolveCmsLink(item.link, locale))
+    .filter((item): item is NonNullable<typeof item> => item !== null) ?? [];
+
+const cmsLegalLinks: LegalLink[] =
+  cmsFooter?.legalLinks
+    ?.map((item) => resolveCmsLink(item.link, locale))
+    .filter((item): item is NonNullable<typeof item> => item !== null) ?? [];
+
 // Get navigation items — footer nav is configured independently from the
 // header in `nav.config.ts` (see `footerNavItems`). Localized for the active
 // locale (hrefs prefixed, labels translated); an explicit `nav` prop is used
 // as-is so callers keep full control.
-const defaultNav: NavItem[] = getFooterNavItems(locale).map((item) => ({
+const fallbackNav: NavItem[] = getFooterNavItems(locale).map((item) => ({
   label: item.label,
   href: item.href,
   external: item.external,
 }));
+const defaultNav: NavItem[] = cmsNavItems.length > 0 ? cmsNavItems : fallbackNav;
 const navItems: NavItem[] = nav || defaultNav;
 const allNavItems: NavItem[] = navItems;
 
-// Resolved legal links: prop wins, otherwise fall back to nav.config.ts
-const resolvedLegalLinks: LegalLink[] = legalLinks ?? getLegalLinks(locale);
+// Resolved legal links: prop wins, then CMS Footer global, otherwise fall back to nav.config.ts
+const resolvedLegalLinks: LegalLink[] =
+  legalLinks ?? (cmsLegalLinks.length > 0 ? cmsLegalLinks : getLegalLinks(locale));
 
-// Copyright resolution: an explicit `copyright` prop wins; otherwise every
-// locale uses the localized `footer.copyright` string (supports {year} and
-// {siteName} placeholders). Edit `footer.copyright` in `src/i18n/<locale>.json`
-// to change it — for example to add your own designer credit.
-const copyrightTemplate = copyright ?? t('footer.copyright', locale);
+// Copyright resolution: an explicit `copyright` prop wins, then CMS Footer global,
+// otherwise every locale uses the localized `footer.copyright` string (supports {year} and
+// {siteName} placeholders).
+const copyrightTemplate = copyright ?? cmsFooter?.copyright ?? t('footer.copyright', locale);
 
 // Process copyright text
 const currentYear = new Date().getFullYear();

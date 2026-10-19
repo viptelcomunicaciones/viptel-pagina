@@ -2,6 +2,7 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
 import RenderHero from '@/components/heros/RenderHero.astro';
+import NotFoundView from '@/components/pages/views/NotFoundView.astro';
 import { payload, redirectTarget } from '@/lib/payload-client';
 import { isValidLocale, defaultLocale } from '@/i18n';
 
@@ -9,22 +10,12 @@ export const prerender = false;
 
 const { locale, slug } = Astro.params;
 
-// In SSR this catch-all also intercepts root-level multi-segment URLs
-// (`/terminos/uso` → locale=terminos, slug=uso). When the first segment is not
-// a valid locale we fall back to resolving the full path as a CMS page in the
-// default locale (served at the site root) before 404ing.
 const isLocale = isValidLocale(locale);
 const effectiveLocale = isLocale ? locale! : defaultLocale;
-// Para un locale válido (`/en/...`), el slug a consultar es solo `slug` — el
-// locale se pasa por separado a getBySlug(). Para una ruta raíz de 2+ segmentos
-// (`/terminos/uso` → locale=terminos, slug=uso) reconstruimos la ruta completa.
 const pageSlug = isLocale ? (slug ?? '') : [locale, slug].filter(Boolean).join('/');
-// Los redirects sí se guardan con el path completo (prefijo de locale incluido).
 const redirectFrom = isLocale ? `/${locale}/${slug ?? ''}` : `/${pageSlug}`;
 
-// /home es la fuente de datos de la landing — nunca una página pública.
-// Return top-level (el return anidado no emite con i18n routing).
-if (pageSlug === 'home') return Astro.redirect('/', 301);
+if (pageSlug === 'home') return Astro.redirect(isLocale ? `/${effectiveLocale}` : '/', 301);
 
 const redirect = await payload.redirects().get(redirectFrom);
 if (redirect) {
@@ -34,14 +25,26 @@ if (redirect) {
 
 const page = await payload.pages().getBySlug(pageSlug, effectiveLocale);
 if (!page) {
-  return Astro.redirect('/404');
+  Astro.response.status = 404;
 }
+
+const metaImage =
+  page?.meta?.image && typeof page.meta.image === 'object' && page.meta.image.url
+    ? payload.resolveMediaUrl(page.meta.image.url)
+    : undefined;
 ---
 
-<PageLayout
-  title={page.meta?.title || page.title}
-  description={page.meta?.description || page.title}
->
-  {page.hero && <RenderHero hero={page.hero} locale={effectiveLocale} />}
-  <BlockRenderer layout={page.layout} locale={effectiveLocale} />
-</PageLayout>
+{
+  !page ? (
+    <NotFoundView locale={effectiveLocale} />
+  ) : (
+    <PageLayout
+      title={page.meta?.title || page.title}
+      description={page.meta?.description || page.title}
+      image={metaImage}
+    >
+      {page.hero && <RenderHero hero={page.hero} locale={effectiveLocale} />}
+      <BlockRenderer layout={page.layout} locale={effectiveLocale} />
+    </PageLayout>
+  )
+}

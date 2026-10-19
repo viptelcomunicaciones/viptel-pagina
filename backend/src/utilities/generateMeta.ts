@@ -2,10 +2,28 @@ import type { Metadata } from 'next'
 
 import { mergeOpenGraph } from './mergeOpenGraph'
 
+interface MetaImage {
+  url?: string | null
+  sizes?: {
+    og?: {
+      url?: string | null
+    }
+  }
+}
+
+interface MetaDoc {
+  title?: string | null
+  meta?: {
+    title?: string | null
+    description?: string | null
+    image?: MetaImage | number | null
+  } | null
+}
+
 /**
  * Generates page-level Metadata (title, description, OpenGraph) from a Payload document.
  */
-export const generateMeta = async (args: { doc: any }): Promise<Metadata> => {
+export const generateMeta = async (args: { doc: MetaDoc | null | undefined }): Promise<Metadata> => {
   const { doc } = args || {}
 
   const ogImage =
@@ -23,13 +41,15 @@ export const generateMeta = async (args: { doc: any }): Promise<Metadata> => {
     ? doc.meta.description
     : 'Soluciones empresariales de telecomunicaciones: PBX, VoIP, desarrollo web, marketing digital y software empresarial.'
 
+  const ogImageUrl = ogImage?.url || ogImage?.sizes?.og?.url || undefined
+
   return {
     title,
     description,
     openGraph: mergeOpenGraph({
       title,
       description,
-      images: ogImage ? [{ url: ogImage?.url || ogImage?.sizes?.og?.url }] : undefined,
+      images: ogImageUrl ? [{ url: ogImageUrl }] : undefined,
     }),
   }
 }

@@ -4,14 +4,24 @@ import type { User as UserType } from '@/payload-types'
 import { adminOnly, adminOnlyField } from '../../access/roleBased'
 import { authenticated } from '../../access/authenticated'
 
+const ADMIN_PANEL_ROLES: NonNullable<UserType['roles']>[number][] = [
+  'admin',
+  'editor',
+  'marketing',
+  'sales',
+]
+
 export const Users: CollectionConfig = {
   slug: 'users',
   access: {
-    admin: ({ req: { user } }): boolean => (user as UserType).roles?.includes('admin') ?? false,
+    admin: ({ req: { user } }): boolean =>
+      Boolean(
+        (user as UserType | null)?.roles?.some((role) => ADMIN_PANEL_ROLES.includes(role)),
+      ),
     create: adminOnly,
     delete: adminOnly,
     read: authenticated,
-update: ({ req: { user }, id }) => {
+    update: ({ req: { user }, id }) => {
       if (!user) return false
       if ((user as UserType).roles?.includes('admin')) return true
       return user.id === id
@@ -50,7 +60,6 @@ update: ({ req: { user }, id }) => {
       required: true,
       saveToJWT: true,
       access: {
-        read: adminOnlyField,
         update: adminOnlyField,
       },
     },
@@ -61,17 +70,33 @@ update: ({ req: { user }, id }) => {
         position: 'sidebar',
         readOnly: true,
       },
-      hooks: {
-        beforeChange: [
-          ({ operation, value }) => {
-            if (operation === 'create' || operation === 'update') {
-              return new Date()
-            }
-            return value
-          },
-        ],
-      },
     },
   ],
+  hooks: {
+    afterLogin: [
+      ({ req, user }) => {
+        setTimeout(async () => {
+          try {
+            await req.payload.update({
+              collection: 'users',
+              id: user.id,
+              data: {
+                lastLogin: new Date().toISOString(),
+              },
+              overrideAccess: true,
+              context: {
+                disableRevalidate: true,
+              },
+            })
+          } catch (err) {
+            req.payload.logger.warn(
+              `Failed to update lastLogin for user ${user.id}: ${err instanceof Error ? err.message : String(err)}`,
+            )
+          }
+        }, 100)
+        return user
+      },
+    ],
+  },
   timestamps: true,
 }

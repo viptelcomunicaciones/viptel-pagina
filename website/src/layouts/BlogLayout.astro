@@ -16,9 +16,8 @@ import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
 import { resolveSocialLinks } from '@/lib/utils';
 import { createBlogPostSchema, createFAQSchema } from '@/lib/schema';
-import { getBlogOgPath } from '@/lib/og';
 import { t, getLocaleFromPath, localizedPath, getLocales } from '@/i18n';
-import { getPostSlug, getPostUrl, getBlogBaseUrl } from '@/lib/blog';
+import { getPostUrl, getBlogBaseUrl } from '@/lib/blog';
 import { payload } from '@/lib/payload-client';
 // Translations resolve against Payload CMS: the same slug looked up in every
 // locale. If a locale has no matching post, the blog index URL is used as the
@@ -144,7 +143,6 @@ const schemas = faqSchema ? [blogPostingSchema, faqSchema] : [blogPostingSchema]
 // falling back to a locale's blog index when this post has no translation
 // there, so switching language never lands on a 404.
 const postTranslations = await getPostTranslations(slug, locale, uid);
-const translationByLocale = new Map(postTranslations.map((tr) => [tr.locale, tr.url]));
 ---
 
 <BaseLayout
@@ -167,7 +165,6 @@ const translationByLocale = new Map(postTranslations.map((tr) => [tr.locale, tr.
     shape="bar"
     variant="solid"
     size="lg"
-    showCta={false}
     showScrollProgress
     maxWidth="7xl"
     languageAlternates={{} as Record<string, string>}

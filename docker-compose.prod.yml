@@ -29,7 +29,9 @@ services:
       PAYLOAD_SECRET: ${PAYLOAD_SECRET}
       PAYLOAD_PUBLIC_SERVER_URL: ${PAYLOAD_PUBLIC_SERVER_URL:-https://cms.viptelcomunicaciones.com}
       FRONTEND_URL: ${FRONTEND_URL:-https://viptelcomunicaciones.com}
+      INTERNAL_FRONTEND_URL: http://website:4321
       PREVIEW_SECRET: ${PREVIEW_SECRET}
+      REVALIDATE_SECRET: ${REVALIDATE_SECRET}
       CRON_SECRET: ${CRON_SECRET}
       RESEND_API_KEY: ${RESEND_API_KEY}
       RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-noreply@viptelcomunicaciones.com}

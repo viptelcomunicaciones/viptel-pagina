@@ -12,11 +12,12 @@ import { Hero } from '@/components/hero';
 import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
 import { t, defaultLocale, localizedPath } from '@/i18n';
 import { getProjectsBaseUrl } from '@/lib/projects';
+import type { Project } from '@/lib/payload-types';
 
 interface Props {
   locale?: string;
   tag: string;
-  projects: any[];
+  projects: Project[];
   visibleTags: string[];
 }
 

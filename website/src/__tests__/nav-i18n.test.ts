@@ -77,4 +77,19 @@ describe('nav config — locale resolution (es default, en secondary)', () => {
   it('falls back to the literal label when no labelKey is set', () => {
     expect(resolveNavItem({ label: 'Docs', href: '/docs', order: 1 }, 'en').label).toBe('Docs');
   });
+
+  it('maintains 100% key parity between es.json and en.json', async () => {
+    const es = (await import('@/i18n/es.json')).default;
+    const en = (await import('@/i18n/en.json')).default;
+
+    const flattenKeys = (obj: Record<string, unknown>, prefix = ''): string[] =>
+      Object.entries(obj).flatMap(([k, v]) =>
+        v && typeof v === 'object' && !Array.isArray(v)
+          ? flattenKeys(v as Record<string, unknown>, prefix ? `${prefix}.${k}` : k)
+          : [prefix ? `${prefix}.${k}` : k]
+      );
+
+    expect(flattenKeys(en).sort()).toEqual(flattenKeys(es).sort());
+  });
 });
+

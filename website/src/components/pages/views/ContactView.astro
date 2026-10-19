@@ -11,6 +11,7 @@ import { t, defaultLocale } from '@/i18n';
 import siteConfig from '@/config/site.config';
 import { resolveSocialLinks } from '@/lib/utils';
 import type { PageBlock } from '@/lib/block-types';
+import type { LexicalNode, LexicalRoot } from '@/lib/headings';
 
 interface Props {
   locale?: string;
@@ -20,13 +21,13 @@ const { locale = defaultLocale } = Astro.props;
 const contact = await payload.pages().getBySlug('contact', locale);
 const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
 
-function extractRichText(richText: any): string {
+function extractRichText(richText?: LexicalRoot | null): string {
   try {
     const root = richText?.root;
     if (!root || !Array.isArray(root.children)) return '';
     return root.children
-      .filter((c: any) => c.type === 'paragraph' || c.type === 'heading')
-      .map((c: any) => c.children?.map((t: any) => t.text || '').join('') || '')
+      .filter((c: LexicalNode) => c.type === 'paragraph' || c.type === 'heading')
+      .map((c: LexicalNode) => c.children?.map((item: LexicalNode) => item.text || '').join('') || '')
       .join(' ');
   } catch {
     return '';
@@ -34,11 +35,16 @@ function extractRichText(richText: any): string {
 }
 
 const heroTitle = extractRichText(contact?.hero?.richText);
+const metaImage =
+  contact?.meta?.image && typeof contact.meta.image === 'object' && contact.meta.image.url
+    ? payload.resolveMediaUrl(contact.meta.image.url)
+    : undefined;
 ---
 
 <PageLayout
-  title={t('pages.contact.meta.title', locale)}
-  description={t('pages.contact.meta.description', locale)}
+  title={contact?.meta?.title || t('pages.contact.meta.title', locale)}
+  description={contact?.meta?.description || t('pages.contact.meta.description', locale)}
+  image={metaImage}
 >
   <Hero layout="centered" size="sm" class="isolate" showHeroHalo>
     <Badge slot="badge" variant="brand" pill
