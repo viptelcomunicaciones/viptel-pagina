@@ -17,6 +17,23 @@ const dirname = path.dirname(filename)
 export const Media: CollectionConfig = {
   slug: 'media',
   folders: true,
+  hooks: {
+    afterRead: [
+      ({ doc }) => {
+        const publicUrl = (process.env.R2_PUBLIC_URL || '').replace(/\/+$/, '')
+        const sizes = doc?.sizes as Record<string, { filename?: string; url?: string }> | undefined
+        const thumbFilename = sizes?.thumbnail?.filename || (typeof doc?.filename === 'string' ? doc.filename : undefined)
+        if (publicUrl && thumbFilename) {
+          doc.thumbnailURL = `${publicUrl}/${thumbFilename}`
+        } else if (typeof sizes?.thumbnail?.url === 'string' && sizes.thumbnail.url.startsWith('http')) {
+          doc.thumbnailURL = sizes.thumbnail.url
+        } else if (typeof doc?.url === 'string' && doc.url.startsWith('http')) {
+          doc.thumbnailURL = doc.url
+        }
+        return doc
+      },
+    ],
+  },
   access: {
     create: contentRoles,
 
@@ -46,13 +63,24 @@ export const Media: CollectionConfig = {
   upload: {
     // Upload to the public/media directory making them publicly accessible even outside of Payload
     staticDir: process.env.MEDIA_PATH || path.resolve(dirname, '../../public/media'),
-    adminThumbnail: ({ doc }) => {
-      const sizes = doc?.sizes as Record<string, { url?: string }> | undefined
-      if (sizes?.thumbnail?.url) return sizes.thumbnail.url
-      if (typeof doc?.url === 'string' && doc.url) return doc.url
-      if (process.env.R2_PUBLIC_URL && typeof doc?.filename === 'string') {
-        const publicUrl = process.env.R2_PUBLIC_URL.replace(/\/+$/, '')
-        return `${publicUrl}/${doc.filename}`
+    adminThumbnail: ({ doc }): string | false | null => {
+      const publicUrl = (process.env.R2_PUBLIC_URL || '').replace(/\/+$/, '')
+      const sizes = doc?.sizes as Record<string, { filename?: string; url?: string }> | undefined
+      const thumbFilename = sizes?.thumbnail?.filename || (typeof doc?.filename === 'string' ? doc.filename : undefined)
+      if (publicUrl && thumbFilename) {
+        return `${publicUrl}/${thumbFilename}`
+      }
+      if (typeof sizes?.thumbnail?.url === 'string' && sizes.thumbnail.url.startsWith('http')) {
+        return sizes.thumbnail.url
+      }
+      if (typeof doc?.url === 'string' && doc.url.startsWith('http')) {
+        return doc.url
+      }
+      if (typeof sizes?.thumbnail?.url === 'string') {
+        return sizes.thumbnail.url
+      }
+      if (typeof doc?.url === 'string') {
+        return doc.url
       }
       return null
     },
