@@ -56,15 +56,20 @@ export class HybridSSRCache {
           const pkgName = 'ioredis';
           const mod = await import(/* @vite-ignore */ pkgName);
           const RedisCtor = mod.default || mod.Redis || mod;
-          const client: RedisLikeClient = new RedisCtor(redisUrl, {
+          const client = new RedisCtor(redisUrl, {
             maxRetriesPerRequest: 1,
             enableOfflineQueue: false,
             lazyConnect: true,
           });
+          if (typeof client.on === 'function') {
+            client.on('error', (err: unknown) => {
+              // Suppress noisy unhandled EventEmitter errors; handled by try/catch in cache calls
+            });
+          }
           if (typeof client.connect === 'function') {
             await client.connect();
           }
-          return client;
+          return client as RedisLikeClient;
         } catch {
           return null;
         }

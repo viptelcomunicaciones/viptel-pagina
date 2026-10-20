@@ -58,6 +58,20 @@ services:
       - viptel-net
       - dokploy-network
 
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru", "--save", ""]
+    expose:
+      - '6379'
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - viptel-net
+
   website:
     build:
       context: ./website
@@ -69,6 +83,8 @@ services:
       SITE_URL: ${SITE_URL:-https://viptelcomunicaciones.com}
       # Comunicación directa interna (Astro SSR -> Payload CMS):
       INTERNAL_PAYLOAD_URL: http://backend:3000
+      # Caché L2 compartida (Redis):
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
       # URL pública para que los navegadores resuelvan recursos de medios:
       PAYLOAD_URL: ${PAYLOAD_URL:-https://cms.viptelcomunicaciones.com}
       PAYLOAD_API_KEY: ${PAYLOAD_API_KEY}
@@ -82,6 +98,8 @@ services:
       - '4321'
     depends_on:
       backend:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4321/api/health').then(r=>r.json()).then(d=>{if(d.status!=='ok')process.exit(1)}).catch(()=>process.exit(1))"]

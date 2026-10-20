@@ -122,6 +122,30 @@ describe('HybridSSRCache (L1 LRU + SWR + selective invalidation)', () => {
     await new Promise((r) => setTimeout(r, 20));
     expect(calls).toBe(2);
   });
+
+  it('handles offline or unreachable REDIS_URL gracefully with L1 fallback', async () => {
+    const originalRedisUrl = process.env.REDIS_URL;
+    process.env.REDIS_URL = 'redis://127.0.0.1:65534'; // non-existent port
+
+    try {
+      const redisFallbackCache = new HybridSSRCache(10);
+      let fetchCount = 0;
+      const fetcher = async () => ({ value: ++fetchCount });
+
+      const res1 = await redisFallbackCache.getOrFetch('resilient-key', fetcher);
+      expect(res1).toEqual({ value: 1 });
+
+      const res2 = await redisFallbackCache.getOrFetch('resilient-key', fetcher);
+      expect(res2).toEqual({ value: 1 });
+      expect(fetchCount).toBe(1); // Served from L1 cache without crash
+    } finally {
+      if (originalRedisUrl !== undefined) {
+        process.env.REDIS_URL = originalRedisUrl;
+      } else {
+        delete process.env.REDIS_URL;
+      }
+    }
+  });
 });
 
 describe('Rate limit & Client IP extraction', () => {
