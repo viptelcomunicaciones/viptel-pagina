@@ -4,7 +4,8 @@ import type { APIRoute } from 'astro';
 import { z } from 'astro/zod';
 import { Resend } from 'resend';
 import siteConfig from '@/config/site.config';
-import { rateLimit } from '@/lib/rate-limit';
+import { getClientIp, rateLimit } from '@/lib/rate-limit';
+import { payload } from '@/lib/payload-client';
 
 // Escape user-supplied values before they are interpolated into the
 // notification email's HTML, so a message containing markup (links,
@@ -26,7 +27,7 @@ const contactSchema = z.object({
 });
 
 export const POST: APIRoute = async ({ request, clientAddress }) => {
-  const ip = clientAddress || 'unknown';
+  const ip = getClientIp(request, clientAddress);
   if (rateLimit(ip)) {
     return new Response(
       JSON.stringify({
@@ -47,6 +48,14 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
       honeypot: formData.get('honeypot')?.toString() || '',
     };
 
+    // Honeypot check (bot detection) before schema check so bots get silent 200
+    if (data.honeypot) {
+      return new Response(JSON.stringify({ success: true }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     // Validate
     const result = contactSchema.safeParse(data);
 
@@ -66,18 +75,35 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
       });
     }
 
-    // Honeypot check (bot detection)
-    if (result.data.honeypot) {
-      return new Response(JSON.stringify({ success: true }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    // 1. Persist lead in Payload CMS (`form-submissions`) so no lead is ever lost
+    let savedToPayload = false;
+    try {
+      const contactForm =
+        (await payload.forms().getByTitle('Contacto Web', 'es')) ??
+        (await payload.forms().getFirst('es'));
+
+      if (contactForm?.id) {
+        savedToPayload = await payload.forms().submit(contactForm.id, [
+          { field: 'name', value: result.data.name },
+          { field: 'email', value: result.data.email },
+          ...(result.data.subject ? [{ field: 'subject', value: result.data.subject }] : []),
+          { field: 'message', value: result.data.message },
+        ]);
+      }
+    } catch (err) {
+      console.error('[Contact] Failed to persist submission in Payload CMS:', err);
     }
 
-    // Send email via Resend
+    // 2. Send email notification via Resend (if configured)
     const apiKey = import.meta.env.RESEND_API_KEY;
     if (!apiKey) {
-      console.error('RESEND_API_KEY is not set');
+      if (savedToPayload) {
+        return new Response(JSON.stringify({ success: true, stored: true }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      console.error('RESEND_API_KEY is not set and Payload form storage was unavailable');
       return new Response(
         JSON.stringify({ success: false, errors: { form: ['Email service is not configured'] } }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
@@ -109,6 +135,12 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
 
     if (error) {
       console.error('Resend error:', error);
+      if (savedToPayload) {
+        return new Response(JSON.stringify({ success: true, stored: true }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
       return new Response(
         JSON.stringify({
           success: false,
@@ -118,7 +150,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
       );
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ success: true, stored: savedToPayload }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });

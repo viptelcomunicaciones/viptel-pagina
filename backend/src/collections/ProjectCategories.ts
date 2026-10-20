@@ -1,16 +1,16 @@
 import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access/anyone'
-import { authenticated } from '../access/authenticated'
+import { adminOnly, contentRoles } from '../access/roleBased'
 import { slugField } from 'payload'
 
 export const ProjectCategories: CollectionConfig = {
   slug: 'project-categories',
   access: {
-    create: authenticated,
-    delete: authenticated,
+    create: contentRoles,
+    delete: adminOnly,
     read: anyone,
-    update: authenticated,
+    update: contentRoles,
   },
   labels: {
     singular: 'Categoría de proyecto',
@@ -33,6 +33,7 @@ export const ProjectCategories: CollectionConfig = {
       name: 'parent',
       type: 'relationship',
       relationTo: 'project-categories',
+      index: true,
       admin: {
         description:
           'Dejar vacío si es una categoría raíz. Seleccionar un padre para crear una subcategoría.',

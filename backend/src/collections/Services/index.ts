@@ -6,6 +6,7 @@ import { CallToAction } from '../../blocks/CallToAction/config'
 import { Cards } from '../../blocks/Cards/config'
 import { Content } from '../../blocks/Content/config'
 import { FAQ } from '../../blocks/FAQ/config'
+import { Form } from '../../blocks/FormBlock/config'
 import { Gallery } from '../../blocks/Gallery/config'
 import { MediaContent } from '../../blocks/MediaContent/config'
 import { Pricing } from '../../blocks/Pricing/config'
@@ -68,6 +69,7 @@ admin: {
       name: 'parent',
       type: 'relationship',
       relationTo: 'services',
+      index: true,
       admin: {
         position: 'sidebar',
         description: 'Dejar vacío si es una categoría. Seleccionar un servicio padre si es un sub-servicio.',
@@ -206,6 +208,7 @@ admin: {
                 Pricing,
                 Cards,
                 MediaContent,
+                Form,
               ],
             },
           ],

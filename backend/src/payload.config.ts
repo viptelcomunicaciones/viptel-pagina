@@ -7,6 +7,8 @@ import { buildConfig, PayloadRequest } from 'payload'
 import type { User } from '@/payload-types'
 import { fileURLToPath } from 'url'
 
+import { anyone } from './access/anyone'
+import { adminOnly, contentRoles, crmRoles } from './access/roleBased'
 import { Categories } from './collections/Categories'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
@@ -88,10 +90,41 @@ export default buildConfig({
   globals: [Header, Footer],
   plugins: [
     ...plugins,
-    mcpPlugin({}),
+    ...(process.env.NODE_ENV !== 'production' || process.env.ENABLE_MCP === 'true'
+      ? [mcpPlugin({})]
+      : []),
     formBuilderPlugin({
       fields: { payment: false },
+      formOverrides: {
+        access: {
+          read: anyone,
+          create: contentRoles,
+          update: contentRoles,
+          delete: adminOnly,
+        },
+        fields: ({ defaultFields }) =>
+          defaultFields.map((field) => {
+            if (
+              'name' in field &&
+              (field.name === 'title' ||
+                field.name === 'submitButtonLabel' ||
+                field.name === 'confirmationMessage')
+            ) {
+              return {
+                ...field,
+                localized: true,
+              } as typeof field
+            }
+            return field
+          }),
+      },
       formSubmissionOverrides: {
+        access: {
+          create: anyone,
+          read: crmRoles,
+          update: adminOnly,
+          delete: adminOnly,
+        },
         fields: ({ defaultFields }) => defaultFields,
       },
     }),

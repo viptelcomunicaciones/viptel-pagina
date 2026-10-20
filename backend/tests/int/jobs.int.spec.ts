@@ -40,7 +40,7 @@ describe('Jobs Queue', () => {
   it('rejects webhookDelivery without a url', async () => {
     const job = await payload.jobs.queue({
       task: 'webhookDelivery',
-      input: {},
+      input: { url: '' },
     })
 
     const result = await payload.jobs.runByID({ id: job.id })

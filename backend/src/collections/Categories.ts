@@ -37,6 +37,7 @@ export const Categories: CollectionConfig = {
       name: 'parent',
       type: 'relationship',
       relationTo: 'categories',
+      index: true,
       admin: {
         description:
           'Dejar vacío si es una categoría raíz. Seleccionar un padre para crear una subcategoría.',

@@ -21,6 +21,8 @@ export function createFieldRoleBasedAccess(...allowedRoles: User['roles']): Fiel
 export const adminOnly = createRoleBasedAccess('admin')
 export const adminOrEditor = createRoleBasedAccess('admin', 'editor')
 export const contentRoles = createRoleBasedAccess('admin', 'editor', 'marketing')
+export const crmRoles = createRoleBasedAccess('admin', 'sales', 'marketing')
+export const allAdminRoles = createRoleBasedAccess('admin', 'editor', 'marketing', 'sales')
 export const allAuthenticated: Access = ({ req: { user } }) => Boolean(user)
 
 export const adminOnlyField = createFieldRoleBasedAccess('admin')

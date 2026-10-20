@@ -1,11 +1,12 @@
 ---
 import ServicesOverviewView from '@/components/pages/views/ServicesOverviewView.astro';
 import { payload } from '@/lib/payload-client';
+import type { Service } from '@/lib/payload-types';
 import { defaultLocale } from '@/i18n';
 
 const locale = defaultLocale;
 const categories = await payload.services().getCategories(locale);
-const childrenMap: Record<string, any[]> = {};
+const childrenMap: Record<string, Service[]> = {};
 const childResults = await Promise.all(
   categories.map((cat) => payload.services().getByParent(cat.id, locale))
 );

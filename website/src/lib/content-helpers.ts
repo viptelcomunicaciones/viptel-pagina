@@ -2,7 +2,7 @@
  * ContentHelpers — shared utilities for tag counting, pagination,
  * and secondary locale resolution. Used by blog.ts and projects.ts.
  */
-import { defaultLocale, localizedPath, isEnabled, getLocales } from '@/i18n';
+import { defaultLocale, isEnabled, getLocales } from '@/i18n';
 import { tagToSlug, findTagBySlug } from '@/lib/tags';
 
 export { tagToSlug, findTagBySlug };

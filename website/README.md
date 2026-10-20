@@ -13,15 +13,16 @@ Sitio público de Viptel Comunicaciones construido con Astro 7 + Tailwind CSS v4
 ## Características
 
 - SSR con adaptador Node standalone
-- i18n: español (default) e inglés
-- 57 componentes reutilizables
-- 12 temas de color (OKLCH)
-- SEO completo (meta tags, JSON-LD, sitemap)
-- Búsqueda estática con Pagefind
-- Blog con comentarios
-- Portafolio de proyectos
-- Formulario de contacto
-- Modo oscuro/claro
+- i18n: español (default, sin prefijo) e inglés (prefijo `/en/`)
+- Caché SSR de alto rendimiento: L1 en memoria (LRU + SWR) con soporte listo para L2 Redis (`REDIS_URL`)
+- Invalidación selectiva de caché on-demand (`POST /api/revalidate`) impulsada por hooks de Payload CMS
+- Manejo real de errores 404 (código de estado 404 sin redirección 302 hacia `/404`)
+- Búsqueda en tiempo real modal conectada a `@payloadcms/plugin-search` del backend
+- Formularios unificados (`ContactForm` y `FormBlock` de Payload) guardados en `form-submissions` con anti-spam y rate-limiting
+- SEO optimizado con OpenGraph, Twitter Cards, JSON-LD estructurado y deduplicación de título
+- Carga optimizada de imágenes (WebP desde Cloudflare R2 con `loading="lazy"` bajo el pliegue)
+- 57 componentes reutilizables y 12 temas de color (OKLCH)
+- Modo oscuro/claro con detección de preferencias de sistema y persistencia local
 
 ## Requisitos
 

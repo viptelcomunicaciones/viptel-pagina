@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import type { CollectionSlug, File, GlobalSlug, Payload } from 'payload'
+import type { CollectionSlug, File, Payload } from 'payload'
 import { getPayload } from 'payload'
 
 import config from '../payload.config'
@@ -21,6 +21,8 @@ type LexicalContent = {
 
 const collections: CollectionSlug[] = [
   'categories',
+  'form-submissions',
+  'forms',
   'media',
   'pages',
   'posts',
@@ -29,12 +31,11 @@ const collections: CollectionSlug[] = [
   'project-types',
   'projects',
   'redirects',
+  'search',
   'services',
   'tags',
   'users',
 ]
-
-const globals: GlobalSlug[] = ['header', 'footer']
 
 // Simple lexical helpers for seed content (hand-built nodes — cast to the editor state type)
 const paragraph = (text: string): LexicalContent => {
@@ -134,19 +135,25 @@ const sections = (...blocks: SeedBlock[]): LexicalContent => {
 }
 
 export const seed = async (payload: Payload): Promise<void> => {
+  process.env.DISABLE_REVALIDATE = 'true'
   payload.logger.info('Seeding database...')
 
   payload.logger.info(`- Clearing collections and globals...`)
 
-  await Promise.all(
-    globals.map((global) =>
-      payload.updateGlobal({
-        slug: global,
-        data: { navItems: [] },
-        depth: 0,
-      }),
-    ),
-  )
+  await Promise.all([
+    payload.updateGlobal({
+      slug: 'header',
+      data: { navItems: [], cta: { showCta: false } },
+      depth: 0,
+      context: { disableRevalidate: true },
+    }),
+    payload.updateGlobal({
+      slug: 'footer',
+      data: { navItems: [], legalLinks: [], copyright: '' },
+      depth: 0,
+      context: { disableRevalidate: true },
+    }),
+  ])
 
   // The MCP plugin's api-keys collection has a NOT NULL relationship to users.
   // Clear it first so deleting users does not violate the constraint.
@@ -2162,7 +2169,7 @@ export const seed = async (payload: Payload): Promise<void> => {
           blockType: 'archive',
           introContent: paragraph('Proyectos que hemos desarrollado para nuestros clientes.'),
           populateBy: 'collection',
-          relationTo: 'projects' as any,
+          relationTo: 'projects',
           limit: 4,
         },
         {
@@ -2254,7 +2261,7 @@ export const seed = async (payload: Payload): Promise<void> => {
           blockType: 'archive',
           introContent: paragraph('Projects we have developed for our clients.'),
           populateBy: 'collection',
-          relationTo: 'projects' as any,
+          relationTo: 'projects',
           limit: 4,
         },
         {
@@ -2344,12 +2351,76 @@ export const seed = async (payload: Payload): Promise<void> => {
     meta: { title: 'About Us — Viptel Comunicaciones', description: 'Colombian telecommunications, web development and digital marketing company. Bogota, Colombia.' },
   }})
 
+  payload.logger.info('- Seeding base contact form...')
+
+  const contactForm = await payload.create({
+    collection: 'forms',
+    locale: 'es',
+    context: { disableRevalidate: true },
+    data: {
+      title: 'Contacto Web',
+      submitButtonLabel: 'Enviar mensaje',
+      confirmationType: 'message',
+      confirmationMessage: paragraph('¡Mensaje enviado! Te responderemos en menos de 24 horas.'),
+      fields: [
+        {
+          blockType: 'text',
+          name: 'name',
+          label: 'Nombre',
+          required: true,
+          width: 50,
+        },
+        {
+          blockType: 'email',
+          name: 'email',
+          label: 'Correo electrónico',
+          required: true,
+          width: 50,
+        },
+        {
+          blockType: 'text',
+          name: 'phone',
+          label: 'Teléfono',
+          required: false,
+          width: 50,
+        },
+        {
+          blockType: 'text',
+          name: 'subject',
+          label: 'Asunto / Servicio',
+          required: false,
+          width: 50,
+        },
+        {
+          blockType: 'textarea',
+          name: 'message',
+          label: 'Mensaje',
+          required: true,
+          width: 100,
+        },
+      ],
+    },
+  })
+
+  await payload.update({
+    collection: 'forms',
+    id: contactForm.id,
+    locale: 'en',
+    context: { disableRevalidate: true },
+    data: {
+      title: 'Web Contact',
+      submitButtonLabel: 'Send message',
+      confirmationMessage: paragraph('Message sent! We will get back to you within 24 hours.'),
+    },
+  })
+
   payload.logger.info('- Seeding contact page...')
 
   const contactPage = await payload.create({
     collection: 'pages',
     locale: 'es',
     depth: 0,
+    context: { disableRevalidate: true },
     data: {
       title: 'Contacto',
       slug: 'contact',
@@ -2360,70 +2431,111 @@ export const seed = async (payload: Payload): Promise<void> => {
     },
   })
 
-  await payload.update({ collection: 'pages', id: contactPage.id, locale: 'en', data: {
-    title: 'Contact',
-    hero: { type: 'lowImpact', richText: heading('Tell us about your project') },
-    meta: { title: 'Contact — Viptel Comunicaciones', description: 'Contact us for telecommunications, web development and digital marketing solutions.' },
-  }})
+  await payload.update({
+    collection: 'pages',
+    id: contactPage.id,
+    locale: 'en',
+    context: { disableRevalidate: true },
+    data: {
+      title: 'Contact',
+      hero: { type: 'lowImpact', richText: heading('Tell us about your project') },
+      meta: { title: 'Contact — Viptel Comunicaciones', description: 'Contact us for telecommunications, web development and digital marketing solutions.' },
+    },
+  })
 
   payload.logger.info(`- Seeding globals...`)
 
-  const headerNav = {
-    es: [
-      { label: 'Inicio', url: '/' },
-      { label: 'Servicios', url: '/services' },
-      { label: 'Portafolio', url: '/projects' },
-      { label: 'Blog', url: '/blog' },
-      { label: 'Contacto', url: '/contact' },
-    ],
-    en: [
-      { label: 'Home', url: '/en' },
-      { label: 'Services', url: '/en/services' },
-      { label: 'Portfolio', url: '/en/projects' },
-      { label: 'Blog', url: '/en/blog' },
-      { label: 'Contact', url: '/en/contact' },
-    ],
-  }
+  const serviceSubLinksEs = [
+    { link: { type: 'custom' as const, label: 'Viptel-PBX', url: '/services/viptel-pbx' } },
+    { link: { type: 'custom' as const, label: 'Viptel-VoIP', url: '/services/viptel-voip' } },
+    { link: { type: 'custom' as const, label: 'Viptel-Web', url: '/services/viptel-web' } },
+    { link: { type: 'custom' as const, label: 'Viptel-Marketing', url: '/services/viptel-marketing' } },
+    { link: { type: 'custom' as const, label: 'Viptel-Software', url: '/services/viptel-software' } },
+  ]
+
+  const serviceSubLinksEn = [
+    { link: { type: 'custom' as const, label: 'Viptel-PBX', url: '/en/services/viptel-pbx' } },
+    { link: { type: 'custom' as const, label: 'Viptel-VoIP', url: '/en/services/viptel-voip' } },
+    { link: { type: 'custom' as const, label: 'Viptel-Web', url: '/en/services/viptel-web' } },
+    { link: { type: 'custom' as const, label: 'Viptel-Marketing', url: '/en/services/viptel-marketing' } },
+    { link: { type: 'custom' as const, label: 'Viptel-Software', url: '/en/services/viptel-software' } },
+  ]
 
   await payload.updateGlobal({
     slug: 'header',
     locale: 'es',
+    context: { disableRevalidate: true },
     data: {
-      navItems: headerNav.es.map((item) => ({
-        link: { type: 'custom' as const, label: item.label, url: item.url },
-      })),
+      navItems: [
+        { link: { type: 'custom' as const, label: 'Inicio', url: '/' } },
+        { link: { type: 'custom' as const, label: 'Servicios', url: '/services' }, children: serviceSubLinksEs },
+        { link: { type: 'custom' as const, label: 'Portafolio', url: '/projects' } },
+        { link: { type: 'custom' as const, label: 'Blog', url: '/blog' } },
+        { link: { type: 'custom' as const, label: 'Nosotros', url: '/about' } },
+        { link: { type: 'custom' as const, label: 'Contacto', url: '/contact' } },
+      ],
+      cta: {
+        showCta: true,
+        link: { type: 'custom' as const, label: 'Comenzar', url: '/contact' },
+      },
     },
   })
   await payload.updateGlobal({
     slug: 'header',
     locale: 'en',
+    context: { disableRevalidate: true },
     data: {
-      navItems: headerNav.en.map((item) => ({
-        link: { type: 'custom' as const, label: item.label, url: item.url },
-      })),
+      navItems: [
+        { link: { type: 'custom' as const, label: 'Home', url: '/en' } },
+        { link: { type: 'custom' as const, label: 'Services', url: '/en/services' }, children: serviceSubLinksEn },
+        { link: { type: 'custom' as const, label: 'Portfolio', url: '/en/projects' } },
+        { link: { type: 'custom' as const, label: 'Blog', url: '/en/blog' } },
+        { link: { type: 'custom' as const, label: 'About', url: '/en/about' } },
+        { link: { type: 'custom' as const, label: 'Contact', url: '/en/contact' } },
+      ],
+      cta: {
+        showCta: true,
+        link: { type: 'custom' as const, label: 'Get Started', url: '/en/contact' },
+      },
     },
   })
 
   await payload.updateGlobal({
     slug: 'footer',
     locale: 'es',
+    context: { disableRevalidate: true },
     data: {
       navItems: [
         { link: { type: 'custom' as const, label: 'Servicios', url: '/services' } },
         { link: { type: 'custom' as const, label: 'Portafolio', url: '/projects' } },
+        { link: { type: 'custom' as const, label: 'Blog', url: '/blog' } },
+        { link: { type: 'custom' as const, label: 'Nosotros', url: '/about' } },
         { link: { type: 'custom' as const, label: 'Contacto', url: '/contact' } },
       ],
+      legalLinks: [
+        { link: { type: 'custom' as const, label: 'Privacidad', url: '/privacy' } },
+        { link: { type: 'custom' as const, label: 'Términos', url: '/terms' } },
+      ],
+      copyright: 'Viptel Comunicaciones S.A.S.',
     },
   })
   await payload.updateGlobal({
     slug: 'footer',
     locale: 'en',
+    context: { disableRevalidate: true },
     data: {
       navItems: [
         { link: { type: 'custom' as const, label: 'Services', url: '/en/services' } },
         { link: { type: 'custom' as const, label: 'Portfolio', url: '/en/projects' } },
+        { link: { type: 'custom' as const, label: 'Blog', url: '/en/blog' } },
+        { link: { type: 'custom' as const, label: 'About', url: '/en/about' } },
         { link: { type: 'custom' as const, label: 'Contact', url: '/en/contact' } },
       ],
+      legalLinks: [
+        { link: { type: 'custom' as const, label: 'Privacy', url: '/en/privacy' } },
+        { link: { type: 'custom' as const, label: 'Terms', url: '/en/terms' } },
+      ],
+      copyright: 'Viptel Comunicaciones S.A.S.',
     },
   })
 

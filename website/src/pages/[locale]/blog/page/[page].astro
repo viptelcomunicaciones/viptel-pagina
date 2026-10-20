@@ -1,21 +1,25 @@
 ---
 import BlogPageView from '@/components/blog/views/BlogPageView.astro';
+import NotFoundView from '@/components/pages/views/NotFoundView.astro';
 import { defaultLocale, isValidLocale } from '@/i18n';
 
 export const prerender = false;
 
-// Locale-prefixed paginated blog index (`/<locale>/blog/page/N`, N >= 2).
-// Page 1 lives at `/<locale>/blog`. Rendered on demand.
 const { locale = defaultLocale } = Astro.params;
-
-if (!isValidLocale(locale)) {
-  return Astro.redirect('/404');
-}
-
+const validLocale = isValidLocale(locale);
+const effectiveLocale = validLocale ? locale : defaultLocale;
 const page = Number(Astro.params.page);
-if (!Number.isInteger(page) || page < 2) {
-  return Astro.redirect('/404');
+const isValidPage = validLocale && Number.isInteger(page) && page >= 2;
+
+if (!isValidPage) {
+  Astro.response.status = 404;
 }
 ---
 
-<BlogPageView locale={locale} page={page} />
+{
+  isValidPage ? (
+    <BlogPageView locale={effectiveLocale} page={page} />
+  ) : (
+    <NotFoundView locale={effectiveLocale} />
+  )
+}

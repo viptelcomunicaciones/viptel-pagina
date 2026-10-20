@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { z } from 'astro/zod';
 import { Resend } from 'resend';
-import { rateLimit } from '@/lib/rate-limit';
+import { getClientIp, rateLimit } from '@/lib/rate-limit';
 
 export const prerender = false;
 
@@ -11,7 +11,7 @@ const newsletterSchema = z.object({
 });
 
 export const POST: APIRoute = async ({ request, clientAddress }) => {
-  const ip = clientAddress || 'unknown';
+  const ip = getClientIp(request, clientAddress);
   if (rateLimit(ip)) {
     return new Response(
       JSON.stringify({ success: false, error: 'Too many requests. Please try again later.' }),

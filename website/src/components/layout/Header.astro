@@ -29,7 +29,7 @@ import {
   resolveNavItem,
   navItems as navConfigItems,
 } from '@/config/nav.config';
-import { localizedPath } from '@/i18n';
+import { localizedPath, swapLocaleInPath } from '@/i18n';
 import { headerVariants, headerInnerVariants } from './header.variants';
 import Button from '@/components/ui/form/Button/Button.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
@@ -43,6 +43,39 @@ import siteConfig from '@/config/site.config';
 import { resolveSocialLink } from '@/lib/utils';
 import { isEnabled as i18nIsEnabled, getLocaleFromPath, stripLocaleFromPath, t } from '@/i18n';
 import AdminBar from '@/components/layout/AdminBar.astro';
+import { payload } from '@/lib/payload-client';
+import type { Header as PayloadHeader } from '@/lib/payload-types';
+
+type PayloadLinkData = NonNullable<NonNullable<PayloadHeader['navItems']>[number]>['link'];
+
+function resolveCmsLink(link: PayloadLinkData | undefined | null, currentLocale: string): {
+  label: string;
+  href: string;
+  external?: boolean;
+} | null {
+  if (!link || !link.label) return null;
+  let rawHref = link.url || '/';
+  if (link.type === 'reference' && link.reference?.value && typeof link.reference.value === 'object') {
+    const doc = link.reference.value as { slug?: string | null; breadcrumbs?: Array<{ url?: string | null }> | null };
+    const slug = doc.slug || '';
+    if (link.reference.relationTo === 'pages') {
+      const lastCrumb = doc.breadcrumbs?.[doc.breadcrumbs.length - 1]?.url;
+      rawHref = slug === 'home' ? '/' : lastCrumb || `/${slug}`;
+    } else if (link.reference.relationTo === 'posts') {
+      rawHref = `/blog/${slug}`;
+    } else if (link.reference.relationTo === 'services') {
+      const lastCrumb = doc.breadcrumbs?.[doc.breadcrumbs.length - 1]?.url;
+      rawHref = lastCrumb ? `/services${lastCrumb}` : `/services/${slug}`;
+    }
+  }
+  const external = Boolean(link.newTab) || isExternalOrAnchorHref(rawHref);
+  const href = external ? rawHref : swapLocaleInPath(rawHref, currentLocale);
+  return {
+    label: link.label,
+    href,
+    external: Boolean(link.newTab),
+  };
+}
 
 export interface NavItem {
   label: string;
@@ -107,8 +140,8 @@ const {
   shape = 'bar',
   nav,
   extraNav = [],
-  showCta = false,
-  cta = { label: 'Start a project', href: '/contact' },
+  showCta: showCtaProp,
+  cta: ctaProp,
   actions = [],
   showSearch = true,
   showThemeToggle = true,
@@ -144,10 +177,31 @@ const currentPath = Astro.url.pathname;
 const locale = getLocaleFromPath(currentPath);
 const isLandingPage = currentPath === '/';
 
+// Fetch CMS Header global with automatic fallback to nav.config.ts
+const cmsHeader = !nav ? await payload.globals().getHeader(locale) : null;
+const cmsNavItems: NavItem[] =
+  cmsHeader?.navItems
+    ?.map((item, idx) => {
+      const resolved = resolveCmsLink(item.link, locale);
+      if (!resolved) return null;
+      const children = item.children
+        ?.map((child, cIdx) => {
+          const resolvedChild = resolveCmsLink(child.link, locale);
+          return resolvedChild ? { ...resolvedChild, order: cIdx + 1 } : null;
+        })
+        .filter((c): c is NonNullable<typeof c> => c !== null);
+      return {
+        ...resolved,
+        order: idx + 1,
+        children: children && children.length > 0 ? children : undefined,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null) ?? [];
+
 // Localized for the active locale: hrefs are locale-prefixed and labels
 // translated (see nav.config.ts). Explicit `nav`/`extraNav` props are used
 // as-is so callers keep full control.
-const defaultNav = navConfigItems.map((item) => {
+const fallbackNav: NavItem[] = navConfigItems.map((item) => {
   const resolved = resolveNavItem(item, locale);
   return {
     label: resolved.label,
@@ -157,7 +211,13 @@ const defaultNav = navConfigItems.map((item) => {
     children: item.children,
   };
 });
+const defaultNav: NavItem[] = cmsNavItems.length > 0 ? cmsNavItems : fallbackNav;
 const navItems: NavItem[] = nav || [...extraNav, ...defaultNav];
+
+const cmsCtaResolved = cmsHeader?.cta?.link ? resolveCmsLink(cmsHeader.cta.link, locale) : null;
+const showCta = showCtaProp ?? Boolean(cmsHeader?.cta?.showCta && cmsCtaResolved);
+const cta = ctaProp ?? (cmsCtaResolved ? { label: cmsCtaResolved.label, href: cmsCtaResolved.href } : { label: 'Start a project', href: localizedPath('/contact', locale) });
+
 const logoHref = getLogoHref(locale);
 const ctaHref = cta.href?.startsWith('#') && !isLandingPage ? `/${cta.href}` : cta.href;
 
@@ -321,10 +381,11 @@ const buttonId = `${menuId}-button`;
                             const childHref =
                               child.external || isExternalOrAnchorHref(child.href)
                                 ? child.href
-                                : localizedPath(child.href, locale);
+                                : swapLocaleInPath(child.href, locale);
                             return (
                               <a
                                 href={childHref}
+                                aria-label={child.label}
                                 target={child.external ? '_blank' : undefined}
                                 rel={child.external ? 'noopener noreferrer' : undefined}
                                 class={cn(
@@ -630,10 +691,11 @@ const buttonId = `${menuId}-button`;
                                 const childHref =
                                   child.external || isExternalOrAnchorHref(child.href)
                                     ? child.href
-                                    : child.href;
+                                    : swapLocaleInPath(child.href, locale);
                                 return (
                                   <a
                                     href={childHref}
+                                    aria-label={child.label}
                                     target={child.external ? '_blank' : undefined}
                                     rel={child.external ? 'noopener noreferrer' : undefined}
                                     class="mobile-menu-row text-foreground-muted hover:text-foreground hover:bg-secondary/50 flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors"

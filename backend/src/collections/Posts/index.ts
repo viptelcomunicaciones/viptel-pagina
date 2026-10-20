@@ -130,6 +130,7 @@ admin: {
                 description: 'Formato del contenido. Es un eje aparte de la categoría.',
                 position: 'sidebar',
               },
+              index: true,
               relationTo: 'post-types',
               required: true,
             },

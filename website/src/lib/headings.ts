@@ -16,7 +16,23 @@ export function slugify(text: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-function nodeText(node: any): string {
+export interface LexicalNode {
+  type?: string;
+  tag?: string;
+  text?: string;
+  children?: LexicalNode[];
+  [k: string]: unknown;
+}
+
+export interface LexicalRoot {
+  root?: {
+    children?: LexicalNode[];
+    [k: string]: unknown;
+  } | null;
+  [k: string]: unknown;
+}
+
+function nodeText(node: LexicalNode | null | undefined): string {
   if (!node) return '';
   if (node.type === 'text') return node.text || '';
   if (Array.isArray(node.children)) return node.children.map(nodeText).join('');
@@ -29,7 +45,7 @@ function nodeText(node: any): string {
  * Slug generation matches the ids emitted by `RichText.astro`, so anchors line
  * up between the TOC links and the headings in the article body.
  */
-export function extractHeadings(content: any): MarkdownHeading[] {
+export function extractHeadings(content: LexicalRoot | null | undefined): MarkdownHeading[] {
   const children = content?.root?.children;
   if (!Array.isArray(children)) return [];
 
@@ -64,7 +80,7 @@ export function extractHeadings(content: any): MarkdownHeading[] {
  * Plain-text rendering of a Lexical rich-text root — used to estimate reading
  * time without markup noise.
  */
-export function getPlainText(content: any): string {
+export function getPlainText(content: LexicalRoot | null | undefined): string {
   const children = content?.root?.children;
   if (!Array.isArray(children)) return '';
   return children.map(nodeText).join('\n');

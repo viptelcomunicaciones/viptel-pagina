@@ -1,14 +1,16 @@
 ---
 import BlogIndexView from '@/components/blog/views/BlogIndexView.astro';
+import NotFoundView from '@/components/pages/views/NotFoundView.astro';
 import { defaultLocale, isValidLocale } from '@/i18n';
 
 export const prerender = false;
 
 const { locale = defaultLocale } = Astro.params;
+const validLocale = isValidLocale(locale);
 
-if (!isValidLocale(locale)) {
-  return Astro.redirect('/404');
+if (!validLocale) {
+  Astro.response.status = 404;
 }
 ---
 
-<BlogIndexView locale={locale} />
+{validLocale ? <BlogIndexView locale={locale} /> : <NotFoundView locale={defaultLocale} />}

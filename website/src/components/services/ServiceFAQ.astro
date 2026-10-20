@@ -1,11 +1,12 @@
 ---
 import { t } from '@/i18n';
 import { cn } from '@/lib/cn';
+import type { LexicalNode, LexicalRoot } from '@/lib/headings';
 
 interface FaqItem {
   id?: string | null;
   question: string;
-  answer?: any;
+  answer?: LexicalRoot | null;
 }
 
 interface Props {
@@ -16,13 +17,13 @@ interface Props {
 
 const { faq, locale = 'es', class: className } = Astro.props;
 
-function extractPlainText(richText: any): string {
+function extractPlainText(richText?: LexicalRoot | null): string {
   try {
     const root = richText?.root;
     if (!root || !Array.isArray(root.children)) return '';
     return root.children
-      .filter((c: any) => c.type === 'paragraph' || c.type === 'heading')
-      .map((c: any) => c.children?.map((t: any) => t.text || '').join('') || '')
+      .filter((c: LexicalNode) => c.type === 'paragraph' || c.type === 'heading')
+      .map((c: LexicalNode) => c.children?.map((item: LexicalNode) => item.text || '').join('') || '')
       .join(' ');
   } catch {
     return '';

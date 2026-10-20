@@ -57,7 +57,7 @@ export const MyDraftsWidget = () => {
               {draft.title || draft.id}
             </a>
             <span className="text-xs text-muted-foreground">
-              Actualizado {new Date(draft.updatedAt ?? Date.now()).toLocaleDateString()}
+              Actualizado {draft.updatedAt ? new Date(draft.updatedAt).toLocaleDateString() : '—'}
             </span>
           </li>
         ))}

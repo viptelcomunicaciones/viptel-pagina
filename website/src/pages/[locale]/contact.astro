@@ -1,19 +1,18 @@
 ---
 import ContactView from '@/components/pages/views/ContactView.astro';
-import { getSecondaryLocales, isValidLocale } from '@/i18n';
+import NotFoundView from '@/components/pages/views/NotFoundView.astro';
+import { getSecondaryLocales, isValidLocale, defaultLocale } from '@/i18n';
 
-// Locale-prefixed Contact page (`/<locale>/contact`). One page per non-default
-// locale; emits nothing when i18n is off. Untranslated copy falls back to the
-// default locale so the LanguageSwitcher never lands on a 404.
 export function getStaticPaths() {
   return getSecondaryLocales().map((locale) => ({ params: { locale } }));
 }
 
 const { locale } = Astro.params;
+const validLocale = isValidLocale(locale);
 
-if (!isValidLocale(locale)) {
-  return Astro.redirect('/404');
+if (!validLocale) {
+  Astro.response.status = 404;
 }
 ---
 
-<ContactView locale={locale} />
+{validLocale ? <ContactView locale={locale} /> : <NotFoundView locale={defaultLocale} />}

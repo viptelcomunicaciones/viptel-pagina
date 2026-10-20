@@ -36,7 +36,17 @@ const {
   localeAlternates,
 } = Astro.props;
 
-const pageTitle = title ? `${title} — ${siteConfig.name}` : siteConfig.name;
+const cleanTitle = title?.trim();
+const hasBrandInTitle =
+  cleanTitle &&
+  (cleanTitle.toLowerCase().includes(siteConfig.name.toLowerCase()) ||
+    cleanTitle.toLowerCase().includes('viptel'));
+
+const pageTitle = !cleanTitle
+  ? siteConfig.name
+  : hasBrandInTitle
+    ? cleanTitle
+    : `${cleanTitle} — ${siteConfig.name}`;
 
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 

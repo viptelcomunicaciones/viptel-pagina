@@ -143,13 +143,13 @@ export default defineConfig({
 
   image: {
     layout: 'constrained',
-    // Permite optimizar imágenes remotas servidas por el CMS (Payload). En
-    // desarrollo el backend vive en localhost:3000; en producción se permite
-    // cualquier dominio https. TODO(prod): restringir al host real del CMS
-    // antes de desplegar (p. ej. `{ protocol: 'https', hostname: 'cms.…' }`).
     remotePatterns: [
       { protocol: 'http', hostname: 'localhost' },
-      { protocol: 'https' },
+      { protocol: 'http', hostname: '127.0.0.1' },
+      { protocol: 'http', hostname: 'backend' },
+      { protocol: 'https', hostname: 'cms.viptelcomunicaciones.com' },
+      { protocol: 'https', hostname: '**.viptelcomunicaciones.com' },
+      { protocol: 'https', hostname: '**.r2.dev' },
     ],
   },
 

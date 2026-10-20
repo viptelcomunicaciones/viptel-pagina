@@ -5,3 +5,8 @@ export const getServerSideURL = () => {
 export const getFrontendURL = () => {
   return process.env.FRONTEND_URL || 'http://localhost:4321'
 }
+
+export const getInternalFrontendURL = () => {
+  return process.env.INTERNAL_FRONTEND_URL || process.env.FRONTEND_URL || 'http://localhost:4321'
+}
+

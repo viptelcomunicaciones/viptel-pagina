@@ -1,27 +1,32 @@
 ---
 import BlogTagView from '@/components/blog/views/BlogTagView.astro';
+import NotFoundView from '@/components/pages/views/NotFoundView.astro';
 import { defaultLocale, isValidLocale } from '@/i18n';
 import { collectTags, findTagBySlug, getPublishedPosts, getTagName } from '@/lib/blog';
 
 export const prerender = false;
 
-// Locale-prefixed tag archive (`/<locale>/blog/tag/<slug>`). Resolved on demand.
 const { locale = defaultLocale } = Astro.params;
-
-if (!isValidLocale(locale)) {
-  return Astro.redirect('/404');
-}
-
+const validLocale = isValidLocale(locale);
+const effectiveLocale = validLocale ? locale : defaultLocale;
 const slug = Astro.params.tag ?? '';
-const allPosts = await getPublishedPosts(locale);
+const allPosts = validLocale ? await getPublishedPosts(effectiveLocale) : [];
 const tags = collectTags(allPosts);
-const tag = findTagBySlug(slug, tags);
+const tag = validLocale ? findTagBySlug(slug, tags) : null;
 
-if (!tag) {
-  return Astro.redirect('/404');
+if (!validLocale || !tag) {
+  Astro.response.status = 404;
 }
 
-const posts = allPosts.filter((p) => (p.tags ?? []).some((t) => getTagName(t) === tag));
+const posts = tag
+  ? allPosts.filter((p) => (p.tags ?? []).some((t) => getTagName(t) === tag))
+  : [];
 ---
 
-<BlogTagView locale={locale} tag={tag} posts={posts} />
+{
+  validLocale && tag ? (
+    <BlogTagView locale={effectiveLocale} tag={tag} posts={posts} />
+  ) : (
+    <NotFoundView locale={effectiveLocale} />
+  )
+}

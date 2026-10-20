@@ -9,8 +9,8 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
     return new Response('Invalid preview secret', { status: 401 });
   }
 
-  if (!path) {
-    return new Response('Missing path parameter', { status: 400 });
+  if (!path || !path.startsWith('/') || path.startsWith('//') || path.includes('\\')) {
+    return new Response('Invalid path parameter', { status: 400 });
   }
 
   cookies.set('__prv', 'true', {

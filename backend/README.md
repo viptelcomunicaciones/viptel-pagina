@@ -10,25 +10,38 @@ Headless CMS de Viptel Comunicaciones construido con Payload CMS 3 + Next.js 16 
 - **TypeScript** 5.7 — tipado estricto en todo el proyecto
 
 ## Colecciones
-
-| Slug | Localizada | Versiones | Descripción |
-|---|---|---|---|
-| `users` | — | — | Autenticación de administradores |
-| `categories` | Sí | Drafts | Categorías para posts |
-| `media` | — | — | Subida y redimensionado de imágenes |
-| `pages` | Sí | Drafts | Páginas del sitio con bloques (nested-docs) |
-| `posts` | Sí | Drafts | Artículos del blog |
-| `projects` | Sí | Drafts | Casos de estudio y portafolio |
-
+ 
+| Slug | Localizada | Versiones | Auth / Acceso | Descripción |
+|---|---|---|---|---|
+| `users` | — | — | Email/password + API key | Administradores, editores, marketing y ventas |
+| `media` | Sí (`alt`, `caption`) | — | Escritura `contentRoles`, lectura pública | Imágenes (WebP auto q:82) en Cloudflare R2 |
+| `categories` | Sí | — | Escritura `contentRoles`, lectura pública | Categorías de artículos del blog |
+| `project-categories` | Sí | — | Escritura `contentRoles`, lectura pública | Categorías de proyectos y portafolio |
+| `tags` | — | — | Escritura `contentRoles`, lectura pública | Etiquetas taxonómicas |
+| `post-types` | Sí | — | Escritura `contentRoles`, lectura pública | Tipos de post (artículo, noticia, tutorial) |
+| `project-types` | Sí | — | Escritura `contentRoles`, lectura pública | Tipos de proyecto |
+| `pages` | Sí | Drafts | Escritura `contentRoles`, lectura pública | Páginas del sitio con bloques (nested-docs) |
+| `posts` | Sí | Drafts | Escritura `contentRoles`, lectura pública | Artículos del blog |
+| `projects` | Sí | Drafts | Escritura `contentRoles`, lectura pública | Casos de estudio y portafolio |
+| `services` | Sí | Drafts | Escritura `contentRoles`, lectura pública | Servicios Viptel jerárquicos |
+| `forms` | Sí | — | Escritura `contentRoles`, lectura pública | Plugin Form Builder |
+| `form-submissions` | — | — | CRM (`crmRoles` read, `anyone` create) | Envíos de leads y contactos |
+| `search` | Sí | — | Índice FTS | Índice de búsqueda en tiempo real |
+| `redirects` | — | — | Escritura `contentRoles`, lectura pública | Redirecciones 301 y 302 |
+ 
 ### Pages — Bloques disponibles
-
-Las páginas usan un builder de bloques con 10 tipos:
-Content, MediaContent, Cards, Pricing, CTA, FAQ, Gallery, Archive, Banner, Code
-
+ 
+Las páginas usan un builder de bloques con 11 tipos:
+Content, MediaContent, Cards, Pricing, CTA, FAQ, Gallery, Archive, Banner, Code, Form
+ 
 ### Plugins activos
-
-- `@payloadcms/plugin-nested-docs` — jerarquía padre/hijo para páginas
-- `@payloadcms/plugin-seo` — generación automática de meta tags
+ 
+- `@payloadcms/plugin-nested-docs` — jerarquía padre/hijo para páginas y servicios
+- `@payloadcms/plugin-seo` — generación automática de meta tags con deduplicación inteligente
+- `@payloadcms/plugin-search` — índice de búsqueda en tiempo real localizado (`es`/`en`)
+- `@payloadcms/plugin-form-builder` — formularios dinámicos y CRM de leads
+- `@payloadcms/plugin-redirects` — gestión de redirecciones 301/302
+- `@payloadcms/storage-s3` — almacenamiento en Cloudflare R2 con WebP automático
 - `@payloadcms/email-resend` — emails transaccionales vía Resend
 - `@payloadcms/richtext-lexical` — editor de contenido rico
 

@@ -18,7 +18,6 @@ const project = (id: number, type: ProjectType, cat?: ProjectCategory, tags: str
 
 describe('rankRelatedProjects', () => {
   it('ranks shared type above shared tags', () => {
-    const current = project(1, typeWeb, catWeb, ['Astro']);
     const sameType = project(2, typeWeb, undefined, []);
     const sameTag = project(3, typeTel, undefined, ['Astro']);
     const ranked = rankRelatedProjects([sameType, sameTag], 'project-1', 'desarrollo-web', 10, ['Astro']);

@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import type { Payload } from 'payload'
+import type { Payload, RequiredDataFromCollectionSlug } from 'payload'
 import { getPayload } from 'payload'
 
 import config from '../payload.config'
@@ -1259,7 +1259,7 @@ const upsertService = async (
 
   const locales = ['es', 'en'] as const
 
-  const buildData = (locale: 'es' | 'en'): any => {
+  const buildData = (locale: 'es' | 'en') => {
     const c = seed[locale]
     return {
       ...(c.title ? { title: c.title } : {}),
@@ -1273,7 +1273,7 @@ const upsertService = async (
       faq: (c.faq ?? []).map((f) => ({ question: f.question, answer: richText([f.answer]) })),
       pricing: pricingToData(c.pricing, locale),
       layout: [ctaBlock(c.cta.heading, c.cta.text, c.cta.label)],
-    }
+    } as unknown as Partial<RequiredDataFromCollectionSlug<'services'>>
   }
 
   if (existing.docs.length > 0) {
@@ -1283,6 +1283,7 @@ const upsertService = async (
         collection: 'services',
         id,
         locale,
+        context: { disableRevalidate: true },
         data: buildData(locale),
       })
     }
@@ -1291,10 +1292,11 @@ const upsertService = async (
       collection: 'services',
       id,
       locale: 'es',
+      context: { disableRevalidate: true },
       data: {
         icon: seed.icon,
         ...(parentId ? { parent: parentId } : {}),
-      } as any,
+      } as unknown as Partial<RequiredDataFromCollectionSlug<'services'>>,
     })
     payload.logger.info(`  ✓ updated: ${seed.slug}`)
     return
@@ -1303,12 +1305,13 @@ const upsertService = async (
   await payload.create({
     collection: 'services',
     locale: 'es',
+    context: { disableRevalidate: true },
     data: {
       slug: seed.slug,
       icon: seed.icon,
       ...(parentId ? { parent: parentId } : {}),
       ...buildData('es'),
-    },
+    } as unknown as RequiredDataFromCollectionSlug<'services'>,
   })
   const created = await payload.find({ collection: 'services', where: { slug: { equals: seed.slug } }, limit: 1 })
   const id = created.docs[0].id
@@ -1316,16 +1319,24 @@ const upsertService = async (
     collection: 'services',
     id,
     locale: 'en',
+    context: { disableRevalidate: true },
     data: buildData('en'),
   })
   // publish both locales
   for (const locale of locales) {
-    await payload.update({ collection: 'services', id, locale, data: { _status: 'published' } as Record<string, unknown> })
+    await payload.update({
+      collection: 'services',
+      id,
+      locale,
+      context: { disableRevalidate: true },
+      data: { _status: 'published' },
+    })
   }
   payload.logger.info(`  + created: ${seed.slug}`)
 }
 
 // ---------- Main ----------
+process.env.DISABLE_REVALIDATE = 'true'
 const payload = await getPayload({ config })
 
 payload.logger.info('Seeding services content (es/en)...')
