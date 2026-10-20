@@ -46,7 +46,16 @@ export const Media: CollectionConfig = {
   upload: {
     // Upload to the public/media directory making them publicly accessible even outside of Payload
     staticDir: process.env.MEDIA_PATH || path.resolve(dirname, '../../public/media'),
-    adminThumbnail: 'thumbnail',
+    adminThumbnail: ({ doc }) => {
+      const sizes = doc?.sizes as Record<string, { url?: string }> | undefined
+      if (sizes?.thumbnail?.url) return sizes.thumbnail.url
+      if (typeof doc?.url === 'string' && doc.url) return doc.url
+      if (process.env.R2_PUBLIC_URL && typeof doc?.filename === 'string') {
+        const publicUrl = process.env.R2_PUBLIC_URL.replace(/\/+$/, '')
+        return `${publicUrl}/${doc.filename}`
+      }
+      return null
+    },
     focalPoint: true,
     formatOptions: {
       format: 'webp',

@@ -285,46 +285,45 @@ const modalId = `search-modal-${Math.random().toString(36).slice(2, 9)}`;
               return;
             }
 
-            // If API responded 200 with 0 results, also check Pagefind fallback before declaring empty
-            const pfFallback = await loadPagefind();
-            if (!pfFallback) {
-              const tmpl = results.dataset.i18nEmpty ?? 'No results for “{query}”';
-              renderMessage(tmpl.replace('{query}', () => escapeHtml(query)));
-              return;
-            }
+            // Real-time search returned 0 matches
+            const tmpl = results.dataset.i18nEmpty ?? 'No results for “{query}”';
+            renderMessage(tmpl.replace('{query}', () => escapeHtml(query)));
+            return;
           }
         } catch {
           // Fall through to Pagefind if SSR endpoint is unreachable
         }
 
-        // 2. Fallback: Static Pagefind index if generated
-        const pf = await loadPagefind();
-        if (!pf) {
-          renderMessage(
-            results.dataset.i18nUnavailable ??
-              'Search is temporarily unavailable.'
+        // 2. Fallback: Static Pagefind index if available
+        try {
+          const pf = await loadPagefind();
+          if (!pf) {
+            const tmpl = results.dataset.i18nEmpty ?? 'No results for “{query}”';
+            renderMessage(tmpl.replace('{query}', () => escapeHtml(query)));
+            return;
+          }
+
+          const search = await pf.search(query);
+          if (input.value.trim() !== query) return;
+
+          if (!search?.results || search.results.length === 0) {
+            const tmpl = results.dataset.i18nEmpty ?? 'No results for “{query}”';
+            renderMessage(tmpl.replace('{query}', () => escapeHtml(query)));
+            return;
+          }
+
+          const items = await Promise.all(search.results.slice(0, MAX_RESULTS).map((r) => r.data()));
+          renderItems(
+            items.map((item) => ({
+              title: item.meta.title ?? item.url,
+              url: item.url,
+              excerptHtml: item.excerpt,
+            }))
           );
-          return;
-        }
-
-        const search = await pf.search(query);
-        // A newer keystroke may have superseded this query while we awaited
-        if (input.value.trim() !== query) return;
-
-        if (search.results.length === 0) {
+        } catch {
           const tmpl = results.dataset.i18nEmpty ?? 'No results for “{query}”';
           renderMessage(tmpl.replace('{query}', () => escapeHtml(query)));
-          return;
         }
-
-        const items = await Promise.all(search.results.slice(0, MAX_RESULTS).map((r) => r.data()));
-        renderItems(
-          items.map((item) => ({
-            title: item.meta.title ?? item.url,
-            url: item.url,
-            excerptHtml: item.excerpt,
-          }))
-        );
       };
 
       let debounce: number | undefined;
