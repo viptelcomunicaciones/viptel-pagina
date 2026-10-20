@@ -6,7 +6,7 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build --webpack",
+    "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=2560\" next build --webpack",
     "ci": "cross-env NODE_OPTIONS=--no-deprecation payload migrate && pnpm build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation NODE_ENV=development next dev",
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
