@@ -3,8 +3,9 @@ import PageLayout from '@/layouts/PageLayout.astro';
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
 import RenderHero from '@/components/heros/RenderHero.astro';
 import NotFoundView from '@/components/pages/views/NotFoundView.astro';
-import { payload, redirectTarget } from '@/lib/payload-client';
+import { payload } from '@/lib/payload-client';
 import { defaultLocale } from '@/i18n';
+import { resolveCatchallRoute, applyCatchallResponseHeaders } from '@/lib/catchall';
 
 export const prerender = false;
 
@@ -14,24 +15,18 @@ const locale = defaultLocale;
 // /home es la fuente de datos de la landing — nunca una página pública.
 if (slug === 'home') return Astro.redirect('/', 301);
 
-let page = null;
-let is404 = false;
+const result = await resolveCatchallRoute(`/${slug ?? ''}`, slug ?? '', locale);
 
-if (slug) {
-  const redirect = await payload.redirects().get(`/${slug}`);
-  if (redirect) {
-    const { target, status } = redirectTarget(redirect);
-    return Astro.redirect(target, status);
-  }
-  page = await payload.pages().getBySlug(slug);
-  if (!page) is404 = true;
-} else {
-  is404 = true;
+if (result.redirect) {
+  return Astro.redirect(result.redirect.target, result.redirect.status);
 }
 
-if (is404 || !page) {
-  Astro.response.status = 404;
-}
+applyCatchallResponseHeaders(Astro.response, {
+  isError: result.isError,
+  hasPage: Boolean(result.page),
+});
+
+const page = result.page;
 
 const metaImage =
   page?.meta?.image && typeof page.meta.image === 'object' && page.meta.image.url
@@ -40,7 +35,7 @@ const metaImage =
 ---
 
 {
-  is404 || !page ? (
+  result.isError || !page ? (
     <NotFoundView locale={locale} />
   ) : (
     <PageLayout

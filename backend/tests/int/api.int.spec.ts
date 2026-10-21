@@ -134,6 +134,51 @@ describe('API', () => {
       await db.execute(sql`ROLLBACK`)
     }
   })
+
+  it('updates lastLogin timestamp when user logs in and completes cleanly', async () => {
+    const testEmail = `login-test-${Date.now()}@viptel.com`
+    const testPassword = 'Password123!'
+
+    const createdUser = await payload.create({
+      collection: 'users',
+      data: {
+        name: 'Login Test User',
+        email: testEmail,
+        password: testPassword,
+        roles: ['editor'],
+      },
+    })
+
+    try {
+      expect(createdUser.lastLogin).toBeFalsy()
+
+      const loginResult = await payload.login({
+        collection: 'users',
+        data: {
+          email: testEmail,
+          password: testPassword,
+        },
+      })
+
+      expect(loginResult.token).toBeTruthy()
+      expect(loginResult.user.id).toBe(createdUser.id)
+
+      const updatedUser = await payload.findByID({
+        collection: 'users',
+        id: createdUser.id,
+      })
+
+      expect(updatedUser.lastLogin).toBeTruthy()
+      const loginTime = new Date(updatedUser.lastLogin as string).getTime()
+      expect(Number.isNaN(loginTime)).toBe(false)
+      expect(Date.now() - loginTime).toBeLessThan(10000)
+    } finally {
+      await payload.delete({
+        collection: 'users',
+        id: createdUser.id,
+      })
+    }
+  })
 })
 
 

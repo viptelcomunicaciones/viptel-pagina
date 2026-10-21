@@ -3,8 +3,9 @@ import PageLayout from '@/layouts/PageLayout.astro';
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
 import RenderHero from '@/components/heros/RenderHero.astro';
 import NotFoundView from '@/components/pages/views/NotFoundView.astro';
-import { payload, redirectTarget } from '@/lib/payload-client';
+import { payload } from '@/lib/payload-client';
 import { isValidLocale, defaultLocale } from '@/i18n';
+import { resolveCatchallRoute, applyCatchallResponseHeaders } from '@/lib/catchall';
 
 export const prerender = false;
 
@@ -17,16 +18,18 @@ const redirectFrom = isLocale ? `/${locale}/${slug ?? ''}` : `/${pageSlug}`;
 
 if (pageSlug === 'home') return Astro.redirect(isLocale ? `/${effectiveLocale}` : '/', 301);
 
-const redirect = await payload.redirects().get(redirectFrom);
-if (redirect) {
-  const { target, status } = redirectTarget(redirect);
-  return Astro.redirect(target, status);
+const result = await resolveCatchallRoute(redirectFrom, pageSlug, effectiveLocale);
+
+if (result.redirect) {
+  return Astro.redirect(result.redirect.target, result.redirect.status);
 }
 
-const page = await payload.pages().getBySlug(pageSlug, effectiveLocale);
-if (!page) {
-  Astro.response.status = 404;
-}
+applyCatchallResponseHeaders(Astro.response, {
+  isError: result.isError,
+  hasPage: Boolean(result.page),
+});
+
+const page = result.page;
 
 const metaImage =
   page?.meta?.image && typeof page.meta.image === 'object' && page.meta.image.url
@@ -35,7 +38,7 @@ const metaImage =
 ---
 
 {
-  !page ? (
+  result.isError || !page ? (
     <NotFoundView locale={effectiveLocale} />
   ) : (
     <PageLayout
