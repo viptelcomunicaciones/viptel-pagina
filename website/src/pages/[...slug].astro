@@ -16,20 +16,30 @@ if (slug === 'home') return Astro.redirect('/', 301);
 
 let page = null;
 let is404 = false;
+let isError = false;
 
 if (slug) {
-  const redirect = await payload.redirects().get(`/${slug}`);
-  if (redirect) {
-    const { target, status } = redirectTarget(redirect);
-    return Astro.redirect(target, status);
+  try {
+    const redirect = await payload.redirects().get(`/${slug}`);
+    if (redirect) {
+      const { target, status } = redirectTarget(redirect);
+      return Astro.redirect(target, status);
+    }
+    page = await payload.pages().getBySlug(slug);
+    if (!page) is404 = true;
+  } catch (err) {
+    console.error(`[Astro [...slug]] Error fetching page "${slug}":`, err);
+    isError = true;
   }
-  page = await payload.pages().getBySlug(slug);
-  if (!page) is404 = true;
 } else {
   is404 = true;
 }
 
-if (is404 || !page) {
+if (isError) {
+  Astro.response.status = 503;
+  Astro.response.headers.set('Retry-After', '30');
+  Astro.response.headers.set('Cache-Control', 'no-store');
+} else if (is404 || !page) {
   Astro.response.status = 404;
 }
 
@@ -40,7 +50,7 @@ const metaImage =
 ---
 
 {
-  is404 || !page ? (
+  isError || is404 || !page ? (
     <NotFoundView locale={locale} />
   ) : (
     <PageLayout

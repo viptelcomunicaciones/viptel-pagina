@@ -74,26 +74,25 @@ export const Users: CollectionConfig = {
   ],
   hooks: {
     afterLogin: [
-      ({ req, user }) => {
-        setTimeout(async () => {
-          try {
-            await req.payload.update({
-              collection: 'users',
-              id: user.id,
-              data: {
-                lastLogin: new Date().toISOString(),
-              },
-              overrideAccess: true,
-              context: {
-                disableRevalidate: true,
-              },
-            })
-          } catch (err) {
-            req.payload.logger.warn(
-              `Failed to update lastLogin for user ${user.id}: ${err instanceof Error ? err.message : String(err)}`,
-            )
-          }
-        }, 100)
+      async ({ req, user }) => {
+        try {
+          await req.payload.update({
+            collection: 'users',
+            id: user.id,
+            data: {
+              lastLogin: new Date().toISOString(),
+            },
+            overrideAccess: true,
+            req,
+            context: {
+              disableRevalidate: true,
+            },
+          })
+        } catch (err) {
+          req.payload.logger.warn(
+            `Failed to update lastLogin for user ${user.id}: ${err instanceof Error ? err.message : String(err)}`,
+          )
+        }
         return user
       },
     ],

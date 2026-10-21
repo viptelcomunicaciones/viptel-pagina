@@ -17,14 +17,27 @@ const redirectFrom = isLocale ? `/${locale}/${slug ?? ''}` : `/${pageSlug}`;
 
 if (pageSlug === 'home') return Astro.redirect(isLocale ? `/${effectiveLocale}` : '/', 301);
 
-const redirect = await payload.redirects().get(redirectFrom);
-if (redirect) {
-  const { target, status } = redirectTarget(redirect);
-  return Astro.redirect(target, status);
+let page = null;
+let isError = false;
+
+try {
+  const redirect = await payload.redirects().get(redirectFrom);
+  if (redirect) {
+    const { target, status } = redirectTarget(redirect);
+    return Astro.redirect(target, status);
+  }
+
+  page = await payload.pages().getBySlug(pageSlug, effectiveLocale);
+} catch (err) {
+  console.error(`[Astro [locale]/[...slug]] Error fetching page "${pageSlug}":`, err);
+  isError = true;
 }
 
-const page = await payload.pages().getBySlug(pageSlug, effectiveLocale);
-if (!page) {
+if (isError) {
+  Astro.response.status = 503;
+  Astro.response.headers.set('Retry-After', '30');
+  Astro.response.headers.set('Cache-Control', 'no-store');
+} else if (!page) {
   Astro.response.status = 404;
 }
 
@@ -35,7 +48,7 @@ const metaImage =
 ---
 
 {
-  !page ? (
+  isError || !page ? (
     <NotFoundView locale={effectiveLocale} />
   ) : (
     <PageLayout
