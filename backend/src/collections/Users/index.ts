@@ -75,6 +75,7 @@ export const Users: CollectionConfig = {
   hooks: {
     afterLogin: [
       async ({ req, user }) => {
+        if (!user?.id) return user
         try {
           await req.payload.update({
             collection: 'users',
