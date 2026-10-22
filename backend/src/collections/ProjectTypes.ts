@@ -4,6 +4,7 @@ import { slugField } from 'payload'
 
 import { anyone } from '../access/anyone'
 import { adminOnly, contentRoles } from '../access/roleBased'
+import { revalidateTaxonomy } from '../hooks/revalidateFrontend'
 import { iconField } from '../fields/iconField'
 import { slugify } from './Tags'
 
@@ -27,6 +28,7 @@ export const ProjectTypes: CollectionConfig = {
     useAsTitle: 'title',
   },
   hooks: {
+    ...revalidateTaxonomy(['/projects']),
     beforeDelete: [
       async ({ id, req }) => {
         const { totalDocs } = await req.payload.count({

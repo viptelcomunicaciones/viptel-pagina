@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access/anyone'
 import { adminOnly, contentRoles } from '../access/roleBased'
+import { revalidateTaxonomy } from '../hooks/revalidateFrontend'
 import { slugField } from 'payload'
 
 // Matches the website's `tagToSlug` (lowercase, strip accents, spaces → dashes)
@@ -31,6 +32,7 @@ export const Tags: CollectionConfig = {
     useAsTitle: 'name',
     group: 'Content',
   },
+  hooks: revalidateTaxonomy(['/blog', '/projects']),
   fields: [
     {
       name: 'name',

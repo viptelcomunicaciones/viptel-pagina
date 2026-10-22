@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access/anyone'
 import { adminOnly, contentRoles } from '../access/roleBased'
+import { revalidateTaxonomy } from '../hooks/revalidateFrontend'
 import { slugField } from 'payload'
 
 export const ProjectCategories: CollectionConfig = {
@@ -22,6 +23,7 @@ export const ProjectCategories: CollectionConfig = {
     useAsTitle: 'title',
     group: 'Content',
   },
+  hooks: revalidateTaxonomy(['/projects']),
   fields: [
     {
       name: 'title',
