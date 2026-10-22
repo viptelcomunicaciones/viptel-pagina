@@ -311,11 +311,12 @@ export function computeSidebarData(
       for (const p of typePosts) {
         const cat = postCategoryOf(p);
         if (!cat) continue;
+        // Payload REST devuelve `parent: null` en categorías raíz.
         const parentId =
           typeof cat.parent === 'object' && cat.parent
             ? cat.parent.id
-            : (cat.parent as number | undefined);
-        if (parentId !== undefined) {
+            : ((cat.parent as number | null | undefined) ?? null);
+        if (parentId != null) {
           subcategoryCounts.set(cat.id, (subcategoryCounts.get(cat.id) ?? 0) + 1);
           categoryCounts.set(parentId, (categoryCounts.get(parentId) ?? 0) + 1);
         } else {

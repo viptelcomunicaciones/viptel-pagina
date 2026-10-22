@@ -53,6 +53,19 @@ describe('project sidebar helpers', () => {
     ]);
   });
 
+  it('shows root categories with parent: null (Payload REST shape)', () => {
+    const movil = {
+      id: 12,
+      title: 'Desarrollo Móvil',
+      slug: 'desarrollo-movil',
+      parent: null,
+    } as unknown as ProjectCategory;
+    const data = computeProjectSidebarData([typeB], [root2, movil], [project(1, typeB, movil)]);
+    const cats = data.types[0].categories;
+    expect(cats.map((c) => c.category.slug)).toContain('desarrollo-movil');
+    expect(cats.find((c) => c.category.slug === 'desarrollo-movil')!.count).toBe(1);
+  });
+
   it('ignores projects whose type is not in the list', () => {
     const projects = [project(1, typeA, root1)];
     const data = computeProjectSidebarData([typeB], [root1], projects);

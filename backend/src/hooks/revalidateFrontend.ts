@@ -1,4 +1,9 @@
-import type { CollectionAfterChangeHook, GlobalAfterChangeHook } from 'payload'
+import type {
+  CollectionAfterChangeHook,
+  CollectionAfterDeleteHook,
+  GlobalAfterChangeHook,
+  PayloadRequest,
+} from 'payload'
 
 import { getInternalFrontendURL } from '@/utilities/getURL'
 
@@ -109,4 +114,71 @@ export const revalidateGlobal: GlobalAfterChangeHook = async ({ global, doc, req
   }
 
   return doc
+}
+
+/**
+ * Revalidación para colecciones de taxonomía (categorías, tipos, etiquetas).
+ * Purga en el website la caché de la colección y los listados (`/blog`,
+ * `/projects`) que embeben esa taxonomía (sidebar, tabs, tarjetas).
+ * Devuelve hooks `afterChange` y `afterDelete` listos para usar.
+ */
+export const revalidateTaxonomy = (paths: string[]) => {
+  const notify = async ({
+    collection,
+    doc,
+    req,
+    context,
+  }: {
+    collection: { slug: string }
+    doc: { id?: number | string }
+    req: PayloadRequest
+    context?: Record<string, unknown>
+  }) => {
+    if (
+      process.env.DISABLE_REVALIDATE === 'true' ||
+      context?.disableRevalidate ||
+      req.context?.disableRevalidate
+    ) {
+      return
+    }
+
+    const secret = process.env.REVALIDATE_SECRET || process.env.PREVIEW_SECRET
+    if (!secret) {
+      req.payload.logger.warn('REVALIDATE_SECRET not configured - skipping taxonomy revalidation')
+      return
+    }
+
+    try {
+      const url = new URL('/api/revalidate', getInternalFrontendURL())
+      url.searchParams.set('secret', secret)
+
+      const response = await fetch(url.toString(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paths, collection: collection.slug }),
+      })
+
+      if (!response.ok) {
+        req.payload.logger.error(
+          `Taxonomy revalidation failed (${response.status}) for ${collection.slug}/${doc?.id}`,
+        )
+      }
+    } catch (error) {
+      req.payload.logger.error(
+        `Taxonomy revalidation error for ${collection.slug}/${doc?.id}: ${error instanceof Error ? error.message : String(error)}`,
+      )
+    }
+  }
+
+  const afterChange: CollectionAfterChangeHook = async (args) => {
+    await notify(args)
+    return args.doc
+  }
+
+  const afterDelete: CollectionAfterDeleteHook = async (args) => {
+    await notify(args)
+    return args.doc
+  }
+
+  return { afterChange: [afterChange], afterDelete: [afterDelete] }
 }

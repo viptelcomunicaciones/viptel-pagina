@@ -68,6 +68,19 @@ describe('blog sidebar helpers', () => {
     ]);
   });
 
+  it('shows root categories with parent: null (Payload REST shape)', () => {
+    const movil = {
+      id: 12,
+      title: 'Desarrollo Móvil',
+      slug: 'desarrollo-movil',
+      parent: null,
+    } as unknown as Category;
+    const data = computeSidebarData([typeB], [root2, movil], [post(1, typeB, movil)]);
+    const cats = data.types[0].categories;
+    expect(cats.map((c) => c.category.slug)).toContain('desarrollo-movil');
+    expect(cats.find((c) => c.category.slug === 'desarrollo-movil')!.count).toBe(1);
+  });
+
   it('ignores posts whose type is not in the list', () => {
     const posts = [post(1, typeA, root1)];
     const data = computeSidebarData([typeB], [root1], posts);
