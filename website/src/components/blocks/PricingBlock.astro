@@ -1,6 +1,7 @@
 ---
 import Button from '@/components/ui/form/Button/Button.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import { cn } from '@/lib/cn';
 import type { PricingBlock as PricingBlockType } from '@/lib/block-types';
 
 interface Props {
@@ -9,55 +10,144 @@ interface Props {
 }
 
 const { block } = Astro.props;
-const formattedPrice = block.price ? new Intl.NumberFormat('es-CO').format(block.price) : null;
+
+const plans = (block as any).plans;
+const hasMultiplePlans = Array.isArray(plans) && plans.length > 0;
+
+const formatPrice = (amount?: number | null) =>
+  amount ? new Intl.NumberFormat('es-CO').format(amount) : null;
 ---
 
 <section
   class="bg-background-secondary border-border relative z-10 border-t py-[var(--space-section-md)]"
 >
   <div class="mx-auto max-w-6xl px-6">
-    <div class="mx-auto max-w-md" data-reveal>
-      <div
-        class="bg-background border-border rounded-xl border p-8 shadow-sm transition-shadow hover:shadow-md"
-      >
-        <h3 class="font-display text-foreground mb-4 text-2xl font-bold">{block.name}</h3>
-        {
-          formattedPrice && (
-            <div class="mb-6">
-              <span class="text-foreground text-4xl font-bold">${formattedPrice}</span>
-              <span class="text-foreground-muted ml-1">{block.currency}</span>
-              {block.interval && (
-                <span class="text-foreground-muted ml-1 text-sm">
-                  /{block.interval === 'monthly' ? 'mes' : 'único'}
+    {
+      (block as any).heading && (
+        <div class="mb-10 text-center" data-reveal>
+          <h2 class="font-display text-foreground text-3xl font-bold md:text-4xl">
+            {(block as any).heading}
+          </h2>
+        </div>
+      )
+    }
+
+    {
+      hasMultiplePlans ? (
+        <div
+          class={cn(
+            'grid gap-6',
+            plans.length === 1 && 'mx-auto max-w-md',
+            plans.length === 2 && 'sm:grid-cols-2 max-w-3xl mx-auto',
+            plans.length >= 3 && 'sm:grid-cols-2 lg:grid-cols-3'
+          )}
+          data-reveal
+        >
+          {plans.map((plan: any) => {
+            const formatted = formatPrice(plan.price);
+            const isHighlighted = Boolean(plan.highlighted);
+
+            return (
+              <div
+                class={cn(
+                  'flex flex-col rounded-xl border p-8 shadow-sm transition-shadow hover:shadow-md',
+                  isHighlighted
+                    ? 'border-brand-500 bg-brand-50 dark:bg-brand-950/30 ring-brand-500 ring-2'
+                    : 'border-border bg-background'
+                )}
+              >
+                {isHighlighted && (
+                  <span class="bg-brand-600 mb-3 self-start rounded-full px-3 py-1 text-xs font-medium text-white">
+                    Recomendado
+                  </span>
+                )}
+                <h3 class="font-display text-foreground mb-4 text-2xl font-bold">
+                  {plan.name}
+                </h3>
+                {formatted && (
+                  <div class="mb-6">
+                    <span class="text-foreground text-4xl font-bold">${formatted}</span>
+                    <span class="text-foreground-muted ml-1">{plan.currency || 'COP'}</span>
+                    {plan.interval && (
+                      <span class="text-foreground-muted ml-1 text-sm">
+                        /{plan.interval === 'monthly' ? 'mes' : 'único'}
+                      </span>
+                    )}
+                  </div>
+                )}
+                {plan.features && plan.features.length > 0 && (
+                  <ul class="mb-8 space-y-3">
+                    {plan.features.map((f: any) => (
+                      <li class="flex items-start gap-3">
+                        <Icon
+                          name={f.included !== false ? 'check' : 'x'}
+                          size="sm"
+                          class={
+                            f.included !== false
+                              ? 'mt-0.5 text-green-500'
+                              : 'mt-0.5 text-red-400'
+                          }
+                        />
+                        <span class="text-foreground-muted">{f.feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {plan.linkText && plan.linkUrl && (
+                  <div class="mt-auto pt-4">
+                    <Button
+                      href={plan.linkUrl}
+                      variant={isHighlighted ? 'primary' : 'outline'}
+                      class="w-full"
+                    >
+                      {plan.linkText}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div class="mx-auto max-w-md" data-reveal>
+          <div class="bg-background border-border rounded-xl border p-8 shadow-sm transition-shadow hover:shadow-md">
+            <h3 class="font-display text-foreground mb-4 text-2xl font-bold">{block.name}</h3>
+            {formatPrice(block.price) && (
+              <div class="mb-6">
+                <span class="text-foreground text-4xl font-bold">
+                  ${formatPrice(block.price)}
                 </span>
-              )}
-            </div>
-          )
-        }
-        {
-          block.features && block.features.length > 0 && (
-            <ul class="mb-8 space-y-3">
-              {block.features.map((f) => (
-                <li class="flex items-start gap-3">
-                  <Icon
-                    name={f.included !== false ? 'check' : 'x'}
-                    size="sm"
-                    class={f.included !== false ? 'mt-0.5 text-green-500' : 'mt-0.5 text-red-400'}
-                  />
-                  <span class="text-foreground-muted">{f.feature}</span>
-                </li>
-              ))}
-            </ul>
-          )
-        }
-        {
-          block.linkText && block.linkUrl && (
-            <Button href={block.linkUrl} class="w-full">
-              {block.linkText}
-            </Button>
-          )
-        }
-      </div>
-    </div>
+                <span class="text-foreground-muted ml-1">{block.currency}</span>
+                {block.interval && (
+                  <span class="text-foreground-muted ml-1 text-sm">
+                    /{block.interval === 'monthly' ? 'mes' : 'único'}
+                  </span>
+                )}
+              </div>
+            )}
+            {block.features && block.features.length > 0 && (
+              <ul class="mb-8 space-y-3">
+                {block.features.map((f) => (
+                  <li class="flex items-start gap-3">
+                    <Icon
+                      name={f.included !== false ? 'check' : 'x'}
+                      size="sm"
+                      class={f.included !== false ? 'mt-0.5 text-green-500' : 'mt-0.5 text-red-400'}
+                    />
+                    <span class="text-foreground-muted">{f.feature}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {block.linkText && block.linkUrl && (
+              <Button href={block.linkUrl} class="w-full">
+                {block.linkText}
+              </Button>
+            )}
+          </div>
+        </div>
+      )
+    }
   </div>
 </section>
+

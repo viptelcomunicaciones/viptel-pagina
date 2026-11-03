@@ -47,6 +47,7 @@ const metaImage =
       title={rootPage.meta?.title || rootPage.title}
       description={rootPage.meta?.description || rootPage.title}
       image={metaImage}
+      headerStyle={rootPage.headerStyle}
     >
       {rootPage.hero && <RenderHero hero={rootPage.hero} locale={defaultLocale} />}
       <BlockRenderer layout={rootPage.layout} locale={defaultLocale} />

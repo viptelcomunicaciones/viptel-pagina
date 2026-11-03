@@ -1,11 +1,13 @@
 ---
 /**
- * LowImpactHero — minimal, left-aligned heading. Rendered when the CMS hero
- * type is `lowImpact`. Uses the `split` layout without an `aside` slot so the
- * content stays left-aligned in a single column.
+ * LowImpactHero — clean, compact centered hero. Rendered when the CMS hero
+ * type is `lowImpact`.
  */
 import { Hero } from '@/components/hero';
 import RichText from '@/components/blocks/RichText.astro';
+import HeroLinks from './HeroLinks.astro';
+import Badge from '@/components/ui/data-display/Badge/Badge.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import { extractHeroTitle } from './hero-helpers';
 import type { PageHero } from '@/lib/block-types';
 
@@ -14,12 +16,22 @@ interface Props {
   locale?: string;
 }
 
-const { hero } = Astro.props;
+const { hero, locale } = Astro.props;
 
 const title = extractHeroTitle(hero.richText);
+const hasLinks = Array.isArray(hero.links) && hero.links.length > 0;
 ---
 
-<Hero size="sm" layout="split">
+<Hero size="sm" layout="centered" class="isolate" showHeroHalo>
+  {
+    hero.badge && (
+      <Badge slot="badge" variant="brand" pill>
+        {hero.badgeIcon && <Icon name={hero.badgeIcon} size="sm" />}
+        {hero.badge}
+      </Badge>
+    )
+  }
   {title && <h1 slot="title">{title}</h1>}
   <RichText slot="description" content={hero.richText} excludeFirstHeading />
+  {hasLinks && <HeroLinks slot="actions" links={hero.links!} locale={locale} />}
 </Hero>

@@ -8,6 +8,8 @@ import type { PageHero } from '@/lib/block-types';
 import HighImpact from './high-impact.astro';
 import MediumImpact from './medium-impact.astro';
 import LowImpact from './low-impact.astro';
+import Split from './split.astro';
+import CenteredHalo from './centered-halo.astro';
 
 interface Props {
   hero: PageHero;
@@ -20,9 +22,11 @@ const heroes = {
   highImpact: HighImpact,
   mediumImpact: MediumImpact,
   lowImpact: LowImpact,
+  split: Split,
+  centeredHalo: CenteredHalo,
 } as const;
 
-const Variant = hero.type === 'none' ? null : heroes[hero.type];
+const Variant = hero.type === 'none' ? null : (heroes as Record<string, any>)[hero.type];
 ---
 
 {Variant && <Variant hero={hero} locale={locale} />}

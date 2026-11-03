@@ -1,6 +1,8 @@
 ---
 import PageLayout from '@/layouts/PageLayout.astro';
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
+import FormBlockRenderer from '@/components/blocks/FormBlock.astro';
+import RenderHero from '@/components/heros/RenderHero.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import Badge from '@/components/ui/data-display/Badge/Badge.astro';
 import Card from '@/components/ui/data-display/Card/Card.astro';
@@ -39,34 +41,44 @@ const metaImage =
   contact?.meta?.image && typeof contact.meta.image === 'object' && contact.meta.image.url
     ? payload.resolveMediaUrl(contact.meta.image.url)
     : undefined;
+
+const cmsFormBlock = contact?.layout?.find((b) => b.blockType === 'formBlock');
+const otherBlocks = contact?.layout?.filter((b) => b.blockType !== 'formBlock') ?? [];
 ---
 
 <PageLayout
   title={contact?.meta?.title || t('pages.contact.meta.title', locale)}
   description={contact?.meta?.description || t('pages.contact.meta.description', locale)}
   image={metaImage}
+  headerStyle={contact?.headerStyle ?? 'bar'}
 >
-  <Hero layout="centered" size="sm" class="isolate" showHeroHalo>
-    <Badge slot="badge" variant="brand" pill
-      ><Icon name="mail" size="sm" />{t('pages.contact.hero.badge', locale)}</Badge
-    >
-    <h1 slot="title">
-      {
-        heroTitle || (
-          <>
-            <span class="text-foreground">{t('pages.contact.hero.titleLead', locale)}</span>{' '}
-            <span class="text-brand-500">{t('pages.contact.hero.titleHighlight', locale)}</span>
-          </>
-        )
-      }
-    </h1>
-    <p slot="description" class="text-balance!">{t('pages.contact.hero.description', locale)}</p>
-  </Hero>
+  {
+    contact?.hero && contact.hero.type && contact.hero.type !== 'none' ? (
+      <RenderHero hero={contact.hero} locale={locale} />
+    ) : (
+      <Hero layout="centered" size="sm" class="isolate" showHeroHalo>
+        <Badge slot="badge" variant="brand" pill>
+          <Icon name="mail" size="sm" />{t('pages.contact.hero.badge', locale)}
+        </Badge>
+        <h1 slot="title">
+          {
+            heroTitle || (
+              <>
+                <span class="text-foreground">{t('pages.contact.hero.titleLead', locale)}</span>{' '}
+                <span class="text-brand-500">{t('pages.contact.hero.titleHighlight', locale)}</span>
+              </>
+            )
+          }
+        </h1>
+        <p slot="description" class="text-balance!">{t('pages.contact.hero.description', locale)}</p>
+      </Hero>
+    )
+  }
 
   <!-- CMS Layout Blocks -->
   {
-    contact?.layout && contact.layout.length > 0 ? (
-      <BlockRenderer layout={contact.layout as PageBlock[]} locale={locale} />
+    otherBlocks.length > 0 ? (
+      <BlockRenderer layout={otherBlocks as PageBlock[]} locale={locale} />
     ) : null
   }
 
@@ -74,12 +86,22 @@ const metaImage =
   <section class="bg-background-secondary border-border border-t py-[var(--space-section-md)]">
     <div class="mx-auto grid max-w-6xl gap-10 px-6 lg:grid-cols-2">
       <div>
-        <h2 class="font-display text-foreground mb-6 text-2xl font-bold">
-          {t('pages.contact.formTitle', locale)}
-        </h2>
-        <Card variant="elevated" padding="lg">
-          <ContactForm />
-        </Card>
+        {
+          !cmsFormBlock && (
+            <h2 class="font-display text-foreground mb-6 text-2xl font-bold">
+              {t('pages.contact.formTitle', locale)}
+            </h2>
+          )
+        }
+        {
+          cmsFormBlock ? (
+            <FormBlockRenderer block={cmsFormBlock as any} locale={locale} embedded />
+          ) : (
+            <Card variant="elevated" padding="lg">
+              <ContactForm />
+            </Card>
+          )
+        }
       </div>
       <div class="flex flex-col gap-6">
         <h2 class="font-display text-foreground text-2xl font-bold">

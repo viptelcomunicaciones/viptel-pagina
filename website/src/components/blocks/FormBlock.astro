@@ -13,9 +13,10 @@ import { defaultLocale, t, type Locale } from '@/i18n'
 interface Props {
   block: FormBlockType
   locale?: string
+  embedded?: boolean
 }
 
-const { block, locale = defaultLocale } = Astro.props
+const { block, locale = defaultLocale, embedded = false } = Astro.props
 const resolvedLocale = (locale === 'en' ? 'en' : 'es') as Locale
 
 const formId =
@@ -59,8 +60,8 @@ const getWidthSpan = (width?: number | null) =>
   width && Number(width) <= 50 ? 'sm:col-span-1' : 'sm:col-span-2'
 ---
 
-<section class="py-[var(--space-section-md)] bg-background-secondary border-t border-border">
-  <div class="mx-auto max-w-2xl px-6">
+<section class:list={[embedded ? 'w-full' : 'py-[var(--space-section-md)] bg-background-secondary border-t border-border']}>
+  <div class:list={[embedded ? 'w-full' : 'mx-auto max-w-2xl px-6']}>
     <Card variant="elevated" padding="lg">
       {formId ? (
         <>

@@ -1,8 +1,11 @@
 ---
+import CTASection from '@/components/ui/marketing/CTA/CTA.astro';
 import Button from '@/components/ui/form/Button/Button.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import Badge from '@/components/ui/data-display/Badge/Badge.astro';
 import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
 import RichText from './RichText.astro';
+import { extractHeroTitle, resolveHeroLink } from '@/components/heros/hero-helpers';
 import type { CallToActionBlock as CTABlockType } from '@/lib/payload-types';
 
 interface Props {
@@ -10,39 +13,148 @@ interface Props {
   locale?: string;
 }
 
-const { block } = Astro.props;
+const { block, locale = 'es' } = Astro.props;
 const links = block.links ?? [];
+const variant = (block as any).variant || 'default';
+const badge = (block as any).badge;
+const rawHeading = (block as any).heading;
+
+const heading = rawHeading || extractHeroTitle(block.richText);
+const resolvedLinks = links.map((l) => resolveHeroLink(l as any, locale));
+const hasCustomHeading = Boolean(rawHeading);
 ---
 
-<section class="bg-background border-border relative z-10 border-t py-[var(--space-section-md)]">
-  <div class="glitch:hidden mx-auto max-w-2xl px-6 text-center" data-reveal>
-    {block.richText && <RichText content={block.richText} />}
-    {
-      links.length > 0 && (
-        <div class="mt-6 flex justify-center gap-4">
-          {links.map((l) => (
-            <Button size="lg" href={l.link.url || '#'}>
-              {l.link.label}
+{
+  variant === 'glitch' ? (
+    <section class="bg-background border-border relative z-10 border-t py-[var(--space-section-md)]">
+      <div class="mx-auto max-w-6xl px-6">
+        <LetterGlitchBand maxWidth="6xl">
+          {badge && (
+            <Badge variant="brand" pill class="mb-4">
+              {badge}
+            </Badge>
+          )}
+          {heading && (
+            <h2 class="font-display text-white mb-4 text-3xl font-bold md:text-4xl text-balance">
+              {heading}
+            </h2>
+          )}
+          {block.richText && (
+            <RichText
+              content={block.richText}
+              excludeFirstHeading={!hasCustomHeading && Boolean(heading)}
+            />
+          )}
+          {resolvedLinks.length > 0 && (
+            <div class="mt-6 flex flex-wrap justify-center gap-4">
+              {resolvedLinks.map((l) => (
+                <Button
+                  size="lg"
+                  href={l.href}
+                  variant={l.appearance === 'outline' ? 'outline' : 'primary'}
+                  target={l.newTab ? '_blank' : undefined}
+                  rel={l.newTab ? 'noopener noreferrer' : undefined}
+                >
+                  {l.label}
+                  <Icon name="arrow-right" size="sm" />
+                </Button>
+              ))}
+            </div>
+          )}
+        </LetterGlitchBand>
+      </div>
+    </section>
+  ) : variant === 'banner' ? (
+    <section class="bg-background-secondary border-border relative z-10 border-t py-[var(--space-section-md)]">
+      <div class="mx-auto max-w-6xl px-6">
+        <div
+          class="bg-background border-border flex flex-col items-center justify-between gap-6 rounded-2xl border p-8 md:flex-row md:p-12 shadow-sm"
+          data-reveal
+        >
+          <div class="max-w-2xl">
+            {badge && (
+              <Badge variant="brand" pill class="mb-3">
+                {badge}
+              </Badge>
+            )}
+            {heading && (
+              <h2 class="font-display text-foreground text-2xl font-bold md:text-3xl">
+                {heading}
+              </h2>
+            )}
+            <RichText
+              content={block.richText}
+              excludeFirstHeading={!hasCustomHeading && Boolean(heading)}
+              class="text-foreground-muted mt-2 text-base md:text-lg"
+            />
+          </div>
+          {resolvedLinks.length > 0 && (
+            <div class="flex flex-col gap-3 sm:flex-row shrink-0">
+              {resolvedLinks.map((l) => (
+                <Button
+                  size="lg"
+                  href={l.href}
+                  variant={l.appearance === 'outline' ? 'outline' : 'primary'}
+                  target={l.newTab ? '_blank' : undefined}
+                  rel={l.newTab ? 'noopener noreferrer' : undefined}
+                >
+                  {l.label}
+                  <Icon name="arrow-right" size="sm" />
+                </Button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  ) : (
+    <CTASection
+      variant={variant === 'invert' ? 'invert' : 'default'}
+      size="lg"
+      maxWidth="lg"
+    >
+      {badge && (
+        <div slot="logo" class="flex justify-center mb-2">
+          <Badge variant="brand" pill>
+            {badge}
+          </Badge>
+        </div>
+      )}
+
+      {heading ? (
+        <h2 slot="heading">{heading}</h2>
+      ) : (
+        <div slot="heading">
+          <RichText content={block.richText} />
+        </div>
+      )}
+
+      {heading && (
+        <div slot="description">
+          <RichText
+            content={block.richText}
+            excludeFirstHeading={!hasCustomHeading && Boolean(heading)}
+          />
+        </div>
+      )}
+
+      {resolvedLinks.length > 0 && (
+        <Fragment slot="actions">
+          {resolvedLinks.map((l) => (
+            <Button
+              size="lg"
+              href={l.href}
+              variant={l.appearance === 'outline' ? 'outline' : 'primary'}
+              target={l.newTab ? '_blank' : undefined}
+              rel={l.newTab ? 'noopener noreferrer' : undefined}
+            >
+              {l.label}
               <Icon name="arrow-right" size="sm" />
             </Button>
           ))}
-        </div>
-      )
-    }
-  </div>
-  <LetterGlitchBand>
-    {block.richText && <RichText content={block.richText} />}
-    {
-      links.length > 0 && (
-        <div class="mt-6 flex justify-center gap-4">
-          {links.map((l) => (
-            <Button size="lg" href={l.link.url || '#'}>
-              {l.link.label}
-              <Icon name="arrow-right" size="sm" />
-            </Button>
-          ))}
-        </div>
-      )
-    }
-  </LetterGlitchBand>
-</section>
+        </Fragment>
+      )}
+    </CTASection>
+  )
+}
+

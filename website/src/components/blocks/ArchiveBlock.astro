@@ -104,9 +104,19 @@ const linkPrefix = isServices ? '/services' : isProjects ? '/projects' : '/blog'
 <section class="bg-background-secondary border-border border-t py-[var(--space-section-md)]">
   <div class="mx-auto max-w-6xl px-6">
     {
-      block.introContent && (
-        <div class="mb-12 text-center">
-          <RichText content={block.introContent} />
+      (block.heading || block.introContent) && (
+        <div class="mb-12 text-center" data-reveal>
+          {block.heading && (
+            <h2 class="font-display text-foreground mb-4 text-3xl font-bold md:text-4xl">
+              {block.heading}
+            </h2>
+          )}
+          {block.introContent && (
+            <RichText
+              content={block.introContent}
+              class="prose prose-lg dark:prose-invert text-foreground-muted mx-auto max-w-3xl [&_h1]:font-display [&_h1]:text-foreground [&_h1]:text-3xl [&_h1]:font-bold md:[&_h1]:text-4xl [&_h2]:font-display [&_h2]:text-foreground [&_h2]:text-3xl [&_h2]:font-bold"
+            />
+          )}
         </div>
       )
     }
