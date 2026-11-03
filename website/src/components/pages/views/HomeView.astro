@@ -57,6 +57,7 @@ const metaImageUrl =
   description={home?.meta?.description || t('pages.home.meta.description', locale)}
   image={metaImageUrl}
   headerStyle={home?.headerStyle ?? 'floating'}
+  hasDarkHero={home?.hero?.type === 'highImpact'}
   includePersonSchema={true}
   includeProfessionalServiceSchema={true}
 >

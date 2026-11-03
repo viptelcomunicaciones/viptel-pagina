@@ -8,11 +8,36 @@ import { localizedPath } from '@/i18n';
 
 export type HeroLinkItem = NonNullable<NonNullable<PageHero['links']>[number]>;
 
+export type HeroLinkAppearance =
+  | 'default'
+  | 'secondary'
+  | 'outline'
+  | 'brand-outline'
+  | 'ghost';
+
 export interface ResolvedHeroLink {
   href: string;
   label: string;
   newTab: boolean;
-  appearance: 'default' | 'outline';
+  appearance: HeroLinkAppearance;
+}
+
+export function mapAppearanceToVariant(
+  appearance?: string
+): 'primary' | 'secondary' | 'outline' | 'brand-outline' | 'ghost' {
+  switch (appearance) {
+    case 'outline':
+      return 'outline';
+    case 'secondary':
+      return 'secondary';
+    case 'brand-outline':
+      return 'brand-outline';
+    case 'ghost':
+      return 'ghost';
+    case 'default':
+    default:
+      return 'primary';
+  }
 }
 
 // Payload reference collections mapped to their public route prefixes.
@@ -63,7 +88,7 @@ export function resolveHeroLink(item: HeroLinkItem, locale?: string): ResolvedHe
   const label = link.label || '';
   const newTab = Boolean(link.newTab);
   const appearance: ResolvedHeroLink['appearance'] =
-    link.appearance === 'outline' ? 'outline' : 'default';
+    (link.appearance as ResolvedHeroLink['appearance']) || 'default';
 
   if (link.type === 'reference' && link.reference?.value) {
     const relationTo = link.reference.relationTo;

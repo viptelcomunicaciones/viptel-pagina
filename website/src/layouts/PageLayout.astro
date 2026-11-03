@@ -26,6 +26,8 @@ interface Props {
   showScrollProgress?: boolean;
   eagerReveal?: boolean;
   headerStyle?: 'bar' | 'floating' | 'transparent' | null;
+  headerColorScheme?: 'default' | 'invert';
+  hasDarkHero?: boolean;
   /**
    * Footer background. Set this to the opposite of the page's last section so
    * the zebra pattern (bg-background ↔ bg-background-secondary) stays intact:
@@ -47,11 +49,15 @@ const {
   showScrollProgress = false,
   eagerReveal = false,
   headerStyle = 'bar',
+  headerColorScheme,
+  hasDarkHero = false,
   footerBackground = 'default',
 } = Astro.props;
 
 const isFloatingHeader = headerStyle === 'floating';
 const isTransparentHeader = headerStyle === 'transparent';
+const effectiveColorScheme =
+  headerColorScheme ?? (isTransparentHeader && hasDarkHero ? 'invert' : 'default');
 ---
 
 <BaseLayout
@@ -85,7 +91,7 @@ const isTransparentHeader = headerStyle === 'transparent';
         position="fixed"
         shape="bar"
         variant="transparent"
-        colorScheme="invert"
+        colorScheme={effectiveColorScheme}
         size="lg"
         showActiveState
         showScrollProgress={showScrollProgress}
@@ -103,7 +109,7 @@ const isTransparentHeader = headerStyle === 'transparent';
     )
   }
 
-  <main class={isFloatingHeader ? 'min-h-screen' : 'min-h-screen pt-16'}>
+  <main class={isFloatingHeader || isTransparentHeader ? 'min-h-screen' : 'min-h-screen pt-16'}>
     <slot />
   </main>
 

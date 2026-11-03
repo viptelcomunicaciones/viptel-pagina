@@ -51,6 +51,7 @@ const otherBlocks = contact?.layout?.filter((b) => b.blockType !== 'formBlock') 
   description={contact?.meta?.description || t('pages.contact.meta.description', locale)}
   image={metaImage}
   headerStyle={contact?.headerStyle ?? 'bar'}
+  hasDarkHero={contact?.hero?.type === 'highImpact'}
 >
   {
     contact?.hero && contact.hero.type && contact.hero.type !== 'none' ? (

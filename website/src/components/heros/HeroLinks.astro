@@ -5,7 +5,7 @@
  * component's `actions` slot, so this only renders the buttons themselves.
  */
 import Button from '@/components/ui/form/Button/Button.astro';
-import { resolveHeroLink } from './hero-helpers';
+import { resolveHeroLink, mapAppearanceToVariant } from './hero-helpers';
 import type { HeroLinkItem } from './hero-helpers';
 
 interface Props {
@@ -23,7 +23,7 @@ const { links, locale } = Astro.props;
       <Button
         size="lg"
         href={href}
-        variant={appearance === 'outline' ? 'outline' : 'primary'}
+        variant={mapAppearanceToVariant(appearance)}
         target={newTab ? '_blank' : undefined}
         rel={newTab ? 'noopener noreferrer' : undefined}
       >

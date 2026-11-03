@@ -5,7 +5,7 @@ import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import Badge from '@/components/ui/data-display/Badge/Badge.astro';
 import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
 import RichText from './RichText.astro';
-import { extractHeroTitle, resolveHeroLink } from '@/components/heros/hero-helpers';
+import { extractHeroTitle, resolveHeroLink, mapAppearanceToVariant } from '@/components/heros/hero-helpers';
 import type { CallToActionBlock as CTABlockType } from '@/lib/payload-types';
 
 interface Props {
@@ -51,7 +51,7 @@ const hasCustomHeading = Boolean(rawHeading);
                 <Button
                   size="lg"
                   href={l.href}
-                  variant={l.appearance === 'outline' ? 'outline' : 'primary'}
+                  variant={mapAppearanceToVariant(l.appearance)}
                   target={l.newTab ? '_blank' : undefined}
                   rel={l.newTab ? 'noopener noreferrer' : undefined}
                 >
@@ -94,7 +94,7 @@ const hasCustomHeading = Boolean(rawHeading);
                 <Button
                   size="lg"
                   href={l.href}
-                  variant={l.appearance === 'outline' ? 'outline' : 'primary'}
+                  variant={mapAppearanceToVariant(l.appearance)}
                   target={l.newTab ? '_blank' : undefined}
                   rel={l.newTab ? 'noopener noreferrer' : undefined}
                 >
@@ -144,7 +144,7 @@ const hasCustomHeading = Boolean(rawHeading);
             <Button
               size="lg"
               href={l.href}
-              variant={l.appearance === 'outline' ? 'outline' : 'primary'}
+              variant={mapAppearanceToVariant(l.appearance)}
               target={l.newTab ? '_blank' : undefined}
               rel={l.newTab ? 'noopener noreferrer' : undefined}
             >

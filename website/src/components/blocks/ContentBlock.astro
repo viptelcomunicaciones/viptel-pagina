@@ -2,6 +2,7 @@
 import RichText from './RichText.astro';
 import Button from '@/components/ui/form/Button/Button.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import { mapAppearanceToVariant } from '@/components/heros/hero-helpers';
 import { resolveHeroLink } from '@/components/heros/hero-helpers';
 import type { ContentBlock as ContentBlockType } from '@/lib/payload-types';
 
@@ -44,7 +45,7 @@ const columns = block.columns ?? [];
                   <div class="mt-6">
                     <Button
                       href={resolvedLink.href}
-                      variant={resolvedLink.appearance === 'outline' ? 'outline' : 'primary'}
+                      variant={mapAppearanceToVariant(resolvedLink.appearance)}
                       target={resolvedLink.newTab ? '_blank' : undefined}
                       rel={resolvedLink.newTab ? 'noopener noreferrer' : undefined}
                     >

@@ -85,12 +85,13 @@ admin: {
                   value: 'floating',
                 },
                 {
-                  label: 'Barra transparente sobre fondo oscuro (Transparent)',
+                  label: 'Barra transparente (Transparent)',
                   value: 'transparent',
                 },
               ],
               admin: {
-                description: 'Elige el aspecto del menú superior para esta página.',
+                description:
+                  'Elige el aspecto del menú superior (Barra fija, Cápsula flotante o Barra transparente adaptativa).',
               },
             },
             hero,

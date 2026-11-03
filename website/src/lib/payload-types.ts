@@ -197,7 +197,7 @@ export interface Page {
   id: number;
   title: string;
   /**
-   * Elige el aspecto del menú superior para esta página.
+   * Elige el aspecto del menú superior (Barra fija, Cápsula flotante o Barra transparente adaptativa).
    */
   headerStyle?: ('bar' | 'floating' | 'transparent') | null;
   hero: {
@@ -245,7 +245,7 @@ export interface Page {
             /**
              * Choose how the link should be rendered.
              */
-            appearance?: ('default' | 'outline') | null;
+            appearance?: ('default' | 'secondary' | 'outline' | 'brand-outline' | 'ghost') | null;
           };
           id?: string | null;
         }[]
@@ -1007,7 +1007,7 @@ export interface ContentBlock {
           /**
            * Choose how the link should be rendered.
            */
-          appearance?: ('default' | 'outline') | null;
+          appearance?: ('default' | 'secondary' | 'outline' | 'brand-outline' | 'ghost') | null;
         };
         id?: string | null;
       }[]

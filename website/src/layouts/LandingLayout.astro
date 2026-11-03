@@ -22,6 +22,8 @@ interface Props {
   includePersonSchema?: boolean;
   includeProfessionalServiceSchema?: boolean;
   headerStyle?: 'bar' | 'floating' | 'transparent' | null;
+  headerColorScheme?: 'default' | 'invert';
+  hasDarkHero?: boolean;
 }
 
 const {
@@ -35,10 +37,14 @@ const {
   includePersonSchema = false,
   includeProfessionalServiceSchema = false,
   headerStyle = 'floating',
+  headerColorScheme,
+  hasDarkHero = false,
 } = Astro.props;
 
 const isFloatingHeader = headerStyle === 'floating';
 const isTransparentHeader = headerStyle === 'transparent';
+const effectiveColorScheme =
+  headerColorScheme ?? (isTransparentHeader && hasDarkHero ? 'invert' : 'default');
 ---
 
 <BaseLayout
@@ -72,7 +78,7 @@ const isTransparentHeader = headerStyle === 'transparent';
         position="fixed"
         shape="bar"
         variant="transparent"
-        colorScheme="invert"
+        colorScheme={effectiveColorScheme}
         size="lg"
         showActiveState
         showScrollProgress={false}

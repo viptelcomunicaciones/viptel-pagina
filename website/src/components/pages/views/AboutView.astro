@@ -47,6 +47,7 @@ const metaImage =
   description={about?.meta?.description || t('pages.about.meta.description', locale)}
   image={metaImage}
   headerStyle={about?.headerStyle ?? 'bar'}
+  hasDarkHero={about?.hero?.type === 'highImpact'}
   footerBackground="secondary"
 >
   {
