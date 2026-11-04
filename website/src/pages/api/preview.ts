@@ -5,11 +5,19 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
   const path = url.searchParams.get('path');
   const secret = url.searchParams.get('secret');
 
-  if (secret !== PREVIEW_SECRET) {
+  const expectedSecret = PREVIEW_SECRET || process.env.PREVIEW_SECRET;
+
+  if (!secret || secret !== expectedSecret) {
+    console.warn(
+      `[preview] Invalid preview secret. Received: "${secret ? '***' : ''}", expected configured: ${Boolean(expectedSecret)}`
+    );
     return new Response('Invalid preview secret', { status: 401 });
   }
 
-  if (!path || !path.startsWith('/') || path.startsWith('//') || path.includes('\\')) {
+  // Normalize path if needed (e.g., if path starts with multiple slashes, clean to single leading slash)
+  const normalizedPath = path?.replace(/^\/+/, '/');
+
+  if (!normalizedPath || !normalizedPath.startsWith('/') || normalizedPath.includes('\\')) {
     return new Response('Invalid path parameter', { status: 400 });
   }
 
@@ -21,5 +29,5 @@ export const GET: APIRoute = async ({ url, cookies, redirect }) => {
     maxAge: 60 * 60, // 1 hour
   });
 
-  return redirect(path);
+  return redirect(normalizedPath);
 };
