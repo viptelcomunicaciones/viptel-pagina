@@ -13,6 +13,8 @@ describe('Catch-all dynamic route resilience (Alta 1)', () => {
         id: 1,
         from: '/old-about',
         to: '/about' as unknown as Redirect['to'],
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
       };
       const { target, status } = redirectTarget(redirectDoc);
       expect(target).toBe('/about');
@@ -87,6 +89,21 @@ describe('Catch-all dynamic route resilience (Alta 1)', () => {
       const result = await resolveCatchallRoute('/es/', '', 'es', mockClient);
 
       expect(result).toEqual({ page: null, isError: false, status: 404 });
+      expect(mockClient.redirects).not.toHaveBeenCalled();
+      expect(mockClient.pages).not.toHaveBeenCalled();
+    });
+
+    it('short-circuits obvious bot probe paths (.php, .env, wp-admin) with 404 without calling CMS', async () => {
+      const mockClient = {
+        redirects: vi.fn(),
+        pages: vi.fn(),
+      } as unknown as PayloadClient;
+
+      for (const probe of ['wp-login.php', '.env', 'wp-admin/install.php', '.git/config', 'phpmyadmin']) {
+        const result = await resolveCatchallRoute(`/${probe}`, probe, 'es', mockClient);
+        expect(result).toEqual({ page: null, isError: false, status: 404 });
+      }
+
       expect(mockClient.redirects).not.toHaveBeenCalled();
       expect(mockClient.pages).not.toHaveBeenCalled();
     });

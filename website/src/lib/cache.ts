@@ -29,6 +29,7 @@ interface RedisLikeClient {
   set(key: string, value: string, mode?: string, duration?: number): Promise<unknown>;
   del(...keys: string[]): Promise<unknown>;
   keys(pattern: string): Promise<string[]>;
+  scan?(cursor: string | number, ...args: Array<string | number>): Promise<[string, string[]]>;
   connect?(): Promise<unknown>;
 }
 
@@ -62,7 +63,7 @@ export class HybridSSRCache {
             lazyConnect: true,
           });
           if (typeof client.on === 'function') {
-            client.on('error', (err: unknown) => {
+            client.on('error', () => {
               // Suppress noisy unhandled EventEmitter errors; handled by try/catch in cache calls
             });
           }
@@ -203,6 +204,31 @@ export class HybridSSRCache {
     });
   }
 
+  private purgeRedisByPrefix(prefix = `${REDIS_PREFIX}*`): void {
+    void this.getRedis().then(async (redis) => {
+      if (!redis) return;
+      try {
+        if (typeof redis.scan === 'function') {
+          let cursor = '0';
+          do {
+            const [nextCursor, foundKeys] = await redis.scan(cursor, 'MATCH', prefix, 'COUNT', 100);
+            cursor = String(nextCursor);
+            if (Array.isArray(foundKeys) && foundKeys.length > 0) {
+              await redis.del(...foundKeys);
+            }
+          } while (cursor !== '0');
+          return;
+        }
+        const keys = await redis.keys(prefix);
+        if (keys.length > 0) {
+          await redis.del(...keys);
+        }
+      } catch {
+        // Ignore L2 purge errors
+      }
+    });
+  }
+
   invalidateByCollection(collection: string): number {
     let removed = 0;
     const targetTag = `collection:${collection}`;
@@ -230,17 +256,7 @@ export class HybridSSRCache {
       }
     }
 
-    void this.getRedis().then(async (redis) => {
-      if (!redis) return;
-      try {
-        const keys = await redis.keys(`${REDIS_PREFIX}*`);
-        if (keys.length > 0) {
-          await redis.del(...keys);
-        }
-      } catch {
-        // Ignore L2 purge errors
-      }
-    });
+    this.purgeRedisByPrefix();
 
     return removed;
   }
@@ -279,22 +295,14 @@ export class HybridSSRCache {
       }
     }
 
+    this.purgeRedisByPrefix();
+
     return removed;
   }
 
   clearAll(): void {
     this.l1.clear();
-    void this.getRedis().then(async (redis) => {
-      if (!redis) return;
-      try {
-        const keys = await redis.keys(`${REDIS_PREFIX}*`);
-        if (keys.length > 0) {
-          await redis.del(...keys);
-        }
-      } catch {
-        // Ignore
-      }
-    });
+    this.purgeRedisByPrefix();
   }
 
   getStats() {

@@ -168,5 +168,13 @@ describe('Rate limit & Client IP extraction', () => {
     }
     expect(rateLimit(testIp)).toBe(true);
   });
+
+  it('supports custom maxRequests per bucket (e.g. search endpoint)', () => {
+    const searchBucket = `search:test-${Date.now()}`;
+    for (let i = 0; i < 25; i++) {
+      expect(rateLimit(searchBucket, 25)).toBe(false);
+    }
+    expect(rateLimit(searchBucket, 25)).toBe(true);
+  });
 });
 

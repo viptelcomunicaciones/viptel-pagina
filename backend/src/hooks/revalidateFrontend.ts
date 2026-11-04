@@ -60,7 +60,10 @@ export const revalidateFrontend: CollectionAfterChangeHook = async ({
 
     const response = await fetch(url.toString(), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-revalidate-secret': secret,
+      },
       body: JSON.stringify({ paths, collection: collectionSlug, locale: doc.locale }),
     })
 
@@ -100,7 +103,10 @@ export const revalidateGlobal: GlobalAfterChangeHook = async ({ global, doc, req
 
     const response = await fetch(url.toString(), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-revalidate-secret': secret,
+      },
       body: JSON.stringify({ paths: ['/'], collection: `global:${globalSlug}` }),
     })
 
@@ -154,7 +160,10 @@ export const revalidateTaxonomy = (paths: string[]) => {
 
       const response = await fetch(url.toString(), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-revalidate-secret': secret,
+        },
         body: JSON.stringify({ paths, collection: collection.slug }),
       })
 

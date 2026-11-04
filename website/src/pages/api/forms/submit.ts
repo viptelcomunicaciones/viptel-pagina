@@ -86,6 +86,10 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
         const replyToEntry = parsed.data.submissionData.find(
           (item) => item.field.toLowerCase() === 'email'
         );
+        const validReplyTo =
+          replyToEntry?.value && z.email().safeParse(replyToEntry.value.trim()).success
+            ? replyToEntry.value.trim()
+            : undefined;
         const rowsHtml = parsed.data.submissionData
           .map(
             (item) =>
@@ -96,7 +100,7 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
         await resend.emails.send({
           from: `${siteConfig.name} Forms <${fromEmail}>`,
           to: toEmail,
-          ...(replyToEntry?.value ? { replyTo: replyToEntry.value } : {}),
+          ...(validReplyTo ? { replyTo: validReplyTo } : {}),
           subject: `[${siteConfig.name}] Nueva respuesta de formulario (#${String(parsed.data.form)})`,
           html: rowsHtml,
         });
