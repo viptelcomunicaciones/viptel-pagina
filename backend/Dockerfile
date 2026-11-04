@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM node:22-alpine
 
 RUN corepack enable
@@ -5,11 +6,14 @@ RUN corepack enable
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
 
 COPY . .
 RUN chmod +x scripts/start.sh
-RUN pnpm build
+
+RUN --mount=type=cache,target=/app/.next/cache,id=backend-next-cache \
+    pnpm build
 
 EXPOSE 3000
 

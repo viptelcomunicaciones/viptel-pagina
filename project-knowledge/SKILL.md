@@ -200,7 +200,7 @@ Ver `website/component-registry.json` para el catálogo completo.
 fetchAPI<T>(endpoint, { locale, draft?, ttlMs?, tags? })
 // → Consulta caché L1 LRU (SWR) y L2 Redis opcional (REDIS_URL)
 // → GET {INTERNAL_PAYLOAD_URL || PAYLOAD_URL}/api/{endpoint}?locale=es&depth=2
-// → Timeout 8s
+// → Timeout 30s (para soportar cold starts del backend)
 // → Bypass automático de caché cuando draft=true
 ```
 
@@ -285,10 +285,17 @@ pnpm fix            # ESLint + Prettier fixes
 
 ## Migraciones
  
-Tres migraciones en `backend/src/migrations/`:
+Cuatro migraciones en `backend/src/migrations/`:
 1. `20260825_205151_initial` — Todas las tablas base y colecciones principales
 2. `20260901_152435` — Colección services jerárquicos
 3. `20261019_174809_v1_1_audit_improvements` — Índices de rendimiento (parent, postType, projectType, year), índice FTS de búsqueda y roles RBAC CRM
+4. `20261104_150522_add_cta_and_blocks_schema` — Esquema de bloques adicionales y CTA
+
+## Flujo de Git y Despliegue (Dokploy)
+
+- **Rama de desarrollo**: `develop` (o ramas `feat/*`, `fix/*`).
+- **Rama de producción**: `main` (conectada por webhook a Dokploy).
+- **Regla obligatoria**: **NUNCA** hacer merge local a `main` ni `git push origin main` directo. Siempre subir a `develop` y abrir un **Pull Request (`develop` → `main`)** en GitHub para aprobación manual del usuario.
 
 ## Documentación relacionada
 

@@ -134,12 +134,27 @@ Dokploy
 
 ### Flujo de deployment
 
-1. Subir código a GitHub
+1. Subir cambios a la rama `develop` (o `feat/*` / `fix/*`) y crear un **Pull Request (PR)** hacia `main` en GitHub para aprobación manual
 2. Crear PostgreSQL en Dokploy (addon)
 3. Crear servicio backend (Dockerfile, variables de entorno)
 4. Crear servicio website (Dockerfile, variables de entorno)
 5. Configurar dominios
 6. Ejecutar seeds: `pnpm seed && pnpm seed:services` (terminal del backend)
+
+## Flujo de Git y Paso a Producción (Regla Estricta)
+
+> **PROHIBIDO hacer `git merge` local a `main` o `git push origin main` directo.**
+> Todo pase a producción en `main` dispara automáticamente el despliegue en Dokploy y requiere revisión humana previa.
+
+1. **Rama de integración (`develop` / `feat/*` / `fix/*`)**:
+   - Todo desarrollo, corrección o auditoría se realiza y verifica primero en `develop` (o en una rama `feat/*` / `fix/*` que apunte a `develop`).
+2. **Verificación obligatoria antes de subir**:
+   - Ejecutar tests (`pnpm --filter ./website test -- --run`), linter (`pnpm --filter ./backend lint`) y build completo (`pnpm build`).
+   - Si hubo cambios en colecciones/campos del backend, verificar si se requiere migración (`pnpm --filter ./backend payload migrate:create`).
+3. **Push y Pull Request (`develop` → `main`)**:
+   - Hacer `git push origin develop`.
+   - **Crear siempre un Pull Request (PR)** en GitHub desde `develop` hacia `main` (vía MCP de GitHub o `gh pr create`) detallando el resumen de cambios y si existen migraciones o variables de entorno nuevas.
+   - **Detenerse y esperar**: El usuario revisa y aprueba manualmente el PR en GitHub para activar el despliegue en Dokploy.
 
 ## Documentación para agentes
 
