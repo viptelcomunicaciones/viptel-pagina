@@ -190,19 +190,29 @@ class QueryBase<T> {
   ) {}
 
   async getBySlug(slug: string, locale = defaultLocale, draft = false): Promise<T | null> {
-    const data = await this.client.fetchAPI<DocsResponse<T>>(
-      `${this.slug}?where[slug][equals]=${encodeURIComponent(slug)}`,
-      { locale, draft }
-    );
-    return data.docs?.[0] ?? null;
+    try {
+      const data = await this.client.fetchAPI<DocsResponse<T>>(
+        `${this.slug}?where[slug][equals]=${encodeURIComponent(slug)}`,
+        { locale, draft }
+      );
+      return data.docs?.[0] ?? null;
+    } catch (err) {
+      console.error(`[Payload] getBySlug failed for ${this.slug}/${slug}:`, err);
+      return null;
+    }
   }
 
   async getAll(locale = defaultLocale): Promise<T[]> {
-    const data = await this.client.fetchAPI<DocsResponse<T>>(
-      `${this.slug}?limit=${MAX_DOCS_PER_PAGE}&where[_status][equals]=published`,
-      { locale }
-    );
-    return data.docs ?? [];
+    try {
+      const data = await this.client.fetchAPI<DocsResponse<T>>(
+        `${this.slug}?limit=${MAX_DOCS_PER_PAGE}&where[_status][equals]=published`,
+        { locale }
+      );
+      return data.docs ?? [];
+    } catch (err) {
+      console.error(`[Payload] getAll failed for ${this.slug}:`, err);
+      return [];
+    }
   }
 }
 
@@ -475,27 +485,42 @@ class ServiceQueries extends QueryBase<Service> {
   }
 
   async getAll(locale = defaultLocale): Promise<Service[]> {
-    const data = await this.client.fetchAPI<DocsResponse<Service>>(
-      `services?limit=${MAX_DOCS_PER_PAGE}&where[_status][equals]=published`,
-      { locale }
-    );
-    return data.docs ?? [];
+    try {
+      const data = await this.client.fetchAPI<DocsResponse<Service>>(
+        `services?limit=${MAX_DOCS_PER_PAGE}&where[_status][equals]=published`,
+        { locale }
+      );
+      return data.docs ?? [];
+    } catch (err) {
+      console.error('[Payload] ServiceQueries.getAll failed:', err);
+      return [];
+    }
   }
 
   async getCategories(locale = defaultLocale): Promise<Service[]> {
-    const data = await this.client.fetchAPI<DocsResponse<Service>>(
-      `services?where[parent][exists]=false&where[_status][equals]=published`,
-      { locale }
-    );
-    return data.docs ?? [];
+    try {
+      const data = await this.client.fetchAPI<DocsResponse<Service>>(
+        `services?where[parent][exists]=false&where[_status][equals]=published`,
+        { locale }
+      );
+      return data.docs ?? [];
+    } catch (err) {
+      console.error('[Payload] ServiceQueries.getCategories failed:', err);
+      return [];
+    }
   }
 
   async getByParent(parentId: string | number, locale = defaultLocale): Promise<Service[]> {
-    const data = await this.client.fetchAPI<DocsResponse<Service>>(
-      `services?where[parent][equals]=${encodeURIComponent(String(parentId))}&where[_status][equals]=published`,
-      { locale }
-    );
-    return data.docs ?? [];
+    try {
+      const data = await this.client.fetchAPI<DocsResponse<Service>>(
+        `services?where[parent][equals]=${encodeURIComponent(String(parentId))}&where[_status][equals]=published`,
+        { locale }
+      );
+      return data.docs ?? [];
+    } catch (err) {
+      console.error('[Payload] ServiceQueries.getByParent failed:', err);
+      return [];
+    }
   }
 }
 
