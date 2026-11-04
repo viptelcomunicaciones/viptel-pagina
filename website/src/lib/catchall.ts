@@ -1,4 +1,4 @@
-import type { Page, Redirect } from './payload-types';
+import type { Page } from './payload-types';
 import { payload, redirectTarget, type PayloadClient } from './payload-client';
 
 export interface CatchallResolution {
@@ -9,10 +9,17 @@ export interface CatchallResolution {
 }
 
 export interface CatchallResponseLike {
-  status: number;
+  status?: number;
   headers: {
     set: (name: string, value: string) => void;
   };
+}
+
+const BOT_PROBE_PATTERN =
+  /(?:^|\/)(?:\.[^/]+|wp-admin|wp-login|wp-content|wp-includes|phpmyadmin|xmlrpc|cgi-bin)(?:\/|$)|\.(?:php|asp|aspx|jsp|cgi|env|sql|bak|ini|log|sh|yml|yaml|toml)$/i;
+
+export function isBotProbeSlug(slug: string): boolean {
+  return BOT_PROBE_PATTERN.test(slug);
 }
 
 /**
@@ -27,7 +34,7 @@ export async function resolveCatchallRoute(
   client: PayloadClient = payload
 ): Promise<CatchallResolution> {
   const trimmedSlug = (pageSlug ?? '').trim();
-  if (!trimmedSlug) {
+  if (!trimmedSlug || isBotProbeSlug(trimmedSlug)) {
     return { page: null, isError: false, status: 404 };
   }
 

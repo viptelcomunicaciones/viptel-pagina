@@ -1,16 +1,26 @@
 import type { APIRoute } from 'astro';
 import { payload } from '@/lib/payload-client';
 import { localizedPath, resolveLocale } from '@/i18n';
+import { getClientIp, rateLimit } from '@/lib/rate-limit';
 
 export const prerender = false;
 
-export const GET: APIRoute = async ({ url }) => {
-  const q = (url.searchParams.get('q') ?? '').trim();
+export const GET: APIRoute = async ({ request, url, clientAddress }) => {
+  const rawQuery = (url.searchParams.get('q') ?? '').trim();
+  const q = rawQuery.slice(0, 100);
   const locale = resolveLocale(url.searchParams.get('locale') ?? undefined);
 
   if (!q || q.length < 2) {
     return new Response(JSON.stringify({ q, results: [] }), {
       status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const ip = getClientIp(request, clientAddress);
+  if (rateLimit(`search:${ip}`, 60)) {
+    return new Response(JSON.stringify({ error: 'rate_limited', q, results: [] }), {
+      status: 429,
       headers: { 'Content-Type': 'application/json' },
     });
   }

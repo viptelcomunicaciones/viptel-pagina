@@ -1,13 +1,22 @@
+import { timingSafeEqual } from 'node:crypto';
 import type { APIRoute } from 'astro';
 import { PREVIEW_SECRET } from 'astro:env/server';
 
-export const GET: APIRoute = async ({ url, cookies, redirect }) => {
+function isValidSecret(provided: string | null | undefined, expected: string | undefined): boolean {
+  if (!provided || !expected) return false;
+  const bufA = Buffer.from(provided);
+  const bufB = Buffer.from(expected);
+  if (bufA.length !== bufB.length) return false;
+  return timingSafeEqual(bufA, bufB);
+}
+
+export const GET: APIRoute = async ({ request, url, cookies, redirect }) => {
   const path = url.searchParams.get('path');
-  const secret = url.searchParams.get('secret');
+  const secret = request.headers.get('x-preview-secret') || url.searchParams.get('secret');
 
   const expectedSecret = PREVIEW_SECRET || process.env.PREVIEW_SECRET;
 
-  if (!secret || secret !== expectedSecret) {
+  if (!isValidSecret(secret, expectedSecret)) {
     console.warn(
       `[preview] Invalid preview secret. Received: "${secret ? '***' : ''}", expected configured: ${Boolean(expectedSecret)}`
     );

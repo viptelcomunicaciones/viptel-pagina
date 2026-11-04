@@ -33,7 +33,7 @@ export function getClientIp(request?: Request, clientAddress?: string): string {
   return clientAddress || 'unknown';
 }
 
-export function rateLimit(identifier: string): boolean {
+export function rateLimit(identifier: string, maxRequests = MAX_REQUESTS): boolean {
   const now = Date.now();
   if (requestCounts.size > 200) {
     pruneExpired(now);
@@ -47,7 +47,7 @@ export function rateLimit(identifier: string): boolean {
   }
 
   entry.count++;
-  if (entry.count > MAX_REQUESTS) return true;
+  if (entry.count > maxRequests) return true;
 
   return false;
 }

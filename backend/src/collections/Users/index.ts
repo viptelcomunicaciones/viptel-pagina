@@ -39,6 +39,8 @@ export const Users: CollectionConfig = {
   auth: {
     // API keys allow the Astro website to fetch drafts for preview mode
     useAPIKey: true,
+    maxLoginAttempts: 5,
+    lockTime: 600 * 1000,
   },
   fields: [
     {

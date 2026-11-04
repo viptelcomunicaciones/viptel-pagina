@@ -1,7 +1,16 @@
+import { timingSafeEqual } from 'node:crypto';
 import type { APIRoute } from 'astro';
 import { ssrCache } from '@/lib/cache';
 
 export const prerender = false;
+
+function isValidSecret(provided: string | null | undefined, expected: string | undefined): boolean {
+  if (!provided || !expected) return false;
+  const bufA = Buffer.from(provided);
+  const bufB = Buffer.from(expected);
+  if (bufA.length !== bufB.length) return false;
+  return timingSafeEqual(bufA, bufB);
+}
 
 type RevalidateBody = {
   paths?: unknown;
@@ -10,10 +19,10 @@ type RevalidateBody = {
 };
 
 export const POST: APIRoute = async ({ request, url }) => {
-  const secret = url.searchParams.get('secret');
+  const secret = request.headers.get('x-revalidate-secret') || url.searchParams.get('secret');
   const expected = import.meta.env.REVALIDATE_SECRET || import.meta.env.PREVIEW_SECRET;
 
-  if (!expected || secret !== expected) {
+  if (!isValidSecret(secret, expected)) {
     return new Response(JSON.stringify({ success: false, error: 'Invalid secret' }), {
       status: 401,
       headers: { 'Content-Type': 'application/json' },
