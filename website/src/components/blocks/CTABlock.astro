@@ -27,7 +27,55 @@ const hasCustomHeading = Boolean(rawHeading);
 {
   variant === 'glitch' ? (
     <section class="bg-background border-border relative z-10 border-t py-[var(--space-section-md)]">
-      <div class="mx-auto max-w-6xl px-6">
+      {/* Mobile / touch fallback: Standard CTA when LetterGlitch canvas is hidden */}
+      <div class="glitch:hidden">
+        <CTASection variant="default" size="lg" maxWidth="lg">
+          {badge && (
+            <div slot="logo" class="flex justify-center mb-2">
+              <Badge variant="brand" pill>
+                {badge}
+              </Badge>
+            </div>
+          )}
+
+          {heading ? (
+            <h2 slot="heading">{heading}</h2>
+          ) : (
+            <div slot="heading">
+              <RichText content={block.richText} />
+            </div>
+          )}
+
+          {heading && (
+            <div slot="description">
+              <RichText
+                content={block.richText}
+                excludeFirstHeading={!hasCustomHeading && Boolean(heading)}
+              />
+            </div>
+          )}
+
+          {resolvedLinks.length > 0 && (
+            <Fragment slot="actions">
+              {resolvedLinks.map((l) => (
+                <Button
+                  size="lg"
+                  href={l.href}
+                  variant={mapAppearanceToVariant(l.appearance)}
+                  target={l.newTab ? '_blank' : undefined}
+                  rel={l.newTab ? 'noopener noreferrer' : undefined}
+                >
+                  {l.label}
+                  <Icon name="arrow-right" size="sm" />
+                </Button>
+              ))}
+            </Fragment>
+          )}
+        </CTASection>
+      </div>
+
+      {/* Desktop with fine pointer: Interactive LetterGlitch band */}
+      <div class="glitch:block hidden mx-auto max-w-6xl px-6">
         <LetterGlitchBand maxWidth="6xl">
           {badge && (
             <Badge variant="brand" pill class="mb-4">

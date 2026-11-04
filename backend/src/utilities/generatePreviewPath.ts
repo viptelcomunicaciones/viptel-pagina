@@ -25,8 +25,17 @@ export const generatePreviewPath = ({ collection, slug, req }: Props) => {
   // Non-default locales are served under a locale prefix in Astro (/en/...)
   const locale = req.locale && req.locale !== 'es' ? `/${req.locale}` : ''
 
+  // The landing page slug in Payload is "home", which lives at the website root ("/" or "/<locale>")
+  let targetPath = ''
+  if (collection === 'pages' && slug === 'home') {
+    targetPath = locale || '/'
+  } else {
+    const prefix = collectionPrefixMap[collection] || ''
+    targetPath = `${locale}${prefix}/${encodeURIComponent(slug)}`.replace(/\/+/g, '/')
+  }
+
   const encodedParams = new URLSearchParams({
-    path: `${locale}${collectionPrefixMap[collection]}/${encodeURIComponent(slug)}`,
+    path: targetPath,
     secret: process.env.PREVIEW_SECRET || '',
   })
 
