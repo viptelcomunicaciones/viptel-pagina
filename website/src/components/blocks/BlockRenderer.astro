@@ -11,6 +11,7 @@ import GalleryBlock from './GalleryBlock.astro';
 import MediaBlockRenderer from './MediaBlockRenderer.astro';
 import ArchiveBlock from './ArchiveBlock.astro';
 import FormBlockRenderer from './FormBlock.astro';
+import CodeBlockRenderer from './CodeBlockRenderer.astro';
 
 interface Props {
   layout?: PageBlock[] | null;
@@ -33,6 +34,7 @@ const renderers: Record<string, AstroComponentFactory> = {
   gallery: GalleryBlock,
   archive: ArchiveBlock,
   formBlock: FormBlockRenderer,
+  code: CodeBlockRenderer,
 };
 ---
 

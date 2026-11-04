@@ -1,0 +1,21 @@
+---
+import CodeBlock from '@/components/ui/content/CodeBlock/CodeBlock.astro';
+import BlockSection from './BlockSection.astro';
+import type { CodeBlock as CodeBlockType } from '@/lib/payload-types';
+
+interface Props {
+  block: CodeBlockType;
+  locale?: string;
+}
+
+const { block } = Astro.props;
+---
+
+<BlockSection>
+  <div class="mx-auto max-w-4xl px-6" data-reveal>
+    <CodeBlock
+      code={block.code || ''}
+      language={block.language || 'typescript'}
+    />
+  </div>
+</BlockSection>

@@ -69,7 +69,33 @@ admin: {
       type: 'tabs',
       tabs: [
         {
-          fields: [hero],
+          fields: [
+            {
+              name: 'headerStyle',
+              type: 'select',
+              defaultValue: 'bar',
+              label: 'Estilo de Barra de Navegación (Header)',
+              options: [
+                {
+                  label: 'Barra fija estándar (Bar)',
+                  value: 'bar',
+                },
+                {
+                  label: 'Cápsula flotante (Floating)',
+                  value: 'floating',
+                },
+                {
+                  label: 'Barra transparente (Transparent)',
+                  value: 'transparent',
+                },
+              ],
+              admin: {
+                description:
+                  'Elige el aspecto del menú superior (Barra fija, Cápsula flotante o Barra transparente adaptativa).',
+              },
+            },
+            hero,
+          ],
           label: 'Hero',
         },
         {

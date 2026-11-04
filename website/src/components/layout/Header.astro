@@ -1041,6 +1041,9 @@ const buttonId = `${menuId}-button`;
             if (isTransparentBar) {
               header.classList.add(...BAR_SCROLLED_CLASSES);
               header.classList.remove('bg-transparent');
+              if (header.dataset.headerColorScheme === 'invert') {
+                header.classList.remove('invert-section');
+              }
             }
           } else {
             if (!menuOpen) {
@@ -1050,6 +1053,9 @@ const buttonId = `${menuId}-button`;
               if (isTransparentBar) {
                 header.classList.remove(...BAR_SCROLLED_CLASSES);
                 header.classList.add('bg-transparent');
+                if (header.dataset.headerColorScheme === 'invert') {
+                  header.classList.add('invert-section');
+                }
               }
             }
           }

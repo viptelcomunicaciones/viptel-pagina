@@ -196,8 +196,17 @@ export interface PayloadMcpApiKeyAuthOperations {
 export interface Page {
   id: number;
   title: string;
+  /**
+   * Elige el aspecto del menú superior (Barra fija, Cápsula flotante o Barra transparente adaptativa).
+   */
+  headerStyle?: ('bar' | 'floating' | 'transparent') | null;
   hero: {
-    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
+    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact' | 'split' | 'centeredHalo';
+    badge?: string | null;
+    /**
+     * Selecciona un icono para el badge.
+     */
+    badgeIcon?: string | null;
     richText?: {
       root: {
         type: string;
@@ -236,7 +245,7 @@ export interface Page {
             /**
              * Choose how the link should be rendered.
              */
-            appearance?: ('default' | 'outline') | null;
+            appearance?: ('default' | 'secondary' | 'outline' | 'brand-outline' | 'ghost') | null;
           };
           id?: string | null;
         }[]
@@ -266,7 +275,27 @@ export interface Page {
             blockType: 'cards';
           }
         | {
-            name: string;
+            heading?: string | null;
+            plans?:
+              | {
+                  name: string;
+                  price?: number | null;
+                  currency?: string | null;
+                  interval?: ('one-time' | 'monthly') | null;
+                  highlighted?: boolean | null;
+                  features?:
+                    | {
+                        feature?: string | null;
+                        included?: boolean | null;
+                        id?: string | null;
+                      }[]
+                    | null;
+                  linkText?: string | null;
+                  linkUrl?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            name?: string | null;
             price?: number | null;
             currency?: string | null;
             interval?: ('one-time' | 'monthly') | null;
@@ -785,7 +814,27 @@ export interface Service {
             blockType: 'gallery';
           }
         | {
-            name: string;
+            heading?: string | null;
+            plans?:
+              | {
+                  name: string;
+                  price?: number | null;
+                  currency?: string | null;
+                  interval?: ('one-time' | 'monthly') | null;
+                  highlighted?: boolean | null;
+                  features?:
+                    | {
+                        feature?: string | null;
+                        included?: boolean | null;
+                        id?: string | null;
+                      }[]
+                    | null;
+                  linkText?: string | null;
+                  linkUrl?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            name?: string | null;
             price?: number | null;
             currency?: string | null;
             interval?: ('one-time' | 'monthly') | null;
@@ -863,6 +912,9 @@ export interface Service {
  * via the `definition` "CallToActionBlock".
  */
 export interface CallToActionBlock {
+  variant?: ('default' | 'invert' | 'glitch' | 'banner') | null;
+  badge?: string | null;
+  heading?: string | null;
   richText?: {
     root: {
       type: string;
@@ -955,7 +1007,7 @@ export interface ContentBlock {
           /**
            * Choose how the link should be rendered.
            */
-          appearance?: ('default' | 'outline') | null;
+          appearance?: ('default' | 'secondary' | 'outline' | 'brand-outline' | 'ghost') | null;
         };
         id?: string | null;
       }[]
@@ -1154,6 +1206,7 @@ export interface MediaBlock {
  * via the `definition` "ArchiveBlock".
  */
 export interface ArchiveBlock {
+  heading?: string | null;
   introContent?: {
     root: {
       type: string;
@@ -1691,10 +1744,13 @@ export interface PayloadMigration {
  */
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
+  headerStyle?: T;
   hero?:
     | T
     | {
         type?: T;
+        badge?: T;
+        badgeIcon?: T;
         richText?: T;
         links?:
           | T
@@ -1739,6 +1795,26 @@ export interface PagesSelect<T extends boolean = true> {
         pricing?:
           | T
           | {
+              heading?: T;
+              plans?:
+                | T
+                | {
+                    name?: T;
+                    price?: T;
+                    currency?: T;
+                    interval?: T;
+                    highlighted?: T;
+                    features?:
+                      | T
+                      | {
+                          feature?: T;
+                          included?: T;
+                          id?: T;
+                        };
+                    linkText?: T;
+                    linkUrl?: T;
+                    id?: T;
+                  };
               name?: T;
               price?: T;
               currency?: T;
@@ -1826,6 +1902,9 @@ export interface PagesSelect<T extends boolean = true> {
  * via the `definition` "CallToActionBlock_select".
  */
 export interface CallToActionBlockSelect<T extends boolean = true> {
+  variant?: T;
+  badge?: T;
+  heading?: T;
   richText?: T;
   links?:
     | T
@@ -1885,6 +1964,7 @@ export interface MediaBlockSelect<T extends boolean = true> {
  * via the `definition` "ArchiveBlock_select".
  */
 export interface ArchiveBlockSelect<T extends boolean = true> {
+  heading?: T;
   introContent?: T;
   populateBy?: T;
   relationTo?: T;
@@ -2076,6 +2156,26 @@ export interface ServicesSelect<T extends boolean = true> {
         pricing?:
           | T
           | {
+              heading?: T;
+              plans?:
+                | T
+                | {
+                    name?: T;
+                    price?: T;
+                    currency?: T;
+                    interval?: T;
+                    highlighted?: T;
+                    features?:
+                      | T
+                      | {
+                          feature?: T;
+                          included?: T;
+                          id?: T;
+                        };
+                    linkText?: T;
+                    linkUrl?: T;
+                    id?: T;
+                  };
               name?: T;
               price?: T;
               currency?: T;

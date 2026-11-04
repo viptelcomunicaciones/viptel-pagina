@@ -14,8 +14,45 @@ export const CallToAction: Block = {
   interfaceName: 'CallToActionBlock',
   fields: [
     {
+      name: 'variant',
+      type: 'select',
+      defaultValue: 'default',
+      label: 'Variante de diseño',
+      options: [
+        {
+          label: 'Default (Estándar centrado con resplandor glow)',
+          value: 'default',
+        },
+        {
+          label: 'Invert (Alto contraste, fondo oscuro permanente)',
+          value: 'invert',
+        },
+        {
+          label: 'Glitch (Banda Matrix animada LetterGlitch)',
+          value: 'glitch',
+        },
+        {
+          label: 'Banner (Tarjeta horizontal con botones alineados)',
+          value: 'banner',
+        },
+      ],
+    },
+    {
+      name: 'badge',
+      type: 'text',
+      localized: true,
+      label: 'Badge / Etiqueta superior opcional',
+    },
+    {
+      name: 'heading',
+      type: 'text',
+      localized: true,
+      label: 'Heading / Título principal de la llamada a la acción',
+    },
+    {
       name: 'richText',
       type: 'richText',
+      localized: true,
       editor: lexicalEditor({
         features: ({ rootFeatures }) => {
           return [

@@ -1,6 +1,7 @@
 ---
 import PageLayout from '@/layouts/PageLayout.astro';
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
+import RenderHero from '@/components/heros/RenderHero.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import Badge from '@/components/ui/data-display/Badge/Badge.astro';
 import Button from '@/components/ui/form/Button/Button.astro';
@@ -45,53 +46,57 @@ const metaImage =
   title={about?.meta?.title || t('pages.about.meta.title', locale)}
   description={about?.meta?.description || t('pages.about.meta.description', locale)}
   image={metaImage}
+  headerStyle={about?.headerStyle ?? 'bar'}
+  hasDarkHero={about?.hero?.type === 'highImpact'}
   footerBackground="secondary"
 >
-  <Hero layout="centered" size="sm" class="isolate" showHeroHalo>
-    <Badge slot="badge" variant="brand" pill
-      ><Icon name="rocket" size="sm" />{t('pages.about.hero.badge', locale)}</Badge
-    >
-    <h1 slot="title">
-      {
-        heroTitle ? (
-          <span class="text-foreground [-webkit-text-fill-color:currentColor]">{heroTitle}</span>
-        ) : (
-          <>
-            <>
-              <span class="text-foreground [-webkit-text-fill-color:currentColor]">
-                {t('pages.about.hero.titleLead', locale)}
-              </span>
-              <br />
-            </>
-            <span class="text-brand-500 [-webkit-text-fill-color:var(--color-brand-500)] sm:hidden">
-              <TypingEffect words={['Telecomunicaciones', 'Desarrollo Web', 'Marketing Digital']} />
-            </span>
-            <span class="text-brand-500 hidden [-webkit-text-fill-color:var(--color-brand-500)] sm:inline">
-              <TypingEffect
-                words={[
-                  'Telecomunicaciones',
-                  'Desarrollo Web',
-                  'Marketing Digital',
-                  'Transformación Digital',
-                ]}
-              />
-            </span>
-          </>
-        )
-      }
-    </h1>
-    <p slot="description" class="text-balance!">{t('pages.about.hero.description', locale)}</p>
-  </Hero>
+  {
+    about?.hero && about.hero.type && about.hero.type !== 'none' ? (
+      <RenderHero hero={about.hero} locale={locale} />
+    ) : (
+      <Hero layout="centered" size="sm" class="isolate" showHeroHalo>
+        <Badge slot="badge" variant="brand" pill
+          ><Icon name="rocket" size="sm" />{t('pages.about.hero.badge', locale)}</Badge
+        >
+        <h1 slot="title">
+          {
+            heroTitle ? (
+              <span class="text-foreground [-webkit-text-fill-color:currentColor]">{heroTitle}</span>
+            ) : (
+              <>
+                <>
+                  <span class="text-foreground [-webkit-text-fill-color:currentColor]">
+                    {t('pages.about.hero.titleLead', locale)}
+                  </span>
+                  <br />
+                </>
+                <span class="text-brand-500 [-webkit-text-fill-color:var(--color-brand-500)] sm:hidden">
+                  <TypingEffect words={['Telecomunicaciones', 'Desarrollo Web', 'Marketing Digital']} />
+                </span>
+                <span class="text-brand-500 hidden [-webkit-text-fill-color:var(--color-brand-500)] sm:inline">
+                  <TypingEffect
+                    words={[
+                      'Telecomunicaciones',
+                      'Desarrollo Web',
+                      'Marketing Digital',
+                      'Transformación Digital',
+                    ]}
+                  />
+                </span>
+              </>
+            )
+          }
+        </h1>
+        <p slot="description" class="text-balance!">{t('pages.about.hero.description', locale)}</p>
+      </Hero>
+    )
+  }
 
   <!-- CMS Layout Blocks -->
   {
     about?.layout && about.layout.length > 0 ? (
       <BlockRenderer layout={about.layout as PageBlock[]} locale={locale} />
-    ) : (
-      <div class="text-foreground-muted bg-background-secondary border-border border-t py-24 text-center">
-        <p class="text-lg">Edita la pagina "about" desde el panel de administracion.</p>
-      </div>
-    )
+    ) : null
   }
 
   <!-- Tech Stack (static) -->

@@ -6,6 +6,8 @@
 import { Hero } from '@/components/hero';
 import RichText from '@/components/blocks/RichText.astro';
 import HeroLinks from './HeroLinks.astro';
+import Badge from '@/components/ui/data-display/Badge/Badge.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import { extractHeroTitle } from './hero-helpers';
 import { payload } from '@/lib/payload-client';
 import type { PageHero } from '@/lib/block-types';
@@ -25,7 +27,23 @@ const backgroundImage =
     : undefined;
 ---
 
-<Hero fullHeight layout="centered" showGrid showGlow onDark backgroundImage={backgroundImage}>
+<Hero
+  fullHeight
+  layout="centered"
+  showGrid
+  showGlow
+  onDark={Boolean(backgroundImage)}
+  backgroundImage={backgroundImage}
+  class={!backgroundImage ? 'hero-dark-gradient' : undefined}
+>
+  {
+    hero.badge && (
+      <Badge slot="badge" variant="brand" pill>
+        {hero.badgeIcon && <Icon name={hero.badgeIcon} size="sm" />}
+        {hero.badge}
+      </Badge>
+    )
+  }
   {title && <h1 slot="title">{title}</h1>}
   <RichText slot="description" content={hero.richText} excludeFirstHeading />
   {hasLinks && <HeroLinks slot="actions" links={hero.links!} locale={locale} />}

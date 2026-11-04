@@ -1,5 +1,9 @@
 ---
 import RichText from './RichText.astro';
+import Button from '@/components/ui/form/Button/Button.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import { mapAppearanceToVariant } from '@/components/heros/hero-helpers';
+import { resolveHeroLink } from '@/components/heros/hero-helpers';
 import type { ContentBlock as ContentBlockType } from '@/lib/payload-types';
 
 interface Props {
@@ -7,7 +11,7 @@ interface Props {
   locale?: string;
 }
 
-const { block } = Astro.props;
+const { block, locale = 'es' } = Astro.props;
 
 const columns = block.columns ?? [];
 ---
@@ -16,30 +20,46 @@ const columns = block.columns ?? [];
   <div class="mx-auto max-w-6xl px-6">
     {
       columns.length > 0 && (
-        <div
-          class="grid gap-8"
-          class:list={[
-            columns.length > 1 && 'md:grid-cols-2',
-            columns.length > 2 && 'md:grid-cols-3',
-          ]}
-        >
-          {columns.map((col) => (
-            <div
-              class:list={[
-                col.size === 'oneThird' && 'md:col-span-1',
-                col.size === 'half' && 'md:col-span-1',
-                col.size === 'twoThirds' && 'md:col-span-2',
-                col.size === 'full' && 'md:col-span-full',
-              ]}
-            >
-              <RichText
-                content={col.richText}
-                class="prose prose-lg dark:prose-invert max-w-none"
-              />
-            </div>
-          ))}
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-12">
+          {columns.map((col) => {
+            const hasLink = Boolean(col.enableLink && col.link);
+            const resolvedLink = hasLink
+              ? resolveHeroLink({ link: col.link } as any, locale)
+              : null;
+
+            return (
+              <div
+                class:list={[
+                  col.size === 'oneThird' && 'md:col-span-4',
+                  col.size === 'half' && 'md:col-span-6',
+                  col.size === 'twoThirds' && 'md:col-span-8',
+                  col.size === 'full' && 'md:col-span-12',
+                  !col.size && 'md:col-span-4',
+                ]}
+              >
+                <RichText
+                  content={col.richText}
+                  class="prose prose-lg dark:prose-invert max-w-none"
+                />
+                {resolvedLink && (
+                  <div class="mt-6">
+                    <Button
+                      href={resolvedLink.href}
+                      variant={mapAppearanceToVariant(resolvedLink.appearance)}
+                      target={resolvedLink.newTab ? '_blank' : undefined}
+                      rel={resolvedLink.newTab ? 'noopener noreferrer' : undefined}
+                    >
+                      {resolvedLink.label}
+                      <Icon name="arrow-right" size="sm" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )
     }
   </div>
 </section>
+

@@ -1,6 +1,6 @@
 import type { Field } from 'payload'
 
-export const iconField = (): Field => ({
+export const iconField = (overrides?: Partial<Field>): Field => ({
   name: 'icon',
   type: 'text',
   admin: {
@@ -9,4 +9,5 @@ export const iconField = (): Field => ({
     },
     description: 'Selecciona un icono de la librería Lucide.',
   },
+  ...(overrides as any),
 })

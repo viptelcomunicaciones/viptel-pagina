@@ -10,31 +10,15 @@
  * route (`/<locale>`).
  */
 import LandingLayout from '@/layouts/LandingLayout.astro';
-import { Hero } from '@/components/hero';
+import RenderHero from '@/components/heros/RenderHero.astro';
 import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
-import Badge from '@/components/ui/data-display/Badge/Badge.astro';
-import Button from '@/components/ui/form/Button/Button.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import StackMarquee from '@/components/landing/StackMarquee.astro';
 import type { StackItem } from '@/components/landing/StackMarquee.astro';
 import { viptelStack } from '@/data/stack';
 import { payload } from '@/lib/payload-client';
-import { t, defaultLocale, localizedPath } from '@/i18n';
+import { t, defaultLocale } from '@/i18n';
 import type { PageBlock } from '@/lib/block-types';
-import type { LexicalNode, LexicalRoot } from '@/lib/headings';
-import { Image } from 'astro:assets';
-
-interface HeroLink {
-  link?: {
-    type?: 'reference' | 'custom' | null;
-    label?: string | null;
-    url?: string | null;
-    appearance?: string | null;
-    reference?: unknown;
-    newTab?: boolean | null;
-  };
-  id?: string | null;
-}
 
 interface Props {
   locale?: string;
@@ -44,39 +28,10 @@ const { locale = defaultLocale } = Astro.props;
 
 const home = await payload.pages().getBySlug('home', locale);
 
-function extractRichText(richText?: LexicalRoot | null): string {
-  try {
-    const root = richText?.root;
-    if (!root || !Array.isArray(root.children)) return '';
-    return root.children
-      .filter((c: LexicalNode) => c.type === 'paragraph' || c.type === 'heading')
-      .map((c: LexicalNode) => c.children?.map((item: LexicalNode) => item.text || '').join('') || '')
-      .join(' ');
-  } catch {
-    return '';
-  }
-}
-
-const heroTitle = extractRichText(home?.hero?.richText);
-const heroLinks: HeroLink[] = home?.hero?.links ?? [];
 const heroImageUrl =
   home?.hero?.media && typeof home.hero.media !== 'number' && home.hero.media.url
     ? payload.resolveMediaUrl(home.hero.media.url)
     : null;
-
-const heroType = home?.hero?.type || 'none';
-const isHighImpact = heroType === 'highImpact';
-const isMediumImpact = heroType === 'mediumImpact';
-
-// Helper to get a Payload link URL (handles custom URLs and references)
-function getLinkUrl(link: HeroLink['link']): string {
-  if (!link) return '#';
-  if (link.type === 'custom' || link.type === undefined) return link.url || '#';
-  if (link.reference && typeof link.reference === 'object' && 'slug' in link.reference) {
-    return `/${link.reference.slug}`;
-  }
-  return link.url || '#';
-}
 
 const heroStackOrder = [
   'Astro',
@@ -90,6 +45,7 @@ const heroStackOrder = [
 const heroStackItems = viptelStack
   .filter((e: StackItem) => heroStackOrder.includes(e.name))
   .sort((a, b) => heroStackOrder.indexOf(a.name) - heroStackOrder.indexOf(b.name));
+
 const metaImageUrl =
   home?.meta?.image && typeof home.meta.image === 'object' && home.meta.image.url
     ? payload.resolveMediaUrl(home.meta.image.url)
@@ -100,184 +56,35 @@ const metaImageUrl =
   title={home?.meta?.title || t('pages.home.meta.title', locale)}
   description={home?.meta?.description || t('pages.home.meta.description', locale)}
   image={metaImageUrl}
+  headerStyle={home?.headerStyle ?? 'floating'}
+  hasDarkHero={home?.hero?.type === 'highImpact'}
   includePersonSchema={true}
   includeProfessionalServiceSchema={true}
 >
-  <!-- Hero: type-dependent rendering matching Payload template -->
-  {
-    isHighImpact && (
-      <Hero
-        layout="centered"
-        size="xl"
-        class="hero-dark-gradient"
-        fullHeight
-        style={
-          heroImageUrl
-            ? `background-image: linear-gradient(rgba(0,0,0,0.55),rgba(0,0,0,0.3)), url(${heroImageUrl}); background-size: cover; background-position: center;`
-            : ''
-        }
-      >
-        <Badge slot="badge" variant="brand" pill pulse class="dark:text-brand-200">
-          {t('pages.home.hero.badge', locale)}
-        </Badge>
-        <h1
-          slot="title"
-          class="text-[clamp(2rem,12.6vw,3rem)]! sm:text-5xl! md:text-6xl! lg:text-7xl!"
-        >
-          {heroTitle ? (
-            <span
-              class={
-                heroImageUrl
-                  ? 'text-white [-webkit-text-fill-color:currentColor]'
-                  : 'text-brand-600 dark:text-foreground [-webkit-text-fill-color:currentColor]'
-              }
-            >
-              {heroTitle}
-            </span>
-          ) : (
-            <>
-              <span class="text-brand-600 dark:text-foreground whitespace-nowrap [-webkit-text-fill-color:currentColor]">
-                {t('pages.home.hero.titleLine1', locale)}
-              </span>
-              <br />
-              <span class="text-brand-600 dark:text-foreground [-webkit-text-fill-color:currentColor]">
-                {t('pages.home.hero.titleLine2', locale)}
-              </span>
-              <br class="md:hidden" />
-              <span class="text-brand-600 dark:text-foreground [-webkit-text-fill-color:currentColor]">
-                {' '}
-                {t('pages.home.hero.titleLine3', locale)}
-              </span>
-            </>
-          )}
-        </h1>
-        <p slot="description" class="text-balance!">
-          <span class={heroImageUrl ? 'text-white/80' : ''}>
-            <span class="sm:hidden">{t('pages.home.hero.descriptionMobile', locale)}</span>
-            <span class="hidden sm:inline">{t('pages.home.hero.description', locale)}</span>
-          </span>
-        </p>
-        <Fragment slot="actions">
-          {heroLinks.length > 0 ? (
-            heroLinks.map((item) => {
-              const link = item.link;
-              if (!link) return null;
-              return (
-                <Button
-                  size="lg"
-                  href={getLinkUrl(link)}
-                  variant={link.appearance === 'outline' ? 'outline' : 'primary'}
-                  target={link.newTab ? '_blank' : undefined}
-                >
-                  {link.label}
-                  <Icon name="arrow-right" size="sm" />
-                </Button>
-              );
-            })
-          ) : (
-            <>
-              <Button size="lg" href={localizedPath('/services', locale)}>
-                {t('pages.home.cta.primary', locale)}
-                <Icon name="arrow-right" size="sm" />
-              </Button>
-              <Button size="lg" variant="outline" href={localizedPath('/contact', locale)}>
-                {t('pages.home.cta.secondary', locale)}
-                <Icon name="arrow-right" size="sm" />
-              </Button>
-            </>
-          )}
-        </Fragment>
-        <div slot="bottom" class="mx-auto w-full max-w-6xl px-6">
-          <div class="hp-hero-marquee" aria-hidden="true">
-            <StackMarquee
-              items={heroStackItems}
-              rows={1}
-              duration={55}
-              pauseOnHover={false}
-              linked={false}
-              cardWidth="auto"
-              gap="1rem"
-            />
-          </div>
-          <div class="hp-hero-logos" aria-hidden="true">
-            {heroStackItems.slice(0, 4).map((item) => (
-              <span class="hp-hero-logo">
-                <Icon name={item.icon} size="lg" />
-              </span>
-            ))}
-          </div>
-        </div>
-      </Hero>
-    )
-  }
+  <!-- Hero: Render CMS Hero with all variants support -->
+  {home?.hero && <RenderHero hero={home.hero} locale={locale} />}
 
-  {
-    isMediumImpact && (
-      <section class="relative z-10 pt-[var(--space-section-md)]">
-        <div class="mx-auto max-w-6xl px-6">
-          <div class="mx-auto max-w-[48rem] text-center">
-            {heroTitle && (
-              <h1 class="font-display text-foreground mb-6 text-3xl font-bold md:text-4xl">
-                {heroTitle}
-              </h1>
-            )}
-            {heroLinks.length > 0 && (
-              <div class="mb-8 flex justify-center gap-4">
-                {heroLinks.map((item) => {
-                  const link = item.link;
-                  if (!link) return null;
-                  return (
-                    <Button
-                      size="lg"
-                      href={getLinkUrl(link)}
-                      variant={link.appearance === 'outline' ? 'outline' : 'primary'}
-                      target={link.newTab ? '_blank' : undefined}
-                    >
-                      {link.label}
-                      <Icon name="arrow-right" size="sm" />
-                    </Button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-        {heroImageUrl && (
-          <div class="mx-auto mt-8 max-w-6xl px-6">
-            <Image
-              src={heroImageUrl}
-              alt={
-                home?.hero?.media && typeof home.hero.media !== 'number' && home.hero.media.alt
-                  ? home.hero.media.alt
-                  : heroTitle
-              }
-              inferSize
-              widths={[640, 960, 1280, 1920]}
-              sizes="100vw"
-              class="w-full rounded-xl shadow-lg"
-              loading="eager"
-            />
-          </div>
-        )}
-      </section>
-    )
-  }
-
-  {
-    heroType === 'lowImpact' && (
-      <section class="pt-16 pb-8">
-        <div class="mx-auto max-w-6xl px-6">
-          <div class="max-w-[48rem]">
-            {heroTitle && (
-              <h1 class="font-display text-foreground text-3xl font-bold md:text-4xl">
-                {heroTitle}
-              </h1>
-            )}
-          </div>
-        </div>
-      </section>
-    )
-  }
+  <!-- Tech Stack Marquee (Identidad visual Viptel) -->
+  <div class="hp-hero-marquee-section relative z-10 mx-auto w-full max-w-6xl px-6 py-6" aria-hidden="true">
+    <div class="hp-hero-marquee">
+      <StackMarquee
+        items={heroStackItems}
+        rows={1}
+        duration={55}
+        pauseOnHover={false}
+        linked={false}
+        cardWidth="auto"
+        gap="1rem"
+      />
+    </div>
+    <div class="hp-hero-logos">
+      {heroStackItems.slice(0, 4).map((item) => (
+        <span class="hp-hero-logo">
+          <Icon name={item.icon} size="lg" />
+        </span>
+      ))}
+    </div>
+  </div>
 
   <!-- CMS Layout Blocks -->
   {

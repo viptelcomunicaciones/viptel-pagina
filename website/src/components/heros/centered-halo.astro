@@ -1,0 +1,36 @@
+---
+/**
+ * CenteredHaloHero — centered hero with architectural Grid and radiant Halo effect.
+ */
+import { Hero } from '@/components/hero';
+import RichText from '@/components/blocks/RichText.astro';
+import HeroLinks from './HeroLinks.astro';
+import Badge from '@/components/ui/data-display/Badge/Badge.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import { extractHeroTitle } from './hero-helpers';
+import type { PageHero } from '@/lib/block-types';
+
+interface Props {
+  hero: PageHero;
+  locale?: string;
+}
+
+const { hero, locale } = Astro.props;
+
+const title = extractHeroTitle(hero.richText);
+const hasLinks = Array.isArray(hero.links) && hero.links.length > 0;
+---
+
+<Hero layout="centered" size="lg" class="isolate" showHeroHalo>
+  {
+    hero.badge && (
+      <Badge slot="badge" variant="brand" pill>
+        {hero.badgeIcon && <Icon name={hero.badgeIcon} size="sm" />}
+        {hero.badge}
+      </Badge>
+    )
+  }
+  {title && <h1 slot="title">{title}</h1>}
+  <RichText slot="description" content={hero.richText} excludeFirstHeading />
+  {hasLinks && <HeroLinks slot="actions" links={hero.links!} locale={locale} />}
+</Hero>

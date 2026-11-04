@@ -42,6 +42,8 @@ const metaImage =
       title={page.meta?.title || page.title}
       description={page.meta?.description || page.title}
       image={metaImage}
+      headerStyle={page.headerStyle}
+      hasDarkHero={page.hero?.type === 'highImpact'}
     >
       {page.hero && <RenderHero hero={page.hero} locale={locale} />}
       <BlockRenderer layout={page.layout} locale={locale} />

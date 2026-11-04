@@ -1,0 +1,61 @@
+---
+/**
+ * SplitHero — two-column hero layout with text/actions on left and media on right.
+ */
+import { Hero } from '@/components/hero';
+import RichText from '@/components/blocks/RichText.astro';
+import HeroLinks from './HeroLinks.astro';
+import Badge from '@/components/ui/data-display/Badge/Badge.astro';
+import Icon from '@/components/ui/primitives/Icon/Icon.astro';
+import { extractHeroTitle } from './hero-helpers';
+import { payload } from '@/lib/payload-client';
+import type { PageHero } from '@/lib/block-types';
+import { Image } from 'astro:assets';
+
+interface Props {
+  hero: PageHero;
+  locale?: string;
+}
+
+const { hero, locale } = Astro.props;
+
+const title = extractHeroTitle(hero.richText);
+const hasLinks = Array.isArray(hero.links) && hero.links.length > 0;
+const imageUrl =
+  hero.media && typeof hero.media === 'object' && hero.media.url
+    ? payload.resolveMediaUrl(hero.media.url)
+    : undefined;
+const imageAlt =
+  hero.media && typeof hero.media === 'object' && hero.media.alt
+    ? hero.media.alt
+    : title;
+---
+
+<Hero layout="split" size="lg" showGlow>
+  {
+    hero.badge && (
+      <Badge slot="badge" variant="brand" pill>
+        {hero.badgeIcon && <Icon name={hero.badgeIcon} size="sm" />}
+        {hero.badge}
+      </Badge>
+    )
+  }
+  {title && <h1 slot="title">{title}</h1>}
+  <RichText slot="description" content={hero.richText} excludeFirstHeading />
+  {hasLinks && <HeroLinks slot="actions" links={hero.links!} locale={locale} />}
+  {
+    imageUrl && (
+      <div slot="aside" class="relative z-10 w-full overflow-hidden rounded-2xl shadow-xl">
+        <Image
+          src={imageUrl}
+          alt={imageAlt}
+          inferSize
+          widths={[480, 640, 960, 1280]}
+          sizes="(max-width: 1024px) 100vw, 50vw"
+          class="h-auto w-full object-cover rounded-2xl"
+          loading="eager"
+        />
+      </div>
+    )
+  }
+</Hero>

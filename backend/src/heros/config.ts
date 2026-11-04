@@ -8,6 +8,7 @@ import {
 } from '@payloadcms/richtext-lexical'
 
 import { linkGroup } from '@/fields/linkGroup'
+import { iconField } from '@/fields/iconField'
 
 export const hero: Field = {
   name: 'hero',
@@ -25,19 +26,53 @@ export const hero: Field = {
           value: 'none',
         },
         {
-          label: 'High Impact',
+          label: 'High Impact (Pantalla completa / Fondo oscuro o imagen)',
           value: 'highImpact',
         },
         {
-          label: 'Medium Impact',
+          label: 'Medium Impact (Centrado con imagen debajo)',
           value: 'mediumImpact',
         },
         {
-          label: 'Low Impact',
+          label: 'Low Impact (Compacto centrado)',
           value: 'lowImpact',
+        },
+        {
+          label: 'Split (2 Columnas: texto a la izquierda, imagen al lado)',
+          value: 'split',
+        },
+        {
+          label: 'Centered Halo (Centrado con Grid arquitectónico y Halo brillante)',
+          value: 'centeredHalo',
         },
       ],
       required: true,
+    },
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'badge',
+          type: 'text',
+          localized: true,
+          label: 'Badge / Etiqueta superior',
+          admin: {
+            width: '50%',
+            placeholder: 'Ej: Nuevas Soluciones',
+          },
+        },
+        iconField({
+          name: 'badgeIcon',
+          label: 'Icono del Badge',
+          admin: {
+            width: '50%',
+            components: {
+              Field: '@/components/IconPicker/IconPickerField#IconPickerField',
+            },
+            description: 'Selecciona un icono para el badge.',
+          },
+        }),
+      ],
     },
     {
       name: 'richText',
@@ -63,10 +98,10 @@ export const hero: Field = {
       name: 'media',
       type: 'upload',
       admin: {
-        condition: (_, { type } = {}) => ['highImpact', 'mediumImpact'].includes(type),
+        condition: (_, { type } = {}) => ['highImpact', 'mediumImpact', 'split'].includes(type),
       },
       relationTo: 'media',
-      required: true,
+      required: false,
     },
   ],
   label: false,
