@@ -231,15 +231,20 @@ export class HybridSSRCache {
 
   invalidateByCollection(collection: string): number {
     let removed = 0;
+    const cleanName = collection.replace(/^global:/, '').replace(/^globals\//, '');
     const targetTag = `collection:${collection}`;
+    const globalTag = `collection:global:${cleanName}`;
 
     for (const [key, entry] of this.l1.entries()) {
       if (
         entry.tags.has(targetTag) ||
         entry.tags.has(collection) ||
+        entry.tags.has(globalTag) ||
         key.startsWith(`${collection}?`) ||
         key.startsWith(`${collection}/`) ||
-        key.startsWith(`globals/${collection.replace(/^global:/, '')}`)
+        key.startsWith(`globals/${cleanName}`) ||
+        key.includes(`globals/${cleanName}`) ||
+        key.includes(`/${cleanName}?`)
       ) {
         this.l1.delete(key);
         removed++;

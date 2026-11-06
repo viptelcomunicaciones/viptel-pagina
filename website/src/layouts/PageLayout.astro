@@ -23,16 +23,15 @@ interface Props {
   extraSchemas?: WithContext<Thing>[];
   noindex?: boolean;
   nofollow?: boolean;
+  canonicalUrl?: string;
   showScrollProgress?: boolean;
   eagerReveal?: boolean;
   headerStyle?: 'bar' | 'floating' | 'transparent' | null;
+  floatingVariant?: 'transparent' | 'default' | 'solid' | null;
   headerColorScheme?: 'default' | 'invert';
   hasDarkHero?: boolean;
   /**
-   * Footer background. Set this to the opposite of the page's last section so
-   * the zebra pattern (bg-background ↔ bg-background-secondary) stays intact:
-   * - last section `bg-background`           → footer `secondary`
-   * - last section `bg-background-secondary` → footer `default`
+   * Footer background override. When omitted, the global CMS Footer background is used.
    */
   footerBackground?: 'default' | 'secondary' | 'invert';
 }
@@ -46,12 +45,14 @@ const {
   extraSchemas,
   noindex,
   nofollow,
+  canonicalUrl,
   showScrollProgress = false,
   eagerReveal = false,
   headerStyle = 'bar',
+  floatingVariant,
   headerColorScheme,
   hasDarkHero = false,
-  footerBackground = 'default',
+  footerBackground,
 } = Astro.props;
 
 const isFloatingHeader = headerStyle === 'floating';
@@ -69,6 +70,7 @@ const effectiveColorScheme =
   extraSchemas={extraSchemas}
   noindex={noindex}
   nofollow={nofollow}
+  canonicalUrl={canonicalUrl}
   eagerReveal={eagerReveal}
 >
   {
@@ -77,7 +79,7 @@ const effectiveColorScheme =
         slot="header"
         position="fixed"
         shape="floating"
-        variant="transparent"
+        variant={floatingVariant ?? 'transparent'}
         colorScheme="default"
         size="lg"
         showThemeSelector
@@ -113,5 +115,5 @@ const effectiveColorScheme =
     <slot />
   </main>
 
-  <Footer slot="footer" layout="centered" background={footerBackground} />
+  <Footer slot="footer" background={footerBackground} />
 </BaseLayout>

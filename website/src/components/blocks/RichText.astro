@@ -1,6 +1,7 @@
 ---
 import { payload } from '@/lib/payload-client';
 import { slugify } from '@/lib/headings';
+import { resolvePayloadLink } from '@/lib/links';
 
 interface LexicalBlockFields {
   blockType?: string;
@@ -12,7 +13,7 @@ interface LexicalBlockFields {
   url?: string;
   newTab?: boolean;
   doc?: {
-    value?: { slug?: string } | number | null;
+    value?: { id?: number | string; title?: string; slug?: string; breadcrumbs?: Array<{ url?: string | null }> | null } | number | null;
     relationTo?: string;
   } | null;
 }
@@ -83,20 +84,28 @@ function wrapFormat(text: string, format: number): string {
   return result;
 }
 
-function resolveLinkUrl(fields?: LexicalBlockFields): { href: string; isExternal: boolean } {
+function resolveLinkUrl(fields?: LexicalBlockFields): { href: string; isExternal: boolean; label?: string } {
   if (!fields) return { href: '#', isExternal: false };
 
-  const linkType = fields.linkType || 'custom';
+  const payloadLinkData = {
+    type: fields.linkType === 'internal' ? 'reference' : 'custom',
+    url: fields.url,
+    newTab: fields.newTab,
+    reference: fields.doc
+      ? {
+          relationTo: fields.doc.relationTo,
+          value: fields.doc.value,
+        }
+      : undefined,
+  };
 
-  if (linkType === 'custom' || linkType === undefined) {
-    return { href: fields.url || '#', isExternal: Boolean(fields.newTab) };
-  }
-
-  if (linkType === 'internal' && fields.doc?.value && typeof fields.doc.value === 'object') {
-    const doc = fields.doc.value;
-    const relationTo = fields.doc.relationTo || 'posts';
-    const prefix = relationTo === 'projects' ? '/projects' : '/blog';
-    return { href: `${prefix}/${doc.slug}`, isExternal: false };
+  const resolved = resolvePayloadLink(payloadLinkData);
+  if (resolved) {
+    return {
+      href: resolved.href,
+      isExternal: Boolean(resolved.external),
+      label: resolved.label,
+    };
   }
 
   return { href: fields.url || '#', isExternal: Boolean(fields.newTab) };
@@ -144,8 +153,11 @@ function renderNode(node: LexicalNode | null | undefined, ctx: RenderCtx): strin
 
   // Link — Lexical embeds link in children, fields contain URL info
   if (node.type === 'link' || node.type === 'autolink') {
-    const children = renderChildren(node.children, ctx);
-    const { href, isExternal } = resolveLinkUrl(node.fields);
+    let children = renderChildren(node.children, ctx);
+    const { href, isExternal, label } = resolveLinkUrl(node.fields);
+    if (!children.trim() && label) {
+      children = escapeHtml(label);
+    }
     const attrs = [
       `href="${href}"`,
       isExternal ? 'target="_blank"' : '',

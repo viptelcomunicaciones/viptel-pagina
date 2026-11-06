@@ -15,6 +15,7 @@ interface Props {
   };
   noindex?: boolean;
   nofollow?: boolean;
+  canonicalUrl?: string;
   /**
    * Verified locale alternates for this page (`{ locale, url }`). When given,
    * they drive the `hreflang` tags instead of blindly swapping the locale
@@ -33,6 +34,7 @@ const {
   article,
   noindex = false,
   nofollow = false,
+  canonicalUrl,
   localeAlternates,
 } = Astro.props;
 
@@ -48,7 +50,9 @@ const pageTitle = !cleanTitle
     ? cleanTitle
     : `${cleanTitle} — ${siteConfig.name}`;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const canonicalURL = canonicalUrl
+  ? (canonicalUrl.startsWith('http') ? new URL(canonicalUrl) : new URL(canonicalUrl, Astro.site))
+  : new URL(Astro.url.pathname, Astro.site);
 
 // Process image - fall back to the static default OG image
 let ogImage: string;

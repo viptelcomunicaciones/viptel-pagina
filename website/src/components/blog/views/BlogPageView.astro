@@ -19,6 +19,7 @@ import siteConfig from '@/config/site.config';
 import { resolveSocialLinks } from '@/lib/utils';
 import { t, defaultLocale } from '@/i18n';
 import { payload } from '@/lib/payload-client';
+import { getResolvedSiteConfig } from '@/lib/site-config';
 import NotFoundView from '@/components/pages/views/NotFoundView.astro';
 import {
   BLOG_POSTS_PER_PAGE,
@@ -39,9 +40,12 @@ interface Props {
 
 const { locale = defaultLocale, page } = Astro.props;
 
+const site = await getResolvedSiteConfig(locale);
+const limit = site.blog?.postsPerPage ?? BLOG_POSTS_PER_PAGE;
+
 const { docs, totalDocs, totalPages } = await payload
   .posts()
-  .getPaginated(locale, page, BLOG_POSTS_PER_PAGE);
+  .getPaginated(locale, page, limit);
 
 const isOutOfRange = page > totalPages && totalPages > 0;
 if (isOutOfRange) {
@@ -62,7 +66,6 @@ const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
   locale={locale}
   showScrollProgress
   eagerReveal
-  footerBackground="secondary"
   activeTypeSlug=""
 >
   <Fragment slot="hero">
@@ -96,6 +99,7 @@ const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
           publishedAt={new Date(post.publishedAt ?? '')}
           tags={(post.tags ?? []).map((t) => getTagName(t))}
           author={post.populatedAuthors?.[0]?.name || 'Viptel'}
+          authorAvatarUrl={post.populatedAuthors?.[0]?.avatarUrl}
           imageUrl={
             post.heroImage && typeof post.heroImage !== 'number'
               ? payload.resolveMediaUrl(post.heroImage.url ?? '')
@@ -115,7 +119,7 @@ const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
     totalPages={totalPages}
     href={(p) => getBlogPageUrl(p, locale)}
     totalDocs={totalDocs}
-    pageSize={BLOG_POSTS_PER_PAGE}
+    pageSize={limit}
   />
 
   <Fragment slot="footer">

@@ -30,38 +30,7 @@ import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import siteConfig from '@/config/site.config';
 import { t, tData, getLocaleFromPath, swapLocaleInPath } from '@/i18n';
 import { payload } from '@/lib/payload-client';
-import type { Footer as PayloadFooter } from '@/lib/payload-types';
-
-type PayloadFooterLinkData = NonNullable<NonNullable<PayloadFooter['navItems']>[number]>['link'];
-
-function resolveCmsLink(link: PayloadFooterLinkData | undefined | null, currentLocale: string): {
-  label: string;
-  href: string;
-  external?: boolean;
-} | null {
-  if (!link || !link.label) return null;
-  let rawHref = link.url || '/';
-  if (link.type === 'reference' && link.reference?.value && typeof link.reference.value === 'object') {
-    const doc = link.reference.value as { slug?: string | null; breadcrumbs?: Array<{ url?: string | null }> | null };
-    const slug = doc.slug || '';
-    if (link.reference.relationTo === 'pages') {
-      const lastCrumb = doc.breadcrumbs?.[doc.breadcrumbs.length - 1]?.url;
-      rawHref = slug === 'home' ? '/' : lastCrumb || `/${slug}`;
-    } else if (link.reference.relationTo === 'posts') {
-      rawHref = `/blog/${slug}`;
-    } else if (link.reference.relationTo === 'services') {
-      const lastCrumb = doc.breadcrumbs?.[doc.breadcrumbs.length - 1]?.url;
-      rawHref = lastCrumb ? `/services${lastCrumb}` : `/services/${slug}`;
-    }
-  }
-  const external = Boolean(link.newTab) || isExternalOrAnchorHref(rawHref);
-  const href = external ? rawHref : swapLocaleInPath(rawHref, currentLocale);
-  return {
-    label: link.label,
-    href,
-    external: Boolean(link.newTab),
-  };
-}
+import { resolvePayloadLink } from '@/lib/links';
 
 export interface NavItem {
   label: string;
@@ -118,22 +87,35 @@ interface Props extends HTMLAttributes<'footer'> {
 }
 
 const {
-  layout = 'simple',
-  columns = 3,
-  background = 'default',
-  nav,
-  linkGroups = [],
+  layout: layoutProp,
+  columns: columnsProp,
+  background: backgroundProp,
+  nav: navProp,
+  linkGroups: linkGroupsProp = [],
   socialLinks = [],
-  showSocial = true,
-  showCopyright = true,
-  copyright,
-  legalLinks,
-  hideLogo = false,
-  tagline,
-  maxWidth = '6xl',
+  showSocial: showSocialProp,
+  showCopyright: showCopyrightProp,
+  copyright: copyrightProp,
+  legalLinks: legalLinksProp,
+  hideLogo: hideLogoProp,
+  tagline: taglineProp,
+  maxWidth: maxWidthProp,
   class: className,
   ...attrs
 } = Astro.props;
+
+const locale = getLocaleFromPath(Astro.url.pathname);
+const logoHref = getLogoHref(locale);
+
+const cmsFooter = await payload.globals().getFooter(locale);
+
+const layout = layoutProp ?? cmsFooter?.layout ?? 'simple';
+const columns = columnsProp ?? (cmsFooter?.columns as 2 | 3 | 4 | undefined) ?? 3;
+const background = backgroundProp ?? cmsFooter?.background ?? 'default';
+const maxWidth = maxWidthProp ?? cmsFooter?.maxWidth ?? '6xl';
+const showSocial = showSocialProp ?? cmsFooter?.showSocial ?? true;
+const showCopyright = showCopyrightProp ?? cmsFooter?.showCopyright ?? true;
+const hideLogo = hideLogoProp ?? cmsFooter?.hideLogo ?? false;
 
 const maxWidthClass = {
   '4xl': 'max-w-4xl',
@@ -143,19 +125,29 @@ const maxWidthClass = {
   full: 'max-w-full',
 }[maxWidth];
 
-const locale = getLocaleFromPath(Astro.url.pathname);
-const logoHref = getLogoHref(locale);
-
-const cmsFooter = !nav || !legalLinks || !copyright ? await payload.globals().getFooter(locale) : null;
 const cmsNavItems: NavItem[] =
   cmsFooter?.navItems
-    ?.map((item) => resolveCmsLink(item.link, locale))
+    ?.map((item) => resolvePayloadLink(item.link, locale))
     .filter((item): item is NonNullable<typeof item> => item !== null) ?? [];
 
 const cmsLegalLinks: LegalLink[] =
   cmsFooter?.legalLinks
-    ?.map((item) => resolveCmsLink(item.link, locale))
+    ?.map((item) => resolvePayloadLink(item.link, locale))
     .filter((item): item is NonNullable<typeof item> => item !== null) ?? [];
+
+const cmsLinkGroups: FooterLinkGroup[] =
+  cmsFooter?.linkGroups
+    ?.map((group) => ({
+      title: group.title || '',
+      links:
+        group.links
+          ?.map((item) => resolvePayloadLink(item.link, locale))
+          .filter((item): item is NonNullable<typeof item> => item !== null) ?? [],
+    }))
+    .filter((group) => group.title && group.links.length > 0) ?? [];
+
+const linkGroups: FooterLinkGroup[] =
+  linkGroupsProp.length > 0 ? linkGroupsProp : cmsLinkGroups;
 
 // Get navigation items — footer nav is configured independently from the
 // header in `nav.config.ts` (see `footerNavItems`). Localized for the active
@@ -167,17 +159,17 @@ const fallbackNav: NavItem[] = getFooterNavItems(locale).map((item) => ({
   external: item.external,
 }));
 const defaultNav: NavItem[] = cmsNavItems.length > 0 ? cmsNavItems : fallbackNav;
-const navItems: NavItem[] = nav || defaultNav;
+const navItems: NavItem[] = navProp || defaultNav;
 const allNavItems: NavItem[] = navItems;
 
 // Resolved legal links: prop wins, then CMS Footer global, otherwise fall back to nav.config.ts
 const resolvedLegalLinks: LegalLink[] =
-  legalLinks ?? (cmsLegalLinks.length > 0 ? cmsLegalLinks : getLegalLinks(locale));
+  legalLinksProp ?? (cmsLegalLinks.length > 0 ? cmsLegalLinks : getLegalLinks(locale));
 
 // Copyright resolution: an explicit `copyright` prop wins, then CMS Footer global,
 // otherwise every locale uses the localized `footer.copyright` string (supports {year} and
 // {siteName} placeholders).
-const copyrightTemplate = copyright ?? cmsFooter?.copyright ?? t('footer.copyright', locale);
+const copyrightTemplate = copyrightProp ?? cmsFooter?.copyright ?? t('footer.copyright', locale);
 
 // Process copyright text
 const currentYear = new Date().getFullYear();
@@ -188,7 +180,7 @@ const processedCopyright = copyrightTemplate
 // Centered layout identity lines: the tagline prop wins, then
 // siteConfig.tagline; the note line underneath comes from
 // siteConfig.footerNote (licensing, location, availability — short facts).
-const footerTagline = tagline ?? siteConfig.tagline;
+const footerTagline = taglineProp ?? cmsFooter?.tagline ?? siteConfig.tagline;
 const footerNote = siteConfig.footerNote;
 
 // Optional designer credit, appended to the copyright line. Lives entirely
@@ -302,9 +294,9 @@ function getSocialIcon(platform: string): string {
                 </span>
               </a>
             )}
-            {(hasTaglineSlot || tagline) && (
+            {(hasTaglineSlot || footerTagline) && (
               <p class="text-sm text-foreground-muted">
-                {hasTaglineSlot ? <slot name="tagline" /> : tagline}
+                {hasTaglineSlot ? <slot name="tagline" /> : footerTagline}
               </p>
             )}
           </div>
@@ -369,9 +361,9 @@ function getSocialIcon(platform: string): string {
                   </span>
                 </a>
               )}
-              {(hasTaglineSlot || tagline) && (
+              {(hasTaglineSlot || footerTagline) && (
                 <p class="text-sm max-w-xs text-foreground-muted">
-                  {hasTaglineSlot ? <slot name="tagline" /> : tagline}
+                  {hasTaglineSlot ? <slot name="tagline" /> : footerTagline}
                 </p>
               )}
               {/* Social Links in columns layout */}

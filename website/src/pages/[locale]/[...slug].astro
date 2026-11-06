@@ -46,7 +46,11 @@ const metaImage =
       description={page.meta?.description || page.title}
       image={metaImage}
       headerStyle={page.headerStyle}
+      floatingVariant={page.floatingVariant}
       hasDarkHero={page.hero?.type === 'highImpact'}
+      noindex={page.meta?.noindex ?? undefined}
+      nofollow={page.meta?.nofollow ?? undefined}
+      canonicalUrl={page.meta?.canonicalUrl ?? undefined}
     >
       {page.hero && <RenderHero hero={page.hero} locale={effectiveLocale} />}
       <BlockRenderer layout={page.layout} locale={effectiveLocale} />

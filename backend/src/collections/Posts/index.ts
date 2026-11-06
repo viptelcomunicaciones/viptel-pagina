@@ -181,6 +181,36 @@ admin: {
       relationTo: 'users',
     },
     tocField(),
+    {
+      name: 'comments',
+      type: 'select',
+      defaultValue: 'inherit',
+      label: 'Comentarios',
+      options: [
+        { label: 'Heredar de configuración global (inherit)', value: 'inherit' },
+        { label: 'Habilitado en este post (enabled)', value: 'enabled' },
+        { label: 'Deshabilitado en este post (disabled)', value: 'disabled' },
+      ],
+      admin: {
+        position: 'sidebar',
+        description: 'Control de comentarios para este artículo.',
+      },
+    },
+    {
+      name: 'blogImageOverlay',
+      type: 'select',
+      defaultValue: 'inherit',
+      label: 'Capa de Color sobre Imagen',
+      options: [
+        { label: 'Heredar de configuración global (inherit)', value: 'inherit' },
+        { label: 'Habilitada (enabled)', value: 'enabled' },
+        { label: 'Deshabilitada (disabled)', value: 'disabled' },
+      ],
+      admin: {
+        position: 'sidebar',
+        description: 'Aplica el tinte de marca sobre la imagen destacada.',
+      },
+    },
     // This field is only used to populate the user data via the `populateAuthors` hook
     // This is because the `user` collection has access control locked to protect user privacy
     {
@@ -201,6 +231,32 @@ admin: {
         {
           name: 'name',
           type: 'text',
+        },
+        {
+          name: 'avatarUrl',
+          type: 'text',
+        },
+        {
+          name: 'roleTitle',
+          type: 'text',
+        },
+        {
+          name: 'bio',
+          type: 'textarea',
+        },
+        {
+          name: 'twitterCreator',
+          type: 'text',
+        },
+        {
+          name: 'socialLinks',
+          type: 'array',
+          fields: [
+            {
+              name: 'url',
+              type: 'text',
+            },
+          ],
         },
       ],
     },

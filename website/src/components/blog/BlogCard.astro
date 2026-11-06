@@ -15,6 +15,7 @@ interface Props {
   tags?: string[];
   featured?: boolean;
   author?: string;
+  authorAvatarUrl?: string;
   image?: ImageMetadata;
   svgSlug?: string;
   imageUrl?: string;
@@ -49,6 +50,7 @@ const {
   publishedAt,
   tags = [],
   author,
+  authorAvatarUrl,
   image,
   svgSlug,
   imageUrl,
@@ -142,7 +144,17 @@ const readingTime = getReadingTime(body ?? description);
       {
         author && (
           <div class="flex items-center gap-2">
-            <Logo size="sm" letter={author.charAt(0).toUpperCase()} />
+            {authorAvatarUrl ? (
+              <img
+                src={authorAvatarUrl}
+                alt={author}
+                class="h-6 w-6 rounded-full object-cover ring-1 ring-border"
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <Logo size="sm" letter={author.charAt(0).toUpperCase()} />
+            )}
             <span class="font-medium">{author}</span>
           </div>
         )

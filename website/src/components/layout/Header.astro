@@ -44,38 +44,7 @@ import { resolveSocialLink } from '@/lib/utils';
 import { isEnabled as i18nIsEnabled, getLocaleFromPath, stripLocaleFromPath, t } from '@/i18n';
 import AdminBar from '@/components/layout/AdminBar.astro';
 import { payload } from '@/lib/payload-client';
-import type { Header as PayloadHeader } from '@/lib/payload-types';
-
-type PayloadLinkData = NonNullable<NonNullable<PayloadHeader['navItems']>[number]>['link'];
-
-function resolveCmsLink(link: PayloadLinkData | undefined | null, currentLocale: string): {
-  label: string;
-  href: string;
-  external?: boolean;
-} | null {
-  if (!link || !link.label) return null;
-  let rawHref = link.url || '/';
-  if (link.type === 'reference' && link.reference?.value && typeof link.reference.value === 'object') {
-    const doc = link.reference.value as { slug?: string | null; breadcrumbs?: Array<{ url?: string | null }> | null };
-    const slug = doc.slug || '';
-    if (link.reference.relationTo === 'pages') {
-      const lastCrumb = doc.breadcrumbs?.[doc.breadcrumbs.length - 1]?.url;
-      rawHref = slug === 'home' ? '/' : lastCrumb || `/${slug}`;
-    } else if (link.reference.relationTo === 'posts') {
-      rawHref = `/blog/${slug}`;
-    } else if (link.reference.relationTo === 'services') {
-      const lastCrumb = doc.breadcrumbs?.[doc.breadcrumbs.length - 1]?.url;
-      rawHref = lastCrumb ? `/services${lastCrumb}` : `/services/${slug}`;
-    }
-  }
-  const external = Boolean(link.newTab) || isExternalOrAnchorHref(rawHref);
-  const href = external ? rawHref : swapLocaleInPath(rawHref, currentLocale);
-  return {
-    label: link.label,
-    href,
-    external: Boolean(link.newTab),
-  };
-}
+import { resolvePayloadLink } from '@/lib/links';
 
 export interface NavItem {
   label: string;
@@ -98,6 +67,7 @@ interface Props extends HTMLAttributes<'header'> {
   position?: 'fixed' | 'sticky' | 'static';
   size?: 'sm' | 'md' | 'lg';
   variant?: 'default' | 'solid' | 'transparent';
+  floatingVariant?: 'transparent' | 'default' | 'solid';
   colorScheme?: 'default' | 'invert';
   shape?: 'bar' | 'floating';
   nav?: NavItem[];
@@ -132,37 +102,67 @@ interface Props extends HTMLAttributes<'header'> {
 }
 
 const {
-  layout = 'default',
-  position = 'fixed',
-  size = 'lg',
-  variant = 'solid',
-  colorScheme = 'default',
-  shape = 'bar',
+  layout: layoutProp,
+  position: positionProp,
+  size: sizeProp,
+  variant: variantProp,
+  floatingVariant: floatingVariantProp,
+  colorScheme: colorSchemeProp,
+  shape: shapeProp,
   nav,
   extraNav = [],
   showCta: showCtaProp,
   cta: ctaProp,
   actions = [],
-  showSearch = true,
-  showThemeToggle = true,
-  showThemeSelector = true,
-  showMobileMenu = true,
-  showSocialLinks = siteConfig.header?.showSocialLinks ?? false,
-  showLanguageSwitcher = i18nIsEnabled(),
+  showSearch: showSearchProp,
+  showThemeToggle: showThemeToggleProp,
+  showThemeSelector: showThemeSelectorProp,
+  showMobileMenu: showMobileMenuProp,
+  showSocialLinks: showSocialLinksProp,
+  showLanguageSwitcher: showLanguageSwitcherProp,
   languageAlternates,
-  showActiveState = true,
-  showScrollProgress = false,
-  scrollProgressPosition = 'bottom',
-  autoHide = true,
-  invertOnReturn = true,
+  showActiveState: showActiveStateProp,
+  showScrollProgress: showScrollProgressProp,
+  scrollProgressPosition: scrollProgressPositionProp,
+  autoHide: autoHideProp,
+  invertOnReturn: invertOnReturnProp,
   logoText,
-  hideLogo = false,
-  maxWidth = '6xl',
+  hideLogo: hideLogoProp,
+  maxWidth: maxWidthProp,
   class: className,
   ...attrs
 } = Astro.props;
 
+const currentPath = Astro.url.pathname;
+const locale = getLocaleFromPath(currentPath);
+const isLandingPage = currentPath === '/';
+
+// Fetch CMS Header global with automatic fallback to nav.config.ts
+const cmsHeader = await payload.globals().getHeader(locale);
+
+const shape = shapeProp ?? cmsHeader?.shape ?? 'bar';
 const isFloating = shape === 'floating';
+const variant = isFloating
+  ? (floatingVariantProp ?? variantProp ?? cmsHeader?.variant ?? 'transparent')
+  : (variantProp ?? cmsHeader?.variant ?? 'solid');
+const position = positionProp ?? cmsHeader?.position ?? 'fixed';
+const size = sizeProp ?? cmsHeader?.size ?? 'lg';
+const colorScheme = colorSchemeProp ?? cmsHeader?.colorScheme ?? 'default';
+const layout = layoutProp ?? cmsHeader?.layout ?? 'default';
+const maxWidth = maxWidthProp ?? cmsHeader?.maxWidth ?? '6xl';
+const showSearch = showSearchProp ?? cmsHeader?.showSearch ?? true;
+const showThemeToggle = showThemeToggleProp ?? cmsHeader?.showThemeToggle ?? true;
+const showThemeSelector = showThemeSelectorProp ?? cmsHeader?.showThemeSelector ?? true;
+const showMobileMenu = showMobileMenuProp ?? true;
+const showSocialLinks = showSocialLinksProp ?? cmsHeader?.showSocialLinks ?? siteConfig.header?.showSocialLinks ?? false;
+const showLanguageSwitcher = showLanguageSwitcherProp ?? cmsHeader?.showLanguageSwitcher ?? i18nIsEnabled();
+const showActiveState = showActiveStateProp ?? cmsHeader?.showActiveState ?? true;
+const showScrollProgress = showScrollProgressProp ?? cmsHeader?.showScrollProgress ?? false;
+const scrollProgressPosition = scrollProgressPositionProp ?? cmsHeader?.scrollProgressPosition ?? 'bottom';
+const autoHide = autoHideProp ?? cmsHeader?.autoHide ?? true;
+const invertOnReturn = invertOnReturnProp ?? true;
+const hideLogo = hideLogoProp ?? false;
+
 const maxWidthClass = {
   '4xl': 'max-w-4xl',
   '5xl': 'max-w-5xl',
@@ -173,20 +173,14 @@ const maxWidthClass = {
 const effectiveShowScrollProgress = showScrollProgress || (isFloating && !autoHide);
 const isInvert = colorScheme === 'invert';
 
-const currentPath = Astro.url.pathname;
-const locale = getLocaleFromPath(currentPath);
-const isLandingPage = currentPath === '/';
-
-// Fetch CMS Header global with automatic fallback to nav.config.ts
-const cmsHeader = !nav ? await payload.globals().getHeader(locale) : null;
 const cmsNavItems: NavItem[] =
   cmsHeader?.navItems
     ?.map((item, idx) => {
-      const resolved = resolveCmsLink(item.link, locale);
+      const resolved = resolvePayloadLink(item.link, locale);
       if (!resolved) return null;
       const children = item.children
         ?.map((child, cIdx) => {
-          const resolvedChild = resolveCmsLink(child.link, locale);
+          const resolvedChild = resolvePayloadLink(child.link, locale);
           return resolvedChild ? { ...resolvedChild, order: cIdx + 1 } : null;
         })
         .filter((c): c is NonNullable<typeof c> => c !== null);
@@ -214,7 +208,7 @@ const fallbackNav: NavItem[] = navConfigItems.map((item) => {
 const defaultNav: NavItem[] = cmsNavItems.length > 0 ? cmsNavItems : fallbackNav;
 const navItems: NavItem[] = nav || [...extraNav, ...defaultNav];
 
-const cmsCtaResolved = cmsHeader?.cta?.link ? resolveCmsLink(cmsHeader.cta.link, locale) : null;
+const cmsCtaResolved = cmsHeader?.cta?.link ? resolvePayloadLink(cmsHeader.cta.link, locale) : null;
 const showCta = showCtaProp ?? Boolean(cmsHeader?.cta?.showCta && cmsCtaResolved);
 const cta = ctaProp ?? (cmsCtaResolved ? { label: cmsCtaResolved.label, href: cmsCtaResolved.href } : { label: 'Start a project', href: localizedPath('/contact', locale) });
 

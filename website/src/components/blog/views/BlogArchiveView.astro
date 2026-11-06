@@ -145,6 +145,7 @@ const countKey = totalDocs === 1 ? 'blog.archiveCountOne' : 'blog.archiveCountOt
             publishedAt={new Date(post.publishedAt ?? '')}
             tags={(post.tags ?? []).map((tag) => getTagName(tag))}
             author={post.populatedAuthors?.[0]?.name || 'Viptel'}
+            authorAvatarUrl={post.populatedAuthors?.[0]?.avatarUrl}
             imageUrl={
               post.heroImage && typeof post.heroImage !== 'number'
                 ? payload.resolveMediaUrl(post.heroImage.url ?? '')

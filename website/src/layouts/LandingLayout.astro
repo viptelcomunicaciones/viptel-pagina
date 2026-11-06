@@ -18,10 +18,12 @@ interface Props {
   imageAlt?: string;
   noindex?: boolean;
   nofollow?: boolean;
+  canonicalUrl?: string;
   includeOrgSchema?: boolean;
   includePersonSchema?: boolean;
   includeProfessionalServiceSchema?: boolean;
   headerStyle?: 'bar' | 'floating' | 'transparent' | null;
+  floatingVariant?: 'transparent' | 'default' | 'solid' | null;
   headerColorScheme?: 'default' | 'invert';
   hasDarkHero?: boolean;
 }
@@ -33,10 +35,12 @@ const {
   imageAlt,
   noindex = false,
   nofollow = false,
+  canonicalUrl,
   includeOrgSchema = false,
   includePersonSchema = false,
   includeProfessionalServiceSchema = false,
   headerStyle = 'floating',
+  floatingVariant,
   headerColorScheme,
   hasDarkHero = false,
 } = Astro.props;
@@ -54,6 +58,7 @@ const effectiveColorScheme =
   imageAlt={imageAlt}
   noindex={noindex}
   nofollow={nofollow}
+  canonicalUrl={canonicalUrl}
   includeOrgSchema={includeOrgSchema}
   includePersonSchema={includePersonSchema}
   includeProfessionalServiceSchema={includeProfessionalServiceSchema}
@@ -64,7 +69,7 @@ const effectiveColorScheme =
         slot="header"
         position="fixed"
         shape="floating"
-        variant="transparent"
+        variant={floatingVariant ?? 'transparent'}
         colorScheme="default"
         size="lg"
         showThemeSelector
@@ -100,6 +105,5 @@ const effectiveColorScheme =
     <slot />
   </main>
 
-  <!-- Footer is `background` so it alternates with the `secondary` CTA section above it. -->
-  <Footer slot="footer" layout="centered" background="default" />
+  <Footer slot="footer" />
 </BaseLayout>

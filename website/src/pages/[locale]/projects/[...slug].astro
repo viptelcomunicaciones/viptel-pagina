@@ -41,6 +41,10 @@ const projectMetaImage =
       title={project.meta?.title || project.title}
       description={project.meta?.description || project.description || project.title}
       image={projectMetaImage}
+      showScrollProgress={project.toc === 'enabled' || project.toc !== 'disabled'}
+      noindex={project.meta?.noindex ?? undefined}
+      nofollow={project.meta?.nofollow ?? undefined}
+      canonicalUrl={project.meta?.canonicalUrl ?? undefined}
     >
       <ProjectLayout project={project} locale={effectiveLocale} />
     </PageLayout>
