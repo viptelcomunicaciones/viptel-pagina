@@ -1,6 +1,6 @@
 import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 
-export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
+export async function up({ db, payload: _payload, req: _req }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
    CREATE TYPE "public"."enum_pages_floating_variant" AS ENUM('transparent', 'default', 'solid');
   CREATE TYPE "public"."enum__pages_v_version_floating_variant" AS ENUM('transparent', 'default', 'solid');
@@ -298,7 +298,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "footer_rels_projects_id_idx" ON "footer_rels" USING btree ("projects_id","locale");`)
 }
 
-export async function down({ db, payload, req }: MigrateDownArgs): Promise<void> {
+export async function down({ db, payload: _payload, req: _req }: MigrateDownArgs): Promise<void> {
   await db.execute(sql`
    ALTER TABLE "posts_populated_authors_social_links" DISABLE ROW LEVEL SECURITY;
   ALTER TABLE "_posts_v_version_populated_authors_social_links" DISABLE ROW LEVEL SECURITY;

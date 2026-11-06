@@ -40,6 +40,7 @@ import ThemeSelector from '@/components/layout/ThemeSelector.astro';
 import ThemeSelectorDropdown from '@/components/layout/ThemeSelectorDropdown.astro';
 import LanguageSwitcher from '@/components/layout/LanguageSwitcher.astro';
 import siteConfig from '@/config/site.config';
+import { getResolvedSiteConfig } from '@/lib/site-config';
 import { resolveSocialLink } from '@/lib/utils';
 import { isEnabled as i18nIsEnabled, getLocaleFromPath, stripLocaleFromPath, t } from '@/i18n';
 import AdminBar from '@/components/layout/AdminBar.astro';
@@ -137,8 +138,11 @@ const currentPath = Astro.url.pathname;
 const locale = getLocaleFromPath(currentPath);
 const isLandingPage = currentPath === '/';
 
-// Fetch CMS Header global with automatic fallback to nav.config.ts
-const cmsHeader = await payload.globals().getHeader(locale);
+// Fetch CMS Header global and SiteSettings in parallel with automatic fallback
+const [cmsHeader, resolvedSite] = await Promise.all([
+  payload.globals().getHeader(locale),
+  getResolvedSiteConfig(locale),
+]);
 
 const shape = shapeProp ?? cmsHeader?.shape ?? 'bar';
 const isFloating = shape === 'floating';
@@ -155,6 +159,10 @@ const showThemeToggle = showThemeToggleProp ?? cmsHeader?.showThemeToggle ?? tru
 const showThemeSelector = showThemeSelectorProp ?? cmsHeader?.showThemeSelector ?? true;
 const showMobileMenu = showMobileMenuProp ?? true;
 const showSocialLinks = showSocialLinksProp ?? cmsHeader?.showSocialLinks ?? siteConfig.header?.showSocialLinks ?? false;
+const headerSocialLinks =
+  resolvedSite.socialLinks && resolvedSite.socialLinks.length > 0
+    ? resolvedSite.socialLinks
+    : siteConfig.socialLinks;
 const showLanguageSwitcher = showLanguageSwitcherProp ?? cmsHeader?.showLanguageSwitcher ?? i18nIsEnabled();
 const showActiveState = showActiveStateProp ?? cmsHeader?.showActiveState ?? true;
 const showScrollProgress = showScrollProgressProp ?? cmsHeader?.showScrollProgress ?? false;
@@ -283,7 +291,7 @@ const mobileSocialOrder = [
   'youtube.com',
 ];
 const mobileSocialLinks = mobileSocialOrder
-  .map((host) => siteConfig.socialLinks.find((u) => u.includes(host)))
+  .map((host) => headerSocialLinks.find((u) => u.includes(host)))
   .filter((u): u is string => Boolean(u));
 
 const menuId = `mobile-menu-${Math.random().toString(36).slice(2, 9)}`;
@@ -310,7 +318,13 @@ const buttonId = `${menuId}-button`;
           <slot name="logo" />
         ) : (
           <a href={logoHref} class="flex items-center gap-2">
-            <Logo size={size === 'sm' ? 'md' : 'lg'} forceDark={isInvert} class="bg-brand-600" />
+            <Logo
+              size={size === 'sm' ? 'md' : 'lg'}
+              forceDark={isInvert}
+              src={resolvedSite.branding.logo.image}
+              alt={resolvedSite.branding.logo.alt}
+              class="bg-brand-600"
+            />
             {/* One line at every width: the wordmark never wraps, and it eases
                 20px → 16px between 345px and 320px so it clears the header
                 icons on the smallest screens. From 345px up the clamp
@@ -325,7 +339,7 @@ const buttonId = `${menuId}-button`;
                     : 'text-brand-600 dark:text-foreground'
               )}
             >
-              {logoText || siteConfig.name}
+              {logoText || resolvedSite.name}
             </span>
           </a>
         ))
@@ -480,9 +494,9 @@ const buttonId = `${menuId}-button`;
               </div>
             )}
 
-            {showSocialLinks && siteConfig.socialLinks.length > 0 && (
+            {showSocialLinks && headerSocialLinks.length > 0 && (
               <div class="hidden items-center gap-0.5 lg:flex">
-                {siteConfig.socialLinks.map((url) => {
+                {headerSocialLinks.map((url) => {
                   const { icon, label } = getSocialIconData(url);
                   return (
                     <a

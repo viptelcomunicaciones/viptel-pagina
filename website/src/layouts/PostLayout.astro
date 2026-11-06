@@ -102,17 +102,23 @@ const breadcrumbs = [
   { label: post.title },
 ];
 
-const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
+const socialLinks = resolveSocialLinks(
+  site.socialLinks && site.socialLinks.length > 0 ? site.socialLinks : siteConfig.socialLinks
+);
 
 // Resolve manual relatedPosts (backend field) to full posts by slug.
 const manualRelated: Post[] = [];
 for (const rel of post.relatedPosts ?? []) {
   if (typeof rel !== 'number' && rel?.slug) {
-    try {
-      const full = await payload.posts().getBySlug(rel.slug, locale);
-      if (full) manualRelated.push(full);
-    } catch {
-      // Skip this relation if the fetch fails; fall back to tag-based picks.
+    if (rel.title) {
+      manualRelated.push(rel as Post);
+    } else {
+      try {
+        const full = await payload.posts().getBySlug(rel.slug, locale);
+        if (full) manualRelated.push(full);
+      } catch {
+        // Skip this relation if the fetch fails; fall back to tag-based picks.
+      }
     }
   }
 }
@@ -211,7 +217,7 @@ const fullUrl = new URL(Astro.url.pathname, Astro.site).toString();
 
       <div class="sm:border-border sm:bg-card sm:rounded-xl sm:border sm:p-8 lg:p-10">
         <div class="prose prose-lg dark:prose-invert max-w-none">
-          <RichText content={post.content} />
+          <RichText content={post.content} locale={locale} />
         </div>
       </div>
 
@@ -308,7 +314,7 @@ const fullUrl = new URL(Astro.url.pathname, Astro.site).toString();
       ))
     }
     <a
-      href={`mailto:${siteConfig.email}`}
+      href={`mailto:${site.email || siteConfig.email}`}
       class="border-brand-500/40 bg-background text-brand-700 dark:text-brand-400 hover:border-brand-500/80 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors"
     >
       <Icon name="mail" size="sm" />
@@ -351,7 +357,7 @@ const fullUrl = new URL(Astro.url.pathname, Astro.site).toString();
         ))
       }
       <a
-        href={`mailto:${siteConfig.email}`}
+        href={`mailto:${site.email || siteConfig.email}`}
         class="text-foreground hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium transition-colors"
       >
         <Icon name="mail" size="sm" />

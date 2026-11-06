@@ -55,7 +55,13 @@ export function resolvePayloadLink(
       rawHref = `/projects/${slug}`;
     } else if (relationTo === 'services') {
       const lastCrumb = doc.breadcrumbs?.[doc.breadcrumbs.length - 1]?.url;
-      rawHref = lastCrumb ? `/services${lastCrumb}` : `/services/${slug}`;
+      if (lastCrumb) {
+        rawHref = lastCrumb.startsWith('/services')
+          ? lastCrumb
+          : `/services${lastCrumb.startsWith('/') ? lastCrumb : `/${lastCrumb}`}`;
+      } else {
+        rawHref = `/services/${slug}`;
+      }
     }
   }
 

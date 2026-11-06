@@ -26,7 +26,7 @@ export const populateAuthors: CollectionAfterReadHook = async ({ doc, req: { pay
         })
 
         if (authorDocs.length > 0) {
-          doc.populatedAuthors = authorDocs.map((authorDoc: any) => {
+          doc.populatedAuthors = (authorDocs as User[]).map((authorDoc) => {
             let avatarUrl: string | null = null
             if (authorDoc.avatar) {
               if (typeof authorDoc.avatar === 'object' && authorDoc.avatar !== null && 'url' in authorDoc.avatar) {

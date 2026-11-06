@@ -62,15 +62,34 @@ const locale = getLocaleFromPath(Astro.url.pathname);
 const resolvedConfig = await getResolvedSiteConfig(locale);
 
 // Build JSON-LD schemas
-const schemas: WithContext<Thing>[] = [createWebsiteSchema()];
+const schemas: WithContext<Thing>[] = [createWebsiteSchema(resolvedConfig)];
 if (includeOrgSchema || resolvedConfig.schemas?.includeOrgSchema) {
-  schemas.push(createOrganizationSchema());
+  schemas.push(
+    createOrganizationSchema({
+      name: resolvedConfig.name,
+      url: resolvedConfig.url,
+      email: resolvedConfig.email,
+      phone: resolvedConfig.phone,
+      logoUrl: resolvedConfig.branding.logo.imageUrl,
+      socialLinks: resolvedConfig.socialLinks,
+      address: resolvedConfig.address,
+    })
+  );
 }
 if (includePersonSchema || resolvedConfig.schemas?.includePersonSchema) {
   schemas.push(createPersonSchema());
 }
 if (includeProfessionalServiceSchema || resolvedConfig.schemas?.includeProfessionalServiceSchema) {
-  schemas.push(createProfessionalServiceSchema());
+  schemas.push(
+    createProfessionalServiceSchema({
+      name: resolvedConfig.name,
+      url: resolvedConfig.url,
+      email: resolvedConfig.email,
+      phone: resolvedConfig.phone,
+      socialLinks: resolvedConfig.socialLinks,
+      address: resolvedConfig.address,
+    })
+  );
 }
 schemas.push(...extraSchemas);
 

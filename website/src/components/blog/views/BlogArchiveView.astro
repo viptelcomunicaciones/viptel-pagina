@@ -18,6 +18,7 @@ import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
 import NewsletterForm from '@/components/patterns/NewsletterForm.astro';
 import { Hero } from '@/components/hero';
 import siteConfig from '@/config/site.config';
+import { getResolvedSiteConfig } from '@/lib/site-config';
 import { resolveSocialLinks } from '@/lib/utils';
 import { t, defaultLocale } from '@/i18n';
 import { payload } from '@/lib/payload-client';
@@ -50,6 +51,9 @@ if (archive.kind === 'not-found' || archive.kind === 'post' || !archive.postType
   throw new Error('BlogArchiveView requires a type/category/subcategory archive');
 }
 
+const site = await getResolvedSiteConfig(locale);
+const limit = site.blog?.postsPerPage ?? BLOG_POSTS_PER_PAGE;
+
 const { postType, category, subcategory } = archive;
 const posts = (archive.posts ?? []) as Post[];
 const totalDocs = archive.totalDocs ?? 0;
@@ -61,7 +65,7 @@ const archiveBaseUrl = subcategory
   : category
     ? getCategoryArchiveUrl(postType.slug, category, locale)
     : getPostTypeUrl(postType.slug, locale);
-const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
+const socialLinks = resolveSocialLinks(site.socialLinks);
 const countKey = totalDocs === 1 ? 'blog.archiveCountOne' : 'blog.archiveCountOther';
 ---
 
@@ -181,7 +185,7 @@ const countKey = totalDocs === 1 ? 'blog.archiveCountOne' : 'blog.archiveCountOt
         totalPages={totalPages}
         href={(page) => (page <= 1 ? archiveBaseUrl : `${archiveBaseUrl}?page=${page}`)}
         totalDocs={totalDocs}
-        pageSize={BLOG_POSTS_PER_PAGE}
+        pageSize={limit}
       />
     )
   }
@@ -213,7 +217,7 @@ const countKey = totalDocs === 1 ? 'blog.archiveCountOne' : 'blog.archiveCountOt
           ))
         }
         <a
-          href={`mailto:${siteConfig.email}`}
+          href={`mailto:${site.email}`}
           class="border-brand-500/40 bg-background text-brand-700 dark:text-brand-400 hover:border-brand-500/80 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors"
         >
           <Icon name="mail" size="sm" />
@@ -258,7 +262,7 @@ const countKey = totalDocs === 1 ? 'blog.archiveCountOne' : 'blog.archiveCountOt
             ))
           }
           <a
-            href={`mailto:${siteConfig.email}`}
+            href={`mailto:${site.email}`}
             class="text-foreground hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium transition-colors"
           >
             <Icon name="mail" size="sm" />

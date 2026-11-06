@@ -2,6 +2,7 @@
 import { payload } from '@/lib/payload-client';
 import { slugify } from '@/lib/headings';
 import { resolvePayloadLink } from '@/lib/links';
+import { getLocaleFromPath, defaultLocale } from '@/i18n';
 
 interface LexicalBlockFields {
   blockType?: string;
@@ -40,12 +41,18 @@ interface Props {
   class?: string;
   /** Skip the first heading node (used by heros where the heading renders in its own slot) */
   excludeFirstHeading?: boolean;
+  locale?: string;
 }
 
-const { content, excludeFirstHeading = false } = Astro.props;
+const {
+  content,
+  excludeFirstHeading = false,
+  locale = getLocaleFromPath(Astro.url.pathname) || defaultLocale,
+} = Astro.props;
 
 interface RenderCtx {
   usedSlugs: Set<string>;
+  locale: string;
 }
 
 function textContent(nodes?: LexicalNode[]): string {
@@ -84,7 +91,7 @@ function wrapFormat(text: string, format: number): string {
   return result;
 }
 
-function resolveLinkUrl(fields?: LexicalBlockFields): { href: string; isExternal: boolean; label?: string } {
+function resolveLinkUrl(fields?: LexicalBlockFields, loc: string = defaultLocale): { href: string; isExternal: boolean; label?: string } {
   if (!fields) return { href: '#', isExternal: false };
 
   const payloadLinkData = {
@@ -99,7 +106,7 @@ function resolveLinkUrl(fields?: LexicalBlockFields): { href: string; isExternal
       : undefined,
   };
 
-  const resolved = resolvePayloadLink(payloadLinkData);
+  const resolved = resolvePayloadLink(payloadLinkData, loc);
   if (resolved) {
     return {
       href: resolved.href,
@@ -154,7 +161,7 @@ function renderNode(node: LexicalNode | null | undefined, ctx: RenderCtx): strin
   // Link — Lexical embeds link in children, fields contain URL info
   if (node.type === 'link' || node.type === 'autolink') {
     let children = renderChildren(node.children, ctx);
-    const { href, isExternal, label } = resolveLinkUrl(node.fields);
+    const { href, isExternal, label } = resolveLinkUrl(node.fields, ctx.locale);
     if (!children.trim() && label) {
       children = escapeHtml(label);
     }
@@ -254,7 +261,7 @@ if (excludeFirstHeading && Array.isArray(rootChildren)) {
   }
 }
 
-const ctx: RenderCtx = { usedSlugs: new Set() };
+const ctx: RenderCtx = { usedSlugs: new Set(), locale };
 
 const html = content?.root ? renderNode({ ...content.root, children: rootChildren }, ctx) : '';
 ---

@@ -28,6 +28,8 @@ import { footerVariants, footerColumnGridVariants } from './footer.variants';
 import Logo from '@/components/ui/marketing/Logo/Logo.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import siteConfig from '@/config/site.config';
+import { getResolvedSiteConfig } from '@/lib/site-config';
+import { resolveSocialLinks } from '@/lib/utils';
 import { t, tData, getLocaleFromPath, swapLocaleInPath } from '@/i18n';
 import { payload } from '@/lib/payload-client';
 import { resolvePayloadLink } from '@/lib/links';
@@ -92,7 +94,7 @@ const {
   background: backgroundProp,
   nav: navProp,
   linkGroups: linkGroupsProp = [],
-  socialLinks = [],
+  socialLinks: socialLinksProp,
   showSocial: showSocialProp,
   showCopyright: showCopyrightProp,
   copyright: copyrightProp,
@@ -107,7 +109,10 @@ const {
 const locale = getLocaleFromPath(Astro.url.pathname);
 const logoHref = getLogoHref(locale);
 
-const cmsFooter = await payload.globals().getFooter(locale);
+const [cmsFooter, resolvedSite] = await Promise.all([
+  payload.globals().getFooter(locale),
+  getResolvedSiteConfig(locale),
+]);
 
 const layout = layoutProp ?? cmsFooter?.layout ?? 'simple';
 const columns = columnsProp ?? (cmsFooter?.columns as 2 | 3 | 4 | undefined) ?? 3;
@@ -166,6 +171,20 @@ const allNavItems: NavItem[] = navItems;
 const resolvedLegalLinks: LegalLink[] =
   legalLinksProp ?? (cmsLegalLinks.length > 0 ? cmsLegalLinks : getLegalLinks(locale));
 
+// Resolved social links: prop wins, otherwise fall back to resolvedSite.socialLinks or siteConfig
+const defaultSocialLinks: SocialLink[] = resolveSocialLinks(
+  resolvedSite.socialLinks && resolvedSite.socialLinks.length > 0
+    ? resolvedSite.socialLinks
+    : siteConfig.socialLinks
+).map((s) => ({
+  platform: s.key,
+  href: s.href,
+  label: s.label,
+}));
+
+const socialLinks: SocialLink[] =
+  socialLinksProp && socialLinksProp.length > 0 ? socialLinksProp : defaultSocialLinks;
+
 // Copyright resolution: an explicit `copyright` prop wins, then CMS Footer global,
 // otherwise every locale uses the localized `footer.copyright` string (supports {year} and
 // {siteName} placeholders).
@@ -175,13 +194,13 @@ const copyrightTemplate = copyrightProp ?? cmsFooter?.copyright ?? t('footer.cop
 const currentYear = new Date().getFullYear();
 const processedCopyright = copyrightTemplate
   .replace('{year}', String(currentYear))
-  .replace('{siteName}', siteConfig.name);
+  .replace('{siteName}', resolvedSite.name);
 
 // Centered layout identity lines: the tagline prop wins, then
-// siteConfig.tagline; the note line underneath comes from
-// siteConfig.footerNote (licensing, location, availability — short facts).
-const footerTagline = taglineProp ?? cmsFooter?.tagline ?? siteConfig.tagline;
-const footerNote = siteConfig.footerNote;
+// resolvedSite.tagline or siteConfig.tagline; the note line underneath comes from
+// resolvedSite.footerNote or siteConfig.footerNote.
+const footerTagline = taglineProp ?? cmsFooter?.tagline ?? resolvedSite.tagline ?? siteConfig.tagline;
+const footerNote = resolvedSite.footerNote ?? siteConfig.footerNote;
 
 // Optional designer credit, appended to the copyright line. Lives entirely
 // in the locale dictionaries (footer.credit) rather than in this component,
@@ -226,9 +245,14 @@ function getSocialIcon(platform: string): string {
                 <slot name="logo" />
               ) : (
                 <a href={logoHref} class="flex items-center gap-2">
-                  <Logo size="md" class="bg-brand-600" />
+                  <Logo
+                    size="md"
+                    src={resolvedSite.branding.logo.image}
+                    alt={resolvedSite.branding.logo.alt}
+                    class="bg-brand-600"
+                  />
                   <span class="font-display text-base font-bold text-brand-600 dark:text-foreground">
-                    {siteConfig.name}
+                    {resolvedSite.name}
                   </span>
                 </a>
               )}
@@ -288,9 +312,14 @@ function getSocialIcon(platform: string): string {
               <slot name="logo" />
             ) : (
               <a href={logoHref} class="flex items-center gap-2">
-                <Logo size="md" class="bg-brand-600" />
+                <Logo
+                  size="md"
+                  src={resolvedSite.branding.logo.image}
+                  alt={resolvedSite.branding.logo.alt}
+                  class="bg-brand-600"
+                />
                 <span class="font-display text-base font-bold text-brand-600 dark:text-foreground">
-                  {siteConfig.name}
+                  {resolvedSite.name}
                 </span>
               </a>
             )}
@@ -355,9 +384,14 @@ function getSocialIcon(platform: string): string {
                 <slot name="logo" />
               ) : (
                 <a href={logoHref} class="flex items-center gap-2">
-                  <Logo size="md" class="bg-brand-600" />
+                  <Logo
+                    size="md"
+                    src={resolvedSite.branding.logo.image}
+                    alt={resolvedSite.branding.logo.alt}
+                    class="bg-brand-600"
+                  />
                   <span class="font-display text-base font-bold text-brand-600 dark:text-foreground">
-                    {siteConfig.name}
+                    {resolvedSite.name}
                   </span>
                 </a>
               )}
@@ -458,9 +492,14 @@ function getSocialIcon(platform: string): string {
             <slot name="logo" />
           ) : (
             <a href={logoHref} class="flex items-center gap-2">
-              <Logo size="md" class="bg-brand-600" />
+              <Logo
+                size="md"
+                src={resolvedSite.branding.logo.image}
+                alt={resolvedSite.branding.logo.alt}
+                class="bg-brand-600"
+              />
               <span class="font-display text-xl font-bold text-brand-600 dark:text-foreground">
-                {siteConfig.name}
+                {resolvedSite.name}
               </span>
             </a>
           )

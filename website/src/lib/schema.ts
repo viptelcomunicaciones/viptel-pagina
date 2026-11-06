@@ -13,13 +13,17 @@ import siteConfig from '@/config/site.config';
 /**
  * Create WebSite schema for homepage
  */
-export function createWebsiteSchema(): WithContext<WebSite> {
+export function createWebsiteSchema(config?: {
+  name?: string;
+  url?: string;
+  description?: string;
+}): WithContext<WebSite> {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: siteConfig.name,
-    url: siteConfig.url,
-    description: siteConfig.description,
+    name: config?.name || siteConfig.name,
+    url: config?.url || siteConfig.url,
+    description: config?.description || siteConfig.description,
   };
 }
 
@@ -163,8 +167,25 @@ export function createBlogPostSchema(post: {
   image: string;
   datePublished: Date;
   dateModified?: Date;
-  author: { name: string; url?: string };
+  author: {
+    name: string;
+    url?: string;
+    image?: string;
+    jobTitle?: string;
+    sameAs?: string[];
+  };
+  publisher?: {
+    name?: string;
+    logoUrl?: string;
+  };
 }): WithContext<BlogPosting> {
+  const publisherName = post.publisher?.name || siteConfig.name;
+  const publisherLogo =
+    post.publisher?.logoUrl ||
+    (siteConfig.branding.logo.imageUrl
+      ? `${siteConfig.url}${siteConfig.branding.logo.imageUrl}`
+      : undefined);
+
   return {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -177,16 +198,19 @@ export function createBlogPostSchema(post: {
     author: {
       '@type': 'Person',
       name: post.author.name,
-      url: post.author.url,
+      ...(post.author.url ? { url: post.author.url } : {}),
+      ...(post.author.image ? { image: post.author.image } : {}),
+      ...(post.author.jobTitle ? { jobTitle: post.author.jobTitle } : {}),
+      ...(post.author.sameAs && post.author.sameAs.length > 0 ? { sameAs: post.author.sameAs } : {}),
     },
     publisher: {
       '@type': 'Organization',
-      name: siteConfig.name,
-      ...(siteConfig.branding.logo.imageUrl
+      name: publisherName,
+      ...(publisherLogo
         ? {
             logo: {
               '@type': 'ImageObject',
-              url: `${siteConfig.url}${siteConfig.branding.logo.imageUrl}`,
+              url: publisherLogo,
             },
           }
         : {}),

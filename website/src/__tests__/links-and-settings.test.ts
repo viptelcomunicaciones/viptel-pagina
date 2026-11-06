@@ -1,6 +1,11 @@
 import { describe, it, expect, vi } from 'vitest';
 import { resolvePayloadLink } from '@/lib/links';
-import { createPersonSchema, createOrganizationSchema } from '@/lib/schema';
+import {
+  createPersonSchema,
+  createOrganizationSchema,
+  createWebsiteSchema,
+  createBlogPostSchema,
+} from '@/lib/schema';
 import { getResolvedSiteConfig } from '@/lib/site-config';
 
 describe('resolvePayloadLink', () => {
@@ -105,6 +110,16 @@ describe('resolvePayloadLink', () => {
       },
     };
     expect(resolvePayloadLink(serviceLink, 'es')?.href).toBe('/services/telefonia/pbx-virtual');
+
+    const serviceLinkAlreadyPrefixed = {
+      type: 'reference',
+      label: 'PBX Virtual',
+      reference: {
+        relationTo: 'services',
+        value: { slug: 'pbx-virtual', breadcrumbs: [{ url: '/services/telefonia/pbx-virtual' }] },
+      },
+    };
+    expect(resolvePayloadLink(serviceLinkAlreadyPrefixed, 'es')?.href).toBe('/services/telefonia/pbx-virtual');
   });
 });
 
@@ -118,10 +133,70 @@ describe('schema creators', () => {
     expect(schema.name).toBe('Ing. Cesar Barrero');
   });
 
-  it('creates an authentic Organization schema with @type Organization', () => {
-    const schema = createOrganizationSchema();
+  it('creates an authentic Organization schema with @type Organization and custom properties', () => {
+    const schema = createOrganizationSchema({
+      name: 'Viptel Custom Org',
+      url: 'https://viptel.custom',
+      logo: 'https://viptel.custom/logo.png',
+      sameAs: ['https://x.com/viptel'],
+    });
     expect(schema['@type']).toBe('Organization');
-    expect(schema.name).toBeDefined();
+    expect(schema.name).toBe('Viptel Custom Org');
+    expect(schema.url).toBe('https://viptel.custom');
+  });
+
+  it('creates WebSite schema with fallback and custom overrides', () => {
+    const defaultSiteSchema = createWebsiteSchema();
+    expect(defaultSiteSchema['@type']).toBe('WebSite');
+    expect(defaultSiteSchema.name).toBeDefined();
+
+    const customSiteSchema = createWebsiteSchema({
+      name: 'Viptel Telecomunicaciones SAS',
+      url: 'https://viptel.co',
+      description: 'Líder en conectividad',
+    });
+    expect(customSiteSchema.name).toBe('Viptel Telecomunicaciones SAS');
+    expect(customSiteSchema.url).toBe('https://viptel.co');
+    expect(customSiteSchema.description).toBe('Líder en conectividad');
+  });
+
+  it('creates BlogPost schema with enriched author metadata and publisher', () => {
+    const now = new Date('2026-01-01T00:00:00Z');
+    const blogSchema = createBlogPostSchema({
+      title: 'Despliegue de Red PBX Cloud',
+      description: 'Guía técnica paso a paso',
+      url: 'https://viptel.co/blog/despliegue-pbx',
+      image: 'https://viptel.co/og.jpg',
+      datePublished: now,
+      author: {
+        name: 'Ing. Carlos Pérez',
+        jobTitle: 'Senior Voice Engineer',
+        image: 'https://viptel.co/authors/carlos.jpg',
+        sameAs: ['https://linkedin.com/in/carlos-perez'],
+      },
+      publisher: {
+        name: 'Viptel Telecom',
+        logoUrl: 'https://viptel.co/logo.png',
+      },
+    });
+
+    expect(blogSchema['@type']).toBe('BlogPosting');
+    expect(blogSchema.headline).toBe('Despliegue de Red PBX Cloud');
+    expect(blogSchema.author).toEqual({
+      '@type': 'Person',
+      name: 'Ing. Carlos Pérez',
+      image: 'https://viptel.co/authors/carlos.jpg',
+      jobTitle: 'Senior Voice Engineer',
+      sameAs: ['https://linkedin.com/in/carlos-perez'],
+    });
+    expect(blogSchema.publisher).toEqual({
+      '@type': 'Organization',
+      name: 'Viptel Telecom',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://viptel.co/logo.png',
+      },
+    });
   });
 });
 

@@ -91,11 +91,15 @@ const gallerySlides = projectToSlides(project).filter((s) => !('video' in s));
 const manualRelated: Project[] = [];
 for (const rel of project.relatedProjects ?? []) {
   if (typeof rel !== 'number' && rel?.slug) {
-    try {
-      const full = await payload.projects().getBySlug(rel.slug, locale);
-      if (full) manualRelated.push(full);
-    } catch {
-      // Fall back if fetch fails
+    if (rel.title) {
+      manualRelated.push(rel as Project);
+    } else {
+      try {
+        const full = await payload.projects().getBySlug(rel.slug, locale);
+        if (full) manualRelated.push(full);
+      } catch {
+        // Fall back if fetch fails
+      }
     }
   }
 }
@@ -165,7 +169,7 @@ const related = [...manualRelated, ...topicRelated].slice(0, 3);
         project.content && (
           <div class="sm:border-border sm:bg-card sm:rounded-xl sm:border sm:p-8 lg:p-10">
             <div class="prose prose-lg dark:prose-invert max-w-none">
-              <RichText content={project.content} />
+              <RichText content={project.content} locale={locale} />
             </div>
           </div>
         )
