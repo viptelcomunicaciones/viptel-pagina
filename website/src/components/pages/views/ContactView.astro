@@ -10,7 +10,7 @@ import { Hero } from '@/components/hero';
 import ContactForm from '@/components/patterns/ContactForm.astro';
 import { payload } from '@/lib/payload-client';
 import { t, defaultLocale } from '@/i18n';
-import siteConfig from '@/config/site.config';
+import { getResolvedSiteConfig } from '@/lib/site-config';
 import { resolveSocialLinks } from '@/lib/utils';
 import type { PageBlock } from '@/lib/block-types';
 import type { LexicalNode, LexicalRoot } from '@/lib/headings';
@@ -20,8 +20,11 @@ interface Props {
 }
 
 const { locale = defaultLocale } = Astro.props;
-const contact = await payload.pages().getBySlug('contact', locale);
-const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
+const [contact, resolvedSite] = await Promise.all([
+  payload.pages().getBySlug('contact', locale),
+  getResolvedSiteConfig(locale),
+]);
+const socialLinks = resolveSocialLinks(resolvedSite.socialLinks);
 
 function extractRichText(richText?: LexicalRoot | null): string {
   try {
@@ -109,31 +112,81 @@ const otherBlocks = contact?.layout?.filter((b) => b.blockType !== 'formBlock') 
           {t('pages.contact.channelsTitle', locale)}
         </h2>
         <p class="text-foreground-muted">{t('pages.contact.channelsSubtitle', locale)}</p>
-        <Card variant="elevated" padding="lg">
-          <div class="flex flex-col gap-4">
-            <div class="flex items-center gap-3">
-              <div
-                class="from-brand-500/20 to-brand-500/5 text-brand-500 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br"
-              >
-                <Icon name="mail" size="sm" />
+        {
+          resolvedSite.email && (
+            <Card variant="elevated" padding="lg">
+              <div class="flex flex-col gap-4">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="from-brand-500/20 to-brand-500/5 text-brand-500 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br"
+                  >
+                    <Icon name="mail" size="sm" />
+                  </div>
+                  <div>
+                    <p class="text-foreground text-sm font-medium">
+                      {t('pages.contact.emailLabel', locale)}
+                    </p>
+                    <a
+                      href={`mailto:${resolvedSite.email}`}
+                      class="text-brand-500 text-sm hover:underline"
+                    >{resolvedSite.email}</a>
+                  </div>
+                </div>
+                <p class="text-foreground-muted text-xs">{t('pages.contact.emailNote', locale)}</p>
               </div>
-              <div>
-                <p class="text-foreground text-sm font-medium">
-                  {t('pages.contact.emailLabel', locale)}
-                </p><a
-                  href={`mailto:${siteConfig.email}`}
-                  class="text-brand-500 text-sm hover:underline">{siteConfig.email}</a>
+            </Card>
+          )
+        }
+        {
+          resolvedSite.phone && (
+            <Card variant="elevated" padding="lg">
+              <div class="flex items-center gap-3">
+                <div
+                  class="from-brand-500/20 to-brand-500/5 text-brand-500 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br"
+                >
+                  <Icon name="phone" size="sm" />
+                </div>
+                <div>
+                  <p class="text-foreground text-sm font-medium">
+                    {locale === 'en' ? 'Main Phone' : 'Teléfono Principal'}
+                  </p>
+                  <a
+                    href={`tel:${resolvedSite.phone}`}
+                    class="text-brand-500 text-sm hover:underline"
+                  >{resolvedSite.phone}</a>
+                </div>
               </div>
-            </div>
-            <p class="text-foreground-muted text-xs">{t('pages.contact.emailNote', locale)}</p>
-          </div>
-        </Card>
+            </Card>
+          )
+        }
+        {
+          (resolvedSite.address?.street || resolvedSite.address?.city) && (
+            <Card variant="elevated" padding="lg">
+              <div class="flex items-center gap-3">
+                <div class="from-brand-500/20 to-brand-500/5 text-brand-500 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br">
+                  <Icon name="map-pin" size="sm" />
+                </div>
+                <div>
+                  <p class="text-foreground text-sm font-medium">
+                    {locale === 'en' ? 'Corporate Address' : 'Dirección Corporativa'}
+                  </p>
+                  <p class="text-foreground-muted text-sm">
+                    {resolvedSite.address.street ? `${resolvedSite.address.street}, ` : ''}
+                    {resolvedSite.address.city}
+                    {resolvedSite.address.state ? `, ${resolvedSite.address.state}` : ''}
+                    {resolvedSite.address.country ? `, ${resolvedSite.address.country}` : ''}
+                  </p>
+                </div>
+              </div>
+            </Card>
+          )
+        }
         {
           socialLinks.length > 0 && (
             <Card variant="elevated" padding="lg">
               <div class="flex flex-col gap-3">
                 <p class="text-foreground-muted text-sm">{t('pages.contact.socialNote', locale)}</p>
-                <div class="flex gap-3">
+                <div class="flex flex-wrap gap-3">
                   {socialLinks.map((link) => (
                     <a
                       href={link.href}
@@ -146,21 +199,6 @@ const otherBlocks = contact?.layout?.filter((b) => b.blockType !== 'formBlock') 
                     </a>
                   ))}
                 </div>
-              </div>
-            </Card>
-          )
-        }
-        {
-          siteConfig.address?.city && (
-            <Card variant="elevated" padding="lg">
-              <div class="flex items-center gap-3">
-                <div class="from-brand-500/20 to-brand-500/5 text-brand-500 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br">
-                  <Icon name="map-pin" size="sm" />
-                </div>
-                <p class="text-foreground text-sm">
-                  {t('pages.contact.basedIn', locale)} {siteConfig.address.city}
-                  {siteConfig.address.country ? ', ' + siteConfig.address.country : ''}
-                </p>
               </div>
             </Card>
           )

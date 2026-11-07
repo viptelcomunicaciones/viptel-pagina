@@ -26,6 +26,10 @@ interface Props {
   floatingVariant?: 'transparent' | 'default' | 'solid' | null;
   headerColorScheme?: 'default' | 'invert';
   hasDarkHero?: boolean;
+  showScrollProgress?: boolean;
+  scrollProgressPosition?: 'top' | 'bottom';
+  autoHide?: boolean;
+  invertOnReturn?: boolean;
 }
 
 const {
@@ -39,10 +43,14 @@ const {
   includeOrgSchema = false,
   includePersonSchema = false,
   includeProfessionalServiceSchema = false,
-  headerStyle = 'floating',
+  headerStyle,
   floatingVariant,
   headerColorScheme,
   hasDarkHero = false,
+  showScrollProgress,
+  scrollProgressPosition,
+  autoHide,
+  invertOnReturn,
 } = Astro.props;
 
 const isFloatingHeader = headerStyle === 'floating';
@@ -67,41 +75,47 @@ const effectiveColorScheme =
     isFloatingHeader ? (
       <Header
         slot="header"
-        position="fixed"
         shape="floating"
-        variant={floatingVariant ?? 'transparent'}
-        colorScheme="default"
-        size="lg"
-        showThemeSelector
-        autoHide={false}
-        scrollProgressPosition="top"
-        invertOnReturn={false}
+        floatingVariant={floatingVariant ?? undefined}
+        colorScheme={headerColorScheme}
+        showScrollProgress={showScrollProgress}
+        scrollProgressPosition={scrollProgressPosition}
+        autoHide={autoHide}
+        invertOnReturn={invertOnReturn}
       />
     ) : isTransparentHeader ? (
       <Header
         slot="header"
-        position="fixed"
         shape="bar"
         variant="transparent"
         colorScheme={effectiveColorScheme}
-        size="lg"
-        showActiveState
-        showScrollProgress={false}
+        showScrollProgress={showScrollProgress}
+        scrollProgressPosition={scrollProgressPosition}
+        autoHide={autoHide}
+        invertOnReturn={invertOnReturn}
+      />
+    ) : headerStyle === 'bar' ? (
+      <Header
+        slot="header"
+        shape="bar"
+        colorScheme={headerColorScheme}
+        showScrollProgress={showScrollProgress}
+        scrollProgressPosition={scrollProgressPosition}
+        autoHide={autoHide}
+        invertOnReturn={invertOnReturn}
       />
     ) : (
       <Header
         slot="header"
-        position="fixed"
-        shape="bar"
-        variant="solid"
-        size="lg"
-        showActiveState
-        showScrollProgress={false}
+        showScrollProgress={showScrollProgress}
+        scrollProgressPosition={scrollProgressPosition}
+        autoHide={autoHide}
+        invertOnReturn={invertOnReturn}
       />
     )
   }
 
-  <main class={isFloatingHeader ? 'min-h-screen' : 'min-h-screen pt-16'}>
+  <main class={isFloatingHeader || isTransparentHeader ? 'min-h-screen' : 'min-h-screen pt-16'}>
     <slot />
   </main>
 

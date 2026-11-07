@@ -156,8 +156,8 @@ const layout = layoutProp ?? cmsHeader?.layout ?? 'default';
 const maxWidth = maxWidthProp ?? cmsHeader?.maxWidth ?? '6xl';
 const showSearch = showSearchProp ?? cmsHeader?.showSearch ?? true;
 const showThemeToggle = showThemeToggleProp ?? cmsHeader?.showThemeToggle ?? true;
-const showThemeSelector = showThemeSelectorProp ?? cmsHeader?.showThemeSelector ?? true;
-const showMobileMenu = showMobileMenuProp ?? true;
+const showThemeSelector = showThemeSelectorProp ?? cmsHeader?.showThemeSelector ?? false;
+const showMobileMenu = showMobileMenuProp ?? cmsHeader?.showMobileMenu ?? true;
 const showSocialLinks = showSocialLinksProp ?? cmsHeader?.showSocialLinks ?? siteConfig.header?.showSocialLinks ?? false;
 const headerSocialLinks =
   resolvedSite.socialLinks && resolvedSite.socialLinks.length > 0
@@ -168,8 +168,8 @@ const showActiveState = showActiveStateProp ?? cmsHeader?.showActiveState ?? tru
 const showScrollProgress = showScrollProgressProp ?? cmsHeader?.showScrollProgress ?? false;
 const scrollProgressPosition = scrollProgressPositionProp ?? cmsHeader?.scrollProgressPosition ?? 'bottom';
 const autoHide = autoHideProp ?? cmsHeader?.autoHide ?? true;
-const invertOnReturn = invertOnReturnProp ?? true;
-const hideLogo = hideLogoProp ?? false;
+const invertOnReturn = invertOnReturnProp ?? cmsHeader?.invertOnReturn ?? true;
+const hideLogo = hideLogoProp ?? cmsHeader?.hideLogo ?? false;
 
 const maxWidthClass = {
   '4xl': 'max-w-4xl',
@@ -178,7 +178,7 @@ const maxWidthClass = {
   '7xl': 'max-w-7xl',
   full: 'max-w-full',
 }[maxWidth];
-const effectiveShowScrollProgress = showScrollProgress || (isFloating && !autoHide);
+const effectiveShowScrollProgress = showScrollProgress;
 const isInvert = colorScheme === 'invert';
 
 const cmsNavItems: NavItem[] =
@@ -771,7 +771,7 @@ const buttonId = `${menuId}-button`;
               </section>
             )}
 
-            {mobileSocialLinks.length > 0 && (
+            {showSocialLinks && mobileSocialLinks.length > 0 && (
               <section class="mobile-menu-section">
                 <p class="mobile-menu-label">{t('nav.sectionConnect', locale)}</p>
                 <div class="flex flex-wrap items-center gap-2 px-2 pt-1 pb-2">
@@ -1068,7 +1068,7 @@ const buttonId = `${menuId}-button`;
             }
           }
 
-          if (isFloating && isAutoHide && !menuOpen) {
+          if ((isFloating || isBar) && isAutoHide && !menuOpen) {
             if (currentScrollY > AUTO_HIDE_THRESHOLD) {
               if (currentScrollY > lastScrollY) {
                 if (currentScrollY - lastShownAtY >= AUTO_HIDE_THRESHOLD) {
@@ -1162,6 +1162,13 @@ const buttonId = `${menuId}-button`;
 
   [data-header-shape='floating'][data-header-hidden] {
     translate: -50% calc(-100% - 1.5rem) !important;
+  }
+
+  [data-header-shape='bar'] {
+    transition: transform 300ms ease, background 300ms ease, border-color 300ms ease;
+  }
+  [data-header-shape='bar'][data-header-hidden] {
+    transform: translateY(-100%) !important;
   }
 
   [data-header-shape='floating'][data-scrolled] {

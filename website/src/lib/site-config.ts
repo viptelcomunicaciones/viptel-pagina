@@ -38,10 +38,17 @@ export async function getResolvedSiteConfig(
     ?.map((s) => s.url)
     .filter((url): url is string => Boolean(url));
 
+  const rawCustomSvg = cmsSettings?.logo?.customSvgPath?.trim();
+  const normalizedCustomSvg = rawCustomSvg
+    ? rawCustomSvg.startsWith('http') || rawCustomSvg.startsWith('/')
+      ? rawCustomSvg
+      : `/${rawCustomSvg}`
+    : undefined;
+
   const resolvedLogoImage =
     cmsSettings?.logo?.image && typeof cmsSettings.logo.image === 'object' && cmsSettings.logo.image.url
       ? payload.resolveMediaUrl(cmsSettings.logo.image.url)
-      : cmsSettings?.logo?.customSvgPath || siteConfig.branding.logo.image;
+      : normalizedCustomSvg || siteConfig.branding.logo.image;
 
   const resolvedStructuredDataImage =
     cmsSettings?.logo?.structuredDataImage &&
@@ -50,12 +57,25 @@ export async function getResolvedSiteConfig(
       ? payload.resolveMediaUrl(cmsSettings.logo.structuredDataImage.url)
       : siteConfig.branding.logo.imageUrl;
 
+  const resolvedOgImage =
+    cmsSettings?.ogImage && typeof cmsSettings.ogImage === 'object' && cmsSettings.ogImage.url
+      ? payload.resolveMediaUrl(cmsSettings.ogImage.url)
+      : siteConfig.ogImage;
+
+  const rawFaviconSvg = cmsSettings?.favicon?.customSvgPath?.trim();
+  const normalizedFaviconSvg = rawFaviconSvg
+    ? rawFaviconSvg.startsWith('http') || rawFaviconSvg.startsWith('/')
+      ? rawFaviconSvg
+      : `/${rawFaviconSvg}`
+    : siteConfig.branding.favicon.svg;
+
   return {
     ...siteConfig,
     name: cmsSettings?.name || siteConfig.name,
     description: cmsSettings?.description || siteConfig.description,
     tagline: cmsSettings?.tagline || siteConfig.tagline,
     footerNote: cmsSettings?.footerNote || siteConfig.footerNote,
+    ogImage: resolvedOgImage,
     url: cmsSettings?.url || siteConfig.url,
     email: cmsSettings?.email || siteConfig.email,
     phone: cmsSettings?.phone || siteConfig.phone,
@@ -78,7 +98,7 @@ export async function getResolvedSiteConfig(
         imageUrl: resolvedStructuredDataImage,
       },
       favicon: {
-        svg: cmsSettings?.favicon?.customSvgPath || siteConfig.branding.favicon.svg,
+        svg: normalizedFaviconSvg,
       },
       colors: {
         themeColor: cmsSettings?.colors?.themeColor || siteConfig.branding.colors.themeColor,

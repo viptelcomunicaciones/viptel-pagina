@@ -12,8 +12,11 @@ import Dialog from '@/components/ui/overlay/Dialog';
 import Button from '@/components/ui/form/Button';
 import Switch from '@/components/ui/form/Switch';
 import type { ConsentUIText } from '@/lib/consent.types';
+import { getLocaleFromPath, localizedPath } from '@/i18n';
 
 interface Props {
+  enabled?: boolean;
+  privacyPolicyUrl?: string;
   position?: 'top' | 'bottom';
   ui?: Partial<ConsentUIText>;
   alwaysOnLabel?: string;
@@ -21,21 +24,50 @@ interface Props {
 }
 
 const {
+  enabled: enabledProp,
+  privacyPolicyUrl: privacyPolicyUrlProp,
   position = 'bottom',
   ui: uiOverrides,
   alwaysOnLabel: alwaysOnLabelProp,
   class: className,
 } = Astro.props;
 
-const consentEnabled = PUBLIC_CONSENT_ENABLED;
-const privacyPolicyUrl = PUBLIC_PRIVACY_POLICY_URL;
+const locale = getLocaleFromPath(Astro.url.pathname);
+const isEn = locale === 'en';
 
-// Merge UI text: props override config defaults
-const ui = { ...consentConfig.ui, ...uiOverrides };
-const alwaysOnLabel = alwaysOnLabelProp ?? ui.alwaysOnLabel ?? 'Always on';
-const privacyPolicyLabel = ui.privacyPolicyLabel ?? 'Privacy Policy';
-const bannerAriaLabel = ui.bannerAriaLabel ?? 'Cookie consent';
-const reopenerAriaLabel = ui.reopenerAriaLabel ?? 'Open cookie settings';
+const rawPrivacyPolicyUrl = (privacyPolicyUrlProp || PUBLIC_PRIVACY_POLICY_URL || '').trim();
+const normalizedUrl = rawPrivacyPolicyUrl
+  ? rawPrivacyPolicyUrl.startsWith('http') || rawPrivacyPolicyUrl.startsWith('/') || rawPrivacyPolicyUrl.startsWith('#')
+    ? rawPrivacyPolicyUrl
+    : `/${rawPrivacyPolicyUrl}`
+  : '';
+const privacyPolicyUrl =
+  normalizedUrl && normalizedUrl.startsWith('/') && !normalizedUrl.startsWith('//')
+    ? localizedPath(normalizedUrl, locale)
+    : normalizedUrl;
+
+// Merge UI text: props override locale defaults
+const defaultUi = isEn
+  ? {
+      heading: 'Cookie Preferences',
+      description: 'We use cookies to enhance your browsing experience and analyze site traffic.',
+      acceptAll: 'Accept all',
+      declineAll: 'Decline all',
+      customize: 'Customize',
+      savePreferences: 'Save preferences',
+      settingsHeading: 'Privacy Settings',
+      alwaysOnLabel: 'Always active',
+      privacyPolicyLabel: 'Privacy Policy',
+      bannerAriaLabel: 'Cookie consent',
+      reopenerAriaLabel: 'Open cookie settings',
+    }
+  : consentConfig.ui;
+
+const ui = { ...defaultUi, ...uiOverrides };
+const alwaysOnLabel = alwaysOnLabelProp ?? ui.alwaysOnLabel ?? (isEn ? 'Always active' : 'Siempre activo');
+const privacyPolicyLabel = ui.privacyPolicyLabel ?? (isEn ? 'Privacy Policy' : 'Política de privacidad');
+const bannerAriaLabel = ui.bannerAriaLabel ?? (isEn ? 'Cookie consent' : 'Consentimiento de cookies');
+const reopenerAriaLabel = ui.reopenerAriaLabel ?? (isEn ? 'Open cookie settings' : 'Abrir configuración de cookies');
 
 const isTop = position === 'top';
 

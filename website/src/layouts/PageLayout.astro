@@ -25,6 +25,9 @@ interface Props {
   nofollow?: boolean;
   canonicalUrl?: string;
   showScrollProgress?: boolean;
+  scrollProgressPosition?: 'top' | 'bottom';
+  autoHide?: boolean;
+  invertOnReturn?: boolean;
   eagerReveal?: boolean;
   headerStyle?: 'bar' | 'floating' | 'transparent' | null;
   floatingVariant?: 'transparent' | 'default' | 'solid' | null;
@@ -46,9 +49,12 @@ const {
   noindex,
   nofollow,
   canonicalUrl,
-  showScrollProgress = false,
+  showScrollProgress,
+  scrollProgressPosition,
+  autoHide,
+  invertOnReturn,
   eagerReveal = false,
-  headerStyle = 'bar',
+  headerStyle,
   floatingVariant,
   headerColorScheme,
   hasDarkHero = false,
@@ -77,36 +83,42 @@ const effectiveColorScheme =
     isFloatingHeader ? (
       <Header
         slot="header"
-        position="fixed"
         shape="floating"
-        variant={floatingVariant ?? 'transparent'}
-        colorScheme="default"
-        size="lg"
-        showThemeSelector
-        autoHide={false}
-        scrollProgressPosition="top"
-        invertOnReturn={false}
+        floatingVariant={floatingVariant ?? undefined}
+        colorScheme={headerColorScheme}
+        showScrollProgress={showScrollProgress}
+        scrollProgressPosition={scrollProgressPosition}
+        autoHide={autoHide}
+        invertOnReturn={invertOnReturn}
       />
     ) : isTransparentHeader ? (
       <Header
         slot="header"
-        position="fixed"
         shape="bar"
         variant="transparent"
         colorScheme={effectiveColorScheme}
-        size="lg"
-        showActiveState
         showScrollProgress={showScrollProgress}
+        scrollProgressPosition={scrollProgressPosition}
+        autoHide={autoHide}
+        invertOnReturn={invertOnReturn}
+      />
+    ) : headerStyle === 'bar' ? (
+      <Header
+        slot="header"
+        shape="bar"
+        colorScheme={headerColorScheme}
+        showScrollProgress={showScrollProgress}
+        scrollProgressPosition={scrollProgressPosition}
+        autoHide={autoHide}
+        invertOnReturn={invertOnReturn}
       />
     ) : (
       <Header
         slot="header"
-        position="fixed"
-        shape="bar"
-        variant="solid"
-        size="lg"
-        showActiveState
         showScrollProgress={showScrollProgress}
+        scrollProgressPosition={scrollProgressPosition}
+        autoHide={autoHide}
+        invertOnReturn={invertOnReturn}
       />
     )
   }

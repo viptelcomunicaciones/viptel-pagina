@@ -5,7 +5,7 @@ export const testUser = {
   name: 'Test User',
   email: 'dev@payloadcms.com',
   password: 'test',
-  roles: ['editor'],
+  roles: ['admin'],
 }
 
 /**
@@ -31,7 +31,7 @@ export async function seedTestUser(): Promise<void> {
       name: 'Test User',
       email: 'dev@payloadcms.com',
       password: 'test',
-      roles: ['editor'],
+      roles: ['admin'],
     },
   })
 }

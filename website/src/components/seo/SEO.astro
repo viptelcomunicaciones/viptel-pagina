@@ -24,6 +24,8 @@ interface Props {
    * omitted. Falls back to same-path swapping when not provided.
    */
   localeAlternates?: { locale: string; url: string }[];
+  siteName?: string;
+  defaultImage?: string;
 }
 
 const {
@@ -36,30 +38,34 @@ const {
   nofollow = false,
   canonicalUrl,
   localeAlternates,
+  siteName: siteNameProp,
+  defaultImage,
 } = Astro.props;
 
+const siteName = siteNameProp || siteConfig.name;
 const cleanTitle = title?.trim();
 const hasBrandInTitle =
   cleanTitle &&
-  (cleanTitle.toLowerCase().includes(siteConfig.name.toLowerCase()) ||
+  (cleanTitle.toLowerCase().includes(siteName.toLowerCase()) ||
     cleanTitle.toLowerCase().includes('viptel'));
 
 const pageTitle = !cleanTitle
-  ? siteConfig.name
+  ? siteName
   : hasBrandInTitle
     ? cleanTitle
-    : `${cleanTitle} — ${siteConfig.name}`;
+    : `${cleanTitle} — ${siteName}`;
 
 const canonicalURL = canonicalUrl
   ? (canonicalUrl.startsWith('http') ? new URL(canonicalUrl) : new URL(canonicalUrl, Astro.site))
   : new URL(Astro.url.pathname, Astro.site);
 
-// Process image - fall back to the static default OG image
+// Process image - fall back to the resolved/static default OG image
 let ogImage: string;
 if (image) {
   ogImage = image.startsWith('http') ? image : new URL(image, Astro.site).toString();
 } else {
-  ogImage = new URL(siteConfig.ogImage, Astro.site).toString();
+  const fallback = defaultImage || siteConfig.ogImage;
+  ogImage = fallback.startsWith('http') ? fallback : new URL(fallback, Astro.site).toString();
 }
 
 const robotsContent = [noindex ? 'noindex' : 'index', nofollow ? 'nofollow' : 'follow'].join(', ');
@@ -142,7 +148,7 @@ const xDefaultHref = i18nOn ? new URL(xDefaultUrl, Astro.site).toString() : null
 <meta property="og:image" content={ogImage} />
 <meta property="og:url" content={canonicalURL.toString()} />
 <meta property="og:description" content={description} />
-<meta property="og:site_name" content={siteConfig.name} />
+<meta property="og:site_name" content={siteName} />
 <meta property="og:locale" content={locale} />
 <meta property="og:image:alt" content={imageAlt || pageTitle} />
 <meta property="og:image:width" content="1200" />

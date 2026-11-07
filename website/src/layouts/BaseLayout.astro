@@ -143,6 +143,8 @@ if (commentsConfig?.enabled) {
       title={title}
       description={description || resolvedConfig.description}
       image={image}
+      defaultImage={resolvedConfig.ogImage}
+      siteName={resolvedConfig.name}
       imageAlt={imageAlt}
       article={article}
       noindex={noindex}
@@ -163,7 +165,7 @@ if (commentsConfig?.enabled) {
     <JsonLd schema={schemas} />
 
     <!-- Analytics (loads if PUBLIC_GA_MEASUREMENT_ID or PUBLIC_GTM_ID is set) -->
-    <Analytics />
+    <Analytics consentEnabled={resolvedConfig.consent?.enabled ?? undefined} />
 
     <!-- Client-side view transitions are intentionally disabled. They composed
          poorly with the theme's CSS keyframe animations (hero slide-up,
@@ -281,8 +283,6 @@ if (commentsConfig?.enabled) {
     </main>
 
     <slot name="footer" />
-
-    <ConsentBanner />
 
     {resolvedConfig.effects?.cursorTrail !== false && <CursorTrail />}
 
@@ -609,5 +609,11 @@ if (commentsConfig?.enabled) {
         }
       })();
     </script>
+
+    <!-- Cookie Consent Banner -->
+    <ConsentBanner
+      enabled={resolvedConfig.consent?.enabled ?? undefined}
+      privacyPolicyUrl={resolvedConfig.consent?.privacyPolicyUrl ?? undefined}
+    />
   </body>
 </html>

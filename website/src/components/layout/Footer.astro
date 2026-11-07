@@ -328,6 +328,7 @@ function getSocialIcon(platform: string): string {
                 {hasTaglineSlot ? <slot name="tagline" /> : footerTagline}
               </p>
             )}
+            {footerNote && <p class="text-xs text-foreground-muted">{footerNote}</p>}
           </div>
         )}
 
@@ -399,6 +400,31 @@ function getSocialIcon(platform: string): string {
                 <p class="text-sm max-w-xs text-foreground-muted">
                   {hasTaglineSlot ? <slot name="tagline" /> : footerTagline}
                 </p>
+              )}
+              {footerNote && (
+                <p class="text-xs max-w-xs text-foreground-muted">{footerNote}</p>
+              )}
+              {(resolvedSite.address?.street || resolvedSite.phone || resolvedSite.email) && (
+                <div class="text-xs text-foreground-muted space-y-1 pt-1">
+                  {resolvedSite.address?.street && (
+                    <p class="flex items-center gap-1.5">
+                      <Icon name="map-pin" size="xs" class="shrink-0 text-foreground-muted" />
+                      <span>{resolvedSite.address.street}{resolvedSite.address.city ? `, ${resolvedSite.address.city}` : ''}</span>
+                    </p>
+                  )}
+                  {resolvedSite.phone && (
+                    <p class="flex items-center gap-1.5">
+                      <Icon name="phone" size="xs" class="shrink-0 text-foreground-muted" />
+                      <a href={`tel:${resolvedSite.phone}`} class="hover:text-foreground transition-colors">{resolvedSite.phone}</a>
+                    </p>
+                  )}
+                  {resolvedSite.email && (
+                    <p class="flex items-center gap-1.5">
+                      <Icon name="mail" size="xs" class="shrink-0 text-foreground-muted" />
+                      <a href={`mailto:${resolvedSite.email}`} class="hover:text-foreground transition-colors">{resolvedSite.email}</a>
+                    </p>
+                  )}
+                </div>
               )}
               {/* Social Links in columns layout */}
               {showSocial && socialLinks.length > 0 && (
@@ -506,10 +532,13 @@ function getSocialIcon(platform: string): string {
         )}
 
         {/* Tagline */}
-        {(hasTaglineSlot || tagline) && (
+        {(hasTaglineSlot || footerTagline) && (
           <p class="text-sm max-w-md text-foreground-muted">
-            {hasTaglineSlot ? <slot name="tagline" /> : tagline}
+            {hasTaglineSlot ? <slot name="tagline" /> : footerTagline}
           </p>
+        )}
+        {footerNote && (
+          <p class="text-xs max-w-md text-foreground-muted">{footerNote}</p>
         )}
 
         {/* Navigation Links */}

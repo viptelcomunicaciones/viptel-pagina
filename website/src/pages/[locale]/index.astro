@@ -6,6 +6,8 @@ import BlockRenderer from '@/components/blocks/BlockRenderer.astro';
 import RenderHero from '@/components/heros/RenderHero.astro';
 import { payload, redirectTarget } from '@/lib/payload-client';
 import { getSecondaryLocales, isValidLocale, defaultLocale } from '@/i18n';
+import { resolveCatchallRoute, applyCatchallResponseHeaders } from '@/lib/catchall';
+import type { Page } from '@/lib/payload-types';
 
 export function getStaticPaths() {
   return getSecondaryLocales().map((locale) => ({ params: { locale } }));
@@ -15,21 +17,26 @@ const { locale } = Astro.params;
 
 if (locale === 'home') return Astro.redirect('/', 301);
 
-const redirect = await payload.redirects().get(`/${locale}`);
-if (redirect) {
-  const { target, status } = redirectTarget(redirect);
-  return Astro.redirect(target, status);
-}
-
 const isLocale = isValidLocale(locale);
-let rootPage = null;
+let rootPage: Page | null = null;
 let is404 = false;
 
 if (!isLocale) {
-  rootPage = await payload.pages().getBySlug(locale ?? '', defaultLocale);
-  if (!rootPage) {
-    Astro.response.status = 404;
-    is404 = true;
+  const result = await resolveCatchallRoute(`/${locale ?? ''}`, locale ?? '', defaultLocale);
+  if (result.redirect) {
+    return Astro.redirect(result.redirect.target, result.redirect.status);
+  }
+  applyCatchallResponseHeaders(Astro.response, {
+    isError: result.isError,
+    hasPage: Boolean(result.page),
+  });
+  rootPage = result.page;
+  is404 = result.isError || !result.page;
+} else {
+  const redirect = await payload.redirects().get(`/${locale}`);
+  if (redirect) {
+    const { target, status } = redirectTarget(redirect);
+    return Astro.redirect(target, status);
   }
 }
 
@@ -48,7 +55,11 @@ const metaImage =
       description={rootPage.meta?.description || rootPage.title}
       image={metaImage}
       headerStyle={rootPage.headerStyle}
+      floatingVariant={rootPage.floatingVariant}
       hasDarkHero={rootPage.hero?.type === 'highImpact'}
+      noindex={rootPage.meta?.noindex ?? undefined}
+      nofollow={rootPage.meta?.nofollow ?? undefined}
+      canonicalUrl={rootPage.meta?.canonicalUrl ?? undefined}
     >
       {rootPage.hero && <RenderHero hero={rootPage.hero} locale={defaultLocale} />}
       <BlockRenderer layout={rootPage.layout} locale={defaultLocale} />

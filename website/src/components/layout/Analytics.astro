@@ -49,12 +49,18 @@ import {
 } from 'astro:env/client';
 import consentConfig from '@/config/consent.config';
 
+interface Props {
+  consentEnabled?: boolean;
+}
+
+const { consentEnabled: consentEnabledProp } = Astro.props;
+
 const gaId = PUBLIC_GA_MEASUREMENT_ID;
 const gtmId = PUBLIC_GTM_ID;
 const umamiId = PUBLIC_UMAMI_WEBSITE_ID;
 const umamiSrc = PUBLIC_UMAMI_SRC;
 const hasUmami = !!umamiId;
-const consentEnabled = PUBLIC_CONSENT_ENABLED;
+const consentEnabled = consentEnabledProp ?? PUBLIC_CONSENT_ENABLED;
 const consentMode = consentConfig.mode;
 const storageKey = consentConfig.storageKey;
 const configVersion = consentConfig.version;
