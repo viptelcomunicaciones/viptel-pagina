@@ -32,6 +32,7 @@ const {
   class: className,
 } = Astro.props;
 
+const consentEnabled = enabledProp ?? PUBLIC_CONSENT_ENABLED ?? false;
 const locale = getLocaleFromPath(Astro.url.pathname);
 const isEn = locale === 'en';
 

@@ -178,7 +178,7 @@ const maxWidthClass = {
   '7xl': 'max-w-7xl',
   full: 'max-w-full',
 }[maxWidth];
-const effectiveShowScrollProgress = showScrollProgress;
+const effectiveShowScrollProgress = showScrollProgress || (isFloating && !autoHide);
 const isInvert = colorScheme === 'invert';
 
 const cmsNavItems: NavItem[] =

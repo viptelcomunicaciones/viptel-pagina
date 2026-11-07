@@ -1,5 +1,5 @@
 import { getPayload, Payload } from 'payload'
-import { type MigrateUpArgs, sql } from '@payloadcms/db-postgres'
+import { type MigrateUpArgs } from '@payloadcms/db-postgres'
 import config from '@/payload.config'
 import { migrations } from '@/migrations'
 
@@ -122,17 +122,20 @@ describe('API', () => {
     )
     expect(migration).toBeDefined()
 
-    const db = (payload.db as unknown as { drizzle: MigrateUpArgs['db'] }).drizzle
+    const drizzle = (payload.db as unknown as { drizzle: { transaction: (cb: (tx: MigrateUpArgs['db']) => Promise<void>) => Promise<void> } }).drizzle
     const req = {} as unknown as MigrateUpArgs['req']
-    await db.execute(sql`BEGIN`)
-    try {
-      await migration!.down({ db, payload, req })
-      await migration!.up({ db, payload, req })
+    await drizzle.transaction(async (tx) => {
+      await migration!.down({ db: tx, payload, req })
+      await migration!.up({ db: tx, payload, req })
       // Verify idempotency when up() is run a second time
-      await migration!.up({ db, payload, req })
-    } finally {
-      await db.execute(sql`ROLLBACK`)
-    }
+      await migration!.up({ db: tx, payload, req })
+      ;(tx as unknown as { rollback: () => void }).rollback()
+    }).catch((err: unknown) => {
+      const message = err instanceof Error ? err.message : String(err)
+      if (!message.toLowerCase().includes('rollback')) {
+        throw err
+      }
+    })
   })
 
   it('updates lastLogin timestamp when user logs in and completes cleanly', async () => {

@@ -84,9 +84,19 @@ test.describe('Website E2E Verifications', () => {
       Authorization: `JWT ${token}`,
     };
 
+    // Dynamically retrieve example page to avoid hardcoding fragile document IDs
+    const exampleFindRes = await request.get('http://localhost:3000/api/pages?where[slug][equals]=example&limit=1');
+    expect(exampleFindRes.ok()).toBeTruthy();
+    const exampleJson = await exampleFindRes.json();
+    const exampleDoc = exampleJson.docs?.[0];
+    expect(exampleDoc).toBeDefined();
+    const pageId = exampleDoc.id;
+    const originalHeaderStyle = exampleDoc.headerStyle ?? 'bar';
+    const originalFloatingVariant = exampleDoc.floatingVariant ?? 'default';
+
     try {
-      // 1. Switch doc 16 to floating + solid
-      const patch1 = await request.patch('http://localhost:3000/api/pages/16', {
+      // 1. Switch doc to floating + solid
+      const patch1 = await request.patch(`http://localhost:3000/api/pages/${pageId}`, {
         headers: authHeaders,
         data: { headerStyle: 'floating', floatingVariant: 'solid' },
       });
@@ -114,8 +124,8 @@ test.describe('Website E2E Verifications', () => {
       await expect(enHeaderSolid).toHaveAttribute('data-header-shape', 'floating');
       await expect(enHeaderSolid).toHaveAttribute('data-header-variant', 'solid');
 
-      // 2. Switch doc 16 to floating + transparent
-      const patch2 = await request.patch('http://localhost:3000/api/pages/16', {
+      // 2. Switch doc to floating + transparent
+      const patch2 = await request.patch(`http://localhost:3000/api/pages/${pageId}`, {
         headers: authHeaders,
         data: { headerStyle: 'floating', floatingVariant: 'transparent' },
       });
@@ -134,10 +144,10 @@ test.describe('Website E2E Verifications', () => {
       await expect(headerTrans).toHaveAttribute('data-header-shape', 'floating');
       await expect(headerTrans).toHaveAttribute('data-header-variant', 'transparent');
     } finally {
-      // 3. Always reset doc 16 back to bar + default
-      await request.patch('http://localhost:3000/api/pages/16', {
+      // 3. Always reset doc back to original settings
+      await request.patch(`http://localhost:3000/api/pages/${pageId}`, {
         headers: authHeaders,
-        data: { headerStyle: 'bar', floatingVariant: 'default' },
+        data: { headerStyle: originalHeaderStyle, floatingVariant: originalFloatingVariant },
       });
       await request.post('http://localhost:4321/api/revalidate', {
         headers: {

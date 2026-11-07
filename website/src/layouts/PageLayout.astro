@@ -79,53 +79,21 @@ const effectiveColorScheme =
   canonicalUrl={canonicalUrl}
   eagerReveal={eagerReveal}
 >
-  {
-    isFloatingHeader ? (
-      <Header
-        slot="header"
-        shape="floating"
-        floatingVariant={floatingVariant ?? undefined}
-        colorScheme={headerColorScheme}
-        showScrollProgress={showScrollProgress}
-        scrollProgressPosition={scrollProgressPosition}
-        autoHide={autoHide}
-        invertOnReturn={invertOnReturn}
-      />
-    ) : isTransparentHeader ? (
-      <Header
-        slot="header"
-        shape="bar"
-        variant="transparent"
-        colorScheme={effectiveColorScheme}
-        showScrollProgress={showScrollProgress}
-        scrollProgressPosition={scrollProgressPosition}
-        autoHide={autoHide}
-        invertOnReturn={invertOnReturn}
-      />
-    ) : headerStyle === 'bar' ? (
-      <Header
-        slot="header"
-        shape="bar"
-        colorScheme={headerColorScheme}
-        showScrollProgress={showScrollProgress}
-        scrollProgressPosition={scrollProgressPosition}
-        autoHide={autoHide}
-        invertOnReturn={invertOnReturn}
-      />
-    ) : (
-      <Header
-        slot="header"
-        showScrollProgress={showScrollProgress}
-        scrollProgressPosition={scrollProgressPosition}
-        autoHide={autoHide}
-        invertOnReturn={invertOnReturn}
-      />
-    )
-  }
+  <Header
+    slot="header"
+    shape={isFloatingHeader ? 'floating' : 'bar'}
+    floatingVariant={isFloatingHeader ? (floatingVariant ?? undefined) : undefined}
+    variant={isTransparentHeader ? 'transparent' : 'default'}
+    colorScheme={isTransparentHeader ? effectiveColorScheme : headerColorScheme}
+    showScrollProgress={showScrollProgress}
+    scrollProgressPosition={scrollProgressPosition ?? (isFloatingHeader ? 'top' : undefined)}
+    autoHide={autoHide ?? (isFloatingHeader ? false : undefined)}
+    invertOnReturn={invertOnReturn ?? (isFloatingHeader ? false : undefined)}
+  />
 
-  <main class={isFloatingHeader || isTransparentHeader ? 'min-h-screen' : 'min-h-screen pt-16'}>
+  <div class={isFloatingHeader || isTransparentHeader ? 'min-h-screen' : 'min-h-screen pt-16'}>
     <slot />
-  </main>
+  </div>
 
   <Footer slot="footer" background={footerBackground} />
 </BaseLayout>
