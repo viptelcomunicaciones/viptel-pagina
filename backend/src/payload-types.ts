@@ -127,10 +127,12 @@ export interface Config {
   globals: {
     header: Header;
     footer: Footer;
+    'site-settings': SiteSetting;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
   };
   locale: 'es' | 'en';
   widgets: {
@@ -200,6 +202,10 @@ export interface Page {
    * Elige el aspecto del menú superior (Barra fija, Cápsula flotante o Barra transparente adaptativa).
    */
   headerStyle?: ('bar' | 'floating' | 'transparent') | null;
+  /**
+   * Acabado visual de la cápsula flotante.
+   */
+  floatingVariant?: ('transparent' | 'default' | 'solid') | null;
   hero: {
     type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact' | 'split' | 'centeredHalo';
     badge?: string | null;
@@ -235,6 +241,10 @@ export interface Page {
               | ({
                   relationTo: 'posts';
                   value: number | Post;
+                } | null)
+              | ({
+                  relationTo: 'projects';
+                  value: number | Project;
                 } | null)
               | ({
                   relationTo: 'services';
@@ -383,6 +393,18 @@ export interface Page {
      */
     image?: (number | null) | Media;
     description?: string | null;
+    /**
+     * Indica a los motores de búsqueda que no indexen esta página.
+     */
+    noindex?: boolean | null;
+    /**
+     * Indica a los motores de búsqueda que no transfieran autoridad a enlaces de esta página.
+     */
+    nofollow?: boolean | null;
+    /**
+     * Opcional. Si se deja en blanco, se calculará automáticamente la URL canónica propia.
+     */
+    canonicalUrl?: string | null;
   };
   publishedAt?: string | null;
   /**
@@ -444,6 +466,18 @@ export interface Post {
      */
     image?: (number | null) | Media;
     description?: string | null;
+    /**
+     * Indica a los motores de búsqueda que no indexen esta página.
+     */
+    noindex?: boolean | null;
+    /**
+     * Indica a los motores de búsqueda que no transfieran autoridad a enlaces de esta página.
+     */
+    nofollow?: boolean | null;
+    /**
+     * Opcional. Si se deja en blanco, se calculará automáticamente la URL canónica propia.
+     */
+    canonicalUrl?: string | null;
   };
   publishedAt?: string | null;
   authors?: (number | User)[] | null;
@@ -451,10 +485,28 @@ export interface Post {
    * Controla la tabla de contenidos "En esta página" de este artículo.
    */
   toc?: ('inherit' | 'enabled' | 'disabled') | null;
+  /**
+   * Control de comentarios para este artículo.
+   */
+  comments?: ('inherit' | 'enabled' | 'disabled') | null;
+  /**
+   * Aplica el tinte de marca sobre la imagen destacada.
+   */
+  blogImageOverlay?: ('inherit' | 'enabled' | 'disabled') | null;
   populatedAuthors?:
     | {
         id?: string | null;
         name?: string | null;
+        avatarUrl?: string | null;
+        roleTitle?: string | null;
+        bio?: string | null;
+        twitterCreator?: string | null;
+        socialLinks?:
+          | {
+              url?: string | null;
+              id?: string | null;
+            }[]
+          | null;
       }[]
     | null;
   tags?: (number | Tag)[] | null;
@@ -641,6 +693,22 @@ export interface Category {
 export interface User {
   id: number;
   name: string;
+  avatar?: (number | null) | Media;
+  /**
+   * Ej: Especialista VoIP, Líder de Infraestructura
+   */
+  roleTitle?: string | null;
+  bio?: string | null;
+  /**
+   * Ej: @cesarbarrero
+   */
+  twitterCreator?: string | null;
+  socialLinks?:
+    | {
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
   roles: ('admin' | 'editor' | 'marketing' | 'sales')[];
   lastLogin?: string | null;
   updatedAt: string;
@@ -672,6 +740,142 @@ export interface User {
 export interface Tag {
   id: number;
   name: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects".
+ */
+export interface Project {
+  id: number;
+  title: string;
+  description?: string | null;
+  coverImage?: (number | null) | Media;
+  content?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  gallery?:
+    | {
+        image?: (number | null) | Media;
+        alt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  client?: string | null;
+  year?: number | null;
+  /**
+   * Proyectos o casos de éxito relacionados.
+   */
+  relatedProjects?: (number | Project)[] | null;
+  /**
+   * Formato del proyecto. Es un eje aparte de la categoría.
+   */
+  projectType: number | ProjectType;
+  /**
+   * Categoría raíz o subcategoría (una sola por proyecto).
+   */
+  categories?: (number | null) | ProjectCategory;
+  tags?: (number | Tag)[] | null;
+  /**
+   * URL del proyecto en vivo (botón "Ver sitio en vivo").
+   */
+  websiteUrl?: string | null;
+  /**
+   * URL del código fuente (botón "Ver código fuente").
+   */
+  sourceUrl?: string | null;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+    description?: string | null;
+    /**
+     * Indica a los motores de búsqueda que no indexen esta página.
+     */
+    noindex?: boolean | null;
+    /**
+     * Indica a los motores de búsqueda que no transfieran autoridad a enlaces de esta página.
+     */
+    nofollow?: boolean | null;
+    /**
+     * Opcional. Si se deja en blanco, se calculará automáticamente la URL canónica propia.
+     */
+    canonicalUrl?: string | null;
+  };
+  publishedAt?: string | null;
+  /**
+   * Controla la tabla de contenidos "En esta página" de este artículo.
+   */
+  toc?: ('inherit' | 'enabled' | 'disabled') | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  deletedAt?: string | null;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * Formato del proyecto (web, telecomunicaciones, marketing…). Es un eje aparte de la categoría.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "project-types".
+ */
+export interface ProjectType {
+  id: number;
+  title: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  description?: string | null;
+  /**
+   * Selecciona un icono de la librería Lucide.
+   */
+  icon?: string | null;
+  /**
+   * Orden en el que aparece en las pestañas y la sidebar de proyectos.
+   */
+  position?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Jerarquía de dos niveles: categoría raíz y subcategoría. Crear una subcategoría solo si agrupa 10+ proyectos (regla de volumen).
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "project-categories".
+ */
+export interface ProjectCategory {
+  id: number;
+  title: string;
+  /**
+   * Dejar vacío si es una categoría raíz. Seleccionar un padre para crear una subcategoría.
+   */
+  parent?: (number | null) | ProjectCategory;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
@@ -900,6 +1104,18 @@ export interface Service {
      */
     image?: (number | null) | Media;
     description?: string | null;
+    /**
+     * Indica a los motores de búsqueda que no indexen esta página.
+     */
+    noindex?: boolean | null;
+    /**
+     * Indica a los motores de búsqueda que no transfieran autoridad a enlaces de esta página.
+     */
+    nofollow?: boolean | null;
+    /**
+     * Opcional. Si se deja en blanco, se calculará automáticamente la URL canónica propia.
+     */
+    canonicalUrl?: string | null;
   };
   publishedAt?: string | null;
   updatedAt: string;
@@ -943,6 +1159,10 @@ export interface CallToActionBlock {
             | ({
                 relationTo: 'posts';
                 value: number | Post;
+              } | null)
+            | ({
+                relationTo: 'projects';
+                value: number | Project;
               } | null)
             | ({
                 relationTo: 'services';
@@ -997,6 +1217,10 @@ export interface ContentBlock {
             | ({
                 relationTo: 'posts';
                 value: number | Post;
+              } | null)
+            | ({
+                relationTo: 'projects';
+                value: number | Project;
               } | null)
             | ({
                 relationTo: 'services';
@@ -1245,126 +1469,6 @@ export interface ArchiveBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'archive';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "projects".
- */
-export interface Project {
-  id: number;
-  title: string;
-  description?: string | null;
-  coverImage?: (number | null) | Media;
-  content?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  gallery?:
-    | {
-        image?: (number | null) | Media;
-        alt?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  client?: string | null;
-  year?: number | null;
-  /**
-   * Formato del proyecto. Es un eje aparte de la categoría.
-   */
-  projectType: number | ProjectType;
-  /**
-   * Categoría raíz o subcategoría (una sola por proyecto).
-   */
-  categories?: (number | null) | ProjectCategory;
-  tags?: (number | Tag)[] | null;
-  /**
-   * URL del proyecto en vivo (botón "Ver sitio en vivo").
-   */
-  websiteUrl?: string | null;
-  /**
-   * URL del código fuente (botón "Ver código fuente").
-   */
-  sourceUrl?: string | null;
-  meta?: {
-    title?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (number | null) | Media;
-    description?: string | null;
-  };
-  publishedAt?: string | null;
-  /**
-   * Controla la tabla de contenidos "En esta página" de este artículo.
-   */
-  toc?: ('inherit' | 'enabled' | 'disabled') | null;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-  deletedAt?: string | null;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * Formato del proyecto (web, telecomunicaciones, marketing…). Es un eje aparte de la categoría.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "project-types".
- */
-export interface ProjectType {
-  id: number;
-  title: string;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
-  slug: string;
-  description?: string | null;
-  /**
-   * Selecciona un icono de la librería Lucide.
-   */
-  icon?: string | null;
-  /**
-   * Orden en el que aparece en las pestañas y la sidebar de proyectos.
-   */
-  position?: number | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Jerarquía de dos niveles: categoría raíz y subcategoría. Crear una subcategoría solo si agrupa 10+ proyectos (regla de volumen).
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "project-categories".
- */
-export interface ProjectCategory {
-  id: number;
-  title: string;
-  /**
-   * Dejar vacío si es una categoría raíz. Seleccionar un padre para crear una subcategoría.
-   */
-  parent?: (number | null) | ProjectCategory;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1745,6 +1849,7 @@ export interface PayloadMigration {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   headerStyle?: T;
+  floatingVariant?: T;
   hero?:
     | T
     | {
@@ -1879,6 +1984,9 @@ export interface PagesSelect<T extends boolean = true> {
         title?: T;
         image?: T;
         description?: T;
+        noindex?: T;
+        nofollow?: T;
+        canonicalUrl?: T;
       };
   publishedAt?: T;
   generateSlug?: T;
@@ -2011,15 +2119,30 @@ export interface PostsSelect<T extends boolean = true> {
         title?: T;
         image?: T;
         description?: T;
+        noindex?: T;
+        nofollow?: T;
+        canonicalUrl?: T;
       };
   publishedAt?: T;
   authors?: T;
   toc?: T;
+  comments?: T;
+  blogImageOverlay?: T;
   populatedAuthors?:
     | T
     | {
         id?: T;
         name?: T;
+        avatarUrl?: T;
+        roleTitle?: T;
+        bio?: T;
+        twitterCreator?: T;
+        socialLinks?:
+          | T
+          | {
+              url?: T;
+              id?: T;
+            };
       };
   tags?: T;
   generateSlug?: T;
@@ -2047,6 +2170,7 @@ export interface ProjectsSelect<T extends boolean = true> {
       };
   client?: T;
   year?: T;
+  relatedProjects?: T;
   projectType?: T;
   categories?: T;
   tags?: T;
@@ -2058,6 +2182,9 @@ export interface ProjectsSelect<T extends boolean = true> {
         title?: T;
         image?: T;
         description?: T;
+        noindex?: T;
+        nofollow?: T;
+        canonicalUrl?: T;
       };
   publishedAt?: T;
   toc?: T;
@@ -2226,6 +2353,9 @@ export interface ServicesSelect<T extends boolean = true> {
         title?: T;
         image?: T;
         description?: T;
+        noindex?: T;
+        nofollow?: T;
+        canonicalUrl?: T;
       };
   publishedAt?: T;
   updatedAt?: T;
@@ -2396,6 +2526,16 @@ export interface ProjectCategoriesSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  avatar?: T;
+  roleTitle?: T;
+  bio?: T;
+  twitterCreator?: T;
+  socialLinks?:
+    | T
+    | {
+        url?: T;
+        id?: T;
+      };
   roles?: T;
   lastLogin?: T;
   updatedAt?: T;
@@ -2716,6 +2856,10 @@ export interface Header {
                 value: number | Post;
               } | null)
             | ({
+                relationTo: 'projects';
+                value: number | Project;
+              } | null)
+            | ({
                 relationTo: 'services';
                 value: number | Service;
               } | null);
@@ -2735,6 +2879,10 @@ export interface Header {
                   | ({
                       relationTo: 'posts';
                       value: number | Post;
+                    } | null)
+                  | ({
+                      relationTo: 'projects';
+                      value: number | Project;
                     } | null)
                   | ({
                       relationTo: 'services';
@@ -2764,6 +2912,10 @@ export interface Header {
             value: number | Post;
           } | null)
         | ({
+            relationTo: 'projects';
+            value: number | Project;
+          } | null)
+        | ({
             relationTo: 'services';
             value: number | Service;
           } | null);
@@ -2771,6 +2923,25 @@ export interface Header {
       label: string;
     };
   };
+  position?: ('fixed' | 'sticky' | 'static') | null;
+  shape?: ('bar' | 'floating') | null;
+  size?: ('sm' | 'md' | 'lg') | null;
+  variant?: ('default' | 'solid' | 'transparent') | null;
+  colorScheme?: ('default' | 'invert') | null;
+  layout?: ('default' | 'centered' | 'minimal') | null;
+  maxWidth?: ('4xl' | '5xl' | '6xl' | '7xl' | 'full') | null;
+  showSearch?: boolean | null;
+  showThemeToggle?: boolean | null;
+  showThemeSelector?: boolean | null;
+  showLanguageSwitcher?: boolean | null;
+  showSocialLinks?: boolean | null;
+  showMobileMenu?: boolean | null;
+  showActiveState?: boolean | null;
+  hideLogo?: boolean | null;
+  showScrollProgress?: boolean | null;
+  scrollProgressPosition?: ('top' | 'bottom') | null;
+  autoHide?: boolean | null;
+  invertOnReturn?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2795,12 +2966,53 @@ export interface Footer {
                 value: number | Post;
               } | null)
             | ({
+                relationTo: 'projects';
+                value: number | Project;
+              } | null)
+            | ({
                 relationTo: 'services';
                 value: number | Service;
               } | null);
           url?: string | null;
           label: string;
         };
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Grupos de enlaces organizados por columnas cuando el layout es "Columnas".
+   */
+  linkGroups?:
+    | {
+        title: string;
+        links?:
+          | {
+              link: {
+                type?: ('reference' | 'custom') | null;
+                newTab?: boolean | null;
+                reference?:
+                  | ({
+                      relationTo: 'pages';
+                      value: number | Page;
+                    } | null)
+                  | ({
+                      relationTo: 'posts';
+                      value: number | Post;
+                    } | null)
+                  | ({
+                      relationTo: 'projects';
+                      value: number | Project;
+                    } | null)
+                  | ({
+                      relationTo: 'services';
+                      value: number | Service;
+                    } | null);
+                url?: string | null;
+                label: string;
+              };
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
@@ -2819,6 +3031,10 @@ export interface Footer {
                 value: number | Post;
               } | null)
             | ({
+                relationTo: 'projects';
+                value: number | Project;
+              } | null)
+            | ({
                 relationTo: 'services';
                 value: number | Service;
               } | null);
@@ -2828,7 +3044,161 @@ export interface Footer {
         id?: string | null;
       }[]
     | null;
+  layout?: ('columns' | 'centered' | 'simple' | 'stacked' | 'minimal') | null;
+  columns?: ('2' | '3' | '4') | null;
+  background?: ('default' | 'secondary' | 'invert') | null;
+  maxWidth?: ('4xl' | '5xl' | '6xl' | '7xl' | 'full') | null;
+  showSocial?: boolean | null;
+  showCopyright?: boolean | null;
+  hideLogo?: boolean | null;
+  tagline?: string | null;
   copyright?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  name: string;
+  description?: string | null;
+  tagline?: string | null;
+  footerNote?: string | null;
+  url?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  address?: {
+    street?: string | null;
+    city?: string | null;
+    state?: string | null;
+    zip?: string | null;
+    country?: string | null;
+  };
+  ogImage?: (number | null) | Media;
+  logo?: {
+    alt?: string | null;
+    image?: (number | null) | Media;
+    customSvgPath?: string | null;
+    structuredDataImage?: (number | null) | Media;
+  };
+  favicon?: {
+    customSvgPath?: string | null;
+  };
+  colors?: {
+    themeColor?: string | null;
+    backgroundColor?: string | null;
+  };
+  defaultTheme?:
+    | (
+        | 'orange'
+        | 'amber'
+        | 'lime'
+        | 'emerald'
+        | 'teal'
+        | 'cyan'
+        | 'sky'
+        | 'blue'
+        | 'indigo'
+        | 'violet'
+        | 'purple'
+        | 'magenta'
+      )
+    | null;
+  defaultColorMode?: ('system' | 'light' | 'dark') | null;
+  enabledThemes?:
+    | (
+        | 'orange'
+        | 'amber'
+        | 'lime'
+        | 'emerald'
+        | 'teal'
+        | 'cyan'
+        | 'sky'
+        | 'blue'
+        | 'indigo'
+        | 'violet'
+        | 'purple'
+        | 'magenta'
+      )[]
+    | null;
+  blogImageOverlay?: boolean | null;
+  cursorTrail?: boolean | null;
+  socialLinks?:
+    | {
+        label?: string | null;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  twitterSite?: string | null;
+  toc?: {
+    enabled?: boolean | null;
+    layout?: ('auto' | 'inline' | 'sidebar') | null;
+    sidebarPosition?: ('right' | 'left') | null;
+    minHeadings?: number | null;
+    maxDepth?: ('2' | '3' | '4') | null;
+  };
+  comments?: {
+    enabled?: boolean | null;
+    provider?: ('giscus' | 'cusdis' | 'artalk') | null;
+    giscus?: {
+      repo?: string | null;
+      repoId?: string | null;
+      category?: string | null;
+      categoryId?: string | null;
+      mapping?: ('pathname' | 'url' | 'title' | 'og:title' | 'specific' | 'number') | null;
+      strict?: boolean | null;
+      reactionsEnabled?: boolean | null;
+      emitMetadata?: boolean | null;
+      inputPosition?: ('top' | 'bottom') | null;
+      theme?: string | null;
+      lang?: string | null;
+    };
+    cusdis?: {
+      appId?: string | null;
+      host?: string | null;
+      theme?: ('auto' | 'light' | 'dark') | null;
+      lang?: string | null;
+    };
+    artalk?: {
+      server?: string | null;
+      site?: string | null;
+      jsUrl?: string | null;
+      cssUrl?: string | null;
+      darkMode?: string | null;
+      locale?: string | null;
+    };
+  };
+  blog?: {
+    postsPerPage?: number | null;
+    tagCloudLimit?: number | null;
+    rssMaxItems?: number | null;
+  };
+  projects?: {
+    perPage?: number | null;
+    tagCloudLimit?: number | null;
+  };
+  schemas?: {
+    includeOrgSchema?: boolean | null;
+    includePersonSchema?: boolean | null;
+    includeProfessionalServiceSchema?: boolean | null;
+  };
+  verification?: {
+    google?: string | null;
+    bing?: string | null;
+  };
+  analytics?: {
+    gaMeasurementId?: string | null;
+    gtmId?: string | null;
+    umamiWebsiteId?: string | null;
+    umamiSrc?: string | null;
+  };
+  consent?: {
+    enabled?: boolean | null;
+    privacyPolicyUrl?: string | null;
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2879,6 +3249,25 @@ export interface HeaderSelect<T extends boolean = true> {
               label?: T;
             };
       };
+  position?: T;
+  shape?: T;
+  size?: T;
+  variant?: T;
+  colorScheme?: T;
+  layout?: T;
+  maxWidth?: T;
+  showSearch?: T;
+  showThemeToggle?: T;
+  showThemeSelector?: T;
+  showLanguageSwitcher?: T;
+  showSocialLinks?: T;
+  showMobileMenu?: T;
+  showActiveState?: T;
+  hideLogo?: T;
+  showScrollProgress?: T;
+  scrollProgressPosition?: T;
+  autoHide?: T;
+  invertOnReturn?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -2902,6 +3291,26 @@ export interface FooterSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  linkGroups?:
+    | T
+    | {
+        title?: T;
+        links?:
+          | T
+          | {
+              link?:
+                | T
+                | {
+                    type?: T;
+                    newTab?: T;
+                    reference?: T;
+                    url?: T;
+                    label?: T;
+                  };
+              id?: T;
+            };
+        id?: T;
+      };
   legalLinks?:
     | T
     | {
@@ -2916,7 +3325,161 @@ export interface FooterSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  layout?: T;
+  columns?: T;
+  background?: T;
+  maxWidth?: T;
+  showSocial?: T;
+  showCopyright?: T;
+  hideLogo?: T;
+  tagline?: T;
   copyright?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  name?: T;
+  description?: T;
+  tagline?: T;
+  footerNote?: T;
+  url?: T;
+  email?: T;
+  phone?: T;
+  address?:
+    | T
+    | {
+        street?: T;
+        city?: T;
+        state?: T;
+        zip?: T;
+        country?: T;
+      };
+  ogImage?: T;
+  logo?:
+    | T
+    | {
+        alt?: T;
+        image?: T;
+        customSvgPath?: T;
+        structuredDataImage?: T;
+      };
+  favicon?:
+    | T
+    | {
+        customSvgPath?: T;
+      };
+  colors?:
+    | T
+    | {
+        themeColor?: T;
+        backgroundColor?: T;
+      };
+  defaultTheme?: T;
+  defaultColorMode?: T;
+  enabledThemes?: T;
+  blogImageOverlay?: T;
+  cursorTrail?: T;
+  socialLinks?:
+    | T
+    | {
+        label?: T;
+        url?: T;
+        id?: T;
+      };
+  twitterSite?: T;
+  toc?:
+    | T
+    | {
+        enabled?: T;
+        layout?: T;
+        sidebarPosition?: T;
+        minHeadings?: T;
+        maxDepth?: T;
+      };
+  comments?:
+    | T
+    | {
+        enabled?: T;
+        provider?: T;
+        giscus?:
+          | T
+          | {
+              repo?: T;
+              repoId?: T;
+              category?: T;
+              categoryId?: T;
+              mapping?: T;
+              strict?: T;
+              reactionsEnabled?: T;
+              emitMetadata?: T;
+              inputPosition?: T;
+              theme?: T;
+              lang?: T;
+            };
+        cusdis?:
+          | T
+          | {
+              appId?: T;
+              host?: T;
+              theme?: T;
+              lang?: T;
+            };
+        artalk?:
+          | T
+          | {
+              server?: T;
+              site?: T;
+              jsUrl?: T;
+              cssUrl?: T;
+              darkMode?: T;
+              locale?: T;
+            };
+      };
+  blog?:
+    | T
+    | {
+        postsPerPage?: T;
+        tagCloudLimit?: T;
+        rssMaxItems?: T;
+      };
+  projects?:
+    | T
+    | {
+        perPage?: T;
+        tagCloudLimit?: T;
+      };
+  schemas?:
+    | T
+    | {
+        includeOrgSchema?: T;
+        includePersonSchema?: T;
+        includeProfessionalServiceSchema?: T;
+      };
+  verification?:
+    | T
+    | {
+        google?: T;
+        bing?: T;
+      };
+  analytics?:
+    | T
+    | {
+        gaMeasurementId?: T;
+        gtmId?: T;
+        umamiWebsiteId?: T;
+        umamiSrc?: T;
+      };
+  consent?:
+    | T
+    | {
+        enabled?: T;
+        privacyPolicyUrl?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

@@ -18,12 +18,18 @@ interface Props {
   imageAlt?: string;
   noindex?: boolean;
   nofollow?: boolean;
+  canonicalUrl?: string;
   includeOrgSchema?: boolean;
   includePersonSchema?: boolean;
   includeProfessionalServiceSchema?: boolean;
   headerStyle?: 'bar' | 'floating' | 'transparent' | null;
+  floatingVariant?: 'transparent' | 'default' | 'solid' | null;
   headerColorScheme?: 'default' | 'invert';
   hasDarkHero?: boolean;
+  showScrollProgress?: boolean;
+  scrollProgressPosition?: 'top' | 'bottom';
+  autoHide?: boolean;
+  invertOnReturn?: boolean;
 }
 
 const {
@@ -33,12 +39,18 @@ const {
   imageAlt,
   noindex = false,
   nofollow = false,
+  canonicalUrl,
   includeOrgSchema = false,
   includePersonSchema = false,
   includeProfessionalServiceSchema = false,
-  headerStyle = 'floating',
+  headerStyle,
+  floatingVariant,
   headerColorScheme,
   hasDarkHero = false,
+  showScrollProgress,
+  scrollProgressPosition,
+  autoHide,
+  invertOnReturn,
 } = Astro.props;
 
 const isFloatingHeader = headerStyle === 'floating';
@@ -54,52 +66,26 @@ const effectiveColorScheme =
   imageAlt={imageAlt}
   noindex={noindex}
   nofollow={nofollow}
+  canonicalUrl={canonicalUrl}
   includeOrgSchema={includeOrgSchema}
   includePersonSchema={includePersonSchema}
   includeProfessionalServiceSchema={includeProfessionalServiceSchema}
 >
-  {
-    isFloatingHeader ? (
-      <Header
-        slot="header"
-        position="fixed"
-        shape="floating"
-        variant="transparent"
-        colorScheme="default"
-        size="lg"
-        showThemeSelector
-        autoHide={false}
-        scrollProgressPosition="top"
-        invertOnReturn={false}
-      />
-    ) : isTransparentHeader ? (
-      <Header
-        slot="header"
-        position="fixed"
-        shape="bar"
-        variant="transparent"
-        colorScheme={effectiveColorScheme}
-        size="lg"
-        showActiveState
-        showScrollProgress={false}
-      />
-    ) : (
-      <Header
-        slot="header"
-        position="fixed"
-        shape="bar"
-        variant="solid"
-        size="lg"
-        showActiveState
-        showScrollProgress={false}
-      />
-    )
-  }
+  <Header
+    slot="header"
+    shape={isFloatingHeader ? 'floating' : 'bar'}
+    floatingVariant={isFloatingHeader ? (floatingVariant ?? undefined) : undefined}
+    variant={isTransparentHeader ? 'transparent' : 'default'}
+    colorScheme={isTransparentHeader ? effectiveColorScheme : headerColorScheme}
+    showScrollProgress={showScrollProgress}
+    scrollProgressPosition={scrollProgressPosition}
+    autoHide={autoHide}
+    invertOnReturn={invertOnReturn}
+  />
 
-  <main class={isFloatingHeader ? 'min-h-screen' : 'min-h-screen pt-16'}>
+  <div class={isFloatingHeader || isTransparentHeader ? 'min-h-screen' : 'min-h-screen pt-16'}>
     <slot />
-  </main>
+  </div>
 
-  <!-- Footer is `background` so it alternates with the `secondary` CTA section above it. -->
-  <Footer slot="footer" layout="centered" background="default" />
+  <Footer slot="footer" />
 </BaseLayout>

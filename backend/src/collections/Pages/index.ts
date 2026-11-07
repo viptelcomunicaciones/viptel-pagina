@@ -94,6 +94,21 @@ admin: {
                   'Elige el aspecto del menú superior (Barra fija, Cápsula flotante o Barra transparente adaptativa).',
               },
             },
+            {
+              name: 'floatingVariant',
+              type: 'select',
+              defaultValue: 'transparent',
+              label: 'Variante de Cápsula Flotante',
+              options: [
+                { label: 'Vidrio translúcido (transparent)', value: 'transparent' },
+                { label: 'Desenfoque suave (default)', value: 'default' },
+                { label: 'Sólida opaca (solid)', value: 'solid' },
+              ],
+              admin: {
+                condition: (data) => data?.headerStyle === 'floating',
+                description: 'Acabado visual de la cápsula flotante.',
+              },
+            },
             hero,
           ],
           label: 'Hero',

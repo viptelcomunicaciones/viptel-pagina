@@ -14,6 +14,7 @@ import { Hero } from '@/components/hero';
 import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
 import { t, defaultLocale, localizedPath } from '@/i18n';
 import { payload } from '@/lib/payload-client';
+import { getResolvedSiteConfig } from '@/lib/site-config';
 import { getProjectsPageUrl, PROJECTS_PER_PAGE } from '@/lib/projects';
 import NotFoundView from '@/components/pages/views/NotFoundView.astro';
 
@@ -24,9 +25,12 @@ interface Props {
 
 const { locale = defaultLocale, page } = Astro.props;
 
+const site = await getResolvedSiteConfig(locale);
+const limit = site.projects?.perPage ?? PROJECTS_PER_PAGE;
+
 const { docs, totalDocs, totalPages } = await payload
   .projects()
-  .getPaginated(locale, page, PROJECTS_PER_PAGE);
+  .getPaginated(locale, page, limit);
 
 const isOutOfRange = page > totalPages && totalPages > 0;
 if (isOutOfRange) {
@@ -47,7 +51,6 @@ const aboutUrl = localizedPath('/about', locale);
   description={t('projects.pageMetaDescription', locale, { page, total: totalPages })}
   locale={locale}
   eagerReveal
-  footerBackground="secondary"
 >
   <Fragment slot="hero">
     <Hero layout="centered" size="sm" class="isolate" showHeroHalo>
@@ -78,7 +81,7 @@ const aboutUrl = localizedPath('/about', locale);
           totalPages={totalPages}
           href={(p) => getProjectsPageUrl(p, locale)}
           totalDocs={totalDocs}
-          pageSize={PROJECTS_PER_PAGE}
+          pageSize={limit}
         />
       </>
     )

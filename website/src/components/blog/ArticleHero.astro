@@ -17,6 +17,8 @@ interface Props {
   updatedAt?: Date;
   /** Author name. When omitted (no author assigned in the CMS), the byline is hidden. */
   author?: string;
+  authorAvatarUrl?: string;
+  authorRoleTitle?: string;
   tags?: string[];
   image?: ImageMetadata;
   imageAlt?: string;
@@ -35,6 +37,8 @@ interface Props {
   postCategoryName?: string;
   /** URL del archivo de categoría. */
   postCategoryHref?: string;
+  /** Whether to render image overlay gradient */
+  showOverlay?: boolean;
 }
 
 const {
@@ -43,6 +47,8 @@ const {
   publishedAt,
   updatedAt,
   author,
+  authorAvatarUrl,
+  authorRoleTitle,
   tags = [],
   image,
   imageAlt,
@@ -54,6 +60,7 @@ const {
   postTypeHref,
   postCategoryName,
   postCategoryHref,
+  showOverlay = true,
 } = Astro.props;
 
 const locale = getLocaleFromPath(Astro.url.pathname);
@@ -130,8 +137,23 @@ const readingTime = getReadingTime(body ?? description);
         author && (
           <>
             <div class="flex items-center gap-3">
-              <Logo size="sm" letter={author.charAt(0).toUpperCase()} />
-              <p class="text-foreground font-semibold">{author}</p>
+              {authorAvatarUrl ? (
+                <img
+                  src={authorAvatarUrl}
+                  alt={author}
+                  class="h-9 w-9 rounded-full object-cover ring-1 ring-border"
+                  loading="eager"
+                  decoding="async"
+                />
+              ) : (
+                <Logo size="sm" letter={author.charAt(0).toUpperCase()} />
+              )}
+              <div>
+                <p class="text-foreground font-semibold leading-tight">{author}</p>
+                {authorRoleTitle && (
+                  <p class="text-xs text-foreground-muted">{authorRoleTitle}</p>
+                )}
+              </div>
             </div>
 
             <div class="bg-border hidden h-8 w-px md:block" />
@@ -227,6 +249,9 @@ const readingTime = getReadingTime(body ?? description);
               class="aspect-video w-full object-cover"
               loading="eager"
             />
+            {showOverlay && (
+              <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+            )}
           </div>
         ) : imageUrl ? (
           <div class="media-shadow relative overflow-hidden rounded-xl">
@@ -240,6 +265,9 @@ const readingTime = getReadingTime(body ?? description);
               class="aspect-video w-full object-cover"
               loading="eager"
             />
+            {showOverlay && (
+              <div class="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+            )}
           </div>
         ) : null}
       </div>

@@ -1,6 +1,8 @@
 ---
 import { payload } from '@/lib/payload-client';
 import { slugify } from '@/lib/headings';
+import { resolvePayloadLink } from '@/lib/links';
+import { getLocaleFromPath, defaultLocale } from '@/i18n';
 
 interface LexicalBlockFields {
   blockType?: string;
@@ -12,7 +14,7 @@ interface LexicalBlockFields {
   url?: string;
   newTab?: boolean;
   doc?: {
-    value?: { slug?: string } | number | null;
+    value?: { id?: number | string; title?: string; slug?: string; breadcrumbs?: Array<{ url?: string | null }> | null } | number | null;
     relationTo?: string;
   } | null;
 }
@@ -39,12 +41,18 @@ interface Props {
   class?: string;
   /** Skip the first heading node (used by heros where the heading renders in its own slot) */
   excludeFirstHeading?: boolean;
+  locale?: string;
 }
 
-const { content, excludeFirstHeading = false } = Astro.props;
+const {
+  content,
+  excludeFirstHeading = false,
+  locale = getLocaleFromPath(Astro.url.pathname) || defaultLocale,
+} = Astro.props;
 
 interface RenderCtx {
   usedSlugs: Set<string>;
+  locale: string;
 }
 
 function textContent(nodes?: LexicalNode[]): string {
@@ -83,20 +91,28 @@ function wrapFormat(text: string, format: number): string {
   return result;
 }
 
-function resolveLinkUrl(fields?: LexicalBlockFields): { href: string; isExternal: boolean } {
+function resolveLinkUrl(fields?: LexicalBlockFields, loc: string = defaultLocale): { href: string; isExternal: boolean; label?: string } {
   if (!fields) return { href: '#', isExternal: false };
 
-  const linkType = fields.linkType || 'custom';
+  const payloadLinkData = {
+    type: fields.linkType === 'internal' ? 'reference' : 'custom',
+    url: fields.url,
+    newTab: fields.newTab,
+    reference: fields.doc
+      ? {
+          relationTo: fields.doc.relationTo,
+          value: fields.doc.value,
+        }
+      : undefined,
+  };
 
-  if (linkType === 'custom' || linkType === undefined) {
-    return { href: fields.url || '#', isExternal: Boolean(fields.newTab) };
-  }
-
-  if (linkType === 'internal' && fields.doc?.value && typeof fields.doc.value === 'object') {
-    const doc = fields.doc.value;
-    const relationTo = fields.doc.relationTo || 'posts';
-    const prefix = relationTo === 'projects' ? '/projects' : '/blog';
-    return { href: `${prefix}/${doc.slug}`, isExternal: false };
+  const resolved = resolvePayloadLink(payloadLinkData, loc);
+  if (resolved) {
+    return {
+      href: resolved.href,
+      isExternal: Boolean(resolved.external),
+      label: resolved.label,
+    };
   }
 
   return { href: fields.url || '#', isExternal: Boolean(fields.newTab) };
@@ -144,8 +160,11 @@ function renderNode(node: LexicalNode | null | undefined, ctx: RenderCtx): strin
 
   // Link — Lexical embeds link in children, fields contain URL info
   if (node.type === 'link' || node.type === 'autolink') {
-    const children = renderChildren(node.children, ctx);
-    const { href, isExternal } = resolveLinkUrl(node.fields);
+    let children = renderChildren(node.children, ctx);
+    const { href, isExternal, label } = resolveLinkUrl(node.fields, ctx.locale);
+    if (!children.trim() && label) {
+      children = escapeHtml(label);
+    }
     const attrs = [
       `href="${href}"`,
       isExternal ? 'target="_blank"' : '',
@@ -242,7 +261,7 @@ if (excludeFirstHeading && Array.isArray(rootChildren)) {
   }
 }
 
-const ctx: RenderCtx = { usedSlugs: new Set() };
+const ctx: RenderCtx = { usedSlugs: new Set(), locale };
 
 const html = content?.root ? renderNode({ ...content.root, children: rootChildren }, ctx) : '';
 ---

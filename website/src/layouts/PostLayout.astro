@@ -10,6 +10,7 @@
  * on the page and this layout only owns the article body.
  */
 import siteConfig from '@/config/site.config';
+import { getResolvedSiteConfig } from '@/lib/site-config';
 import type { Post } from '@/lib/payload-types';
 import { payload } from '@/lib/payload-client';
 import { t, localizedPath } from '@/i18n';
@@ -46,7 +47,11 @@ interface Props {
 
 const { post, locale = 'es' } = Astro.props;
 
+const site = await getResolvedSiteConfig(locale);
+
 const author = post.populatedAuthors?.[0]?.name ?? undefined;
+const authorAvatarUrl = post.populatedAuthors?.[0]?.avatarUrl ?? undefined;
+const authorRoleTitle = post.populatedAuthors?.[0]?.roleTitle ?? undefined;
 const tags = (post.tags ?? []).map((tag) => getTagName(tag)).filter(Boolean);
 
 const publishedAt = post.publishedAt
@@ -61,7 +66,7 @@ const updatedAt =
 
 const bodyText = getPlainText(post.content);
 
-const tocConfig = siteConfig.articleFeatures?.toc;
+const tocConfig = site.articleFeatures?.toc;
 const showToc = post.toc === 'enabled' || (!!tocConfig?.enabled && post.toc !== 'disabled');
 const tocLayout = tocConfig?.layout ?? 'auto';
 const sidebarActive = showToc && (tocLayout === 'sidebar' || tocLayout === 'auto');
@@ -97,17 +102,23 @@ const breadcrumbs = [
   { label: post.title },
 ];
 
-const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
+const socialLinks = resolveSocialLinks(
+  site.socialLinks && site.socialLinks.length > 0 ? site.socialLinks : siteConfig.socialLinks
+);
 
 // Resolve manual relatedPosts (backend field) to full posts by slug.
 const manualRelated: Post[] = [];
 for (const rel of post.relatedPosts ?? []) {
   if (typeof rel !== 'number' && rel?.slug) {
-    try {
-      const full = await payload.posts().getBySlug(rel.slug, locale);
-      if (full) manualRelated.push(full);
-    } catch {
-      // Skip this relation if the fetch fails; fall back to tag-based picks.
+    if (rel.title) {
+      manualRelated.push(rel as Post);
+    } else {
+      try {
+        const full = await payload.posts().getBySlug(rel.slug, locale);
+        if (full) manualRelated.push(full);
+      } catch {
+        // Skip this relation if the fetch fails; fall back to tag-based picks.
+      }
     }
   }
 }
@@ -120,7 +131,14 @@ const tagRelated = (await getRelatedByTags(post.slug, tags, locale, 3)).filter(
 
 const relatedPosts = [...manualRelated, ...tagRelated].slice(0, 3);
 
-const showComments = !!siteConfig.articleFeatures?.comments?.enabled;
+const commentsConfig = site.articleFeatures?.comments;
+const showComments =
+  (post as any).comments === 'enabled' ||
+  (Boolean(commentsConfig?.enabled) && (post as any).comments !== 'disabled');
+
+const showOverlay =
+  (post as any).blogImageOverlay === 'enabled' ||
+  (site.blogImageOverlay && (post as any).blogImageOverlay !== 'disabled');
 
 // Full URL for share buttons.
 const fullUrl = new URL(Astro.url.pathname, Astro.site).toString();
@@ -132,9 +150,12 @@ const fullUrl = new URL(Astro.url.pathname, Astro.site).toString();
   publishedAt={publishedAt}
   updatedAt={updatedAt}
   author={author}
+  authorAvatarUrl={authorAvatarUrl}
+  authorRoleTitle={authorRoleTitle}
   tags={tags}
   imageUrl={imageUrl}
   imageAlt={imageAlt}
+  showOverlay={showOverlay}
   body={bodyText}
   postTypeName={postTypeName}
   postTypeIcon={postTypeIcon}
@@ -196,7 +217,7 @@ const fullUrl = new URL(Astro.url.pathname, Astro.site).toString();
 
       <div class="sm:border-border sm:bg-card sm:rounded-xl sm:border sm:p-8 lg:p-10">
         <div class="prose prose-lg dark:prose-invert max-w-none">
-          <RichText content={post.content} />
+          <RichText content={post.content} locale={locale} />
         </div>
       </div>
 
@@ -245,6 +266,7 @@ const fullUrl = new URL(Astro.url.pathname, Astro.site).toString();
             publishedAt={rp.publishedAt ? new Date(rp.publishedAt) : new Date()}
             tags={(rp.tags ?? []).map((t) => getTagName(t))}
             author={rp.populatedAuthors?.[0]?.name || 'Viptel'}
+            authorAvatarUrl={rp.populatedAuthors?.[0]?.avatarUrl}
             imageUrl={
               rp.heroImage && typeof rp.heroImage !== 'number'
                 ? payload.resolveMediaUrl(rp.heroImage.url ?? '')
@@ -292,7 +314,7 @@ const fullUrl = new URL(Astro.url.pathname, Astro.site).toString();
       ))
     }
     <a
-      href={`mailto:${siteConfig.email}`}
+      href={`mailto:${site.email || siteConfig.email}`}
       class="border-brand-500/40 bg-background text-brand-700 dark:text-brand-400 hover:border-brand-500/80 inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-colors"
     >
       <Icon name="mail" size="sm" />
@@ -335,7 +357,7 @@ const fullUrl = new URL(Astro.url.pathname, Astro.site).toString();
         ))
       }
       <a
-        href={`mailto:${siteConfig.email}`}
+        href={`mailto:${site.email || siteConfig.email}`}
         class="text-foreground hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium transition-colors"
       >
         <Icon name="mail" size="sm" />

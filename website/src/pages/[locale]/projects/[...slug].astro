@@ -4,19 +4,24 @@ import ProjectLayout from '@/layouts/ProjectLayout.astro';
 import ProjectsArchiveView from '@/components/projects/views/ProjectsArchiveView.astro';
 import NotFoundView from '@/components/pages/views/NotFoundView.astro';
 import { defaultLocale, isValidLocale } from '@/i18n';
-import { resolveProjectArchive } from '@/lib/projects';
+import { resolveProjectArchive, PROJECTS_PER_PAGE } from '@/lib/projects';
 import { payload } from '@/lib/payload-client';
+import { getResolvedSiteConfig } from '@/lib/site-config';
 
 export const prerender = false;
 
 const { locale = defaultLocale, slug } = Astro.params;
 const validLocale = isValidLocale(locale);
 const effectiveLocale = validLocale ? locale : defaultLocale;
+
+const resolvedConfig = await getResolvedSiteConfig(effectiveLocale);
+const limit = resolvedConfig.projects?.perPage ?? PROJECTS_PER_PAGE;
+
 const segments = validLocale && slug ? slug.split('/').filter(Boolean) : [];
 const currentPage = Math.max(1, Number(Astro.url.searchParams.get('page')) || 1);
 const archive =
   segments.length > 0
-    ? await resolveProjectArchive(segments, effectiveLocale, currentPage)
+    ? await resolveProjectArchive(segments, effectiveLocale, currentPage, limit)
     : ({ kind: 'not-found' } as const);
 
 const is404 = !validLocale || archive.kind === 'not-found';
@@ -41,6 +46,10 @@ const projectMetaImage =
       title={project.meta?.title || project.title}
       description={project.meta?.description || project.description || project.title}
       image={projectMetaImage}
+      showScrollProgress={project.toc === 'enabled' || project.toc !== 'disabled'}
+      noindex={project.meta?.noindex ?? undefined}
+      nofollow={project.meta?.nofollow ?? undefined}
+      canonicalUrl={project.meta?.canonicalUrl ?? undefined}
     >
       <ProjectLayout project={project} locale={effectiveLocale} />
     </PageLayout>

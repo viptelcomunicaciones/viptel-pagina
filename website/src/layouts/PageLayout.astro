@@ -23,16 +23,18 @@ interface Props {
   extraSchemas?: WithContext<Thing>[];
   noindex?: boolean;
   nofollow?: boolean;
+  canonicalUrl?: string;
   showScrollProgress?: boolean;
+  scrollProgressPosition?: 'top' | 'bottom';
+  autoHide?: boolean;
+  invertOnReturn?: boolean;
   eagerReveal?: boolean;
   headerStyle?: 'bar' | 'floating' | 'transparent' | null;
+  floatingVariant?: 'transparent' | 'default' | 'solid' | null;
   headerColorScheme?: 'default' | 'invert';
   hasDarkHero?: boolean;
   /**
-   * Footer background. Set this to the opposite of the page's last section so
-   * the zebra pattern (bg-background ↔ bg-background-secondary) stays intact:
-   * - last section `bg-background`           → footer `secondary`
-   * - last section `bg-background-secondary` → footer `default`
+   * Footer background override. When omitted, the global CMS Footer background is used.
    */
   footerBackground?: 'default' | 'secondary' | 'invert';
 }
@@ -46,12 +48,17 @@ const {
   extraSchemas,
   noindex,
   nofollow,
-  showScrollProgress = false,
+  canonicalUrl,
+  showScrollProgress,
+  scrollProgressPosition,
+  autoHide,
+  invertOnReturn,
   eagerReveal = false,
-  headerStyle = 'bar',
+  headerStyle,
+  floatingVariant,
   headerColorScheme,
   hasDarkHero = false,
-  footerBackground = 'default',
+  footerBackground,
 } = Astro.props;
 
 const isFloatingHeader = headerStyle === 'floating';
@@ -69,49 +76,24 @@ const effectiveColorScheme =
   extraSchemas={extraSchemas}
   noindex={noindex}
   nofollow={nofollow}
+  canonicalUrl={canonicalUrl}
   eagerReveal={eagerReveal}
 >
-  {
-    isFloatingHeader ? (
-      <Header
-        slot="header"
-        position="fixed"
-        shape="floating"
-        variant="transparent"
-        colorScheme="default"
-        size="lg"
-        showThemeSelector
-        autoHide={false}
-        scrollProgressPosition="top"
-        invertOnReturn={false}
-      />
-    ) : isTransparentHeader ? (
-      <Header
-        slot="header"
-        position="fixed"
-        shape="bar"
-        variant="transparent"
-        colorScheme={effectiveColorScheme}
-        size="lg"
-        showActiveState
-        showScrollProgress={showScrollProgress}
-      />
-    ) : (
-      <Header
-        slot="header"
-        position="fixed"
-        shape="bar"
-        variant="solid"
-        size="lg"
-        showActiveState
-        showScrollProgress={showScrollProgress}
-      />
-    )
-  }
+  <Header
+    slot="header"
+    shape={isFloatingHeader ? 'floating' : 'bar'}
+    floatingVariant={isFloatingHeader ? (floatingVariant ?? undefined) : undefined}
+    variant={isTransparentHeader ? 'transparent' : 'default'}
+    colorScheme={isTransparentHeader ? effectiveColorScheme : headerColorScheme}
+    showScrollProgress={showScrollProgress}
+    scrollProgressPosition={scrollProgressPosition ?? (isFloatingHeader ? 'top' : undefined)}
+    autoHide={autoHide ?? (isFloatingHeader ? false : undefined)}
+    invertOnReturn={invertOnReturn ?? (isFloatingHeader ? false : undefined)}
+  />
 
-  <main class={isFloatingHeader || isTransparentHeader ? 'min-h-screen' : 'min-h-screen pt-16'}>
+  <div class={isFloatingHeader || isTransparentHeader ? 'min-h-screen' : 'min-h-screen pt-16'}>
     <slot />
-  </main>
+  </div>
 
-  <Footer slot="footer" layout="centered" background={footerBackground} />
+  <Footer slot="footer" background={footerBackground} />
 </BaseLayout>

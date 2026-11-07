@@ -20,16 +20,29 @@ export const populateAuthors: CollectionAfterReadHook = async ({ doc, req: { pay
               in: authorIds,
             },
           },
-          depth: 0,
+          depth: 1,
           limit: authorIds.length,
           overrideAccess: true,
         })
 
         if (authorDocs.length > 0) {
-          doc.populatedAuthors = authorDocs.map((authorDoc) => ({
-            id: authorDoc.id,
-            name: authorDoc.name,
-          }))
+          doc.populatedAuthors = (authorDocs as User[]).map((authorDoc) => {
+            let avatarUrl: string | null = null
+            if (authorDoc.avatar) {
+              if (typeof authorDoc.avatar === 'object' && authorDoc.avatar !== null && 'url' in authorDoc.avatar) {
+                avatarUrl = authorDoc.avatar.url ?? null
+              }
+            }
+            return {
+              id: authorDoc.id,
+              name: authorDoc.name,
+              avatarUrl,
+              roleTitle: authorDoc.roleTitle ?? null,
+              bio: authorDoc.bio ?? null,
+              twitterCreator: authorDoc.twitterCreator ?? null,
+              socialLinks: Array.isArray(authorDoc.socialLinks) ? authorDoc.socialLinks : [],
+            }
+          })
         }
       } catch {
         // swallow error

@@ -18,8 +18,27 @@ export const Media: CollectionConfig = {
   slug: 'media',
   folders: true,
   hooks: {
+    beforeChange: [
+      ({ data, req }) => {
+        // Evitar conversión o alteración a WebP si el archivo es SVG
+        if (
+          req?.file?.mimetype === 'image/svg+xml' ||
+          data?.mimeType === 'image/svg+xml' ||
+          req?.file?.name?.endsWith('.svg')
+        ) {
+          if (data) {
+            data.mimeType = 'image/svg+xml'
+          }
+        }
+        return data
+      },
+    ],
     afterRead: [
       ({ doc }) => {
+        if (doc?.mimeType === 'image/svg+xml' && typeof doc?.url === 'string') {
+          doc.thumbnailURL = doc.url
+          return doc
+        }
         const publicUrl = (process.env.R2_PUBLIC_URL || '').replace(/\/+$/, '')
         const sizes = doc?.sizes as Record<string, { filename?: string; url?: string }> | undefined
         const thumbFilename = sizes?.thumbnail?.filename || (typeof doc?.filename === 'string' ? doc.filename : undefined)
@@ -64,6 +83,9 @@ export const Media: CollectionConfig = {
     // Upload to the public/media directory making them publicly accessible even outside of Payload
     staticDir: process.env.MEDIA_PATH || path.resolve(dirname, '../../public/media'),
     adminThumbnail: ({ doc }): string | false | null => {
+      if (doc?.mimeType === 'image/svg+xml' && typeof doc?.url === 'string') {
+        return doc.url
+      }
       const publicUrl = (process.env.R2_PUBLIC_URL || '').replace(/\/+$/, '')
       const sizes = doc?.sizes as Record<string, { filename?: string; url?: string }> | undefined
       const thumbFilename = sizes?.thumbnail?.filename || (typeof doc?.filename === 'string' ? doc.filename : undefined)

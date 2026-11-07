@@ -19,6 +19,7 @@ import type {
   Redirect,
   Search,
   Service,
+  SiteSettings,
 } from './payload-types';
 import { defaultLocale } from '@/i18n';
 import { ssrCache } from './cache';
@@ -558,6 +559,17 @@ class GlobalQueries {
       return await this.client.fetchAPI<Footer>('globals/footer', {
         locale,
         tags: ['collection:global:footer'],
+      });
+    } catch {
+      return null;
+    }
+  }
+
+  async getSiteSettings(locale = defaultLocale): Promise<SiteSettings | null> {
+    try {
+      return await this.client.fetchAPI<SiteSettings>('globals/site-settings', {
+        locale,
+        tags: ['collection:global:site-settings'],
       });
     } catch {
       return null;

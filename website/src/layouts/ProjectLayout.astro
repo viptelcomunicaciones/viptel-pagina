@@ -8,6 +8,8 @@
  * topic, and the closing CTA.
  */
 import siteConfig from '@/config/site.config';
+import { getResolvedSiteConfig } from '@/lib/site-config';
+import { payload } from '@/lib/payload-client';
 import type { Project } from '@/lib/payload-types';
 import { t, localizedPath } from '@/i18n';
 import { extractHeadings } from '@/lib/headings';
@@ -36,7 +38,8 @@ interface Props {
 
 const { project, locale = 'es' } = Astro.props;
 
-const tocConfig = siteConfig.articleFeatures?.toc;
+const site = await getResolvedSiteConfig(locale);
+const tocConfig = site.articleFeatures?.toc;
 const showToc = project.toc === 'enabled' || (!!tocConfig?.enabled && project.toc !== 'disabled');
 const tocLayout = tocConfig?.layout ?? 'auto';
 const sidebarActive = showToc && (tocLayout === 'sidebar' || tocLayout === 'auto');
@@ -84,7 +87,29 @@ breadcrumbs.push({ label: project.title });
 
 const gallerySlides = projectToSlides(project).filter((s) => !('video' in s));
 
-const related = await getRelatedByTopic(project.slug, locale, 3);
+// Resolve manual relatedProjects (backend field) to full projects by slug.
+const manualRelated: Project[] = [];
+for (const rel of project.relatedProjects ?? []) {
+  if (typeof rel !== 'number' && rel?.slug) {
+    if (rel.title) {
+      manualRelated.push(rel as Project);
+    } else {
+      try {
+        const full = await payload.projects().getBySlug(rel.slug, locale);
+        if (full) manualRelated.push(full);
+      } catch {
+        // Fall back if fetch fails
+      }
+    }
+  }
+}
+
+// Fill remaining slots with topic-based fallback
+const topicRelated = (await getRelatedByTopic(project.slug, locale, 3)).filter(
+  (p) => !manualRelated.some((m) => m.slug === p.slug)
+);
+
+const related = [...manualRelated, ...topicRelated].slice(0, 3);
 ---
 
 <ProjectHero project={project} locale={locale} />
@@ -144,7 +169,7 @@ const related = await getRelatedByTopic(project.slug, locale, 3);
         project.content && (
           <div class="sm:border-border sm:bg-card sm:rounded-xl sm:border sm:p-8 lg:p-10">
             <div class="prose prose-lg dark:prose-invert max-w-none">
-              <RichText content={project.content} />
+              <RichText content={project.content} locale={locale} />
             </div>
           </div>
         )

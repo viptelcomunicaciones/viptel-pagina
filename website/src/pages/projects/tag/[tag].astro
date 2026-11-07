@@ -2,6 +2,7 @@
 import ProjectsTagView from '@/components/projects/views/ProjectsTagView.astro';
 import NotFoundView from '@/components/pages/views/NotFoundView.astro';
 import { defaultLocale } from '@/i18n';
+import { getResolvedSiteConfig } from '@/lib/site-config';
 import {
   collectProjectTags,
   collectTopProjectTags,
@@ -14,6 +15,9 @@ import {
 export const prerender = false;
 
 const locale = defaultLocale;
+const resolvedConfig = await getResolvedSiteConfig(locale);
+const tagCloudLimit = resolvedConfig.projects?.tagCloudLimit ?? PROJECT_TAG_CLOUD_LIMIT;
+
 const slug = Astro.params.tag ?? '';
 const allProjects = await getVisibleProjects(locale);
 const tags = collectProjectTags(allProjects);
@@ -26,11 +30,11 @@ if (!tag) {
 const projects = tag
   ? allProjects.filter((p) => (p.tags ?? []).some((t) => getTagName(t) === tag))
   : [];
-const topTags = tag ? collectTopProjectTags(allProjects, PROJECT_TAG_CLOUD_LIMIT) : [];
+const topTags = tag ? collectTopProjectTags(allProjects, tagCloudLimit) : [];
 const visibleTags = tag
   ? topTags.includes(tag)
     ? topTags
-    : [tag, ...topTags.slice(0, PROJECT_TAG_CLOUD_LIMIT - 1)]
+    : [tag, ...topTags.slice(0, tagCloudLimit - 1)]
   : [];
 ---
 

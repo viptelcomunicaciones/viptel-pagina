@@ -137,7 +137,8 @@ function isChildOf(
 export async function resolveProjectArchive(
   segments: string[],
   locale = defaultLocale,
-  page = 1
+  page = 1,
+  limit: number = PROJECTS_PER_PAGE
 ): Promise<ProjectArchive> {
   if (segments.length === 1) {
     const [s] = segments;
@@ -148,7 +149,7 @@ export async function resolveProjectArchive(
     if (projectType) {
       const res = await payload
         .projects()
-        .getByType(projectType.id, locale, page, PROJECTS_PER_PAGE);
+        .getByType(projectType.id, locale, page, limit);
       return {
         kind: 'type',
         projectType,
@@ -168,7 +169,7 @@ export async function resolveProjectArchive(
       const categoryIds = getCategorySubtreeIds(category.id, allCategories);
       const res = await payload
         .projects()
-        .getByTypeAndCategories(projectType.id, categoryIds, locale, page, PROJECTS_PER_PAGE);
+        .getByTypeAndCategories(projectType.id, categoryIds, locale, page, limit);
       return {
         kind: 'category',
         projectType,
@@ -188,7 +189,7 @@ export async function resolveProjectArchive(
     if (projectType && category && isChildOf(subcategory, category.id)) {
       const res = await payload
         .projects()
-        .getByTypeAndCategory(projectType.id, subcategory!.id, locale, page, PROJECTS_PER_PAGE);
+        .getByTypeAndCategory(projectType.id, subcategory!.id, locale, page, limit);
       return {
         kind: 'subcategory',
         projectType,

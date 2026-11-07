@@ -8,7 +8,8 @@
  * Pass `class` to tint the label colour for floating / inverted headers.
  */
 import { t, getLocaleFromPath } from '@/i18n';
-import { selectorThemes as themes } from '@/lib/themes';
+import { selectorThemes as allThemes } from '@/lib/themes';
+import { getResolvedSiteConfig } from '@/lib/site-config';
 
 interface Props {
   class?: string;
@@ -16,6 +17,11 @@ interface Props {
 
 const { class: className } = Astro.props;
 const locale = getLocaleFromPath(Astro.url.pathname);
+const site = await getResolvedSiteConfig(locale);
+const enabled = site.enabledThemes;
+const themes = enabled && enabled.length > 0
+  ? allThemes.filter((th) => enabled.includes(th.id))
+  : allThemes;
 ---
 
 <div

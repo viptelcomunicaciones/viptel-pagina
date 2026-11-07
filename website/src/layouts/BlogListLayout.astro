@@ -38,7 +38,7 @@ const {
   activeTag,
   showScrollProgress = false,
   eagerReveal = false,
-  footerBackground = 'default',
+  footerBackground,
 } = Astro.props;
 
 const sidebarData = await getBlogSidebarData(locale);

@@ -4,19 +4,23 @@ import PostLayout from '@/layouts/PostLayout.astro';
 import BlogArchiveView from '@/components/blog/views/BlogArchiveView.astro';
 import NotFoundView from '@/components/pages/views/NotFoundView.astro';
 import { defaultLocale } from '@/i18n';
-import { resolveBlogArchive, getTagName } from '@/lib/blog';
+import { resolveBlogArchive, getTagName, BLOG_POSTS_PER_PAGE } from '@/lib/blog';
 import { payload } from '@/lib/payload-client';
 import { createBlogPostSchema } from '@/lib/schema';
+import { getResolvedSiteConfig } from '@/lib/site-config';
 import siteConfig from '@/config/site.config';
 
 export const prerender = false;
+
+const resolvedConfig = await getResolvedSiteConfig(defaultLocale);
+const limit = resolvedConfig.blog?.postsPerPage ?? BLOG_POSTS_PER_PAGE;
 
 const { slug } = Astro.params;
 const segments = slug ? slug.split('/').filter(Boolean) : [];
 const currentPage = Math.max(1, Number(Astro.url.searchParams.get('page')) || 1);
 const archive =
   segments.length > 0
-    ? await resolveBlogArchive(segments, defaultLocale, currentPage)
+    ? await resolveBlogArchive(segments, defaultLocale, currentPage, limit)
     : ({ kind: 'not-found' } as const);
 
 const is404 = archive.kind === 'not-found';
@@ -32,7 +36,18 @@ const postMetaImage =
       ? payload.resolveMediaUrl(post.heroImage.url)
       : undefined;
 
-const postAuthor = post?.populatedAuthors?.[0]?.name || siteConfig.name;
+const primaryAuthor = post?.populatedAuthors?.[0];
+const postAuthor = primaryAuthor?.name || resolvedConfig.name;
+const postAuthorAvatarUrl =
+  primaryAuthor?.avatarUrl ? payload.resolveMediaUrl(primaryAuthor.avatarUrl) : undefined;
+const postAuthorRoleTitle = primaryAuthor?.roleTitle || undefined;
+const postAuthorSocialLinks =
+  primaryAuthor?.socialLinks && primaryAuthor.socialLinks.length > 0
+    ? primaryAuthor.socialLinks
+        .map((s: { url?: string }) => s.url)
+        .filter((u): u is string => Boolean(u))
+    : undefined;
+
 const postPublishedAt = post?.publishedAt
   ? new Date(post.publishedAt)
   : post?.createdAt
@@ -46,10 +61,26 @@ const postSchemas = post
         title: post.meta?.title || post.title,
         description: post.meta?.description || post.excerpt || post.title,
         url: new URL(Astro.url.pathname, Astro.site).toString(),
-        image: postMetaImage || new URL(siteConfig.ogImage, Astro.site).toString(),
+        image:
+          postMetaImage ||
+          (resolvedConfig.branding.logo.imageUrl
+            ? `${resolvedConfig.url}${resolvedConfig.branding.logo.imageUrl}`
+            : new URL(siteConfig.ogImage, Astro.site).toString()),
         datePublished: postPublishedAt,
         dateModified: postModifiedAt,
-        author: { name: postAuthor, url: siteConfig.url },
+        author: {
+          name: postAuthor,
+          url: resolvedConfig.url,
+          image: postAuthorAvatarUrl,
+          jobTitle: postAuthorRoleTitle,
+          sameAs: postAuthorSocialLinks,
+        },
+        publisher: {
+          name: resolvedConfig.name,
+          logoUrl: resolvedConfig.branding.logo.imageUrl
+            ? `${resolvedConfig.url}${resolvedConfig.branding.logo.imageUrl}`
+            : undefined,
+        },
       }),
     ]
   : undefined;
@@ -63,6 +94,9 @@ const postSchemas = post
       title={post.meta?.title || post.title}
       description={post.meta?.description || post.excerpt || post.title}
       image={postMetaImage}
+      canonicalUrl={post.meta?.canonicalUrl || undefined}
+      noindex={post.meta?.noindex ?? undefined}
+      nofollow={post.meta?.nofollow ?? undefined}
       article={{
         publishedTime: postPublishedAt,
         modifiedTime: postModifiedAt,

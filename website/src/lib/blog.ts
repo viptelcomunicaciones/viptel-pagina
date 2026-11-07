@@ -121,7 +121,8 @@ function isChildOf(candidate: Category | null | undefined, parentId: number | un
 export async function resolveBlogArchive(
   segments: string[],
   locale = defaultLocale,
-  page = 1
+  page = 1,
+  limit: number = BLOG_POSTS_PER_PAGE
 ): Promise<BlogArchive> {
   if (segments.length === 1) {
     const [s] = segments;
@@ -132,7 +133,7 @@ export async function resolveBlogArchive(
     if (postType) {
       const res = await payload
         .posts()
-        .getByPostType(postType.id, locale, page, BLOG_POSTS_PER_PAGE);
+        .getByPostType(postType.id, locale, page, limit);
       return {
         kind: 'type',
         postType,
@@ -153,7 +154,7 @@ export async function resolveBlogArchive(
       const categoryIds = getCategorySubtreeIds(category.id, allCategories);
       const res = await payload
         .posts()
-        .getByPostTypeAndCategories(postType.id, categoryIds, locale, page, BLOG_POSTS_PER_PAGE);
+        .getByPostTypeAndCategories(postType.id, categoryIds, locale, page, limit);
       return {
         kind: 'category',
         postType,
@@ -173,7 +174,7 @@ export async function resolveBlogArchive(
     if (postType && category && isChildOf(subcategory, category.id)) {
       const res = await payload
         .posts()
-        .getByPostTypeAndCategory(postType.id, subcategory!.id, locale, page, BLOG_POSTS_PER_PAGE);
+        .getByPostTypeAndCategory(postType.id, subcategory!.id, locale, page, limit);
       return {
         kind: 'subcategory',
         postType,

@@ -5,6 +5,7 @@ import type {
   BlogPosting,
   BreadcrumbList,
   FAQPage,
+  Person,
   WithContext,
 } from 'schema-dts';
 import siteConfig from '@/config/site.config';
@@ -12,92 +13,147 @@ import siteConfig from '@/config/site.config';
 /**
  * Create WebSite schema for homepage
  */
-export function createWebsiteSchema(): WithContext<WebSite> {
+export function createWebsiteSchema(config?: {
+  name?: string;
+  url?: string;
+  description?: string;
+}): WithContext<WebSite> {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
-    name: siteConfig.name,
-    url: siteConfig.url,
-    description: siteConfig.description,
+    name: config?.name || siteConfig.name,
+    url: config?.url || siteConfig.url,
+    description: config?.description || siteConfig.description,
   };
 }
 
 /**
- * Create Organization schema for Viptel
+ * Create Person schema
  */
-export function createPersonSchema(): WithContext<Organization> {
+export function createPersonSchema(author?: {
+  name?: string;
+  url?: string;
+  image?: string;
+  jobTitle?: string;
+  description?: string;
+  sameAs?: string[];
+}): WithContext<Person> {
+  const name = author?.name || siteConfig.author || siteConfig.name;
+  const image =
+    author?.image || (siteConfig.authorImage ? `${siteConfig.url}${siteConfig.authorImage}` : undefined);
   return {
     '@context': 'https://schema.org',
-    '@type': 'Organization',
-    name: siteConfig.name,
-    url: siteConfig.url,
-    email: siteConfig.email,
-    description: siteConfig.description,
-    ...(siteConfig.authorImage ? { image: `${siteConfig.url}${siteConfig.authorImage}` } : {}),
-    ...(siteConfig.address?.city
-      ? {
-          address: {
-            '@type': 'PostalAddress',
-            addressLocality: siteConfig.address.city,
-            addressCountry: siteConfig.address.country,
-          },
-        }
-      : {}),
-    sameAs: siteConfig.socialLinks,
+    '@type': 'Person',
+    name,
+    url: author?.url || siteConfig.url,
+    ...(author?.jobTitle ? { jobTitle: author.jobTitle } : {}),
+    ...(author?.description ? { description: author.description } : {}),
+    ...(image ? { image } : {}),
+    sameAs: author?.sameAs || siteConfig.socialLinks,
   };
 }
 
 /**
  * Create ProfessionalService schema for local SEO
  */
-export function createProfessionalServiceSchema(): WithContext<LocalBusiness> {
+export function createProfessionalServiceSchema(config?: {
+  name?: string;
+  url?: string;
+  email?: string;
+  phone?: string;
+  socialLinks?: string[];
+  address?: {
+    city?: string;
+    country?: string;
+  };
+}): WithContext<LocalBusiness> {
+  const name = config?.name || siteConfig.name;
+  const url = config?.url || siteConfig.url;
+  const email = config?.email || siteConfig.email;
+  const phone = config?.phone || siteConfig.phone;
+  const socialLinks = config?.socialLinks || siteConfig.socialLinks;
+  const city = config?.address?.city || siteConfig.address?.city || 'Bogotá';
+  const country = config?.address?.country || siteConfig.address?.country || 'CO';
+
   return {
     '@context': 'https://schema.org',
     '@type': 'ProfessionalService' as 'LocalBusiness',
-    name: siteConfig.name,
-    url: siteConfig.url,
-    email: siteConfig.email,
-    ...(siteConfig.phone ? { telephone: siteConfig.phone } : {}),
+    name,
+    url,
+    email,
+    ...(phone ? { telephone: phone } : {}),
     ...(siteConfig.authorImage ? { image: `${siteConfig.url}${siteConfig.authorImage}` } : {}),
-    ...(siteConfig.address?.city
-      ? {
-          address: {
-            '@type': 'PostalAddress',
-            addressLocality: siteConfig.address.city,
-            addressRegion: 'Bogotá, D.C.',
-            addressCountry: 'CO',
-          },
-        }
-      : {}),
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: city,
+      addressRegion: 'Bogotá, D.C.',
+      addressCountry: country,
+    },
     areaServed: [
       { '@type': 'Country', name: 'Colombia' },
       { '@type': 'Continent', name: 'Latin America' },
     ],
-    sameAs: siteConfig.socialLinks,
+    sameAs: socialLinks,
   };
 }
 
 /**
  * Create Organization schema
  */
-export function createOrganizationSchema(): WithContext<Organization> {
-  const logoUrl = siteConfig.branding.logo.imageUrl
-    ? `${siteConfig.url}${siteConfig.branding.logo.imageUrl}`
-    : undefined;
+export function createOrganizationSchema(config?: {
+  name?: string;
+  url?: string;
+  email?: string;
+  phone?: string;
+  logoUrl?: string;
+  socialLinks?: string[];
+  address?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+    country?: string;
+  };
+}): WithContext<Organization> {
+  const name = config?.name || siteConfig.name;
+  const url = config?.url || siteConfig.url;
+  const logoUrl =
+    config?.logoUrl ||
+    (siteConfig.branding.logo.imageUrl
+      ? `${siteConfig.url}${siteConfig.branding.logo.imageUrl}`
+      : undefined);
+  const socialLinks = config?.socialLinks || siteConfig.socialLinks;
+  const phone = config?.phone || siteConfig.phone;
+  const email = config?.email || siteConfig.email;
+  const address = config?.address || siteConfig.address;
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    name: siteConfig.name,
-    url: siteConfig.url,
+    name,
+    url,
+    ...(email ? { email } : {}),
     ...(logoUrl ? { logo: logoUrl } : {}),
-    sameAs: siteConfig.socialLinks,
-    contactPoint: siteConfig.phone
+    sameAs: socialLinks,
+    contactPoint: phone
       ? {
           '@type': 'ContactPoint',
-          telephone: siteConfig.phone,
+          telephone: phone,
           contactType: 'customer service',
         }
       : undefined,
+    ...(address?.city
+      ? {
+          address: {
+            '@type': 'PostalAddress',
+            streetAddress: address.street,
+            addressLocality: address.city,
+            addressRegion: address.state,
+            postalCode: address.zip,
+            addressCountry: address.country,
+          },
+        }
+      : {}),
   };
 }
 
@@ -111,8 +167,25 @@ export function createBlogPostSchema(post: {
   image: string;
   datePublished: Date;
   dateModified?: Date;
-  author: { name: string; url?: string };
+  author: {
+    name: string;
+    url?: string;
+    image?: string;
+    jobTitle?: string;
+    sameAs?: string[];
+  };
+  publisher?: {
+    name?: string;
+    logoUrl?: string;
+  };
 }): WithContext<BlogPosting> {
+  const publisherName = post.publisher?.name || siteConfig.name;
+  const publisherLogo =
+    post.publisher?.logoUrl ||
+    (siteConfig.branding.logo.imageUrl
+      ? `${siteConfig.url}${siteConfig.branding.logo.imageUrl}`
+      : undefined);
+
   return {
     '@context': 'https://schema.org',
     '@type': 'BlogPosting',
@@ -125,16 +198,19 @@ export function createBlogPostSchema(post: {
     author: {
       '@type': 'Person',
       name: post.author.name,
-      url: post.author.url,
+      ...(post.author.url ? { url: post.author.url } : {}),
+      ...(post.author.image ? { image: post.author.image } : {}),
+      ...(post.author.jobTitle ? { jobTitle: post.author.jobTitle } : {}),
+      ...(post.author.sameAs && post.author.sameAs.length > 0 ? { sameAs: post.author.sameAs } : {}),
     },
     publisher: {
       '@type': 'Organization',
-      name: siteConfig.name,
-      ...(siteConfig.branding.logo.imageUrl
+      name: publisherName,
+      ...(publisherLogo
         ? {
             logo: {
               '@type': 'ImageObject',
-              url: `${siteConfig.url}${siteConfig.branding.logo.imageUrl}`,
+              url: publisherLogo,
             },
           }
         : {}),

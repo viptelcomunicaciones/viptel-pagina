@@ -44,24 +44,98 @@ export const Users: CollectionConfig = {
   },
   fields: [
     {
-      name: 'name',
-      type: 'text',
-      required: true,
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Perfil y Autoría',
+          fields: [
+            {
+              name: 'name',
+              type: 'text',
+              required: true,
+              label: 'Nombre Completo',
+            },
+            {
+              name: 'avatar',
+              type: 'upload',
+              relationTo: 'media',
+              label: 'Foto de Perfil / Avatar',
+            },
+            {
+              name: 'roleTitle',
+              type: 'text',
+              localized: true,
+              label: 'Cargo / Rol Visible',
+              admin: {
+                description: 'Ej: Especialista VoIP, Líder de Infraestructura',
+              },
+            },
+            {
+              name: 'bio',
+              type: 'textarea',
+              localized: true,
+              label: 'Biografía del Autor',
+            },
+            {
+              name: 'twitterCreator',
+              type: 'text',
+              label: 'Usuario en X / Twitter',
+              admin: {
+                description: 'Ej: @cesarbarrero',
+              },
+            },
+            {
+              name: 'socialLinks',
+              type: 'array',
+              label: 'Redes Sociales',
+              fields: [
+                {
+                  name: 'url',
+                  type: 'text',
+                  required: true,
+                  label: 'URL del Perfil',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          label: 'Permisos y Cuenta',
+          fields: [
+            {
+              name: 'roles',
+              type: 'select',
+              hasMany: true,
+              options: [
+                { label: 'Administrador', value: 'admin' },
+                { label: 'Editor', value: 'editor' },
+                { label: 'Marketing', value: 'marketing' },
+                { label: 'Ventas', value: 'sales' },
+              ],
+              defaultValue: ['editor'],
+              required: true,
+              saveToJWT: true,
+              access: {
+                update: adminOnlyField,
+              },
+            },
+          ],
+        },
+      ],
     },
     {
-      name: 'roles',
-      type: 'select',
-      hasMany: true,
-      options: [
-        { label: 'Administrador', value: 'admin' },
-        { label: 'Editor', value: 'editor' },
-        { label: 'Marketing', value: 'marketing' },
-        { label: 'Ventas', value: 'sales' },
-      ],
-      defaultValue: ['editor'],
-      required: true,
-      saveToJWT: true,
+      name: 'enableAPIKey',
+      type: 'checkbox',
       access: {
+        read: adminOnlyField,
+        update: adminOnlyField,
+      },
+    },
+    {
+      name: 'apiKey',
+      type: 'text',
+      access: {
+        read: adminOnlyField,
         update: adminOnlyField,
       },
     },

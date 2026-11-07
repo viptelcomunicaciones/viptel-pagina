@@ -13,6 +13,7 @@ import Button from '@/components/ui/form/Button/Button.astro';
 import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
 import { Hero } from '@/components/hero';
 import { t, defaultLocale, localizedPath } from '@/i18n';
+import { getResolvedSiteConfig } from '@/lib/site-config';
 import {
   getProjectsBaseUrl,
   getProjectCategoryArchiveUrl,
@@ -34,6 +35,9 @@ const { locale = defaultLocale, archive, currentPage = 1 } = Astro.props;
 if (archive.kind === 'not-found' || archive.kind === 'project' || !archive.projectType) {
   throw new Error('ProjectsArchiveView requires a type/category/subcategory archive');
 }
+
+const site = await getResolvedSiteConfig(locale);
+const limit = site.projects?.perPage ?? PROJECTS_PER_PAGE;
 
 const { projectType, category, subcategory } = archive;
 const projects = (archive.projects ?? []) as Project[];
@@ -150,7 +154,7 @@ const aboutUrl = localizedPath('/about', locale);
         totalPages={totalPages}
         href={(page) => (page <= 1 ? archiveBaseUrl : `${archiveBaseUrl}?page=${page}`)}
         totalDocs={totalDocs}
-        pageSize={PROJECTS_PER_PAGE}
+        pageSize={limit}
       />
     )
   }

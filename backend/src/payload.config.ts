@@ -22,6 +22,9 @@ import { Tags } from './collections/Tags'
 import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
+import { SiteSettings } from './SiteSettings/config'
+import { es } from '@payloadcms/translations/languages/es'
+import { en } from '@payloadcms/translations/languages/en'
 import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { plugins } from './plugins'
@@ -53,6 +56,10 @@ export default buildConfig({
       title: 'Viptel CMS',
       description: 'Panel de administración de Viptel Comunicaciones',
     },
+    timezones: {
+      defaultTimezone: 'America/Bogota',
+    },
+    avatar: 'default',
     livePreview: {
       breakpoints: [
         {
@@ -87,7 +94,7 @@ export default buildConfig({
   }),
   collections: [Pages, Posts, Projects, Services, Media, Categories, Tags, PostTypes, ProjectTypes, ProjectCategories, Users],
   cors: [getServerSideURL(), getFrontendURL()].filter(Boolean),
-  globals: [Header, Footer],
+  globals: [Header, Footer, SiteSettings],
   plugins: [
     ...plugins,
     ...(process.env.NODE_ENV !== 'production' || process.env.ENABLE_MCP === 'true'
@@ -166,8 +173,15 @@ export default buildConfig({
         apiKey: process.env.RESEND_API_KEY,
       })
     : undefined,
-localization: {
-    locales: ['es', 'en'],
+  i18n: {
+    fallbackLanguage: 'es',
+    supportedLanguages: { es, en },
+  },
+  localization: {
+    locales: [
+      { label: 'Español', code: 'es' },
+      { label: 'Inglés', code: 'en' },
+    ],
     defaultLocale: 'es',
     fallback: true,
   },

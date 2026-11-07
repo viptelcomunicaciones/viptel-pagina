@@ -41,6 +41,7 @@ export const Projects: CollectionConfig<'projects'> = {
     slug: true,
     projectType: true,
     categories: true,
+    relatedProjects: true,
     meta: {
       image: true,
       description: true,
@@ -139,6 +140,23 @@ admin: {
               admin: {
                 position: 'sidebar',
               },
+            },
+            {
+              name: 'relatedProjects',
+              type: 'relationship',
+              admin: {
+                position: 'sidebar',
+                description: 'Proyectos o casos de éxito relacionados.',
+              },
+              filterOptions: ({ id }) => {
+                return {
+                  id: {
+                    not_in: [id],
+                  },
+                }
+              },
+              hasMany: true,
+              relationTo: 'projects',
             },
             {
               name: 'projectType',

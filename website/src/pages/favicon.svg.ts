@@ -1,21 +1,22 @@
 import type { APIRoute } from 'astro';
-import siteConfig from '@/config/site.config';
+import { getResolvedSiteConfig } from '@/lib/site-config';
 import { buildFaviconSvg } from '@/lib/favicon';
 
-// Pre-render at build time so the favicon is a plain static file in the
-// output — no serverless function needed, no runtime overhead.
-export const prerender = true;
+export const prerender = false;
 
-export const GET: APIRoute = () => {
-  const letter = siteConfig.name.charAt(0).toUpperCase();
-  const color = siteConfig.branding.colors.themeColor;
+const CACHE_CONTROL = 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800';
 
-  // The letter is outlined to a vector path (see src/lib/favicon), so the SVG
-  // is self-contained and renders without the Outfit web font — search-engine
-  // crawlers can now capture it for the SERP.
+export const GET: APIRoute = async () => {
+  const site = await getResolvedSiteConfig();
+  const letter = site.name.charAt(0).toUpperCase();
+  const color = site.branding.colors.themeColor;
+
   const svg = buildFaviconSvg(letter, color);
 
   return new Response(svg, {
-    headers: { 'Content-Type': 'image/svg+xml' },
+    headers: {
+      'Content-Type': 'image/svg+xml',
+      'Cache-Control': CACHE_CONTROL,
+    },
   });
 };
